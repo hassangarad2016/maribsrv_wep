@@ -2,8 +2,12 @@
 
 namespace App\Services;
 
+use Illuminate\Cache\Repository;
+use Illuminate\Cache\TaggableStore;
 use Closure;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Throwable;
 
 class SliderCacheService
 {
@@ -25,14 +29,33 @@ class SliderCacheService
         $cacheKey = self::buildCacheKey($interfaceTypes, $userIdentifier, $sessionIdentifier);
         $expiry = now()->addSeconds(max($ttlSeconds, 1));
 
-        return Cache::store('redis')
-            ->tags([self::CACHE_TAG])
-            ->remember($cacheKey, $expiry, $callback);
+        $store = self::resolveStore();
+
+        if (self::supportsTags($store)) {
+            try {
+                return $store->tags([self::CACHE_TAG])->remember($cacheKey, $expiry, $callback);
+            } catch (Throwable) {
+                // fall through to non-tagged cache
+            }
+        }
+
+        return $store->remember($cacheKey, $expiry, $callback);
     }
 
     public static function flushEligible(): void
     {
-        Cache::store('redis')->tags([self::CACHE_TAG])->flush();
+        $store = self::resolveStore();
+
+        if (self::supportsTags($store)) {
+            try {
+                $store->tags([self::CACHE_TAG])->flush();
+                return;
+            } catch (Throwable) {
+                // fall through
+            }
+        }
+
+        // If tags not supported, do nothing (best-effort) to avoid clearing whole cache store.
     }
 
     /**
@@ -84,5 +107,29 @@ class SliderCacheService
 
         return $normalized;
     }
-}
 
+    private static function resolveStore(): Repository
+    {
+        $preferred = 'redis';
+        $fallback = config('cache.default', 'file');
+
+        foreach (Arr::where([$preferred, $fallback, 'array'], static fn ($v) => !empty($v)) as $storeName) {
+            try {
+                return Cache::store($storeName);
+            } catch (Throwable) {
+                continue;
+            }
+        }
+
+        return Cache::store(); // final fallback to default
+    }
+
+    private static function supportsTags(Repository $store): bool
+    {
+        try {
+            return $store->getStore() instanceof TaggableStore;
+        } catch (Throwable) {
+            return false;
+        }
+    }
+}
