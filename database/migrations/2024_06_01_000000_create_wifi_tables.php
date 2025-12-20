@@ -16,7 +16,7 @@ return new class extends Migration {
             Schema::create('wifi_networks', static function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-                $table->foreignId('wallet_account_id')->nullable()->constrained()->nullOnDelete();
+                $table->unsignedBigInteger('wallet_account_id')->nullable()->index();
                 $table->string('name');
                 $table->string('slug')->nullable()->unique();
                 $table->string('status')->default(WifiNetworkStatus::INACTIVE->value)->index();

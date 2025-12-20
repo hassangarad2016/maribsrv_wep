@@ -70,8 +70,6 @@
                         </button>
                     @endcan
 
-
-
                 </div>
             </div>
         </div>
@@ -86,18 +84,18 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
                     </div>
                     <div class="modal-body">
-                        <p class="text-muted">{{ __('اختر القسم أو الفئة الهدف لنسخ هذه الفئة وحقولها المخصصة إليه.') }}</p>
+                        <p class="text-muted">{{ __('اختر القسم أو الفئة التي تريد نسخ الفئة الحالية إليها.') }}</p>
                         <input type="hidden" name="source_category_id" value="{{ $cat_id }}">
 
                         @if(empty($cloneTargetOptions))
                             <div class="alert alert-warning mb-0" role="alert">
-                                {{ __('لا توجد فئات متاحة لنسخ الفئة إليها حالياً.') }}
+                                {{ __('لا توجد أقسام متاحة لنسخ هذه الفئة إليها.') }}
                             </div>
                         @else
                             <div class="mb-3">
-                                <label for="target_parent_category_id" class="form-label">{{ __('الفئة الهدف') }}</label>
+                                <label for="target_parent_category_id" class="form-label">{{ __('الفئة المستهدفة') }}</label>
                                 <select name="target_parent_category_id" id="target_parent_category_id" class="form-select" required>
-                                    <option value="" disabled selected>{{ __('اختر الفئة الهدف') }}</option>
+                                    <option value="" disabled selected>{{ __('اختر الفئة المستهدفة') }}</option>
                                     @foreach($cloneTargetOptions as $option)
                                         <option value="{{ $option['id'] }}" @selected((int) old('target_parent_category_id') === (int) $option['id'])>{{ $option['label'] }}</option>
                                     @endforeach
@@ -145,8 +143,6 @@
         </div>
     </section>
 @endsection
-
-
 @section('script')
     @if ($errors->has('target_parent_category_id'))
         <script>

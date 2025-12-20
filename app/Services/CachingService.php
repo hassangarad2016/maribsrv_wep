@@ -89,15 +89,11 @@ class CachingService {
         $defaultStore = config('cache.default', 'file');
 
         if (!array_key_exists($defaultStore, $stores)) {
-            $defaultStore = 'file';
+            return 'file';
         }
 
-        if ($defaultStore === 'redis') {
-            return self::redisIsAvailable() ? 'redis' : 'file';
-        }
-
-        if (self::redisIsAvailable()) {
-            return 'redis';
+        if ($defaultStore === 'redis' && ! self::redisIsAvailable()) {
+            return 'file';
         }
 
         return $defaultStore;

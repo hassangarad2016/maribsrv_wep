@@ -91,7 +91,7 @@ class WifiPlanPaymentService
         // Front-end cabin flow only allows wallet + east_yemen_bank.
         if ($method === 'manual_bank') {
             throw ValidationException::withMessages([
-                'payment_method' => __('طھط­ظˆظٹظ„ ط§ظ„ط¨ظ†ظƒ ط§ظ„ظٹط¯ظˆظٹ طºظٹط± ظ…طھط§ط­ ظ‡ط°ط§ ط§ظ„ط®ط·ط©.'),
+                'payment_method' => __('التحويل البنكي اليدوي غير متاح لهذه الخطة.'),
             ]);
         }
 

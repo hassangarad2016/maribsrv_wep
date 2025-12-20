@@ -65,9 +65,6 @@ use App\Http\Controllers\SectionCategoryCloneController;
 use App\Http\Controllers\WalletWithdrawalRequestAdminController;
 use App\Http\Controllers\SheinOrderBatchController;
 use App\Http\Controllers\LegalNumberingSettingController;
-use App\Http\Controllers\WifiCodeBatchController;
-use App\Http\Controllers\WifiNetworkController;
-use App\Http\Controllers\WifiPlanController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -402,23 +399,23 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
         'as' => 'wifi.',
         'middleware' => ['permission:service-list|service-create|service-edit|service-delete'],
     ], function () {
-        Route::get('networks', [WifiNetworkController::class, 'index'])->name('networks.index');
-        Route::post('networks', [WifiNetworkController::class, 'store'])->name('networks.store');
-        Route::put('networks/{network}', [WifiNetworkController::class, 'update'])
+        Route::get('networks', [WifiOwnerNetworkController::class, 'index'])->name('networks.index');
+        Route::post('networks', [WifiOwnerNetworkController::class, 'store'])->name('networks.store');
+        Route::put('networks/{network}', [WifiOwnerNetworkController::class, 'update'])
             ->whereNumber('network')
             ->name('networks.update'); 
-        Route::get('networks/{network}/plans', [WifiPlanController::class, 'index'])
+        Route::get('networks/{network}/plans', [WifiOwnerPlanController::class, 'index'])
             ->whereNumber('network')
             ->name('plans.index');
-        Route::post('networks/{network}/plans', [WifiPlanController::class, 'store'])
+        Route::post('networks/{network}/plans', [WifiOwnerPlanController::class, 'store'])
             ->whereNumber('network')
             ->name('plans.store');
 
-        Route::put('plans/{plan}', [WifiPlanController::class, 'update'])
+        Route::put('plans/{plan}', [WifiOwnerPlanController::class, 'update'])
             ->whereNumber('plan')
             ->name('plans.update');
 
-        Route::post('plans/{plan}/batches', [WifiCodeBatchController::class, 'store'])
+        Route::post('plans/{plan}/batches', [WifiOwnerBatchController::class, 'store'])
             ->whereNumber('plan')
             ->name('plans.batches.store');
     });

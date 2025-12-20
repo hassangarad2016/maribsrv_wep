@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             MetalRatePermissionSeeder::class,
             ChatMonitorPermissionSeeder::class,
             PricingSeeder::class,
+            CoreRolesSeeder::class,
 
 
         ]);
