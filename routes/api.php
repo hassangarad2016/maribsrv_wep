@@ -42,6 +42,7 @@ use App\Http\Controllers\Wifi\OwnerPlanController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Wifi\PublicDiscoveryController;
 use App\Http\Controllers\Api\WebExperienceController;
+use App\Http\Controllers\ItemController;
 
 
 Route::get('diag', fn() => response('ok', 200));
@@ -394,6 +395,7 @@ Route::get('get-services', [ApiController::class, 'getServices']);
 Route::get('currency-rates', [ApiController::class, 'getCurrencyRates']);
 Route::get('currency-rates/history', [\App\Http\Controllers\CurrencyHistoryController::class, 'index']);
 Route::get('service-reviews', [ApiController::class, 'getServiceReviews']);
+Route::get('items/search', [ItemController::class, 'search']);
 
 
 // Challenges and Referrals API

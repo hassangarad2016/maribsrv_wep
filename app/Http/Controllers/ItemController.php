@@ -1057,7 +1057,9 @@ class ItemController extends Controller {
             $query = $request->input('q', '');
             $items = Item::where('name', 'like', '%' . $query . '%')
                 ->where('status', 'approved')
+                // expose both name and a title alias for API consumers expecting "title"
                 ->select('id', 'name', 'price')
+                ->addSelect(['name as title'])
                 ->limit(10)
                 ->get();
 
