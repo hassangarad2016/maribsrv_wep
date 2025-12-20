@@ -19,5 +19,6 @@ class TrustProxies extends Middleware
      *
      * @var int
      */
-    protected $headers = Request::HEADER_X_FORWARDED_ALL;
+    // Use AWS_ELB constant for broader compatibility on older Laravel versions.
+    protected $headers = Request::HEADER_X_FORWARDED_AWS_ELB;
 }
