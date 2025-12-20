@@ -1,0 +1,46 @@
+{
+  "resources/js/items/index.js": {
+    "file": "assets/index.1d748ae2.js",
+    "src": "resources/js/items/index.js",
+    "isEntry": true
+  },
+  "resources/js/wifi/index.js": {
+    "file": "assets/index.27ceb086.js",
+    "src": "resources/js/wifi/index.js",
+    "isEntry": true,
+    "imports": [
+      "_index.83bc9570.js"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app.85f05090.js",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "_index.83bc9570.js"
+    ]
+  },
+  "_index.83bc9570.js": {
+    "file": "assets/index.83bc9570.js"
+  },
+  "resources/js/items/index.scss": {
+    "file": "assets/index.40b916f0.css",
+    "src": "resources/js/items/index.scss",
+    "isEntry": true
+  },
+  "resources/js/wifi/show.scss": {
+    "file": "assets/show.13f155ae.css",
+    "src": "resources/js/wifi/show.scss",
+    "isEntry": true
+  },
+  "resources/js/wifi/index.scss": {
+    "file": "assets/index.198f9f1d.css",
+    "src": "resources/js/wifi/index.scss",
+    "isEntry": true
+  },
+  "resources/sass/app.scss": {
+    "file": "assets/app.69f3207f.css",
+    "src": "resources/sass/app.scss",
+    "isEntry": true
+  }
+}
