@@ -1183,14 +1183,6 @@ Route::middleware(['permission:manual-payments-review'])->group(static function 
 
 
 
-    /* --------------------------------- API ط·آ¯ط·آ§ط·آ®ط¸â€‍ط¸ظ¹ ط¸â€‍ط¸â€‍ط¸ث†ط·آ­ط·آ© --------------------------------- */
-    Route::group(['prefix' => 'api'], function () {
-        Route::get('/items/search', [ItemController::class, 'search'])->name('api.items.search.alt');
-    });
-
-    // ط·آ§ط·آ®ط·ع¾ط·آµط·آ§ط·آ± ط¸â€‍ط¸â€‍ط·آ¨ط·آ­ط·آ« ط¸â€ ط¸ظ¾ط·آ³ط¸â€، ط·آ®ط·آ§ط·آ±ط·آ¬ /api
-    Route::get('/items/search', [ItemController::class, 'search'])->name('api.items.search');
-
 }); // ط¸â€ ط¸â€،ط·آ§ط¸ظ¹ط·آ© ط¸â€¦ط·آ¬ط¸â€¦ط¸ث†ط·آ¹ط·آ© (auth, language)
 
 
