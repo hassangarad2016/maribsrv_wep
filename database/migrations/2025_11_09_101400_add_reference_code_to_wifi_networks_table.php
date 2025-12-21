@@ -9,7 +9,11 @@ return new class extends Migration {
     {
         Schema::table('wifi_networks', static function (Blueprint $table): void {
             if (! Schema::hasColumn('wifi_networks', 'reference_code')) {
-                $table->string('reference_code')->nullable()->unique()->after('status');
+                $column = $table->string('reference_code')->nullable()->unique();
+
+                if (Schema::hasColumn('wifi_networks', 'status')) {
+                    $column->after('status');
+                }
             }
         });
     }
