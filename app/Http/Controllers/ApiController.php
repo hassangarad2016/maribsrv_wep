@@ -2122,6 +2122,8 @@ class ApiController extends Controller {
                 Log::info('getItem.params', $request->all());
             }
 
+            $isMyItemsRequest = $request->is('api/my-items');
+
             // If this is an e_store context and store_id is missing, infer it from user_id
             if ($request->interface_type === 'e_store'
                 && ! $request->filled('store_id')
@@ -2439,20 +2441,22 @@ class ApiController extends Controller {
                     })->groupBy('item_id')->having(DB::raw("COUNT(DISTINCT CASE $having END)"), '=', count($request->custom_fields));
                 });
             }
-            if ($isDetailView && Auth::check()) {
+            if ($isMyItemsRequest && Auth::check()) {
+                if ($isDetailView) {
+                    $sql->with(['item_offers' => function ($q) {
+                        $q->where('buyer_id', Auth::user()->id);
+                    }, 'user_reports'         => function ($q) {
+                        $q->where('user_id', Auth::user()->id);
+                    }]);
+                }
+                $sql->where(['user_id' => Auth::user()->id])->withTrashed();
+            } elseif ($isDetailView && Auth::check()) {
                 $sql->with(['item_offers' => function ($q) {
                     $q->where('buyer_id', Auth::user()->id);
                 }, 'user_reports'         => function ($q) {
                     $q->where('user_id', Auth::user()->id);
                 }]);
-
-                $currentURI = explode('?', $request->getRequestUri(), 2);
-
-                if ($currentURI[0] == "/api/my-items") { //TODO: This if condition is temporary fix. Need something better
-                    $sql->where(['user_id' => Auth::user()->id])->withTrashed();
-                } else {
-                    $sql->where('status', 'approved')->has('user')->onlyNonBlockedUsers()->getNonExpiredItems();
-                }
+                $sql->where('status', 'approved')->has('user')->onlyNonBlockedUsers()->getNonExpiredItems();
             } else {
                 //  Other users should only get approved items
                 $sql->where('status', 'approved')->getNonExpiredItems();
