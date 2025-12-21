@@ -4055,6 +4055,8 @@ class ApiController extends Controller {
                 }
 
                 if ($sectionsForConfig === [] && $page === 1) {
+                    $baseQuery ??= $makeBaseQuery($applyInterfaceFilterConfig);
+
                     $fallbackItems = (clone $baseQuery)
                         ->orderByDesc('items.created_at')
                         ->skip($offset)
