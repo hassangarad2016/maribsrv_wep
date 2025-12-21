@@ -2,7 +2,7 @@
 
 namespace App\Http;
 
-
+ 
 use App\Http\Middleware\DemoMiddleware;
 use App\Http\Middleware\InitializeApiMetrics;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
