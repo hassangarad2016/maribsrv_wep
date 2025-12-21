@@ -344,13 +344,13 @@ class StorefrontController extends Controller
     {
         $storeModel = $this->resolveStoreOrResponse($store, includeInactive: true);
         if ($storeModel === null) {
-            return response()->json(['message' => 'Store not found'], 404);
+            return $this->errorResponse('Store not found', 404);
         }
 
         /** @var User|null $user */
         $user = $request->user();
         if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
+            return $this->errorResponse('Unauthenticated', 401);
         }
 
         $validated = $request->validate([
@@ -361,9 +361,7 @@ class StorefrontController extends Controller
         ]);
 
         if ($this->userHasStoreReview($storeModel->getKey(), $user->getKey())) {
-            return response()->json([
-                'message' => __('You already reviewed this store.'),
-            ], 422);
+            return $this->errorResponse('You already reviewed this store.', 422);
         }
 
         $attachments = $this->normalizeAttachments($validated['attachments'] ?? null);
@@ -382,25 +380,28 @@ class StorefrontController extends Controller
 
         $this->notifyStoreOwnerAboutStoreReviewSafe($storeModel, $review, $user);
 
-        return response()->json([
-            'data' => [
+        return $this->successResponse(
+            'Store review added successfully.',
+            [
                 'review' => $this->formatStoreReview($review),
                 'summary' => $summary,
             ],
-        ], 201);
+            [],
+            201
+        );
     }
 
     public function updateReview(Request $request, string $store): JsonResponse
     {
         $storeModel = $this->resolveStoreOrResponse($store, includeInactive: true);
         if ($storeModel === null) {
-            return response()->json(['message' => 'Store not found'], 404);
+            return $this->errorResponse('Store not found', 404);
         }
 
         /** @var User|null $user */
         $user = $request->user();
         if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
+            return $this->errorResponse('Unauthenticated', 401);
         }
 
         $validated = $request->validate([
@@ -412,7 +413,7 @@ class StorefrontController extends Controller
 
         $review = $this->getUserStoreReview($storeModel->getKey(), $user->getKey());
         if (!$review) {
-            return response()->json(['message' => 'Review not found'], 404);
+            return $this->errorResponse('Review not found', 404);
         }
 
         $attachments = $this->normalizeAttachments($validated['attachments'] ?? null);
@@ -427,11 +428,9 @@ class StorefrontController extends Controller
         $summary['can_review'] = false;
         $summary['my_review'] = $this->formatStoreReview($review->loadMissing('user:id,name,profile'));
 
-        return response()->json([
-            'data' => [
-                'review' => $this->formatStoreReview($review),
-                'summary' => $summary,
-            ],
+        return $this->successResponse('Store review updated successfully.', [
+            'review' => $this->formatStoreReview($review),
+            'summary' => $summary,
         ]);
     }
 
@@ -439,18 +438,18 @@ class StorefrontController extends Controller
     {
         $storeModel = $this->resolveStoreOrResponse($store, includeInactive: true);
         if ($storeModel === null) {
-            return response()->json(['message' => 'Store not found'], 404);
+            return $this->errorResponse('Store not found', 404);
         }
 
         /** @var User|null $user */
         $user = $request->user();
         if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
+            return $this->errorResponse('Unauthenticated', 401);
         }
 
         $review = $this->getUserStoreReview($storeModel->getKey(), $user->getKey());
         if (!$review) {
-            return response()->json(['message' => 'Review not found'], 404);
+            return $this->errorResponse('Review not found', 404);
         }
 
         $review->delete();
@@ -459,10 +458,8 @@ class StorefrontController extends Controller
         $summary['can_review'] = true;
         $summary['my_review'] = null;
 
-        return response()->json([
-            'data' => [
-                'summary' => $summary,
-            ],
+        return $this->successResponse('Store review deleted successfully.', [
+            'summary' => $summary,
         ]);
     }
 

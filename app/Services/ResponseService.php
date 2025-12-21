@@ -207,9 +207,11 @@ class ResponseService
             }
         }
 
+        $messageText = self::resolveMessage($message);
+
         $response = response()->json(array_merge([
             'error'   => false,
-            'message' => trans($message),
+            'message' => $messageText,
             'data'    => $data,
             'code'    => $code ?? config('constants.RESPONSE_CODE.SUCCESS')
         ], $customData));
@@ -300,6 +302,67 @@ class ResponseService
 
     }
 
+    private static function resolveMessage(mixed $message): string
+    {
+        $raw = self::stringifyMessage($message);
+
+        if ($raw === '') {
+            return '';
+        }
+
+        $translated = trans($raw);
+
+        if (is_array($translated)) {
+            return '';
+        }
+
+        return (string) $translated;
+    }
+
+    private static function stringifyMessage(mixed $message): string
+    {
+        if ($message === null) {
+            return '';
+        }
+
+        if ($message instanceof MessageBag) {
+            return (string) ($message->first() ?? '');
+        }
+
+        if ($message instanceof \Stringable) {
+            return (string) $message;
+        }
+
+        if (is_array($message)) {
+            foreach ($message as $value) {
+                $candidate = self::stringifyMessage($value);
+                if ($candidate !== '') {
+                    return $candidate;
+                }
+            }
+
+            return '';
+        }
+
+        if (is_object($message)) {
+            if (method_exists($message, '__toString')) {
+                return (string) $message;
+            }
+
+            return '';
+        }
+
+        if (is_bool($message)) {
+            return $message ? '1' : '0';
+        }
+
+        if (is_scalar($message)) {
+            return (string) $message;
+        }
+
+        return '';
+    }
+
 
 
     /**
@@ -326,9 +389,11 @@ class ResponseService
      */
     public static function errorResponse(string $message = 'Error Occurred', $data = null, string|int $code = null, $e = null)
     {
+        $messageText = self::resolveMessage($message);
+
         $response = response()->json([
             'error'   => true,
-            'message' => trans($message),
+            'message' => $messageText,
             'data'    => $data,
             'code'    => $code ?? config('constants.RESPONSE_CODE.EXCEPTION_ERROR'),
             'details' => (!empty($e) && is_object($e)) ? $e->getMessage() . ' --> ' . $e->getFile() . ' At Line : ' . $e->getLine() : ''
@@ -361,11 +426,13 @@ class ResponseService
      */
     public static function warningResponse(string $message = 'Error Occurred', $data = null, $code = null)
     {
+        $messageText = self::resolveMessage($message);
+
         response()->json([
             'error'   => false,
             'warning' => true,
             'code'    => $code,
-            'message' => trans($message),
+            'message' => $messageText,
             'data'    => $data,
         ])->send();
         exit();
