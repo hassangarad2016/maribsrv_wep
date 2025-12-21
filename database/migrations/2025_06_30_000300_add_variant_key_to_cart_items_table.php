@@ -9,6 +9,8 @@ return new class extends Migration {
     public function up(): void
     {
         $isSqlite = Schema::getConnection()->getDriverName() === 'sqlite';
+        $legacyUniqueExists = $this->indexExists('cart_items', 'cart_items_user_item_variant_department_unique');
+        $newUniqueExists = $this->indexExists('cart_items', 'cart_items_user_item_variantkey_department_unique');
 
         Schema::table('cart_items', static function (Blueprint $table) {
             if (! Schema::hasColumn('cart_items', 'variant_key')) {
@@ -18,7 +20,7 @@ return new class extends Migration {
 
         DB::table('cart_items')->update(['variant_key' => DB::raw("COALESCE(variant_key, '')")]);
 
-        Schema::table('cart_items', static function (Blueprint $table) use ($isSqlite) {
+        Schema::table('cart_items', function (Blueprint $table) use ($isSqlite, $legacyUniqueExists, $newUniqueExists) {
             if (! $isSqlite && Schema::hasColumn('cart_items', 'user_id')) {
                 try {
                     $table->dropForeign(['user_id']);
@@ -36,13 +38,18 @@ return new class extends Migration {
             }
 
 
-            try {
-                $table->dropUnique('cart_items_user_item_variant_department_unique');
-            } catch (\Throwable $exception) {
-                // ignore missing index
+            if ($legacyUniqueExists) {
+                try {
+                    $table->dropUnique('cart_items_user_item_variant_department_unique');
+                } catch (\Throwable $exception) {
+                    // ignore missing index
+                }
             }
 
-            $table->unique(['user_id', 'item_id', 'variant_key', 'department'], 'cart_items_user_item_variantkey_department_unique');
+            if (! $newUniqueExists) {
+                $table->unique(['user_id', 'item_id', 'variant_key', 'department'], 'cart_items_user_item_variantkey_department_unique');
+            }
+
             if (Schema::hasColumn('cart_items', 'user_id')) {
                 $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             }
@@ -57,8 +64,10 @@ return new class extends Migration {
     public function down(): void
     {
         $isSqlite = Schema::getConnection()->getDriverName() === 'sqlite';
+        $legacyUniqueExists = $this->indexExists('cart_items', 'cart_items_user_item_variant_department_unique');
+        $newUniqueExists = $this->indexExists('cart_items', 'cart_items_user_item_variantkey_department_unique');
 
-        Schema::table('cart_items', static function (Blueprint $table) use ($isSqlite) {
+        Schema::table('cart_items', function (Blueprint $table) use ($isSqlite, $legacyUniqueExists, $newUniqueExists) {
 
             if (! $isSqlite && Schema::hasColumn('cart_items', 'user_id')) {
                 try {
@@ -76,17 +85,21 @@ return new class extends Migration {
                 }
             }
 
-            try {
-                $table->dropUnique('cart_items_user_item_variantkey_department_unique');
-            } catch (\Throwable $exception) {
-                // ignore missing index
+            if ($newUniqueExists) {
+                try {
+                    $table->dropUnique('cart_items_user_item_variantkey_department_unique');
+                } catch (\Throwable $exception) {
+                    // ignore missing index
+                }
             }
 
             if (Schema::hasColumn('cart_items', 'variant_key')) {
                 $table->dropColumn('variant_key');
             }
 
-            $table->unique(['user_id', 'item_id', 'variant_id', 'department'], 'cart_items_user_item_variant_department_unique');
+            if (! $legacyUniqueExists) {
+                $table->unique(['user_id', 'item_id', 'variant_id', 'department'], 'cart_items_user_item_variant_department_unique');
+            }
 
             if (Schema::hasColumn('cart_items', 'user_id')) {
                 $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
@@ -97,5 +110,24 @@ return new class extends Migration {
             }
 
         });
+    }
+
+    private function indexExists(string $table, string $index): bool
+    {
+        $connection = Schema::getConnection();
+
+        if ($connection->getDriverName() !== 'mysql') {
+            return false;
+        }
+
+        try {
+            $prefixedTable = $connection->getTablePrefix() . $table;
+            $sql = sprintf('SHOW INDEX FROM `%s` WHERE Key_name = ?', $prefixedTable);
+            $result = $connection->select($sql, [$index]);
+
+            return ! empty($result);
+        } catch (\Throwable $exception) {
+            return false;
+        }
     }
 };
