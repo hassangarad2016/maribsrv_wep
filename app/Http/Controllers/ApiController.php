@@ -3650,7 +3650,8 @@ class ApiController extends Controller {
                 ->get();
 
             if ($configs->isEmpty()) {
-                $applyInterfaceFilter = $sectionType !== null && $sectionType !== 'all';
+                // في حالة عدم وجود إعدادات مسبقة، لا نقيّد بـ interface_type حتى تظهر البيانات الافتراضية
+                $applyInterfaceFilter = false;
                 $baseQuery = Item::query()
                     ->approved()
                     ->with($relations)
