@@ -101,7 +101,7 @@ Route::middleware(['auth:sanctum', 'ability:admin:full'])->group(function (): vo
 
 
 /* Authenticated Routes */
-Route::group(['middleware' => ['auth:sanctum']], static function () {
+Route::group(['middleware' => ['auth:api']], static function () {
     Route::get('notifications', [NotificationInboxController::class, 'index']);
     Route::get('notifications/unread-count', [NotificationInboxController::class, 'unreadCount']);
     Route::post('notifications/mark-read', [NotificationInboxController::class, 'markRead']);
