@@ -77,17 +77,24 @@ return new class extends Migration {
             $table->unique('fcm_token');
         });
 
-        $tokens = [];
-        foreach (User::whereNotNull('fcm_id')->whereNot('fcm_id', '')->get() as $user) {
-            $tokens[] = [
-                'user_id'    => $user->id,
-                'fcm_token'  => $user->fcm_id,
-                'created_at' => now(),
-                'updated_at' => now()
-            ];
-        }
-        if (count($tokens) > 0) {
-            UserFcmToken::insertOrIgnore($tokens);
+        if (Schema::hasTable('users') && Schema::hasColumn('users', 'fcm_id')) {
+            $query = User::query();
+            // Avoid eager loading relationships (like store) when related tables may not exist yet.
+            $query->setEagerLoads([]);
+
+            $tokens = [];
+            foreach ($query->whereNotNull('fcm_id')->where('fcm_id', '!=', '')->get() as $user) {
+                $tokens[] = [
+                    'user_id'    => $user->id,
+                    'fcm_token'  => $user->fcm_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+            }
+
+            if (count($tokens) > 0 && Schema::hasTable('user_fcm_tokens')) {
+                UserFcmToken::insertOrIgnore($tokens);
+            }
         }
 
         if (Schema::getConnection()->getDriverName() !== 'sqlite') {
