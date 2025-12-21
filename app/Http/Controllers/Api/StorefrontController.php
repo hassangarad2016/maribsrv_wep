@@ -197,12 +197,12 @@ class StorefrontController extends Controller
     {
         $storeModel = $this->resolveStoreOrResponse($store, includeInactive: true);
         if ($storeModel === null) {
-            return response()->json(['message' => 'Store not found'], 404);
+            return $this->errorResponse('Store not found', 404);
         }
         $user = $request->user();
 
         if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
+            return $this->errorResponse('Unauthenticated', 401);
         }
 
         $exists = StoreFollower::query()
@@ -227,11 +227,9 @@ class StorefrontController extends Controller
             ->exists();
         $this->notifyFollowerConfirmationSafe($user, $storeModel);
 
-        return response()->json([
-            'data' => [
-                'is_following' => $isFollowing,
-                'followers_count' => $followersCount,
-            ],
+        return $this->successResponse('Store follow status updated successfully.', [
+            'is_following' => $isFollowing,
+            'followers_count' => $followersCount,
         ]);
     }
 
@@ -239,13 +237,13 @@ class StorefrontController extends Controller
     {
         $storeModel = $this->resolveStoreOrResponse($store, includeInactive: true);
         if ($storeModel === null) {
-            return response()->json(['message' => 'Store not found'], 404);
+            return $this->errorResponse('Store not found', 404);
         }
 
         $currentUser = $this->resolveCurrentUser($request);
         $viewerId = $this->resolveViewerId($request, $currentUser);
         if ($viewerId === null) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
+            return $this->errorResponse('Unauthenticated', 401);
         }
 
         $isFollowing = StoreFollower::query()
@@ -255,11 +253,9 @@ class StorefrontController extends Controller
 
         $followersCount = $storeModel->followers()->count();
 
-        return response()->json([
-            'data' => [
-                'is_following' => $isFollowing,
-                'followers_count' => $followersCount,
-            ],
+        return $this->successResponse('Store follow status fetched successfully.', [
+            'is_following' => $isFollowing,
+            'followers_count' => $followersCount,
         ]);
     }
 
@@ -267,12 +263,12 @@ class StorefrontController extends Controller
     {
         $storeModel = $this->resolveStoreOrResponse($store, includeInactive: true);
         if ($storeModel === null) {
-            return response()->json(['message' => 'Store not found'], 404);
+            return $this->errorResponse('Store not found', 404);
         }
         $user = $request->user();
 
         if (!$user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
+            return $this->errorResponse('Unauthenticated', 401);
         }
 
         StoreFollower::query()
@@ -288,11 +284,9 @@ class StorefrontController extends Controller
 
         $this->notifyUnfollowConfirmationSafe($user, $storeModel);
 
-        return response()->json([
-            'data' => [
-                'is_following' => $isFollowing,
-                'followers_count' => $followersCount,
-            ],
+        return $this->successResponse('Store unfollowed successfully.', [
+            'is_following' => $isFollowing,
+            'followers_count' => $followersCount,
         ]);
     }
 
@@ -300,7 +294,7 @@ class StorefrontController extends Controller
     {
         $storeModel = $this->resolveStoreOrResponse($store, includeInactive: true);
         if ($storeModel === null) {
-            return response()->json(['message' => 'Store not found'], 404);
+            return $this->errorResponse('Store not found', 404);
         }
 
         $validated = $request->validate([
@@ -331,14 +325,19 @@ class StorefrontController extends Controller
             ? $this->formatStoreReviewIfExists($this->getUserStoreReview($storeModel->getKey(), $viewerId))
             : null;
 
-        return $this->paginateResponse($reviews, $formatted, [
-            'store' => [
-                'id' => $storeModel->getKey(),
-                'name' => $storeModel->name,
-                'slug' => $storeModel->slug,
+        return $this->paginateResponse(
+            $reviews,
+            $formatted,
+            [
+                'store' => [
+                    'id' => $storeModel->getKey(),
+                    'name' => $storeModel->name,
+                    'slug' => $storeModel->slug,
+                ],
+                'summary' => $summary,
             ],
-            'summary' => $summary,
-        ]);
+            'Store reviews fetched successfully.'
+        );
     }
 
     public function addReview(Request $request, string $store): JsonResponse
