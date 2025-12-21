@@ -1186,6 +1186,7 @@ class ApiController extends Controller {
 
             $type = $request->type;
             $auth = null;
+            $token = null;
 
             // Handle phone and password login
             if ($type == 'phone_password') {
