@@ -54,8 +54,15 @@ return new class extends Migration {
         });
 
         Schema::table('categories', static function (Blueprint $table) {
-            $table->unique('slug');
+            if (! Schema::hasColumn('categories', 'slug')) {
+                $table->string('slug')->nullable();
+            }
         });
+        if (! $this->indexExists('categories', 'categories_slug_unique')) {
+            Schema::table('categories', static function (Blueprint $table) {
+                $table->unique('slug');
+            });
+        }
 
         Schema::table('languages', static function (Blueprint $table) {
             $table->dropColumn('slug');
