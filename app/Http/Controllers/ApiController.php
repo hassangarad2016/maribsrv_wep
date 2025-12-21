@@ -1,5 +1,5 @@
 <?php
-
+ 
 namespace App\Http\Controllers;
 
 use App\Events\ManualPaymentRequestCreated;
@@ -424,6 +424,9 @@ class ApiController extends Controller {
         
         
         $this->uploadFolder = 'item_images';
+        if (array_key_exists('HTTP_AUTHORIZATION', $_SERVER) && !empty($_SERVER['HTTP_AUTHORIZATION'])) {
+            $this->middleware('auth:sanctum');
+        }
     }
 
 
@@ -1839,7 +1842,10 @@ class ApiController extends Controller {
                 'interface_type',
             ]);
 
-            $categoryIdValue = $request->integer('category_id');
+            $categoryIdValue = null;
+            if ($request->filled('category_id') && is_numeric($request->input('category_id'))) {
+                $categoryIdValue = (int) $request->input('category_id');
+            }
             $explicitInterfaceType = InterfaceSectionService::canonicalSectionTypeOrNull(
                 $request->input('interface_type')
             );
@@ -2794,6 +2800,19 @@ class ApiController extends Controller {
             // $uniqueSlug = HelperService::generateUniqueSlug(new Item(), $slug,$request->id);
 
             $data = $request->all();
+
+            $explicitInterfaceType = InterfaceSectionService::canonicalSectionTypeOrNull(
+                $request->input('interface_type')
+            );
+            $resolvedInterfaceType = $explicitInterfaceType
+                ?? $this->resolveInterfaceSectionForCategory($categoryId)
+                ?? InterfaceSectionService::canonicalSectionTypeOrNull($targetSection);
+
+            if ($resolvedInterfaceType !== null) {
+                $data['interface_type'] = $resolvedInterfaceType;
+            } elseif (array_key_exists('interface_type', $data)) {
+                unset($data['interface_type']);
+            }
 
 
            if (array_key_exists('price', $data)) {
@@ -3802,7 +3821,12 @@ class ApiController extends Controller {
                     }
 
                     if ($withInterfaceFilter && $sectionTypeForConfig !== null && $sectionTypeForConfig !== 'all') {
-                        $query->whereIn('interface_type', $interfaceVariantsForConfig);
+                        $query->where(function ($inner) use ($interfaceVariantsForConfig, $categoryIdsForConfig) {
+                            $inner->whereIn('interface_type', $interfaceVariantsForConfig);
+                            if ($categoryIdsForConfig !== null) {
+                                $inner->orWhereNull('interface_type');
+                            }
+                        });
                     }
 
                     return $query;
