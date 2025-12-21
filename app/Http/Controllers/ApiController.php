@@ -2026,9 +2026,36 @@ class ApiController extends Controller {
 
 
     public function getItem(Request $request) {
-                if ($request->query->has('view')) {
+        if ($request->query->has('view')) {
             $request->query->set('view', strtolower((string) $request->query('view')));
         }
+
+        // إذا لم يُرسل أي مُعرّف أو فلاتر أساسية، أعِد رداً فارغاً بدل خطأ
+        $guardFields = [
+            'id',
+            'category_id',
+            'category_ids',
+            'store_id',
+            'user_id',
+            'slug',
+            'custom_fields',
+        ];
+
+        $hasIdentifier = false;
+        foreach ($guardFields as $field) {
+            if ($request->filled($field)) {
+                $hasIdentifier = true;
+                break;
+            }
+        }
+
+        if (! $hasIdentifier && ! $request->filled('view')) {
+            return ResponseService::successResponse('OK', [
+                'data' => [],
+                'total' => 0,
+            ]);
+        }
+
         $validator = Validator::make($request->all(), [
             'limit'          => 'nullable|integer',
             'offset'         => 'nullable|integer',
