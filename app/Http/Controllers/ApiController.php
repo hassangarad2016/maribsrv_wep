@@ -2714,6 +2714,13 @@ class ApiController extends Controller {
         $user = $request->user();
 
         if (! $user instanceof User) {
+            Log::warning('API Controller -> getAllowedSections anonymous request', [
+                'context' => [
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ],
+            ]);
+
             return response()->json([
                 'permitted_sections' => [],
                 'blocked_sections' => [],
@@ -2721,6 +2728,13 @@ class ApiController extends Controller {
         }
 
         $access = $delegateAuthorizationService->getSectionAccessForUser($user);
+
+        Log::info('API Controller -> getAllowedSections response', [
+            'user_id' => $user->getAuthIdentifier(),
+            'permitted_count' => count($access['permitted'] ?? []),
+            'blocked_count' => count($access['blocked'] ?? []),
+            'requested_scopes' => $request->input('scopes'),
+        ]);
 
         return response()->json([
             'permitted_sections' => $access['permitted'],
