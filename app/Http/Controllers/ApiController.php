@@ -3642,6 +3642,9 @@ class ApiController extends Controller {
                 'area:id,name',
             ];
 
+            $itemColumns = $this->getItemColumnAvailability();
+            $itemsSupportsInterfaceType = isset($itemColumns['interface_type']);
+
             $titleMap = [
                 'featured'      => __('Featured Items'),
                 'premium'       => __('Featured Items'),
@@ -3778,7 +3781,7 @@ class ApiController extends Controller {
 
                 $applyInterfaceFilterConfig = $sectionTypeForConfig !== null && $sectionTypeForConfig !== 'all';
 
-                $makeBaseQuery = function (bool $withInterfaceFilter = true) use ($categoryIdsForConfig, $relations, $sectionTypeForConfig, $interfaceVariantsForConfig) {
+                $makeBaseQuery = function (bool $withInterfaceFilter = true) use ($categoryIdsForConfig, $relations, $sectionTypeForConfig, $interfaceVariantsForConfig, $itemsSupportsInterfaceType) {
                     $query = Item::query()
                         ->approved()
                         ->with($relations)
@@ -3789,7 +3792,7 @@ class ApiController extends Controller {
                         $query->whereIn('category_id', $categoryIdsForConfig);
                     }
 
-                    if ($withInterfaceFilter && $sectionTypeForConfig !== null && $sectionTypeForConfig !== 'all') {
+                    if ($itemsSupportsInterfaceType && $withInterfaceFilter && $sectionTypeForConfig !== null && $sectionTypeForConfig !== 'all') {
                         $query->whereIn('interface_type', $interfaceVariantsForConfig);
                     }
 
@@ -3942,7 +3945,7 @@ class ApiController extends Controller {
 
                     if ($categoryIdsForConfig !== null) {
                         $singleItemQuery->whereIn('category_id', $categoryIdsForConfig);
-                    } elseif ($applyInterfaceFilterConfig) {
+                    } elseif ($itemsSupportsInterfaceType && $applyInterfaceFilterConfig) {
                         $singleItemQuery->whereIn('interface_type', $interfaceVariantsForConfig);
                     }
 
