@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
+        if (Schema::hasTable('campaign_events')) {
+            return;
+        }
+
         Schema::create('campaign_events', function (Blueprint $table) {
             $table->id();
             $table->foreignId('campaign_id')->constrained('marketing_campaigns')->cascadeOnDelete();
