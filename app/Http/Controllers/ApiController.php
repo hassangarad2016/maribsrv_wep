@@ -3135,20 +3135,9 @@ class ApiController extends Controller {
                             static fn ($id) => ! is_null($id) && $id > 0
                         ));
 
-                        if ($resolvedIds === []) {
-                            $emptyPaginator = Category::query()
-                                ->whereRaw('1 = 0')
-                                ->paginate();
-
-                            ResponseService::successResponse(null, $emptyPaginator, [
-                                'self_category'  => null,
-                                'append_to_data' => ['self_category' => null],
-                            ]);
-
-                            return;
+                        if ($resolvedIds !== []) {
+                            $allowedCategoryIds = $resolvedIds;
                         }
-
-                        $allowedCategoryIds = $resolvedIds;
                     }
                 }
             }
@@ -3931,20 +3920,22 @@ class ApiController extends Controller {
                         $query->whereIn('category_id', $categoryIdsForConfig);
                     }
 
-                    if ($withInterfaceFilter && $sectionTypeForConfig !== null && $sectionTypeForConfig !== 'all') {
-                        $query->where(function ($inner) use ($interfaceVariantsForConfig, $categoryIdsForConfig) {
-                            $inner->whereIn('interface_type', $interfaceVariantsForConfig);
-                            if ($categoryIdsForConfig !== null) {
-                                $inner->orWhere(function ($legacy) use ($categoryIdsForConfig) {
-                                    $legacy->whereNull('interface_type')
-                                        ->whereIn('category_id', $categoryIdsForConfig);
-                                });
-                            }
-                        });
-                    }
+                if ($withInterfaceFilter && $sectionTypeForConfig !== null && $sectionTypeForConfig !== 'all') {
+                    $query->where(function ($inner) use ($interfaceVariantsForConfig, $categoryIdsForConfig) {
+                        $inner->whereIn('interface_type', $interfaceVariantsForConfig);
+                        if ($categoryIdsForConfig !== null) {
+                            $inner->orWhere(function ($legacy) use ($categoryIdsForConfig) {
+                                $legacy->whereNull('interface_type')
+                                    ->whereIn('category_id', $categoryIdsForConfig);
+                            });
+                        } else {
+                            $inner->orWhereNull('interface_type');
+                        }
+                    });
+                }
 
-                    return $query;
-                };
+                return $query;
+            };
 
                 $baseQuery = $makeBaseQuery($applyInterfaceFilterConfig);
                 $sectionsForConfig = [];
@@ -4189,11 +4180,109 @@ class ApiController extends Controller {
                                 $legacy->whereNull('interface_type')
                                     ->whereIn('category_id', $categoryIds);
                             });
+                        } else {
+                            $inner->orWhereNull('interface_type');
                         }
                     });
                 }
 
                 $fallbackItems = $fallbackQuery
+                    ->orderByDesc('items.created_at')
+                    ->skip($offset)
+                    ->limit($limit)
+                    ->get();
+
+                if ($fallbackItems->isEmpty()) {
+                    $fallbackItems = Item::query()
+                        ->approved()
+                        ->with($relations)
+                        ->withCount('favourites')
+                        ->withCount('featured_items')
+                        ->orderByDesc('items.created_at')
+                        ->skip($offset)
+                        ->limit($limit)
+                        ->get();
+                }
+
+                if ($fallbackItems->isNotEmpty()) {
+                    $fallbackSectionData = array_values((new ItemCollection($fallbackItems))->toArray($request));
+                    $allSections[] = [
+                        'id' => null,
+                        'title' => $titleMap['latest'] ?? 'Latest Listings',
+                        'style' => 'list',
+                        'section_type' => $sectionType,
+                        'filter' => 'latest',
+                        'slug' => $request->input('slug')
+                            ?? Str::slug(($sectionType ?: 'all') . '-latest'),
+                        'sequence' => count($allSections) + 1,
+                        'root_identifier' => $rootIdentifier,
+                        'total_data' => count($fallbackSectionData),
+                        'min_price' => $fallbackItems->min('price'),
+                        'max_price' => $fallbackItems->max('price'),
+                        'has_more' => $fallbackItems->count() === $limit,
+                        'section_data' => $fallbackSectionData,
+                    ];
+                }
+
+                if ($fallbackItems->isNotEmpty()) {
+                    continue;
+                }
+            }
+
+            Log::info('featured_sections.response', [
+                'requested_interface' => $requestContext['interface_type'],
+                'resolved_section_type' => $sectionType,
+                'filters' => $filters,
+                'sections_count' => count($allSections),
+                'section_filters' => array_map(static fn ($section) => $section['filter'] ?? null, $allSections),
+                'page' => $page,
+            ]);
+
+            ResponseService::successResponse(
+                'Featured sections fetched successfully.',
+                [
+                    'interface_type' => $sectionType,
+                    'filters' => $filters,
+                    'page' => $page,
+                    'per_page' => $limit,
+                    'sections' => array_values($allSections),
+                ]
+            );
+
+            return;
+        } catch (Throwable $th) {
+            Log::error('API Controller -> getFeaturedSections failed', [
+                'exception' => $th,
+                'user_id' => $requestUser?->getAuthIdentifier(),
+                'context' => $requestContext,
+            ]);
+
+            ResponseService::errorResponse('Unable to load featured sections.', null, 500);
+        }
+    }
+    public function recordSliderClick(Request $request, Slider $slider, SliderMetricService $sliderMetricService)
+    {
+        try {
+            $now = Carbon::now();
+            $user = $request->user() ?? Auth::user();
+            $userId = $user?->getAuthIdentifier();
+            $sessionId = $this->resolveSliderSessionId($request);
+
+            $sliderMetricService->recordClick($slider, $userId, $sessionId, $now);
+
+            ResponseService::successResponse(__('сЬЩ?Ъ?Г??Щ?с?Щ?с·Щ·с?Щ¤сЬЩ?Ъ?Г??Щ?с?Щ?с·Щ·с?Щ¤сЬЩ?Ъ?Г??Щ?с?Щ?с·Щ·с?Щ¤сЬЩ?Ъ?Г??Г??с?Щ?с·ЩЬс?Щ?сЬЩ?Ъ?Г??Г??с?Щ?с·Щ?Ъ?Г??Г??
+сЬЩ?Ъ?Г??Г??с?Щ?с·ЩЬс?Щ?сЬЩ?Ъ?Г??Г??с?Щ?с·Щ?Ъ?Г??Г??сЬЩ?Ъ?Г??Г??с?Щ?с·ЩЬс?Щ?сЬЩ?Ъ?Г??Г??с?Щ?с·Щ?Ъ?Г??Г?? 
+сЬЩ?Ъ?Г??Г??с?Щ?с·ЩЬс?Щ?сЬЩ?Ъ?Г??Г??с?Щ?с·ЩЬс?Щ?сЬЩ?Ъ?Г??Г??с?Щ?с·Щ?Ъ?Г??Г??сЬЩ?Ъ?Г??Г??с?Щ?с·ЩЬс?Щ?сЬЩ?Ъ?Г??Г??
+с?Щ?с·ЩЬс?Щ?сЬЩ?Ъ?Г??Щ?с?Щ?сЬЩ?Ъ?Г??Щ?с?Щ?с·Щ·с?Щ¤сЬЩ?Ъ?Г??Щ?с?Щ?с·Щ·с?Щ¤сЬЩ?Ъ?Г??Щ?с?Щ?сЬЩ?Ъ?Г??Г??Ъ?Г??Г??
+сЬЩ?Ъ?Г??Г??с?Щ?с·Щ?Ъ?Г??Г??сЬЩ?Ъ?Г??Щ?с?Щ?с·Щ·с?Щ¤сЬЩ?Ъ?Г??Щ?с?Щ?сЬЩ?Ъ?Г??Г??Ъ?Г??Г??сЬЩ?Ъ?Г??Г??с?Щ?с·ЩЬс?Щ?
+сЬЩ?Ъ?Г??Г??с?Щ?с·Щ?Ъ?Г??Г??сЬЩ?Ъ?Г??Г??с?Щ?с·ЩЬс?Щ?сЬЩ?Ъ?Г??Г??с?Щ?с·Щ?Ъ?Г??Г??'));
+        } catch (Throwable $th) {
+            ResponseService::logErrorResponse($th, 'API Controller -> recordSliderClick');
+            ResponseService::errorResponse();
+        }
+    }
+
+
                     ->orderByDesc('items.created_at')
                     ->skip($offset)
                     ->limit($limit)
