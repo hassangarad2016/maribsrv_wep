@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 
 $serviceCategoryMap = [
@@ -38,7 +38,8 @@ $interfaceSectionRoots = [
     'computer'    => [
         'computer_section',
         (int) env('CART_COMPUTER_ROOT_CATEGORY_ID', 5),
-    ],];
+    ],
+];
 
 
 $serviceSectionRoots = [
