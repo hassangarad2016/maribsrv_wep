@@ -3840,7 +3840,10 @@ class ApiController extends Controller {
                         $query->where(function ($inner) use ($interfaceVariantsForConfig, $categoryIdsForConfig) {
                             $inner->whereIn('interface_type', $interfaceVariantsForConfig);
                             if ($categoryIdsForConfig !== null) {
-                                $inner->orWhereNull('interface_type');
+                                $inner->orWhere(function ($legacy) use ($categoryIdsForConfig) {
+                                    $legacy->whereNull('interface_type')
+                                        ->whereIn('category_id', $categoryIdsForConfig);
+                                });
                             }
                         });
                     }
