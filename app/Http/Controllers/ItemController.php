@@ -1063,10 +1063,10 @@ class ItemController extends Controller {
                 ->limit(10)
                 ->get();
 
-            return response()->json($items);
+            ResponseService::successResponse('Items fetched successfully.', $items);
         } catch (Throwable $th) {
             ResponseService::logErrorResponse($th, 'ItemController -> search');
-            return response()->json([]);
+            ResponseService::errorResponse('Failed to fetch items.');
         }
     }
 

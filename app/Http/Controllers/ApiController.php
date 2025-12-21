@@ -3605,6 +3605,26 @@ class ApiController extends Controller {
 
             $rootId = $request->integer('root_id') ?? $request->integer('root_category_id');
 
+            $relations = [
+                'user:id,name,email,mobile,profile,country_code,show_personal_details',
+                'category:id,name,image',
+                'gallery_images:id,image,item_id,thumbnail_url,detail_image_url',
+                'featured_items',
+                'favourites',
+                'item_custom_field_values.custom_field',
+                'area:id,name',
+            ];
+
+            $titleMap = [
+                'featured'      => __('Featured Items'),
+                'premium'       => __('Featured Items'),
+                'latest'        => __('Latest Listings'),
+                'most_viewed'   => __('Popular Items'),
+                'price_range'   => __('Budget Friendly'),
+                'highest_price' => __('Highest Price'),
+                'lowest_price'  => __('Lowest Price'),
+            ];
+
             $configs = FeaturedAdsConfig::query()
                 ->where('enabled', true)
                 ->when($sectionType, function ($query) use ($sectionType) {
@@ -3630,37 +3650,62 @@ class ApiController extends Controller {
                 ->get();
 
             if ($configs->isEmpty()) {
+                $applyInterfaceFilter = $sectionType !== null && $sectionType !== 'all';
+                $baseQuery = Item::query()
+                    ->approved()
+                    ->with($relations)
+                    ->withCount('favourites')
+                    ->withCount('featured_items');
+
+                if ($categoryIds !== null) {
+                    $baseQuery->whereIn('category_id', $categoryIds);
+                }
+
+                if ($applyInterfaceFilter && $interfaceVariants !== null) {
+                    $baseQuery->whereIn('interface_type', $interfaceVariants);
+                }
+
+                $items = (clone $baseQuery)
+                    ->orderByDesc('items.created_at')
+                    ->skip($offset)
+                    ->limit($limit)
+                    ->get();
+
+                $sections = [];
+
+                if ($items->isNotEmpty()) {
+                    $sectionData = array_values((new ItemCollection($items))->toArray($request));
+                    $sections[] = [
+                        'id' => null,
+                        'title' => $titleMap['latest'] ?? 'Latest Listings',
+                        'style' => 'list',
+                        'section_type' => $sectionType,
+                        'filter' => 'latest',
+                        'slug' => $request->input('slug')
+                            ?? Str::slug($sectionType . '-latest'),
+                        'sequence' => 1,
+                        'root_identifier' => $rootIdentifier,
+                        'total_data' => count($sectionData),
+                        'min_price' => $items->min('price'),
+                        'max_price' => $items->max('price'),
+                        'has_more' => $items->count() === $limit,
+                        'section_data' => $sectionData,
+                    ];
+                }
+
                 return response()->json([
                     'error' => false,
-                    'message' => __('No featured ads configuration found for this section.'),
+                    'message' => __('Featured sections fetched successfully.'),
                     'data' => [
                         'interface_type' => $sectionType,
                         'filters' => $filters,
-                        'sections' => [],
+                        'page' => $page,
+                        'per_page' => $limit,
+                        'sections' => array_values($sections),
                     ],
                     'code' => 200,
                 ], 200);
             }
-
-            $relations = [
-                'user:id,name,email,mobile,profile,country_code,show_personal_details',
-                'category:id,name,image',
-                'gallery_images:id,image,item_id,thumbnail_url,detail_image_url',
-                'featured_items',
-                'favourites',
-                'item_custom_field_values.custom_field',
-                'area:id,name',
-            ];
-
-            $titleMap = [
-                'featured'      => __('Featured Items'),
-                'premium'       => __('Featured Items'),
-                'latest'        => __('Latest Listings'),
-                'most_viewed'   => __('Popular Items'),
-                'price_range'   => __('Budget Friendly'),
-                'highest_price' => __('Highest Price'),
-                'lowest_price'  => __('Lowest Price'),
-            ];
 
             $allSections = [];
             $sequenceOffset = 0;
