@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 
 $serviceCategoryMap = [
@@ -13,15 +13,32 @@ $serviceCategoryMap = [
 
 $interfaceSectionRoots = [
     'homepage'    => null,
-    'public'      => null,
+    'public'      => [
+        'public_ads',
+        (int) env('INTERFACE_SECTIONS_PUBLIC_ROOT_ID', 6),
+    ],
     'request_ad'  => null,
-    // استخدم السجل الفعلي من القاعدة (slug=realestate) بدلاً من قيمة غير موجودة
-    'real_estate' => 'realestate',
+    // į?į?į?į?į?ā? į?ā?į?į?ā? į?ā?ā?į?ā?ā? ā?ā? į?ā?ā?į?į?į?į? (slug=realestate) į?į?ā?į?ā? ā?ā? ā?ā?ā?į? į?ā?į? ā?ā?į?ā?į?į?
+    'real_estate' => [
+        'realestate',
+        (int) env('INTERFACE_SECTIONS_REAL_ESTATE_ROOT_ID', 1),
+    ],
     'tourism'     => 'tourism_services',
-    'merchants'   => 'e_store',
-    'shein'       => 'shein_products',
-    'computer'    => 'computer_section',
-];
+    'merchants'   => [
+        'e_store',
+        (int) env(
+            'INTERFACE_SECTIONS_MERCHANTS_ROOT_ID',
+            env('CART_STORE_ROOT_CATEGORY_ID', 3)
+        ),
+    ],
+    'shein'       => [
+        'shein_products',
+        (int) env('CART_SHEIN_ROOT_CATEGORY_ID', 4),
+    ],
+    'computer'    => [
+        'computer_section',
+        (int) env('CART_COMPUTER_ROOT_CATEGORY_ID', 5),
+    ],];
 
 
 $serviceSectionRoots = [
@@ -94,3 +111,4 @@ return [
     ],
     'service_category_map' => $serviceCategoryMap,
 ];
+

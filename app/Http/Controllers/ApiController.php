@@ -404,6 +404,7 @@ class ApiController extends Controller {
     private ?array $geoDisabledCategoryCache = null;
     private ?array $productLinkRequiredCategoryCache = null;
     private ?array $productLinkRequiredSectionCache = null;
+    private ?array $interfaceSectionCategoryCache = null;
 
 
 
@@ -1837,6 +1838,20 @@ class ApiController extends Controller {
                 'all_category_ids',
                 'interface_type',
             ]);
+
+            $categoryIdValue = $request->integer('category_id');
+            $explicitInterfaceType = InterfaceSectionService::canonicalSectionTypeOrNull(
+                $request->input('interface_type')
+            );
+            $resolvedInterfaceType = $explicitInterfaceType
+                ?? $this->resolveInterfaceSectionForCategory($categoryIdValue)
+                ?? InterfaceSectionService::canonicalSectionTypeOrNull($section);
+
+            if ($resolvedInterfaceType !== null) {
+                $data['interface_type'] = $resolvedInterfaceType;
+            } else {
+                unset($data['interface_type']);
+            }
 
             
 
@@ -12503,6 +12518,33 @@ public function storeRequestDevice(Request $request)
         )));
     }
 
+
+    private function resolveInterfaceSectionForCategory(?int $categoryId): ?string
+    {
+        if (empty($categoryId)) {
+            return null;
+        }
+
+        if ($this->interfaceSectionCategoryCache === null) {
+            $this->interfaceSectionCategoryCache = [];
+
+            $sectionTypes = InterfaceSectionService::allowedSectionTypes(includeLegacy: true);
+            foreach ($sectionTypes as $sectionType) {
+                $categoryIds = InterfaceSectionService::categoryIdsForSection($sectionType);
+                if (! is_array($categoryIds) || $categoryIds === []) {
+                    continue;
+                }
+                foreach ($categoryIds as $id) {
+                    if (! is_int($id)) {
+                        continue;
+                    }
+                    $this->interfaceSectionCategoryCache[$id] = $sectionType;
+                }
+            }
+        }
+
+        return $this->interfaceSectionCategoryCache[$categoryId] ?? null;
+    }
 
     private function resolveSectionByCategoryId(?int $categoryId): ?string
     {
