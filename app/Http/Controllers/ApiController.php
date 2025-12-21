@@ -2100,6 +2100,13 @@ class ApiController extends Controller {
         try {
             //TODO : need to simplify this whole module
 
+            $interfaceTypeRaw = $request->input('interface_type', $request->query('interface_type', ''));
+            $interfaceType = trim((string) $interfaceTypeRaw);
+
+            $authenticatedUser = Auth::guard('sanctum')->user() ?? Auth::user();
+            $isAuthenticated = $authenticatedUser !== null;
+            $authenticatedUserId = $authenticatedUser?->id;
+
             $viewMode = strtolower((string) $request->query('view', 'detail'));
             $isSummaryView = $viewMode === 'summary';
             $isDetailView = ! $isSummaryView;
@@ -2108,8 +2115,12 @@ class ApiController extends Controller {
                 Log::info('getItem.params', $request->all());
             }
 
+            $normalizedInterfaceType = $interfaceType !== ''
+                ? InterfaceSectionService::normalizeSectionType($interfaceType)
+                : null;
+
             // If this is an e_store context and store_id is missing, infer it from user_id
-            if ($request->interface_type === 'e_store'
+            if ($normalizedInterfaceType === 'e_store'
                 && ! $request->filled('store_id')
                 && $request->filled('user_id')) {
                 $storeIdGuess = Store::where('user_id', $request->input('user_id'))
@@ -2120,7 +2131,7 @@ class ApiController extends Controller {
             }
 
             // Prevent leaking cross-store items: if e_store context without store/user, return empty.
-            if ($request->interface_type === 'e_store'
+            if ($normalizedInterfaceType === 'e_store'
                 && ! $request->filled('store_id')
                 && ! $request->filled('user_id')) {
                 return ResponseService::successResponse('OK', [
@@ -2130,7 +2141,7 @@ class ApiController extends Controller {
             }
 
             // Hard guard: in e_store context, enforce store or user filter.
-            if ($request->interface_type === 'e_store') {
+            if ($normalizedInterfaceType === 'e_store') {
                 if ($request->filled('store_id')) {
                     $request->merge(['store_id' => (int) $request->input('store_id')]);
                 } elseif ($request->filled('user_id')) {
@@ -2139,7 +2150,8 @@ class ApiController extends Controller {
             }
 
             // Extra guard for store category requests (storefront root category = 3):
-            if ((string) $request->input('category_id') === '3'
+            if ($normalizedInterfaceType === 'e_store'
+                && (string) $request->input('category_id') === '3'
                 && ! $request->filled('store_id')
                 && ! $request->filled('user_id')) {
                 return ResponseService::successResponse('OK', [
@@ -2152,12 +2164,9 @@ class ApiController extends Controller {
             $interfaceTypeFilter = null;
             $interfaceTypeVariants = [];
 
-            if ($request->filled('interface_type')) {
-                $interfaceTypeFilter = InterfaceSectionService::normalizeSectionType($request->input('interface_type'));
-
-                if ($interfaceTypeFilter !== null && $interfaceTypeFilter !== 'all') {
-                    $interfaceTypeVariants = InterfaceSectionService::sectionTypeVariants($interfaceTypeFilter);
-                }
+            if ($normalizedInterfaceType !== null && $normalizedInterfaceType !== 'all') {
+                $interfaceTypeFilter = $normalizedInterfaceType;
+                $interfaceTypeVariants = InterfaceSectionService::sectionTypeVariants($interfaceTypeFilter);
             }
 
 
@@ -2224,10 +2233,10 @@ class ApiController extends Controller {
                     ->withCount('featured_items as featured_items_count')
                     ->withCount('favourites as favourites_count');
 
-                if (Auth::check()) {
+                if ($isAuthenticated) {
                     $sql->withExists([
-                        'favourites as is_favorited' => static function ($query) {
-                            $query->where('user_id', Auth::id());
+                        'favourites as is_favorited' => static function ($query) use ($authenticatedUserId) {
+                            $query->where('user_id', $authenticatedUserId);
                         },
                     ]);
                 }
@@ -2409,17 +2418,17 @@ class ApiController extends Controller {
                     })->groupBy('item_id')->having(DB::raw("COUNT(DISTINCT CASE $having END)"), '=', count($request->custom_fields));
                 });
             }
-            if ($isDetailView && Auth::check()) {
-                $sql->with(['item_offers' => function ($q) {
-                    $q->where('buyer_id', Auth::user()->id);
-                }, 'user_reports'         => function ($q) {
-                    $q->where('user_id', Auth::user()->id);
+            if ($isDetailView && $isAuthenticated) {
+                $sql->with(['item_offers' => function ($q) use ($authenticatedUserId) {
+                    $q->where('buyer_id', $authenticatedUserId);
+                }, 'user_reports'         => function ($q) use ($authenticatedUserId) {
+                    $q->where('user_id', $authenticatedUserId);
                 }]);
 
                 $currentURI = explode('?', $request->getRequestUri(), 2);
 
                 if ($currentURI[0] == "/api/my-items") { //TODO: This if condition is temporary fix. Need something better
-                    $sql->where(['user_id' => Auth::user()->id])->withTrashed();
+                    $sql->where(['user_id' => $authenticatedUserId])->withTrashed();
                 } else {
                     $sql->where('status', 'approved')->has('user')->onlyNonBlockedUsers()->getNonExpiredItems();
                 }
