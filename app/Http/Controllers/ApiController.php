@@ -1127,18 +1127,11 @@ class ApiController extends Controller {
                 
                 DB::commit();
             } else {
-                $auth = $socialLogin->user;
-                $token = auth('api')->login($auth);
+                Auth::guard('web')->login($socialLogin->user);
+                $auth = Auth::user();
             }
-            if (
-                !$auth ||
-                (
-                    !$auth->hasRole('User') &&
-                    !$auth->hasRole('User', 'api') &&
-                    !$auth->hasRole('User', 'web')
-                )
-            ) {
-                ResponseService::errorResponse('INVALID_LOGIN', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
+            if (!$auth->hasRole('User')) {
+                ResponseService::errorResponse('Invalid Login Credentials', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
             }
 
             if (!empty($request->fcm_id)) {
@@ -1193,35 +1186,37 @@ class ApiController extends Controller {
 
             $type = $request->type;
             $auth = null;
-            $token = null;
 
             // Handle phone and password login
             if ($type == 'phone_password') {
-                $credentials = [
-                    'mobile'   => $request->mobile,
-                    'password' => $request->password,
-                ];
+                $user = User::where('mobile', $request->mobile)
+                           ->whereHas('roles', function ($q) {
+                               $q->where('name', 'User');
+                           })
+                           ->first();
 
-                $jwt = auth('api')->attempt($credentials);
-
-                if (!$jwt) {
-                    ResponseService::errorResponse('INVALID_LOGIN', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
+                if (!$user) {
+                    ResponseService::errorResponse('أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ§أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط¢ظ¾ أ¢â€¢ع¾أ¢â€¢â€کأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط¢â€‍. أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ« أ¢â€¢ع¾ط·آ­أ¢â€‌ع©ط¢â€ أ¢â€¢ع¾أ¢â€‌آ¤أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ© أ¢â€¢ع¾ط·آµأ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ° أ¢â€¢ع¾ط·آ´أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط¢آ» أ¢â€¢ع¾ط·آ«أ¢â€‌ع©ط£ع¾أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط£آ¯.', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
                 }
 
-                $auth = auth('api')->user();
-
-                if (
-                    !$auth ||
-                    (
-                        !$auth->hasRole('User') &&
-                        !$auth->hasRole('User', 'api') &&
-                        !$auth->hasRole('User', 'web')
-                    )
-                ) {
-                    ResponseService::errorResponse('INVALID_LOGIN', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
+                if ($user->trashed()) {
+                    ResponseService::errorResponse('أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ­أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾أ¢â€¢â€کأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ© أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط¢ظ¾أ¢â€¢ع¾أ¢â€¢آ£أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آµأ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط£آ¢. أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ« أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾أ¢â€¢طŒأ¢â€‌ع©ط¢â€‍ أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€¢آ£ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾ط¢آ»أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾ط·آ±.', null, config('constants.RESPONSE_CODE.DEACTIVATED_ACCOUNT'));
                 }
 
-                $token = $jwt;
+                // Check if user has password set
+                if (!$user->password) {
+                    ResponseService::errorResponse('
+                    
+                    أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ  أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€¢آ£أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€  أ¢â€‌ع©ط£آ¢أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€¢ع¾ط·آ± أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾أ¢â€“â€™ أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ§أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾ط·آ¯ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آµأ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ°. أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ« أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط¢آ»أ¢â€¢ع¾ط¢آ«أ¢â€‌ع©ط£ع¾أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط£آ  OTP أ¢â€¢ع¾ط·آ«أ¢â€‌ع©ط£ع¾ أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط¢آ»أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€¢آ£أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€  أ¢â€‌ع©ط£آ¢أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾أ¢â€“â€™.', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
+                }
+
+                // Verify password
+                if (!Hash::check($request->password, $user->password)) {
+                    ResponseService::errorResponse('أ¢â€‌ع©ط£آ¢أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾أ¢â€“â€™ أ¢â€¢ع¾أ¢â€¢â€کأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€¢ع¾أ¢â€¢طŒأ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ±.', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
+                }
+
+                Auth::guard('web')->login($user);
+                $auth = $user;
             } else {
                 // Handle Firebase-based login (existing logic)
                 $firebase_id = $request->firebase_id;
@@ -1239,19 +1234,12 @@ class ApiController extends Controller {
                     ResponseService::errorResponse("أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ­أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾أ¢â€¢â€کأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ© أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط¢ظ¾أ¢â€¢ع¾أ¢â€¢آ£أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ . أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ« أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾أ¢â€¢طŒأ¢â€‌ع©ط¢â€‍ أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€¢آ£ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾ط¢آ»أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾ط·آ±", null, config('constants.RESPONSE_CODE.DEACTIVATED_ACCOUNT'));
                 }
 
-                $auth = $socialLogin->user;
-                $token = auth('api')->login($auth);
+                Auth::guard('web')->login($socialLogin->user);
+                $auth = Auth::user();
             }
 
-            if (
-                !$auth ||
-                (
-                    !$auth->hasRole('User') &&
-                    !$auth->hasRole('User', 'api') &&
-                    !$auth->hasRole('User', 'web')
-                )
-            ) {
-                ResponseService::errorResponse('INVALID_LOGIN', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
+            if (!$auth->hasRole('User')) {
+                ResponseService::errorResponse('أ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€ أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ² أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط¢آ»أ¢â€¢ع¾ط¢آ«أ¢â€‌ع©ط£ع¾أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾أ¢â€¢â€کأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€¢ع¾أ¢â€¢طŒأ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ±', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
             }
 
             // Update FCM token
@@ -1266,11 +1254,10 @@ class ApiController extends Controller {
                 );
             }
 
-            if (empty($token)) {
-                $token = auth('api')->login($auth);
-            }
+            // Generate token
+            $token = $auth->createToken($auth->name ?? '')->plainTextToken;
 
-            ResponseService::successResponse('LOGIN_OK', $auth, ['token' => $token]);
+            ResponseService::successResponse('أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط¢آ»أ¢â€¢ع¾ط¢آ«أ¢â€‌ع©ط£ع¾أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط¢â€ أ¢â€¢ع¾ط·آ´أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آµ', $auth, ['token' => $token]);
         } catch (Throwable $th) {
             ResponseService::logErrorResponse($th, "API Controller -> Login");
             ResponseService::errorResponse();
