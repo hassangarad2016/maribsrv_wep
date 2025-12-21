@@ -17,7 +17,10 @@ return new class extends Migration
             // 2 = تاجر (seller)
             // 3 = مسوق (marketer)
             // null = غير محدد
-            $table->tinyInteger('account_type')->nullable()->after('email');
+            if (! Schema::hasColumn('users', 'account_type')) {
+                // 1 = Customer, 2 = Seller, 3 = Marketer, null = undefined
+                $table->tinyInteger('account_type')->nullable()->after('email');
+            }
         });
     }
     
@@ -28,7 +31,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('account_type');
+            if (Schema::hasColumn('users', 'account_type')) {
+                $table->dropColumn('account_type');
+            }
         });
     }
 };
