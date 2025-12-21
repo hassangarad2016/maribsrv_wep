@@ -9,8 +9,9 @@ return new class extends Migration {
     public function up(): void
     {
         $isSqlite = Schema::getConnection()->getDriverName() === 'sqlite';
+        $legacyUniqueExists = $this->indexExists('cart_items', 'cart_items_user_id_item_id_department_unique');
 
-        Schema::table('cart_items', function (Blueprint $table) use ($isSqlite) {
+        Schema::table('cart_items', function (Blueprint $table) use ($isSqlite, $legacyUniqueExists) {
             if (! $isSqlite && Schema::hasColumn('cart_items', 'user_id')) {
                 try {
                     $table->dropForeign(['user_id']);
@@ -33,10 +34,8 @@ return new class extends Migration {
                 Schema::hasColumn('cart_items', 'department')
             ) {
 
-                try {
+                if ($legacyUniqueExists) {
                     $table->dropUnique('cart_items_user_id_item_id_department_unique');
-                } catch (\Throwable $exception) {
-                    // Index already dropped or does not exist; continue.
                 }
             }
 
@@ -90,8 +89,9 @@ return new class extends Migration {
     public function down(): void
     {
         $isSqlite = Schema::getConnection()->getDriverName() === 'sqlite';
+        $newUniqueExists = $this->indexExists('cart_items', 'cart_items_user_item_variant_department_unique');
 
-        Schema::table('cart_items', function (Blueprint $table) use ($isSqlite) {
+        Schema::table('cart_items', function (Blueprint $table) use ($isSqlite, $newUniqueExists) {
             if (! $isSqlite && Schema::hasColumn('cart_items', 'user_id')) {
                 try {
                     $table->dropForeign(['user_id']);
@@ -108,10 +108,8 @@ return new class extends Migration {
                 }
             }
 
-            try {
+            if ($newUniqueExists) {
                 $table->dropUnique('cart_items_user_item_variant_department_unique');
-            } catch (\Throwable $exception) {
-                // Index already removed; continue.
             }
 
             if (Schema::hasColumn('cart_items', 'stock_snapshot')) {
@@ -145,5 +143,24 @@ return new class extends Migration {
             }
         
         });
+    }
+
+    private function indexExists(string $table, string $index): bool
+    {
+        $connection = Schema::getConnection();
+
+        if ($connection->getDriverName() !== 'mysql') {
+            return false;
+        }
+
+        try {
+            $prefixedTable = $connection->getTablePrefix() . $table;
+            $sql = sprintf('SHOW INDEX FROM `%s` WHERE Key_name = ?', $prefixedTable);
+            $result = $connection->select($sql, [$index]);
+
+            return ! empty($result);
+        } catch (\Throwable $exception) {
+            return false;
+        }
     }
 };
