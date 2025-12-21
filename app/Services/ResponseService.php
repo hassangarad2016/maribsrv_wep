@@ -211,6 +211,7 @@ class ResponseService
 
         $response = response()->json(array_merge([
             'error'   => false,
+            'success' => true,
             'message' => $messageText,
             'data'    => $data,
             'code'    => $code ?? config('constants.RESPONSE_CODE.SUCCESS')
@@ -393,6 +394,7 @@ class ResponseService
 
         $response = response()->json([
             'error'   => true,
+            'success' => false,
             'message' => $messageText,
             'data'    => $data,
             'code'    => $code ?? config('constants.RESPONSE_CODE.EXCEPTION_ERROR'),

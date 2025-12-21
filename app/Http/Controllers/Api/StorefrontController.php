@@ -467,6 +467,7 @@ class StorefrontController extends Controller
     {
         return response()->json(array_merge([
             'error' => false,
+            'success' => true,
             'message' => __($message),
             'data' => $data,
             'code' => config('constants.RESPONSE_CODE.SUCCESS'),
@@ -477,6 +478,7 @@ class StorefrontController extends Controller
     {
         return response()->json(array_merge([
             'error' => true,
+            'success' => false,
             'message' => __($message),
             'data' => $data,
             'code' => $statusCode,
