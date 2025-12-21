@@ -423,8 +423,9 @@ class ApiController extends Controller {
         
         
         $this->uploadFolder = 'item_images';
-        if (array_key_exists('HTTP_AUTHORIZATION', $_SERVER) && !empty($_SERVER['HTTP_AUTHORIZATION'])) {
-            $this->middleware('auth:sanctum');
+        $request = request();
+        if ($request && $request->bearerToken()) {
+            $this->middleware('auth:api');
         }
     }
 
