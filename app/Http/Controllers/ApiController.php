@@ -4095,6 +4095,65 @@ class ApiController extends Controller {
                 }
             }
 
+            $hasNonFeaturedSections = collect($allSections)->contains(static function (array $section) {
+                $filter = $section['filter'] ?? null;
+                if (! is_string($filter) || $filter === '') {
+                    return true;
+                }
+
+                return strtolower($filter) !== 'featured';
+            });
+
+            if (! $hasNonFeaturedSections) {
+                $fallbackQuery = Item::query()
+                    ->approved()
+                    ->with($relations)
+                    ->withCount('favourites')
+                    ->withCount('featured_items');
+
+                if ($categoryIds !== null) {
+                    $fallbackQuery->whereIn('category_id', $categoryIds);
+                }
+
+                if ($sectionType !== null && $sectionType !== 'all') {
+                    $fallbackQuery->where(static function ($inner) use ($interfaceVariants, $categoryIds) {
+                        $inner->whereIn('interface_type', $interfaceVariants);
+                        if ($categoryIds !== null) {
+                            $inner->orWhere(static function ($legacy) use ($categoryIds) {
+                                $legacy->whereNull('interface_type')
+                                    ->whereIn('category_id', $categoryIds);
+                            });
+                        }
+                    });
+                }
+
+                $fallbackItems = $fallbackQuery
+                    ->orderByDesc('items.created_at')
+                    ->skip($offset)
+                    ->limit($limit)
+                    ->get();
+
+                if ($fallbackItems->isNotEmpty()) {
+                    $fallbackSectionData = array_values((new ItemCollection($fallbackItems))->toArray($request));
+                    $allSections[] = [
+                        'id' => null,
+                        'title' => $titleMap['latest'] ?? 'Latest Listings',
+                        'style' => 'list',
+                        'section_type' => $sectionType,
+                        'filter' => 'latest',
+                        'slug' => $request->input('slug')
+                            ?? Str::slug(($sectionType ?: 'all') . '-latest'),
+                        'sequence' => count($allSections) + 1,
+                        'root_identifier' => $rootIdentifier,
+                        'total_data' => count($fallbackSectionData),
+                        'min_price' => $fallbackItems->min('price'),
+                        'max_price' => $fallbackItems->max('price'),
+                        'has_more' => $fallbackItems->count() === $limit,
+                        'section_data' => $fallbackSectionData,
+                    ];
+                }
+            }
+
             ResponseService::successResponse(
                 'Featured sections fetched successfully.',
                 [
