@@ -77,22 +77,26 @@ return new class extends Migration {
             });
         }
 
-        Schema::create('contact_us', static function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email');
-            $table->string('subject');
-            $table->text('message');
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('contact_us')) {
+            Schema::create('contact_us', static function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('email');
+                $table->string('subject');
+                $table->text('message');
+                $table->timestamps();
+            });
+        }
 
-        Schema::create('user_fcm_tokens', static function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->string('fcm_token');
-            $table->timestamps();
-            $table->unique('fcm_token');
-        });
+        if (! Schema::hasTable('user_fcm_tokens')) {
+            Schema::create('user_fcm_tokens', static function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+                $table->string('fcm_token');
+                $table->timestamps();
+                $table->unique('fcm_token');
+            });
+        }
 
         if (Schema::hasTable('users') && Schema::hasColumn('users', 'fcm_id')) {
             $query = User::query();
