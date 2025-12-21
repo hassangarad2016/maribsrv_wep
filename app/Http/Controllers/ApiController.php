@@ -3951,6 +3951,38 @@ class ApiController extends Controller {
                 $allSections = array_merge($allSections, $sectionsForConfig);
             }
 
+            // إذا لم تُرجع أيّ الأقسام من الإعدادات، قدّم قسمًا افتراضيًا بأحدث الإعلانات بدون أي قيود
+            if ($allSections === []) {
+                $fallbackItems = Item::query()
+                    ->approved()
+                    ->with($relations)
+                    ->withCount('favourites')
+                    ->withCount('featured_items')
+                    ->orderByDesc('items.created_at')
+                    ->skip($offset)
+                    ->limit($limit)
+                    ->get();
+
+                if ($fallbackItems->isNotEmpty()) {
+                    $sectionData = array_values((new ItemCollection($fallbackItems))->toArray($request));
+                    $allSections[] = [
+                        'id' => null,
+                        'title' => $titleMap['latest'] ?? 'Latest Listings',
+                        'style' => 'list',
+                        'section_type' => 'all',
+                        'filter' => 'latest',
+                        'slug' => $request->input('slug') ?? Str::slug('all-latest'),
+                        'sequence' => 1,
+                        'root_identifier' => null,
+                        'total_data' => count($sectionData),
+                        'min_price' => $fallbackItems->min('price'),
+                        'max_price' => $fallbackItems->max('price'),
+                        'has_more' => $fallbackItems->count() === $limit,
+                        'section_data' => $sectionData,
+                    ];
+                }
+            }
+
             return response()->json([
                 'error' => false,
                 'message' => __('Featured sections fetched successfully.'),
