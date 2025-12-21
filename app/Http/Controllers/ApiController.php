@@ -2707,7 +2707,7 @@ class ApiController extends Controller {
             return [
                 'items' => $result->map($transformItem)->values()->all(),
             ];
-        }
+        } 
 
         return ['items' => collect($result)->map($transformItem)->values()->all()];
     }
