@@ -65,7 +65,9 @@ return new class extends Migration {
         }
 
         Schema::table('languages', static function (Blueprint $table) {
-            $table->dropColumn('slug');
+            if (Schema::hasColumn('languages', 'slug')) {
+                $table->dropColumn('slug');
+            }
         });
 
         if (Schema::getConnection()->getDriverName() !== 'sqlite') {
