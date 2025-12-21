@@ -3653,7 +3653,6 @@ class ApiController extends Controller {
                 // لا توجد إعدادات مخصصة: اعرض أحدث الإعلانات بدون تقييد القسم/الفئة
                 $applyInterfaceFilter = false;
                 $categoryIds = null;
-                $sectionType = 'all';
                 $baseQuery = Item::query()
                     ->approved()
                     ->with($relations)
@@ -3677,7 +3676,7 @@ class ApiController extends Controller {
                         'section_type' => $sectionType,
                         'filter' => 'latest',
                         'slug' => $request->input('slug')
-                            ?? Str::slug($sectionType . '-latest'),
+                            ?? Str::slug(($sectionType ?: 'all') . '-latest'),
                         'sequence' => 1,
                         'root_identifier' => $rootIdentifier,
                         'total_data' => count($sectionData),
