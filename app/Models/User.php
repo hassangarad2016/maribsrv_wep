@@ -26,9 +26,10 @@ use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasPermissions;
 use Spatie\Permission\Traits\HasRoles;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 
-class User extends Authenticatable {
+class User extends Authenticatable implements JWTSubject {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, HasPermissions;
 
     protected $appends = ['verification_status', 'verification_expires_at'];
@@ -95,6 +96,16 @@ class User extends Authenticatable {
         'additional_info' => 'json',
         'payment_info' => 'json',
     ];
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
 
 
     public function getProfileAttribute($image) {
