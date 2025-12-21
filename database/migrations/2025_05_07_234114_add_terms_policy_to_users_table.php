@@ -12,8 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
-            $table->boolean('terms_and_policy_accepted')->default(false)->comment('User accepted terms and policy');
+            if (! Schema::hasColumn('users', 'terms_and_policy_accepted')) {
+                $table->boolean('terms_and_policy_accepted')
+                    ->default(false)
+                    ->comment('User accepted terms and policy');
+            }
         });
     }
 
@@ -23,7 +26,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            if (Schema::hasColumn('users', 'terms_and_policy_accepted')) {
+                $table->dropColumn('terms_and_policy_accepted');
+            }
         });
     }
 };
