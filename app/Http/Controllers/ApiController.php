@@ -423,10 +423,6 @@ class ApiController extends Controller {
         
         
         $this->uploadFolder = 'item_images';
-        $request = request();
-        if ($request && $request->bearerToken()) {
-            $this->middleware('auth:api');
-        }
     }
 
 
