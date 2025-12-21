@@ -11,6 +11,8 @@ return new class extends Migration {
         $isSqlite = Schema::getConnection()->getDriverName() === 'sqlite';
         $legacyUniqueExists = $this->indexExists('cart_items', 'cart_items_user_item_variant_department_unique');
         $newUniqueExists = $this->indexExists('cart_items', 'cart_items_user_item_variantkey_department_unique');
+        $userForeignExists = $this->foreignKeyExists('cart_items', 'cart_items_user_id_foreign');
+        $itemForeignExists = $this->foreignKeyExists('cart_items', 'cart_items_item_id_foreign');
 
         Schema::table('cart_items', static function (Blueprint $table) {
             if (! Schema::hasColumn('cart_items', 'variant_key')) {
@@ -20,8 +22,8 @@ return new class extends Migration {
 
         DB::table('cart_items')->update(['variant_key' => DB::raw("COALESCE(variant_key, '')")]);
 
-        Schema::table('cart_items', function (Blueprint $table) use ($isSqlite, $legacyUniqueExists, $newUniqueExists) {
-            if (! $isSqlite && Schema::hasColumn('cart_items', 'user_id')) {
+        Schema::table('cart_items', function (Blueprint $table) use ($isSqlite, $legacyUniqueExists, $newUniqueExists, $userForeignExists, $itemForeignExists) {
+            if (! $isSqlite && Schema::hasColumn('cart_items', 'user_id') && $userForeignExists) {
                 try {
                     $table->dropForeign(['user_id']);
                 } catch (\Throwable $exception) {
@@ -29,7 +31,7 @@ return new class extends Migration {
                 }
             }
 
-            if (! $isSqlite && Schema::hasColumn('cart_items', 'item_id')) {
+            if (! $isSqlite && Schema::hasColumn('cart_items', 'item_id') && $itemForeignExists) {
                 try {
                     $table->dropForeign(['item_id']);
                 } catch (\Throwable $exception) {
@@ -66,10 +68,12 @@ return new class extends Migration {
         $isSqlite = Schema::getConnection()->getDriverName() === 'sqlite';
         $legacyUniqueExists = $this->indexExists('cart_items', 'cart_items_user_item_variant_department_unique');
         $newUniqueExists = $this->indexExists('cart_items', 'cart_items_user_item_variantkey_department_unique');
+        $userForeignExists = $this->foreignKeyExists('cart_items', 'cart_items_user_id_foreign');
+        $itemForeignExists = $this->foreignKeyExists('cart_items', 'cart_items_item_id_foreign');
 
-        Schema::table('cart_items', function (Blueprint $table) use ($isSqlite, $legacyUniqueExists, $newUniqueExists) {
+        Schema::table('cart_items', function (Blueprint $table) use ($isSqlite, $legacyUniqueExists, $newUniqueExists, $userForeignExists, $itemForeignExists) {
 
-            if (! $isSqlite && Schema::hasColumn('cart_items', 'user_id')) {
+            if (! $isSqlite && Schema::hasColumn('cart_items', 'user_id') && $userForeignExists) {
                 try {
                     $table->dropForeign(['user_id']);
                 } catch (\Throwable $exception) {
@@ -77,7 +81,7 @@ return new class extends Migration {
                 }
             }
 
-            if (! $isSqlite && Schema::hasColumn('cart_items', 'item_id')) {
+            if (! $isSqlite && Schema::hasColumn('cart_items', 'item_id') && $itemForeignExists) {
                 try {
                     $table->dropForeign(['item_id']);
                 } catch (\Throwable $exception) {
@@ -124,6 +128,26 @@ return new class extends Migration {
             $prefixedTable = $connection->getTablePrefix() . $table;
             $sql = sprintf('SHOW INDEX FROM `%s` WHERE Key_name = ?', $prefixedTable);
             $result = $connection->select($sql, [$index]);
+
+            return ! empty($result);
+        } catch (\Throwable $exception) {
+            return false;
+        }
+    }
+
+    private function foreignKeyExists(string $table, string $foreignKey): bool
+    {
+        $connection = Schema::getConnection();
+
+        if ($connection->getDriverName() !== 'mysql') {
+            return false;
+        }
+
+        try {
+            $prefixedTable = $connection->getTablePrefix() . $table;
+            $database = $connection->getDatabaseName();
+            $sql = 'SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND CONSTRAINT_NAME = ? AND CONSTRAINT_TYPE = ?';
+            $result = $connection->select($sql, [$database, $prefixedTable, $foreignKey, 'FOREIGN KEY']);
 
             return ! empty($result);
         } catch (\Throwable $exception) {
