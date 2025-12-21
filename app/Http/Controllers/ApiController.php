@@ -12656,7 +12656,7 @@ public function storeRequestDevice(Request $request)
             return isset($availability[$columnName]);
         }));
     }
- 
+  
 
     /**
      * Generate a fallback email address for phone-based signups.
