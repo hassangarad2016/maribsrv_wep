@@ -3598,7 +3598,21 @@ class ApiController extends Controller {
             ResponseService::validationError($validator->errors()->first());
         }
 
+        $requestContext = [
+            'interface_type' => $request->input('interface_type'),
+            'section_type' => $request->input('section_type'),
+            'slug' => $request->input('slug'),
+            'limit' => $request->input('limit'),
+            'page' => $request->input('page'),
+            'filters' => $request->input('filters'),
+        ];
+        $requestUser = $request->user() ?? Auth::user();
+
         try {
+            Log::info('API Controller -> getFeaturedSections request', [
+                'user_id' => $requestUser?->getAuthIdentifier(),
+                'context' => $requestContext,
+            ]);
             $defaultFilters = config('interface_sections.default_filters', ['latest']);
             if (! is_array($defaultFilters) || $defaultFilters === []) {
                 $defaultFilters = ['latest'];
@@ -4076,8 +4090,10 @@ class ApiController extends Controller {
                 'code' => 200,
             ], 200);
         } catch (Throwable $th) {
-            \Log::error('API Controller -> getFeaturedSections failed', [
+            Log::error('API Controller -> getFeaturedSections failed', [
                 'exception' => $th,
+                'user_id' => $requestUser?->getAuthIdentifier(),
+                'context' => $requestContext,
             ]);
 
             return response()->json([
