@@ -1266,10 +1266,11 @@ class ApiController extends Controller {
                 );
             }
 
-            // Generate token
-            $token = $auth->createToken($auth->name ?? '')->plainTextToken;
+            if (empty($token)) {
+                $token = auth('api')->login($auth);
+            }
 
-            ResponseService::successResponse('ط£آ¢أ¢â‚¬آ¢ط¹آ¾ط·آ·ط¢آ²ط£آ¢أ¢â‚¬â€Œط¹آ©ط·آ£ط¢آ  ط£آ¢أ¢â‚¬آ¢ط¹آ¾ط·آ·ط¢آ²ط£آ¢أ¢â‚¬آ¢ط¹آ¾ط£آ¢أ¢â‚¬â€Œأ¢â‚¬ع‘ط£آ¢أ¢â‚¬آ¢ط¹آ¾ط·آ·ط¢آ´ط£آ¢أ¢â‚¬â€Œط¹آ©ط·آ£ط¢آ¨ط£آ¢أ¢â‚¬â€Œط¹آ©ط·آ¢أ¢â‚¬â€چ ط£آ¢أ¢â‚¬آ¢ط¹آ¾ط·آ·ط¢آ¯ط£آ¢أ¢â‚¬â€Œط¹آ©ط·آ¢أ¢â‚¬â€چط£آ¢أ¢â‚¬آ¢ط¹آ¾ط·آ¢ط¢آ»ط£آ¢أ¢â‚¬آ¢ط¹آ¾ط·آ¢ط¢آ«ط£آ¢أ¢â‚¬â€Œط¹آ©ط·آ£ط¹آ¾ط£آ¢أ¢â‚¬â€Œط¹آ©ط·آ¢أ¢â‚¬â€چ ط£آ¢أ¢â‚¬آ¢ط¹آ¾ط·آ·ط¢آ°ط£آ¢أ¢â‚¬â€Œط¹آ©ط·آ¢أ¢â‚¬آ ط£آ¢أ¢â‚¬آ¢ط¹آ¾ط·آ·ط¢آ´ط£آ¢أ¢â‚¬آ¢ط¹آ¾ط·آ·ط¢آ¯ط£آ¢أ¢â‚¬آ¢ط¹آ¾ط·آ·ط¢آµ', $auth, ['token' => $token]);
+            ResponseService::successResponse('LOGIN_OK', $auth, ['token' => $token]);
         } catch (Throwable $th) {
             ResponseService::logErrorResponse($th, "API Controller -> Login");
             ResponseService::errorResponse();
