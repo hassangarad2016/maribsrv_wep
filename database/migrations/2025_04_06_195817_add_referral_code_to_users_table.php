@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
-            $table->string('referral_code')->unique()->nullable();
+            if (! Schema::hasColumn('users', 'referral_code')) {
+                $table->string('referral_code')->unique()->nullable();
+            }
         });
     }
 
@@ -23,7 +24,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            if (Schema::hasColumn('users', 'referral_code')) {
+                $table->dropUnique('users_referral_code_unique');
+                $table->dropColumn('referral_code');
+            }
         });
     }
 };
