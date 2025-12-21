@@ -1130,8 +1130,15 @@ class ApiController extends Controller {
                 $auth = $socialLogin->user;
                 $token = auth('api')->login($auth);
             }
-            if (!$auth->hasRole('User')) {
-                ResponseService::errorResponse('Invalid Login Credentials', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
+            if (
+                !$auth ||
+                (
+                    !$auth->hasRole('User') &&
+                    !$auth->hasRole('User', 'api') &&
+                    !$auth->hasRole('User', 'web')
+                )
+            ) {
+                ResponseService::errorResponse('INVALID_LOGIN', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
             }
 
             if (!empty($request->fcm_id)) {
@@ -12761,5 +12768,4 @@ public function storeRequestDevice(Request $request)
         return $ids;
     }
 }
-
 
