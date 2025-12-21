@@ -3847,6 +3847,19 @@ class ApiController extends Controller {
                     ];
                 }
 
+                Log::info('API Controller -> getFeaturedSections fallback response', [
+                    'user_id' => $requestUser?->getAuthIdentifier(),
+                    'interface_type' => $sectionType,
+                    'sections_count' => count($sections),
+                    'sections' => array_map(static function ($section) {
+                        return [
+                            'title' => $section['title'] ?? null,
+                            'filter' => $section['filter'] ?? null,
+                            'items' => $section['total_data'] ?? null,
+                        ];
+                    }, $sections),
+                ]);
+
                 ResponseService::successResponse(
                     'Featured sections fetched successfully.',
                     [
@@ -4235,6 +4248,20 @@ class ApiController extends Controller {
                 'sections_count' => count($allSections),
                 'section_filters' => array_map(static fn ($section) => $section['filter'] ?? null, $allSections),
                 'page' => $page,
+            ]);
+
+            Log::info('API Controller -> getFeaturedSections response', [
+                'user_id' => $requestUser?->getAuthIdentifier(),
+                'interface_type' => $sectionType,
+                'sections_count' => count($allSections),
+                'sample_sections' => array_map(static function ($section) {
+                    return [
+                        'title' => $section['title'] ?? null,
+                        'filter' => $section['filter'] ?? null,
+                        'items' => $section['total_data'] ?? null,
+                        'has_more' => $section['has_more'] ?? null,
+                    ];
+                }, array_slice($allSections, 0, 5)),
             ]);
 
             ResponseService::successResponse(
