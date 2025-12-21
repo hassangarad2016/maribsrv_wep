@@ -20,103 +20,121 @@
             };
         @endphp
 
-        <div class="row g-3 mb-4">
+        <div class="row g-2 mb-4">
             <div class="col-xl-3 col-md-4 col-sm-6">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted small">{{ __('إجمالي المستخدمين') }}</span>
-                            <i class="fa fa-users text-primary"></i>
+                <div class="card h-100 shadow-sm border-0 metric-card">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="icon-circle bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="fa fa-users"></i>
                         </div>
-                        <div class="fs-3 fw-bold" data-metric="users_total">{{ $metric('users_total') }}</div>
+                        <div class="flex-grow-1">
+                            <div class="text-muted small mb-1">{{ __('إجمالي المستخدمين') }}</div>
+                            <div class="fs-4 fw-bold" data-metric="users_total">{{ $metric('users_total') }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-md-4 col-sm-6">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted small">{{ __('المتصلون الآن') }}</span>
-                            <i class="fa fa-signal text-success"></i>
+                <div class="card h-100 shadow-sm border-0 metric-card">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="icon-circle bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="fa fa-signal"></i>
                         </div>
-                        <div class="fs-3 fw-bold" data-metric="users_online">{{ $metric('users_online') }}</div>
+                        <div class="flex-grow-1">
+                            <div class="text-muted small mb-1">{{ __('المتصلون الآن') }}</div>
+                            <div class="fs-4 fw-bold" data-metric="users_online">{{ $metric('users_online') }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-md-4 col-sm-6">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted small">{{ __('الإعلانات المعتمدة') }}</span>
-                            <i class="fa fa-check-circle text-success"></i>
+                <div class="card h-100 shadow-sm border-0 metric-card">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="icon-circle bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="fa fa-check-circle"></i>
                         </div>
-                        <div class="fs-3 fw-bold" data-metric="items_approved">{{ $metric('items_approved') }}</div>
+                        <div class="flex-grow-1">
+                            <div class="text-muted small mb-1">{{ __('الإعلانات المعتمدة') }}</div>
+                            <div class="fs-4 fw-bold" data-metric="items_approved">{{ $metric('items_approved') }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-md-4 col-sm-6">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted small">{{ __('إعلانات بانتظار المراجعة') }}</span>
-                            <i class="fa fa-hourglass-half text-warning"></i>
+                <div class="card h-100 shadow-sm border-0 metric-card">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="icon-circle bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="fa fa-hourglass-half"></i>
                         </div>
-                        <div class="fs-3 fw-bold" data-metric="items_pending">{{ $metric('items_pending') }}</div>
+                        <div class="flex-grow-1">
+                            <div class="text-muted small mb-1">{{ __('إعلانات بانتظار المراجعة') }}</div>
+                            <div class="fs-4 fw-bold" data-metric="items_pending">{{ $metric('items_pending') }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-md-4 col-sm-6">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted small">{{ __('طلبات دفع قيد المعالجة') }}</span>
-                            <i class="fa fa-credit-card text-info"></i>
+                <div class="card h-100 shadow-sm border-0 metric-card">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="icon-circle bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="fa fa-credit-card"></i>
                         </div>
-                        <div class="fs-3 fw-bold" data-metric="payments_pending">{{ $metric('payments_pending') }}</div>
+                        <div class="flex-grow-1">
+                            <div class="text-muted small mb-1">{{ __('طلبات دفع قيد المعالجة') }}</div>
+                            <div class="fs-4 fw-bold" data-metric="payments_pending">{{ $metric('payments_pending') }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-md-4 col-sm-6">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted small">{{ __('فشل/انتهت صلاحية المدفوعات') }}</span>
-                            <i class="fa fa-times-circle text-danger"></i>
+                <div class="card h-100 shadow-sm border-0 metric-card">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="icon-circle bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="fa fa-times-circle"></i>
                         </div>
-                        <div class="fs-3 fw-bold" data-metric="payments_failed">{{ $metric('payments_failed') }}</div>
+                        <div class="flex-grow-1">
+                            <div class="text-muted small mb-1">{{ __('فشل/انتهت صلاحية المدفوعات') }}</div>
+                            <div class="fs-4 fw-bold" data-metric="payments_failed">{{ $metric('payments_failed') }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-md-4 col-sm-6">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted small">{{ __('الطلبات اليدوية المفتوحة') }}</span>
-                            <i class="fa fa-university text-secondary"></i>
+                <div class="card h-100 shadow-sm border-0 metric-card">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="icon-circle bg-secondary-subtle text-secondary rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="fa fa-university"></i>
                         </div>
-                        <div class="fs-3 fw-bold" data-metric="manual_requests">{{ $metric('manual_requests') }}</div>
+                        <div class="flex-grow-1">
+                            <div class="text-muted small mb-1">{{ __('الطلبات اليدوية المفتوحة') }}</div>
+                            <div class="fs-4 fw-bold" data-metric="manual_requests">{{ $metric('manual_requests') }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-md-4 col-sm-6">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted small">{{ __('بلاغات غير مقروءة') }}</span>
-                            <i class="fa fa-flag text-danger"></i>
+                <div class="card h-100 shadow-sm border-0 metric-card">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="icon-circle bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="fa fa-flag"></i>
                         </div>
-                        <div class="fs-3 fw-bold" data-metric="unread_reports">{{ $metric('unread_reports') }}</div>
+                        <div class="flex-grow-1">
+                            <div class="text-muted small mb-1">{{ __('بلاغات غير مقروءة') }}</div>
+                            <div class="fs-4 fw-bold" data-metric="unread_reports">{{ $metric('unread_reports') }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-md-4 col-sm-6">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-muted small">{{ __('إشعارات غير مقروءة') }}</span>
-                            <i class="fa fa-bell text-warning"></i>
+                <div class="card h-100 shadow-sm border-0 metric-card">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="icon-circle bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="fa fa-bell"></i>
                         </div>
-                        <div class="fs-3 fw-bold" data-metric="notifications_unread">{{ $metric('notifications_unread') }}</div>
+                        <div class="flex-grow-1">
+                            <div class="text-muted small mb-1">{{ __('إشعارات غير مقروءة') }}</div>
+                            <div class="fs-4 fw-bold" data-metric="notifications_unread">{{ $metric('notifications_unread') }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -276,6 +294,11 @@
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        .metric-card .card-body { padding: 12px 14px; }
+        .metric-card .icon-circle { width: 44px; height: 44px; }
+        .metric-card .fs-4 { font-size: 1.35rem !important; }
+    </style>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const metricsUrl = '{{ route('home.metrics') }}';
@@ -446,7 +469,8 @@
                 }
             };
 
-            setInterval(refreshMetrics, 30000);
+            refreshMetrics();
+            setInterval(refreshMetrics, 2000);
         });
     </script>
 @endpush
