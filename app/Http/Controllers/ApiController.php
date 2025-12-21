@@ -3792,18 +3792,18 @@ class ApiController extends Controller {
                     ];
                 }
 
-                return response()->json([
-                    'error' => false,
-                    'message' => __('Featured sections fetched successfully.'),
-                    'data' => [
+                ResponseService::successResponse(
+                    'Featured sections fetched successfully.',
+                    [
                         'interface_type' => $sectionType,
                         'filters' => $filters,
                         'page' => $page,
                         'per_page' => $limit,
                         'sections' => array_values($sections),
-                    ],
-                    'code' => 200,
-                ], 200);
+                    ]
+                );
+
+                return;
             }
 
             $allSections = [];
@@ -4095,18 +4095,18 @@ class ApiController extends Controller {
                 }
             }
 
-            return response()->json([
-                'error' => false,
-                'message' => __('Featured sections fetched successfully.'),
-                'data' => [
+            ResponseService::successResponse(
+                'Featured sections fetched successfully.',
+                [
                     'interface_type' => $sectionType,
                     'filters' => $filters,
                     'page' => $page,
                     'per_page' => $limit,
                     'sections' => array_values($allSections),
-                ],
-                'code' => 200,
-            ], 200);
+                ]
+            );
+
+            return;
         } catch (Throwable $th) {
             Log::error('API Controller -> getFeaturedSections failed', [
                 'exception' => $th,
@@ -4114,11 +4114,7 @@ class ApiController extends Controller {
                 'context' => $requestContext,
             ]);
 
-            return response()->json([
-                'error' => true,
-                'message' => 'Unable to load featured sections.',
-                'code' => 500,
-            ], 500);
+            ResponseService::errorResponse('Unable to load featured sections.', null, 500);
         }
     }
     public function recordSliderClick(Request $request, Slider $slider, SliderMetricService $sliderMetricService)
