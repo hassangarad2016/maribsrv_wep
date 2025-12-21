@@ -4224,9 +4224,6 @@ class ApiController extends Controller {
                     ];
                 }
 
-                if ($fallbackItems->isNotEmpty()) {
-                    continue;
-                }
             }
 
             Log::info('featured_sections.response', [
