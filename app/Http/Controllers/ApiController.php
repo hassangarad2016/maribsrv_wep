@@ -3546,7 +3546,10 @@ class ApiController extends Controller {
                 },
                 'target',
             ])
-                ->whereIn('interface_type', $interfaceTypes)
+                ->where(function ($query) use ($interfaceTypes) {
+                    $query->whereIn('interface_type', $interfaceTypes)
+                        ->orWhereNull('interface_type');
+                })
                 ->eligibleAt($now)
                 ->orderByPriority()
                 ->get();
