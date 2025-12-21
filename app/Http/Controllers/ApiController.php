@@ -2167,16 +2167,24 @@ class ApiController extends Controller {
             }
 
 
-            $interfaceTypeFilter = null;
-            $interfaceTypeVariants = [];
+        $interfaceTypeFilter = null;
+        $interfaceTypeVariants = [];
+        $interfaceTypeCategoryIds = [];
 
-            if ($request->filled('interface_type')) {
-                $interfaceTypeFilter = InterfaceSectionService::normalizeSectionType($request->input('interface_type'));
+        if ($request->filled('interface_type')) {
+            $interfaceTypeFilter = InterfaceSectionService::normalizeSectionType($request->input('interface_type'));
 
-                if ($interfaceTypeFilter !== null && $interfaceTypeFilter !== 'all') {
-                    $interfaceTypeVariants = InterfaceSectionService::sectionTypeVariants($interfaceTypeFilter);
+            if ($interfaceTypeFilter !== null && $interfaceTypeFilter !== 'all') {
+                $interfaceTypeVariants = InterfaceSectionService::sectionTypeVariants($interfaceTypeFilter);
+                $resolvedCategories = InterfaceSectionService::categoryIdsForSection($interfaceTypeFilter);
+                if (is_array($resolvedCategories) && $resolvedCategories !== []) {
+                    $interfaceTypeCategoryIds = array_values(array_filter(
+                        $resolvedCategories,
+                        static fn ($id) => is_int($id) && $id > 0
+                    ));
                 }
             }
+        }
 
 
             $promotedFilter = null;
@@ -2279,12 +2287,20 @@ class ApiController extends Controller {
                     }
 
                     return $sql->whereIn('category_id', $categoryIds);
-                })->when($interfaceTypeFilter !== null, static function ($sql) use ($interfaceTypeFilter, $interfaceTypeVariants) {
+                })->when($interfaceTypeFilter !== null, function ($sql) use ($interfaceTypeFilter, $interfaceTypeVariants, $interfaceTypeCategoryIds) {
                     if ($interfaceTypeFilter === 'all') {
                         return $sql;
                     }
 
-                    return $sql->whereIn('interface_type', $interfaceTypeVariants);
+                    return $sql->where(function ($query) use ($interfaceTypeVariants, $interfaceTypeCategoryIds) {
+                        $query->whereIn('interface_type', $interfaceTypeVariants);
+                        if (! empty($interfaceTypeCategoryIds)) {
+                            $query->orWhere(function ($inner) use ($interfaceTypeCategoryIds) {
+                                $inner->whereNull('interface_type')
+                                    ->whereIn('category_id', $interfaceTypeCategoryIds);
+                            });
+                        }
+                    });
                 })->when($promotedFilter === true, function ($sql) {
                     return $sql->whereHas('featured_items');
 
