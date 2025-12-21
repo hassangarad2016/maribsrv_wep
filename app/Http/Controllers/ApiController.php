@@ -4220,6 +4220,15 @@ class ApiController extends Controller {
                 }
             }
 
+            Log::info('featured_sections.response', [
+                'requested_interface' => $requestContext['interface_type'],
+                'resolved_section_type' => $sectionType,
+                'filters' => $filters,
+                'sections_count' => count($allSections),
+                'section_filters' => array_map(static fn ($section) => $section['filter'] ?? null, $allSections),
+                'page' => $page,
+            ]);
+
             ResponseService::successResponse(
                 'Featured sections fetched successfully.',
                 [
