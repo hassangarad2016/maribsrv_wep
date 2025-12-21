@@ -30,9 +30,17 @@ return new class extends Migration {
                 ]);
             }
         });
+        $itemsSlugUniqueExists = $this->indexExists('items', 'items_slug_unique');
         Schema::table('items', static function (Blueprint $table) {
-            $table->unique('slug');
-            if (!Schema::hasColumn('items', 'rejected_reason')) {
+            if (! Schema::hasColumn('items', 'slug')) {
+                $table->string('slug')->nullable();
+            }
+        });
+        Schema::table('items', function (Blueprint $table) use ($itemsSlugUniqueExists) {
+            if (! $itemsSlugUniqueExists) {
+                $table->unique('slug');
+            }
+            if (! Schema::hasColumn('items', 'rejected_reason')) {
                 $table->string('rejected_reason')->after('status')->nullable();
             }
         });
@@ -138,6 +146,24 @@ return new class extends Migration {
             Schema::table('users', static function (Blueprint $table) {
                 $table->string('fcm_id')->comment('')->change();
             });
+        }
+    }
+
+    private function indexExists(string $table, string $index): bool
+    {
+        $connection = Schema::getConnection();
+        if ($connection->getDriverName() !== 'mysql') {
+            return false;
+        }
+
+        try {
+            $prefixedTable = $connection->getTablePrefix() . $table;
+            $sql = sprintf('SHOW INDEX FROM `%s` WHERE Key_name = ?', $prefixedTable);
+            $result = $connection->select($sql, [$index]);
+
+            return ! empty($result);
+        } catch (\Throwable $exception) {
+            return false;
         }
     }
 };
