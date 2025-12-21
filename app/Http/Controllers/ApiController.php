@@ -3136,7 +3136,7 @@ class ApiController extends Controller {
                         ));
 
                         if ($resolvedIds !== []) {
-                            $allowedCategoryIds = $resolvedIds;
+                            $allowedCategoryIds = $this->expandCategoryIdsWithDescendants($resolvedIds);
                         }
                     }
                 }
@@ -3753,7 +3753,9 @@ class ApiController extends Controller {
             }
 
             $categoryIds = InterfaceSectionService::categoryIdsForSection($sectionType);
-            if ($categoryIds === []) {
+            if (is_array($categoryIds) && $categoryIds !== []) {
+                $categoryIds = $this->expandCategoryIdsWithDescendants(array_map('intval', $categoryIds));
+            } else {
                 $categoryIds = null;
             }
 
@@ -12972,6 +12974,31 @@ public function storeRequestDevice(Request $request)
         }
 
         return self::$itemColumnAvailability = $columns;
+    }
+
+    /**
+     * Expand the provided category ids to include all their descendant ids.
+     *
+     * @param array<int> $categoryIds
+     * @return array<int>
+     */
+    private function expandCategoryIdsWithDescendants(array $categoryIds): array
+    {
+        $expanded = [];
+
+        foreach ($categoryIds as $id) {
+            $intId = is_numeric($id) ? (int) $id : null;
+
+            if ($intId === null || $intId <= 0) {
+                continue;
+            }
+
+            foreach ($this->collectCategoryTreeIds($intId) as $treeId) {
+                $expanded[$treeId] = $treeId;
+            }
+        }
+
+        return array_values($expanded);
     }
 
     /**
