@@ -525,6 +525,7 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
 
     /* --------------------------------- ط·آ§ط¸â€‍ط·آ±ط·آ¦ط¸ظ¹ط·آ³ط¸ظ¹ط·آ© Home ------------------------------- */
     Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/home/metrics', [HomeController::class, 'metrics'])->name('home.metrics');
 
     Route::get('change-password', [HomeController::class, 'changePasswordIndex'])->name('change-password.index');
     Route::post('change-password', [HomeController::class, 'changePasswordUpdate'])->name('change-password.update');

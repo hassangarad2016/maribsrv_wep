@@ -9,6 +9,7 @@ use App\Models\PaymentTransaction;
 use App\Models\ManualPaymentRequest;
 use App\Models\Notifications;
 use App\Services\ResponseService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -29,23 +30,32 @@ class HomeController extends Controller {
 
 
     public function index() {
+        [
+            'counts' => $counts,
+            'recentItems' => $recentItems,
+            'recentUsers' => $recentUsers,
+            'recentPayments' => $recentPayments,
+            'recentManualRequests' => $recentManualRequests,
+            'timeline' => $timeline,
+        ] = $this->buildDashboardData();
 
-        $items = Item::select('id','name','price','latitude','longitude','city','state','country','image')->where('clicks','>',0)->where('status', 'approved')->inRandomOrder()->limit(50)->get();
-        $categories = Category::withCount('items')->with('translations')->whereHas('items')->get();
+        return view('home', compact(
+            'counts',
+            'recentItems',
+            'recentUsers',
+            'recentPayments',
+            'recentManualRequests',
+            'timeline'
+        ));
+    }
 
-        $category_name = array();
-        $category_item_count = array();
+    public function metrics()
+    {
+        return response()->json($this->buildDashboardData());
+    }
 
-        foreach ($categories as $value) {
-            $category_name[] = "'" . $value->translated_name . "'";
-            $category_item_count[] = $value->items_count;
-        }
-
-        $categories_count = Category::count();
-        $user_count = User::role('User')->withTrashed()->count();
-        $item_count = Item::count();
-        $custom_field_count = CustomField::count();
-
+    private function buildDashboardData(): array
+    {
         $itemStatusCount = function ($statuses) {
             if (! Schema::hasColumn('items', 'status')) {
                 return null;
@@ -54,17 +64,21 @@ class HomeController extends Controller {
             return Item::whereIn('status', (array) $statuses)->count();
         };
 
+        $user_count = User::role('User')->withTrashed()->count();
+        $onlineUsers = $this->onlineUsersCount();
+
         $counts = [
-            'users_total'        => $user_count,
-            'items_total'        => $item_count,
-            'items_approved'     => $itemStatusCount(['approved']),
-            'items_pending'      => $itemStatusCount(['pending', 'awaiting_approval', 'under_review']),
-            'categories_total'   => $categories_count,
-            'custom_fields'      => $custom_field_count,
-            'payments_pending'   => null,
-            'payments_failed'    => null,
-            'manual_requests'    => null,
-            'unread_reports'     => null,
+            'users_total'          => $user_count,
+            'users_online'         => $onlineUsers,
+            'items_total'          => Item::count(),
+            'items_approved'       => $itemStatusCount(['approved']),
+            'items_pending'        => $itemStatusCount(['pending', 'awaiting_approval', 'under_review']),
+            'categories_total'     => Category::count(),
+            'custom_fields'        => CustomField::count(),
+            'payments_pending'     => null,
+            'payments_failed'      => null,
+            'manual_requests'      => null,
+            'unread_reports'       => null,
             'notifications_unread' => null,
         ];
 
@@ -98,18 +112,69 @@ class HomeController extends Controller {
             ? ManualPaymentRequest::select('id', 'status', 'amount', 'currency', 'created_at')->latest()->take(5)->get()
             : collect();
 
-        return view('home', compact(
-            'category_item_count',
-            'category_name',
-            'items',
+        $timeline = $this->buildActivityTimeline();
+
+        return compact(
             'counts',
             'recentItems',
             'recentUsers',
             'recentPayments',
-            'recentManualRequests'
-        ));
+            'recentManualRequests',
+            'timeline'
+        );
+    }
 
+    private function onlineUsersCount(): ?int
+    {
+        $window = Carbon::now()->subMinutes(5);
 
+        if (Schema::hasColumn('users', 'last_seen_at')) {
+            return User::where('last_seen_at', '>=', $window)->count();
+        }
+
+        if (Schema::hasColumn('users', 'updated_at')) {
+            return User::where('updated_at', '>=', $window)->count();
+        }
+
+        return null;
+    }
+
+    private function buildActivityTimeline(): array
+    {
+        $now = Carbon::now();
+        $labels = [];
+        $itemsSeries = [];
+        $paymentsSeries = [];
+        $manualSeries = [];
+
+        for ($i = 11; $i >= 0; $i--) {
+            $start = $now->copy()->subHours($i + 1);
+            $end = $now->copy()->subHours($i);
+            $labels[] = $end->format('H:i');
+
+            $itemsSeries[] = Item::whereBetween('created_at', [$start, $end])->count();
+
+            if (class_exists(PaymentTransaction::class)) {
+                $paymentsSeries[] = PaymentTransaction::whereBetween('created_at', [$start, $end])->count();
+            } else {
+                $paymentsSeries[] = 0;
+            }
+
+            if (class_exists(ManualPaymentRequest::class)) {
+                $manualSeries[] = ManualPaymentRequest::whereBetween('created_at', [$start, $end])->count();
+            } else {
+                $manualSeries[] = 0;
+            }
+        }
+
+        return [
+            'labels' => $labels,
+            'series' => [
+                ['name' => 'الإعلانات', 'data' => $itemsSeries],
+                ['name' => 'المدفوعات', 'data' => $paymentsSeries],
+                ['name' => 'التحويلات اليدوية', 'data' => $manualSeries],
+            ],
+        ];
     }
 
     public function changePasswordIndex() {
