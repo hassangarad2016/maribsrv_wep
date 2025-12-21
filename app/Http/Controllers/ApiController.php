@@ -1243,8 +1243,15 @@ class ApiController extends Controller {
                 $token = auth('api')->login($auth);
             }
 
-            if (!$auth->hasRole('User')) {
-                ResponseService::errorResponse('أ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€ أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ² أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط¢آ»أ¢â€¢ع¾ط¢آ«أ¢â€‌ع©ط£ع¾أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾أ¢â€¢â€کأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€¢ع¾أ¢â€¢طŒأ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ±', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
+            if (
+                !$auth ||
+                (
+                    !$auth->hasRole('User') &&
+                    !$auth->hasRole('User', 'api') &&
+                    !$auth->hasRole('User', 'web')
+                )
+            ) {
+                ResponseService::errorResponse('INVALID_LOGIN', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
             }
 
             // Update FCM token
