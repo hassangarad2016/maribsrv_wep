@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        if (Schema::hasTable('wallet_withdrawal_requests')) {
+            return;
+        }
+
         Schema::create('wallet_withdrawal_requests', static function (Blueprint $table) {
             $table->id();
             $table->foreignId('wallet_account_id')->constrained()->cascadeOnDelete();
