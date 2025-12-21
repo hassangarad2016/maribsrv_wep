@@ -3650,21 +3650,15 @@ class ApiController extends Controller {
                 ->get();
 
             if ($configs->isEmpty()) {
-                // في حالة عدم وجود إعدادات مسبقة، لا نقيّد بـ interface_type حتى تظهر البيانات الافتراضية
+                // لا توجد إعدادات مخصصة: اعرض أحدث الإعلانات بدون تقييد القسم/الفئة
                 $applyInterfaceFilter = false;
+                $categoryIds = null;
+                $sectionType = 'all';
                 $baseQuery = Item::query()
                     ->approved()
                     ->with($relations)
                     ->withCount('favourites')
                     ->withCount('featured_items');
-
-                if ($categoryIds !== null) {
-                    $baseQuery->whereIn('category_id', $categoryIds);
-                }
-
-                if ($applyInterfaceFilter && $interfaceVariants !== null) {
-                    $baseQuery->whereIn('interface_type', $interfaceVariants);
-                }
 
                 $items = (clone $baseQuery)
                     ->orderByDesc('items.created_at')
