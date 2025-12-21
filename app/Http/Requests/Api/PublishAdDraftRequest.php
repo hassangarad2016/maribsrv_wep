@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Api;
 
-use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\ApiController;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
@@ -20,7 +20,7 @@ class PublishAdDraftRequest extends FormRequest
         return [
             'draft_id' => ['nullable', 'integer', 'min:1'],
             'payload' => ['required', 'array'],
-            'payload.interface_type' => ['required', 'string', 'max:64', Rule::in(ApiController::INTERFACE_TYPES)],
+            'payload.interface_type' => ['required', 'string', 'max:64', Rule::in(ApiController::interfaceTypes(includeLegacy: true))],
             'payload.main_category_id' => ['required', 'integer'],
             'payload.sub_category_id' => ['required', 'integer'],
             'payload.title' => ['required', 'string', 'min:10', 'max:90'],

@@ -150,22 +150,18 @@ use JsonException;
 class ApiController extends Controller {
 
 
-    public const INTERFACE_TYPES = [
-        'all',
-        'public',
-        'real_estate',
-        'shein',
-        'computer',
-    ];
-    private static function interfaceTypes(bool $includeLegacy = false): array
+    public static function interfaceTypes(bool $includeLegacy = false): array
     {
-        if (! $includeLegacy) {
-            return self::INTERFACE_TYPES;
+        $allowedSectionTypes = InterfaceSectionService::allowedSectionTypes(includeLegacy: $includeLegacy);
+        $aliases = array_keys(InterfaceSectionService::sectionTypeAliases());
+
+        if ($aliases !== []) {
+            $allowedSectionTypes = array_merge($allowedSectionTypes, $aliases);
         }
 
-        return array_values(array_unique(array_merge(
-            self::INTERFACE_TYPES,
-            InterfaceSectionService::legacySectionTypes()
+        return array_values(array_unique(array_filter(
+            $allowedSectionTypes,
+            static fn ($type) => is_string($type) && $type !== ''
         )));
     }
 
