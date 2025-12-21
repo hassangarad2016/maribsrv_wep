@@ -96,7 +96,12 @@ class StorefrontController extends Controller
             )
         );
 
-        return $this->paginateResponse($stores, $mapped->values()->all());
+        return $this->paginateResponse(
+            $stores,
+            $mapped->values()->all(),
+            [],
+            'Stores fetched successfully.'
+        );
     }
 
     public function show(Request $request, string $store): JsonResponse
@@ -104,7 +109,7 @@ class StorefrontController extends Controller
         $currentUser = $this->resolveCurrentUser($request);
         $storeModel = $this->resolveStoreOrResponse($store);
         if ($storeModel === null) {
-            return response()->json(['message' => 'Store not found'], 404);
+            return $this->errorResponse('Store not found', 404);
         }
         $storeModel->loadMissing([
             'settings',
@@ -113,21 +118,22 @@ class StorefrontController extends Controller
         ]);
         $storeModel->loadCount('followers');
 
-        return response()->json([
-            'data' => $this->formatStoreSummary(
+        return $this->successResponse(
+            'Store fetched successfully.',
+            $this->formatStoreSummary(
                 $storeModel,
                 includeDetails: true,
                 currentUser: $currentUser,
                 viewerId: $this->resolveViewerId($request, $currentUser),
-            ),
-        ]);
+            )
+        );
     }
 
     public function products(Request $request, string $store): JsonResponse
     {
         $storeModel = $this->resolveStoreOrResponse($store);
         if ($storeModel === null) {
-            return response()->json(['message' => 'Store not found'], 404);
+            return $this->errorResponse('Store not found', 404);
         }
 
         $validated = $request->validate([
@@ -160,25 +166,31 @@ class StorefrontController extends Controller
             fn (Item $item) => $this->formatStoreItem($item)
         );
 
-        return $this->paginateResponse($items, $mapped->values()->all(), [
-            'store' => [
-                'id' => $storeModel->id,
-                'name' => $storeModel->name,
-                'slug' => $storeModel->slug,
+        return $this->paginateResponse(
+            $items,
+            $mapped->values()->all(),
+            [
+                'store' => [
+                    'id' => $storeModel->id,
+                    'name' => $storeModel->name,
+                    'slug' => $storeModel->slug,
+                ],
             ],
-        ]);
+            'Store products fetched successfully.'
+        );
     }
 
     public function manualBankAccounts(Request $request, string $store): JsonResponse
     {
         $storeModel = $this->resolveStoreOrResponse($store);
         if ($storeModel === null) {
-            return response()->json(['message' => 'Store not found'], 404);
+            return $this->errorResponse('Store not found', 404);
         }
 
-        return response()->json([
-            'data' => $this->formatStoreManualBanks($storeModel),
-        ]);
+        return $this->successResponse(
+            'Manual bank accounts fetched successfully.',
+            $this->formatStoreManualBanks($storeModel)
+        );
     }
 
     public function follow(Request $request, string $store): JsonResponse
@@ -455,13 +467,34 @@ class StorefrontController extends Controller
         ]);
     }
 
+    private function successResponse(string $message, mixed $data = null, array $custom = [], int $statusCode = 200): JsonResponse
+    {
+        return response()->json(array_merge([
+            'error' => false,
+            'message' => __($message),
+            'data' => $data,
+            'code' => config('constants.RESPONSE_CODE.SUCCESS'),
+        ], $custom), $statusCode);
+    }
+
+    private function errorResponse(string $message, int $statusCode = 400, mixed $data = null, array $custom = []): JsonResponse
+    {
+        return response()->json(array_merge([
+            'error' => true,
+            'message' => __($message),
+            'data' => $data,
+            'code' => $statusCode,
+        ], $custom), $statusCode);
+    }
+
     private function paginateResponse(
         LengthAwarePaginator $paginator,
-        array $data,
-        array $extra = []
+        array $items,
+        array $extra = [],
+        string $message = 'Data fetched successfully.'
     ): JsonResponse {
-        return response()->json(array_merge([
-            'data' => $data,
+        $data = array_merge([
+            'items' => $items,
             'meta' => [
                 'current_page' => $paginator->currentPage(),
                 'per_page' => $paginator->perPage(),
@@ -469,7 +502,9 @@ class StorefrontController extends Controller
                 'last_page' => $paginator->lastPage(),
                 'has_more' => $paginator->hasMorePages(),
             ],
-        ], $extra));
+        ], $extra);
+
+        return $this->successResponse($message, $data);
     }
 
     private function formatStoreSummary(Store $store, bool $includeDetails = false, ?User $currentUser = null, ?int $viewerId = null): array
