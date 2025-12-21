@@ -3110,25 +3110,89 @@ class ApiController extends Controller {
 
     public function getSubCategories(Request $request) {
         $validator = Validator::make($request->all(), [
-            'category_id' => 'nullable|integer'
+            'category_id'    => 'nullable|integer',
+            'interface_type' => 'nullable|string|max:191',
         ]);
 
         if ($validator->fails()) {
             ResponseService::validationError($validator->errors()->first());
         }
         try {
-            $baseQuery = Category::withCount(['subcategories' => function ($q) {
+            $interfaceTypeFilter = null;
+            $allowedCategoryIds = null;
+
+            if ($request->filled('interface_type')) {
+                $interfaceTypeInput = $request->input('interface_type');
+                $interfaceTypeFilter = InterfaceSectionService::canonicalSectionTypeOrNull($interfaceTypeInput)
+                    ?? InterfaceSectionService::normalizeSectionType($interfaceTypeInput);
+
+                if ($interfaceTypeFilter !== null && $interfaceTypeFilter !== 'all') {
+                    $resolvedIds = InterfaceSectionService::categoryIdsForSection($interfaceTypeFilter);
+
+                    if (is_array($resolvedIds)) {
+                        $resolvedIds = array_values(array_filter(
+                            array_map(static fn ($id) => is_numeric($id) ? (int) $id : null, $resolvedIds),
+                            static fn ($id) => ! is_null($id) && $id > 0
+                        ));
+
+                        if ($resolvedIds === []) {
+                            $emptyPaginator = Category::query()
+                                ->whereRaw('1 = 0')
+                                ->paginate();
+
+                            ResponseService::successResponse(null, $emptyPaginator, [
+                                'self_category'  => null,
+                                'append_to_data' => ['self_category' => null],
+                            ]);
+
+                            return;
+                        }
+
+                        $allowedCategoryIds = $resolvedIds;
+                    }
+                }
+            }
+
+            $baseQuery = Category::withCount(['subcategories' => function ($q) use ($allowedCategoryIds) {
                 $q->where('status', 1);
+                if (! empty($allowedCategoryIds)) {
+                    $q->whereIn('id', $allowedCategoryIds);
+                }
             }])->with('translations')->where(['status' => 1])->orderBy('sequence', 'ASC')
-                ->with(['subcategories'          => function ($query) {
-                    $query->where('status', 1)->orderBy('sequence', 'ASC')->with('translations')->withCount(['approved_items', 'subcategories' => function ($q) {
-                        $q->where('status', 1);
-                    }]); // Order subcategories by 'sequence'
-                }, 'subcategories.subcategories' => function ($query) {
-                    $query->where('status', 1)->orderBy('sequence', 'ASC')->with('translations')->withCount(['approved_items', 'subcategories' => function ($q) {
-                        $q->where('status', 1);
-                    }]);
+                ->with(['subcategories'          => function ($query) use ($allowedCategoryIds) {
+                    $query->where('status', 1)
+                        ->orderBy('sequence', 'ASC')
+                        ->with('translations')
+                        ->withCount(['approved_items', 'subcategories' => function ($q) use ($allowedCategoryIds) {
+                            $q->where('status', 1);
+                            if (! empty($allowedCategoryIds)) {
+                                $q->whereIn('id', $allowedCategoryIds);
+                            }
+                        }]); // Order subcategories by 'sequence'
+
+                    if (! empty($allowedCategoryIds)) {
+                        $query->whereIn('id', $allowedCategoryIds);
+                    }
+                }, 'subcategories.subcategories' => function ($query) use ($allowedCategoryIds) {
+                    $query->where('status', 1)
+                        ->orderBy('sequence', 'ASC')
+                        ->with('translations')
+                        ->withCount(['approved_items', 'subcategories' => function ($q) use ($allowedCategoryIds) {
+                            $q->where('status', 1);
+                            if (! empty($allowedCategoryIds)) {
+                                $q->whereIn('id', $allowedCategoryIds);
+                            }
+                        }]);
+
+                    if (! empty($allowedCategoryIds)) {
+                        $query->whereIn('id', $allowedCategoryIds);
+                    }
                 }]);
+
+            if (! empty($allowedCategoryIds)) {
+                $baseQuery->whereIn('id', $allowedCategoryIds);
+            }
+
             if (!empty($request->category_id)) {
                 $category = (clone $baseQuery)
                     ->where('id', $request->category_id)
