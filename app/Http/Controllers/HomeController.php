@@ -5,10 +5,15 @@ use App\Models\Category;
 use App\Models\CustomField;
 use App\Models\Item;
 use App\Models\User;
+use App\Models\PaymentTransaction;
+use App\Models\ManualPaymentRequest;
+use App\Models\Notifications;
 use App\Services\ResponseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
@@ -40,8 +45,69 @@ class HomeController extends Controller {
         $user_count = User::role('User')->withTrashed()->count();
         $item_count = Item::count();
         $custom_field_count = CustomField::count();
-        // $items = Item::all();
-        return view('home', compact('category_item_count', 'category_name', 'categories_count', 'item_count', 'user_count', 'custom_field_count','items'));
+
+        $itemStatusCount = function ($statuses) {
+            if (! Schema::hasColumn('items', 'status')) {
+                return null;
+            }
+
+            return Item::whereIn('status', (array) $statuses)->count();
+        };
+
+        $counts = [
+            'users_total'        => $user_count,
+            'items_total'        => $item_count,
+            'items_approved'     => $itemStatusCount(['approved']),
+            'items_pending'      => $itemStatusCount(['pending', 'awaiting_approval', 'under_review']),
+            'categories_total'   => $categories_count,
+            'custom_fields'      => $custom_field_count,
+            'payments_pending'   => null,
+            'payments_failed'    => null,
+            'manual_requests'    => null,
+            'unread_reports'     => null,
+            'notifications_unread' => null,
+        ];
+
+        if (class_exists(PaymentTransaction::class)) {
+            $counts['payments_pending'] = PaymentTransaction::whereIn('payment_status', ['pending', 'initiated', 'processing'])->count();
+            $counts['payments_failed'] = PaymentTransaction::whereIn('payment_status', ['failed', 'expired'])->count();
+        }
+
+        if (class_exists(ManualPaymentRequest::class)) {
+            $counts['manual_requests'] = ManualPaymentRequest::whereIn('status', ['pending', 'awaiting_review'])->count();
+        }
+
+        if (Schema::hasTable('reports') && Schema::hasColumn('reports', 'status')) {
+            $counts['unread_reports'] = DB::table('reports')->where('status', 'unread')->count();
+        }
+
+        if (class_exists(Notifications::class)) {
+            if (Schema::hasColumn('notifications', 'is_read')) {
+                $counts['notifications_unread'] = Notifications::where('is_read', 0)->count();
+            } elseif (Schema::hasColumn('notifications', 'read_at')) {
+                $counts['notifications_unread'] = Notifications::whereNull('read_at')->count();
+            }
+        }
+
+        $recentItems = Item::select('id', 'name', 'status', 'created_at')->latest()->take(8)->get();
+        $recentUsers = User::select('id', 'name', 'email', 'created_at')->latest()->take(8)->get();
+        $recentPayments = class_exists(PaymentTransaction::class)
+            ? PaymentTransaction::select('id', 'payment_gateway', 'payment_status', 'amount', 'currency', 'created_at')->latest()->take(8)->get()
+            : collect();
+        $recentManualRequests = class_exists(ManualPaymentRequest::class)
+            ? ManualPaymentRequest::select('id', 'status', 'amount', 'currency', 'created_at')->latest()->take(5)->get()
+            : collect();
+
+        return view('home', compact(
+            'category_item_count',
+            'category_name',
+            'items',
+            'counts',
+            'recentItems',
+            'recentUsers',
+            'recentPayments',
+            'recentManualRequests'
+        ));
 
 
     }

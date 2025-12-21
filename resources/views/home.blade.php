@@ -1,310 +1,194 @@
 @extends('layouts.main')
 @section('title')
-    {{__('Home')}}
+    {{ __('لوحة القيادة') }}
 @endsection
+
 @section('content')
     <section class="section">
-        <div class="dashboard_title mb-3">{{__("Hi, Admin")}}</div>
-        <div class="row mb-3 d-flex">
-            <div class="col-md-4 col-sm-12">
-                <div class="row">
-                    <div class="col-md-6 col-sm-6 mb-3">
-                        <a href="{{ url('customer') }}">
-                            <div class="card h-100">
-                                <div class="total_customer d-flex">
-                                    <div class="curtain"></div>
-                                    <div class="row">
-                                        <div class="col-4 col-md-12 ">
-                                            <div class="svg_icon align-items-center d-flex justify-content-center me-3">
-                                                <span class="fa fa-users text-white fa-2x"></span>
-                                            </div>
-                                        </div>
-                                        <div class="col-8 col-md-12">
-                                            <div class="total_number">{{$user_count}}</div>
-                                            <div class="card_title">{{ __('Total Customers') }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+            <div>
+                <div class="text-muted small">{{ now()->translatedFormat('l، d F Y') }}</div>
+                <h2 class="fw-bold mb-1">{{ __('مرحباً، هذا ملخص حي للنظام') }}</h2>
+                <p class="text-muted mb-0">{{ __('تابع كل ما يحدث في الإعلانات، المدفوعات، البلاغات، والمستخدمين مباشرةً.') }}</p>
+            </div>
+        </div>
 
-                    <div class="col-md-6 col-sm-6 mb-3">
-                        <a href="{{ url('item') }}">
-                            <div class="card h-100">
-                                <div class="total_items d-flex">
-                                    <div class="curtain"></div>
-                                    <div class="row">
-                                        <div class="col-4 col-md-12 ">
-                                            <div class="svg_icon align-items-center d-flex justify-content-center me-3">
-                                                <span class="fa fa-box text-white fa-2x"></span>
-                                            </div>
-                                        </div>
-                                        <div class="col-8 col-md-12">
-                                            <div class="total_number">{{$item_count}}</div>
-                                            <div class="card_title">{{ __('Total Items') }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
+        @php
+            $metric = function ($key) use ($counts) {
+                return $counts[$key] ?? '—';
+            };
+        @endphp
 
-                    <div class="col-md-6 col-sm-6 mt-3">
-                        <a href="{{ route('category.index') }}">
-                            <div class="card h-100">
-                                <div class="item_for_sale d-flex">
-                                    <div class="curtain"></div>
-                                    <div class="row">
-                                        <div class="col-4 col-md-12 ">
-                                            <div class="svg_icon align-items-center d-flex justify-content-center me-3">
-                                                <span class="fa fa-layer-group text-white fa-2x"></span>
-                                            </div>
-                                        </div>
-                                        <div class="col-8 col-md-12">
-                                            <div class="total_number">{{$categories_count}}</div>
-                                            <div class="card_title">{{ __('Total Categories') }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="col-md-6 col-sm-6 mt-3">
-                        <a href="{{ route('custom-fields.index') }}">
-                            <div class="card h-100">
-                                <div class="properties_for_rent d-flex">
-                                    <div class="curtain"></div>
-                                    <div class="row">
-                                        <div class="col-4 col-md-12 ">
-                                            <div class="svg_icon align-items-center d-flex justify-content-center me-3">
-                                                <span class="fab fa-wpforms text-white fa-2x"></span>
-                                            </div>
-                                        </div>
-                                        <div class="col-8 col-md-12">
-                                            <div class="total_number">{{$custom_field_count}}</div>
-                                            <div class="card_title">{{ __('Total Custom Fields') }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
+        <div class="row g-3 mb-4">
+            <div class="col-xl-3 col-md-4 col-sm-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small">{{ __('إجمالي المستخدمين') }}</span>
+                            <i class="fa fa-users text-primary"></i>
+                        </div>
+                        <div class="fs-3 fw-bold">{{ $metric('users_total') }}</div>
                     </div>
                 </div>
             </div>
+            <div class="col-xl-3 col-md-4 col-sm-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small">{{ __('الإعلانات المعتمدة') }}</span>
+                            <i class="fa fa-check-circle text-success"></i>
+                        </div>
+                        <div class="fs-3 fw-bold">{{ $metric('items_approved') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-4 col-sm-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small">{{ __('إعلانات بانتظار المراجعة') }}</span>
+                            <i class="fa fa-hourglass-half text-warning"></i>
+                        </div>
+                        <div class="fs-3 fw-bold">{{ $metric('items_pending') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-4 col-sm-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small">{{ __('طلبات دفع قيد المعالجة') }}</span>
+                            <i class="fa fa-credit-card text-info"></i>
+                        </div>
+                        <div class="fs-3 fw-bold">{{ $metric('payments_pending') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-4 col-sm-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small">{{ __('فشل/انتهت صلاحية المدفوعات') }}</span>
+                            <i class="fa fa-times-circle text-danger"></i>
+                        </div>
+                        <div class="fs-3 fw-bold">{{ $metric('payments_failed') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-4 col-sm-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small">{{ __('الطلبات اليدوية المفتوحة') }}</span>
+                            <i class="fa fa-university text-secondary"></i>
+                        </div>
+                        <div class="fs-3 fw-bold">{{ $metric('manual_requests') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-4 col-sm-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small">{{ __('بلاغات غير مقروءة') }}</span>
+                            <i class="fa fa-flag text-danger"></i>
+                        </div>
+                        <div class="fs-3 fw-bold">{{ $metric('unread_reports') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-4 col-sm-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small">{{ __('إشعارات غير مقروءة') }}</span>
+                            <i class="fa fa-bell text-warning"></i>
+                        </div>
+                        <div class="fs-3 fw-bold">{{ $metric('notifications_unread') }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            @php
-                $featureSectionRoute = null;
-
-                try {
-                    if (\Illuminate\Support\Facades\Route::has('feature-section.list')) {
-                        $featureSectionRoute = route('feature-section.list', ['include_actions' => 0]);
-                    }
-                } catch (\Throwable $exception) {
-                    // Prevent the entire dashboard from failing if the optional route is missing.
-                    if (config('app.debug')) {
-                        logger()->warning('feature-section.list route is missing or misconfigured.', [
-                            'message' => $exception->getMessage(),
-                        ]);
-                    }
-                    $featureSectionRoute = null;
-                }
-            @endphp
-            <div class="col-md-8">
-                <div class="card h-100">
-                    <div class="card-header border-0 pb-0">
-                        <h3 style="font-weight: 600">{{ __("Featured Sections") }}</h3>
+        <div class="row g-3">
+            <div class="col-xl-8">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0">{{ __('التدفق الحي للأحداث') }}</h5>
+                        <span class="text-muted small">{{ __('آخر الأنشطة في الإعلانات والمدفوعات') }}</span>
                     </div>
                     <div class="card-body">
-                        @if($featureSectionRoute)
-                            <table class="table-borderless table-striped" aria-describedby="mydesc"
-                                   id="table_list" data-toggle="table" data-url="{{ $featureSectionRoute }}"
-                                   data-click-to-select="true" data-search="true" data-toolbar="#toolbar"
-                                   data-show-columns="true" data-show-refresh="true" data-fixed-columns="true"
-                                   data-fixed-number="1" data-trim-on-search="false" data-responsive="true"
-                                   data-escape="true"
-                                   data-sort-name="id" data-sort-order="desc" data-query-params="queryParams" data-mobile-responsive="true"
-                                   data-side-pagination="server"  data-pagination="true" data-page-size="3">
-                                <thead class="thead-dark">
-                                <tr>
-                                    <th scope="col" data-field="id" data-sortable="true">{{ __('ID') }}</th>
-                                    <th scope="col" data-field="style" data-formatter="styleImageFormatter">{{ __('Style') }}</th>
-                                    <th scope="col" data-field="title" data-sortable="false">{{ __('Title') }}</th>
-                                    <th scope="col" data-field="filter" data-sortable="false" data-formatter="filterTextFormatter">{{ __('Filters') }}</th>
-                                    <th scope="col" data-field="min_price" data-sortable="true" data-visible="false">{{ __('Min Price') }}</th>
-                                    <th scope="col" data-field="max_price" data-sortable="true" data-visible="false">{{ __('Max price') }}</th>
-                                    <th scope="col" data-field="values_text" data-sortable="true" data-visible="false">{{ __('Value') }}</th>
-                                </tr>
-                                </thead>
-                            </table>
-                        @else
-                            <div class="text-center py-5">
-                                <p class="text-muted mb-0">{{ __('Feature section data is currently unavailable.') }}</p>
-                            </div>
-                        @endif
+                        <div class="list-group list-group-flush">
+                            @forelse($recentItems as $item)
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-semibold">{{ $item->name }}</div>
+                                        <div class="text-muted small">{{ __('إعلان') }} • {{ $item->status ?? __('غير محدد') }}</div>
+                                    </div>
+                                    <span class="text-muted small">{{ optional($item->created_at)->diffForHumans() }}</span>
+                                </div>
+                            @empty
+                                <div class="text-center text-muted py-3">{{ __('لا توجد إعلانات حديثة') }}</div>
+                            @endforelse
+
+                            @foreach($recentPayments as $payment)
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-semibold">{{ __('دفعة #:id',['id'=>$payment->id]) }}</div>
+                                        <div class="text-muted small">
+                                            {{ $payment->payment_gateway ?? __('غير محدد') }} • {{ $payment->payment_status ?? __('غير محدد') }}
+                                        </div>
+                                    </div>
+                                    <span class="text-muted small">
+                                        @if(!empty($payment->amount))
+                                            {{ $payment->amount }} {{ $payment->currency }}
+                                        @endif
+                                        • {{ optional($payment->created_at)->diffForHumans() }}
+                                    </span>
+                                </div>
+                            @endforeach
+
+                            @foreach($recentManualRequests as $manual)
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-semibold">{{ __('طلب يدوي #:id',['id'=>$manual->id]) }}</div>
+                                        <div class="text-muted small">{{ $manual->status ?? __('غير محدد') }}</div>
+                                    </div>
+                                    <span class="text-muted small">
+                                        @if(!empty($manual->amount))
+                                            {{ $manual->amount }} {{ $manual->currency }}
+                                        @endif
+                                        • {{ optional($manual->created_at)->diffForHumans() }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="card">
-            <div class="card-header border-0 pb-0">
-                <h3 style="font-weight: 600">{{__("Recent Items")}}</h3>
-            </div>
-            <div class="card-body">
-                <table class="table-borderless table-striped" aria-describedby="mydesc" id="table_list"
-                       data-toggle="table" data-url="{{ route('item.show',1) }}" data-click-to-select="true"
-                       data-search="true" data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true"
-                       data-fixed-columns="true" data-fixed-number="1" data-trim-on-search="false"
-                       data-responsive="true" data-sort-name="id" data-sort-order="desc"
-                       data-escape="true"
-                       data-query-params="queryParams" data-mobile-responsive="true">
-                    <thead class="thead-dark">
-                    <tr>
-                        <th scope="col" data-field="id" data-sortable="true">{{ __('ID') }}</th>
-                        <th scope="col" data-field="name" data-sortable="true">{{ __('Name') }}</th>
-                        <th scope="col" data-field="category.name" data-sortable="true">{{ __('Category') }}</th>
-                        <th scope="col" data-field="user.name" data-sortable="true">{{ __('Added By') }}</th>
-                        <th scope="col" data-field="price" data-sortable="true">{{ __('Price') }}</th>
-                        <th scope="col" data-field="status" data-sortable="true" data-formatter="itemStatusFormatter">{{ __('Status') }}</th>
-                    </tr>
-                    </thead>
-                </table>
-            </div>
-        </div>
-        <input type="hidden" name="map_data" id="map_data" value="{{ $items }}">
-        {{-- <div class="row"> --}}
-            <!-- <div class="col-md-12 col-sm-12">
-                <div class="card map_title h-100">
-                    <div class="card-header border-0 pb-0">
-                        <h3 style="font-weight: 600">{{ __('Most Viewed') }}</h3>
+
+            <div class="col-xl-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0">{{ __('آخر المستخدمين المسجلين') }}</h5>
                     </div>
-                    <div class="card-body h-50">
-                        <div id="world-map" style="width: 100%; height:400px"></div>
-                    </div>
-                </div>
-            </div> -->
-        {{-- </div> --}}
-        <div class="row mb-10">
-            <div class="col-md-6 col-sm-12">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <div class="recent_list_heading">{{__("Total Categories")}}</div>
-                    </div>
-                    <div class="card-body mt-5">
-                        <div id="pie_chart"></div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            @forelse($recentUsers as $user)
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-semibold">{{ $user->name ?? __('بدون اسم') }}</div>
+                                        <div class="text-muted small">{{ $user->email }}</div>
+                                    </div>
+                                    <span class="text-muted small">{{ optional($user->created_at)->diffForHumans() }}</span>
+                                </div>
+                            @empty
+                                <div class="text-center text-muted py-3">{{ __('لا يوجد مستخدمون جدد') }}</div>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-@endsection
-
-@section('js')
-    <script>
-        let options = {
-        series: {!! json_encode(array_values($category_item_count)) !!},
-        chart: {
-            type: 'donut',
-            height: "700px"
-        },
-        labels: {!! json_encode($category_name) !!},
-        plotOptions: {},
-
-        responsive: [{
-            breakpoint: 480,
-            options: {
-                chart: {
-                    width: '100%',
-                    height: '300px',
-                },
-            }
-        }],
-        legend: {
-            show: true,
-            showForSingleSeries: false,
-            showForNullSeries: true,
-            showForZeroSeries: true,
-            position: 'bottom',
-            horizontalAlign: 'center',
-            fontSize: '18px',
-            fontFamily: 'Helvetica, Arial',
-            fontWeight: 400,
-            itemMargin: {
-                horizontal: 30,
-                vertical: 10
-            }
-        }
-    };
-
-    let chart1 = new ApexCharts(document.querySelector("#pie_chart"), options);
-    chart1.render();
-    </script>
-
-
-
-    <!-- Existing JS for chart rendering -->
-
-@endsection
-@section('script')
-<script>
-    var mapData = JSON.parse($('#map_data').val());
-        //  var currency_symbol = $('#currency_symbol').val();
-        //  var featured='<div class="featured_tag"><div class="featured_lable">Featured</div>';
-        var markerValues = mapData.map(function(item, index) {
-    return {
-        latLng: [parseFloat(item.latitude), parseFloat(item.longitude)],
-        name: item.city,
-        label: item.city,
-        style: {
-            fill: '#00B2CA',
-            stroke: '#00000'
-        },
-        card: {
-            content: '<div class="card_map">' +
-                        '<div class="image-container">' +
-                            '<img src="' + item.image + '" alt="' + item.name + '" class="object-fit-cover">' +
-                        '</div>' +
-                        '<div class="title mt-3">' + item.name + '</div>' +
-                        '<div class="price mt-2">' + item.price + '</div>' +
-                        '<div class="city mt-2">' +
-                            '<i class="bi bi-geo-alt"></i> ' + item.city +
-                        '</div>' +
-                    '</div>'
-        }
-    };
-});
-
-            $('#world-map').vectorMap({
-            map: 'world_mill',
-            // scaleColors: ['#116D6E', '#116D6E'],
-            backgroundColor: '#fffff',
-            markerStyle: {
-            initial: {
-            strokeWidth: 1,
-            stroke: '#383F47',
-            fillOpacity: 1,
-            r: 8,
-            },
-            onMarkerLabelShow: function(event, label, index) {
-            // Add custom CSS classes to the label element
-            label.addClass('custom-marker-label');
-            },
-            },
-            markers: markerValues,
-            series: {
-            markers: [{
-            // attribute: 'fill',
-            scale: {}, // Empty scale object to be populated dynamically
-            values: mapData.map(function(item) {
-            return item.city;
-            })
-            }]
-            },
-            onMarkerTipShow: function(event, label, index) {
-            var cardContent = markerValues[index].card.content;
-            label.html(cardContent);
-            }
-            });
-</script>
 @endsection
