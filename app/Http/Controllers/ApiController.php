@@ -9661,6 +9661,12 @@ public function storeRequestDevice(Request $request)
 
   public function sendOtp(Request $request, EnjazatikWhatsAppService $whatsApp)
     {
+        $request->validate([
+            'country_code' => 'required|string',
+            'phone' => 'required|string',
+            'type' => 'nullable|in:new_user,forgot_password',
+        ]);
+
         $settings = CachingService::getSystemSettings([
             'whatsapp_otp_enabled',
             'whatsapp_otp_message_new_user',
@@ -9674,10 +9680,21 @@ public function storeRequestDevice(Request $request)
             return ResponseService::errorResponse('أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€“â€œ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾أ¢â€“â€™ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ° أ¢â€¢ع¾أ¢â€¢â€کأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€‌ع©ط£آ أ¢â€‌ع©ط¢ظ¾أ¢â€¢ع¾أ¢â€¢آ£أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط£آ¯.');
         }
 
-        $phone = $request->country_code . $request->phone;
+        $rawCountryCode = (string) $request->country_code;
+        $rawPhone = (string) $request->phone;
+        $countryCodeDigits = preg_replace('/\D+/', '', $rawCountryCode);
+        $phoneDigits = preg_replace('/\D+/', '', $rawPhone);
+
+        if ($countryCodeDigits === '' || $phoneDigits === '') {
+            return ResponseService::validationError('Invalid phone number provided.');
+        }
+
+        $normalizedPhone = $countryCodeDigits . $phoneDigits;
+        $composite = preg_replace('/\s+/', '', trim($rawCountryCode . $rawPhone));
+        $deliveryPhone = $composite !== '' ? $composite : $normalizedPhone;
 
 
-        $check = $whatsApp->checkNumber($phone);
+        $check = $whatsApp->checkNumber($deliveryPhone);
 
         if (!($check['status'] ?? false)) {
             return ResponseService::errorResponse("أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ¯أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط£آ® أ¢â€‌ع©ط£آ§أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾ط·آ¯ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ  أ¢â€¢ع¾أ¢â€¢â€کأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾أ¢â€¢â€“ أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾ط·آµأ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ° أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ°.");
@@ -9688,7 +9705,7 @@ public function storeRequestDevice(Request $request)
 
 
         OTP::create([
-            'phone' => $phone,
+            'phone' => $normalizedPhone,
             'otp' => $otp,
             'type' => $type,
             'expires_at' => now()->addMinutes(5)->timestamp,
@@ -9716,7 +9733,7 @@ public function storeRequestDevice(Request $request)
         $messageTemplate = $templates[$type];
         $message = str_replace(':otp', $otp, $messageTemplate);
 
-        SendOtpWhatsAppJob::dispatch($phone, $message);
+        SendOtpWhatsAppJob::dispatch($deliveryPhone, $message);
 
 
         return ResponseService::successResponse('أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€“â€œ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾أ¢â€“â€™ WhatsApp أ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط¢â€ أ¢â€¢ع¾ط·آ´أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آµ.');
@@ -9726,15 +9743,43 @@ public function storeRequestDevice(Request $request)
     public function verifyOtp(Request $request)
     {
         $request->validate([
-            'country_code' => 'required|numeric',
-            'phone' => 'required|numeric',
+            'country_code' => 'required|string',
+            'phone' => 'required|string',
             'otp' => 'required|numeric',
         ]);
 
-        $otpEnabled = filter_var(CachingService::getSystemSettings('whatsapp_otp_enabled') ?? false, FILTER_VALIDATE_BOOLEAN);
-        $phone = $request->country_code . $request->phone;
+        $rawCountryCode = (string) $request->country_code;
+        $rawPhone = (string) $request->phone;
+        $countryCodeDigits = preg_replace('/\D+/', '', $rawCountryCode);
+        $phoneDigits = preg_replace('/\D+/', '', $rawPhone);
 
-        $user = User::where('mobile', $request->phone)->first();
+        if ($countryCodeDigits === '' || $phoneDigits === '') {
+            return ResponseService::validationError('Invalid phone number provided.');
+        }
+
+        $normalizedPhone = $countryCodeDigits . $phoneDigits;
+        $composite = preg_replace('/\s+/', '', trim($rawCountryCode . $rawPhone));
+        $deliveryPhone = $composite !== '' ? $composite : $normalizedPhone;
+
+        $phoneCandidates = array_values(array_filter(array_unique([
+            $phoneDigits,
+            $normalizedPhone,
+            '+' . $normalizedPhone,
+            '00' . $normalizedPhone,
+            $deliveryPhone,
+        ])));
+
+        if (empty($phoneCandidates)) {
+            return ResponseService::validationError('Invalid phone number provided.');
+        }
+
+        $otpEnabled = filter_var(CachingService::getSystemSettings('whatsapp_otp_enabled') ?? false, FILTER_VALIDATE_BOOLEAN);
+
+        $user = User::where(function ($query) use ($phoneCandidates) {
+            foreach ($phoneCandidates as $candidate) {
+                $query->orWhere('mobile', $candidate);
+            }
+        })->first();
 
         if (!$user) {
             return ResponseService::errorResponse(
@@ -9751,10 +9796,13 @@ public function storeRequestDevice(Request $request)
             return ResponseService::successResponse('أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط¢â€ أ¢â€¢ع¾ط·آ´أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آµ (أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾أ¢â€¢â€“أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾أ¢â€“â€™ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ° أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط£آ¯).');
         }
 
-        $otpRecord = OTP::where('phone', $phone)
-
-
-            ->where('otp', $request->otp)
+        $otpRecord = OTP::where('otp', $request->otp)
+            ->where(function ($query) use ($phoneCandidates) {
+                foreach ($phoneCandidates as $candidate) {
+                    $query->orWhere('phone', $candidate);
+                }
+            })
+            ->latest()
             ->first();
 
         if (!$otpRecord) {
