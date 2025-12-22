@@ -15,10 +15,10 @@ return [
     'department_roots' => [
         'shein' => (int) env('CART_SHEIN_ROOT_CATEGORY_ID', 4),
         'computer' => (int) env('CART_COMPUTER_ROOT_CATEGORY_ID', 5),
-        'store' => (int) env('CART_STORE_ROOT_CATEGORY_ID', 6),
+        // Default must stay aligned with Constant.storeRootCategoryId (3) in the apps
+        // to avoid mis-detecting which listings support ecommerce purchase options.
+        'store' => (int) env('CART_STORE_ROOT_CATEGORY_ID', 3),
         'services' => null,
-        
-
     ],
 
     'interface_map' => [
