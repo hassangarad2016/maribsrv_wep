@@ -1390,16 +1390,32 @@ class ApiController extends Controller {
         $accountType = (int) ($request->account_type ?? User::ACCOUNT_TYPE_CUSTOMER);
         $password = $request->password ?? Str::random(12);
 
+        $email = $request->email;
+        if (!is_string($email) || trim($email) === '') {
+            $email = $this->generatePhoneSignupEmail(
+                $request->country_code,
+                $request->mobile
+            );
+        } else {
+            $email = Str::lower(trim($email));
+        }
+
+        $name = $request->name;
+        if (!is_string($name) || trim($name) === '') {
+            $name = $request->mobile ?? 'User';
+        }
+
         $userData = [
-            'name' => $request->name,
+            'name' => $name,
             'mobile' => $request->mobile,
-            'email' => $request->email,
+            'email' => $email,
             'password' => Hash::make($password),
             'account_type' => $accountType,
             'country_code' => $request->country_code,
             'country_name' => $request->country_name,
             'flag_emoji' => $request->flag_emoji ?? 'ye',
             'firebase_id' => $firebaseId,
+            'fcm_id' => (string) ($request->fcm_id ?? ''),
             'type' => 'phone',
             'platform_type' => $request->platform_type,
             'is_verified' => 0,
@@ -1407,8 +1423,8 @@ class ApiController extends Controller {
             'normalized_mobile' => $normalizedMobile,
         ];
 
-        if ($request->filled('fcm_id')) {
-            $userData['fcm_id'] = $request->fcm_id;
+        if (!is_string($userData['fcm_id'])) {
+            $userData['fcm_id'] = '';
         }
 
         if ($accountType === User::ACCOUNT_TYPE_SELLER) {

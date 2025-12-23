@@ -60,6 +60,7 @@ class User extends Authenticatable {
         'password',
         'type',
         'firebase_id',
+        'fcm_id',
         'profile',
         'address',
         'location',
