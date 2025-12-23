@@ -30,7 +30,7 @@
     </div>
     <div class="table-responsive">
         <table id="wifi-networks-table" class="table table-hover align-middle"
-               data-toggle="table"
+               data-table="true"
                data-toolbar="#wifi-networks-toolbar"
                data-pagination="true"
                data-page-list="[10, 20, 50]"

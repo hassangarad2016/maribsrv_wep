@@ -126,7 +126,7 @@
                 <div class="card">
                     <div class="card-body">
                         <table class="table table-borderless table-striped" id="table_list"
-                               data-toggle="table" data-url="{{ route('seller-verification.value.show', $verification_field->id) }}"
+                               data-table="true" data-url="{{ route('seller-verification.value.show', $verification_field->id) }}"
                                data-click-to-select="true"
                                data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-search-align="right"
                                data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true"

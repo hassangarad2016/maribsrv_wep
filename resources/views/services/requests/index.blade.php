@@ -330,7 +330,7 @@
                            class="table-borderless table-striped"
                            aria-describedby="mydesc"
                            id="table_list"
-                           data-toggle="table"
+                           data-table="true"
                            data-url="{{ route('service.requests.datatable') }}"
                            data-click-to-select="true"
                            data-side-pagination="server"

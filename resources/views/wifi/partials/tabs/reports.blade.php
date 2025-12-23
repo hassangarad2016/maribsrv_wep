@@ -23,7 +23,7 @@
     </div>
     <div class="table-responsive">
         <table id="wifi-reports-table" class="table table-hover align-middle"
-               data-toggle="table"
+               data-table="true"
                data-toolbar="#wifi-reports-toolbar"
                data-pagination="true"
                data-page-size="10"

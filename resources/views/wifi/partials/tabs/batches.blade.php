@@ -26,7 +26,7 @@
 
     <div class="table-responsive">
         <table id="wifi-batches-table" class="table table-striped align-middle"
-               data-toggle="table"
+               data-table="true"
                data-toolbar="#wifi-batches-toolbar"
                data-search="true"
                data-pagination="true"

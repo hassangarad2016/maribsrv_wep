@@ -48,7 +48,7 @@
                     <div class="tab-pane fade show active" id="requests" role="tabpanel" aria-labelledby="requests-tab">
                         <table class="stable-borderless table-striped"
                                id="table_requests"
-                               data-toggle="table"
+                               data-table="true"
                                data-url="{{ route('verification_requests.show') }}"
                                data-side-pagination="server"
                                data-pagination="true"
@@ -72,7 +72,7 @@
                     <div class="tab-pane fade" id="payments" role="tabpanel" aria-labelledby="payments-tab">
                         <table class="stable-borderless table-striped"
                                id="table_payments"
-                               data-toggle="table"
+                               data-table="true"
                                data-url="{{ route('verification_payments.show') }}"
                                data-side-pagination="server"
                                data-pagination="true"
@@ -101,7 +101,7 @@
                     <div class="tab-pane fade" id="verified" role="tabpanel" aria-labelledby="verified-tab">
                         <table class="stable-borderless table-striped"
                                id="table_verified"
-                               data-toggle="table"
+                               data-table="true"
                                data-url="{{ route('verification_verified_accounts.show') }}"
                                data-side-pagination="server"
                                data-pagination="true"
@@ -290,7 +290,7 @@
                         </div>
                         <table class="stable-borderless table-striped"
                                id="table_fields"
-                               data-toggle="table"
+                               data-table="true"
                                data-url="{{ route('verification-field.show') }}"
                                data-side-pagination="server"
                                data-pagination="true"

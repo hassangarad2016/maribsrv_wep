@@ -25,7 +25,7 @@
 
     <div class="table-responsive">
         <table id="wifi-requests-table" class="table table-striped table-hover align-middle"
-               data-toggle="table"
+               data-table="true"
                data-toolbar="#wifi-requests-toolbar"
                data-search="true"
                data-pagination="true"

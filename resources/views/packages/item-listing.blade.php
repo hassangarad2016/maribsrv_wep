@@ -188,7 +188,7 @@
                             <div class="col-12">
 
                                 <table class="table table-borderless table-striped" aria-describedby="mydesc"
-                                       id="table_list" data-toggle="table" data-url="{{ route('package.show',1) }}"
+                                       id="table_list" data-table="true" data-url="{{ route('package.show',1) }}"
                                        data-click-to-select="true" data-side-pagination="server" data-pagination="true"
                                        data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
                                        data-search-align="right" data-toolbar="#toolbar" data-show-columns="true"

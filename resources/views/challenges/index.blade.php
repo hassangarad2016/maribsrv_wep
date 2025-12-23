@@ -87,7 +87,7 @@
                         <div class="row">
                             <div class="col-12">
                                 <table class="table table-borderless table-striped" aria-describedby="mydesc"
-                                       id="table_list" data-toggle="table" data-url="{{ route('challenges.list') }}"
+                                       id="table_list" data-table="true" data-url="{{ route('challenges.list') }}"
                                        data-click-to-select="true" data-side-pagination="server" data-pagination="true"
                                        data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
                                        data-show-columns="true" data-show-refresh="true"

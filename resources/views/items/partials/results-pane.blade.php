@@ -3,7 +3,7 @@
         class="table table-borderless table-striped align-middle mb-0"
         aria-describedby="items-list"
         id="table_list"
-        data-toggle="table"
+        data-table="true"
         data-url="{{ route('item.list') }}"
         data-click-to-select="true"
         data-side-pagination="server"

@@ -245,7 +245,7 @@
                 <div class="card-body">
                     <table class="table table-borderless table-striped"
                            id="table_list"
-                           data-toggle="table"
+                           data-table="true"
                            data-url="{{ route('custom-fields.value.show', $custom_field->id) }}"
                            data-click-to-select="true"
                            data-page-list="[5, 10, 20, 50, 100, 200]"

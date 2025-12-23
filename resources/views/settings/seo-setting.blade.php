@@ -87,7 +87,7 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-12">
-                                <table class="table-light table-striped" aria-describedby="mydesc" id="table_list" data-toggle="table" data-url="{{ route('seo-setting.show',1) }}" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true" data-fixed-columns="true" data-fixed-number="1" data-fixed-right-number="1" data-trim-on-search="false" data-responsive="true" data-sort-name="id" data-sort-order="desc" data-pagination-successively-size="3" data-escape="true" data-query-params="queryParams" data-mobile-responsive="true">
+                                <table class="table-light table-striped" aria-describedby="mydesc" id="table_list" data-table="true" data-url="{{ route('seo-setting.show',1) }}" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true" data-fixed-columns="true" data-fixed-number="1" data-fixed-right-number="1" data-trim-on-search="false" data-responsive="true" data-sort-name="id" data-sort-order="desc" data-pagination-successively-size="3" data-escape="true" data-query-params="queryParams" data-mobile-responsive="true">
                                     <thead>
                                     <tr>
                                         <th scope="col" data-field="id" data-sortable="true">{{ __('ID') }}</th>
