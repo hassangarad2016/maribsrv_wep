@@ -42,8 +42,12 @@ class CachingService {
      */
     public static function getSystemSettings(array|string $key = '*') {
         $settings = self::cacheRemember(config('constants.CACHE.SETTINGS'), static function () {
-            return Setting::all()->pluck('value', 'name');
+            return Setting::all()->pluck('value', 'name')->toArray();
         });
+
+        if ($settings instanceof \Illuminate\Support\Collection) {
+            $settings = $settings->toArray();
+        }
 
         if (($key != '*')) {
             /* There is a minor possibility of getting a specific key from the $systemSettings
@@ -63,6 +67,10 @@ class CachingService {
             }
 
             // If String is given in Key param
+            if (is_array($settings) && array_key_exists($key, $settings)) {
+                return $settings[$key] ?? '';
+            }
+
             if ($settings && is_object($settings) && $settings->has($key)) {
                 return $settings[$key] ?? '';
             }
