@@ -60,7 +60,7 @@
                                 <div class="col-12 mb-3">
                                     <label for="whatsapp_preview_phone" class="form-label">{{ __('رقم الهاتف للمعاينة') }}</label>
                                     <input type="text" id="whatsapp_preview_phone" class="form-control" placeholder="{{ __('مثال: +9677xxxxxxx') }}">
-                                    <small class="text-muted">{{ __('سيتم استبدال :otp بالرمز XXXXX للعرض فقط.') }}</small>
+                                    <small class="text-muted">{{ __('سيتم استبدال :otp أو (...) بالرمز XXXXX للعرض فقط.') }}</small>
                                 </div>
                                 <div class="col-12 col-lg-6 mb-3">
                                     <div class="border rounded-3 p-3 bg-light">
@@ -125,6 +125,24 @@
             const escapeHtml = (value) =>
                 (value || '').toString().replace(/[&<>"']/g, (ch) => escapeMap[ch]);
 
+            const applyPreview = (raw) => {
+                const safe = escapeHtml(raw);
+
+                if (safe.includes(':otp')) {
+                    return safe.replace(/:otp/g, otpBadge);
+                }
+
+                if (safe.includes('...')) {
+                    return safe.replace('...', otpBadge);
+                }
+
+                if (safe.includes('…')) {
+                    return safe.replace('…', otpBadge);
+                }
+
+                return (safe.trim().length ? safe + ' ' : '') + otpBadge;
+            };
+
             const updatePreview = () => {
                 if (!previewNew || !previewForgot) return;
                 const phoneValue = (previewPhone && previewPhone.value
@@ -139,8 +157,8 @@
                     });
                 }
 
-                previewNew.innerHTML = escapeHtml(newRaw).replace(/:otp/g, otpBadge);
-                previewForgot.innerHTML = escapeHtml(forgotRaw).replace(/:otp/g, otpBadge);
+                previewNew.innerHTML = applyPreview(newRaw);
+                previewForgot.innerHTML = applyPreview(forgotRaw);
             };
 
             [newMessage, forgotMessage, previewPhone].forEach((element) => {
