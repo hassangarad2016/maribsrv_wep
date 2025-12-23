@@ -54,6 +54,31 @@
                             </div>
 
                             <div class="divider pt-3">
+                                <h6 class="divider-text">{{ __('معاينة الرسالة') }}</h6>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="whatsapp_preview_phone" class="form-label">{{ __('رقم الهاتف للمعاينة') }}</label>
+                                    <input type="text" id="whatsapp_preview_phone" class="form-control" placeholder="{{ __('مثال: +9677xxxxxxx') }}">
+                                    <small class="text-muted">{{ __('سيتم استبدال :otp بالرمز 123456 للعرض فقط.') }}</small>
+                                </div>
+                                <div class="col-12 col-lg-6 mb-3">
+                                    <div class="border rounded-3 p-3 bg-light">
+                                        <div class="text-muted small mb-2">{{ __('سيصل إلى') }} <span data-preview-phone></span></div>
+                                        <div class="fw-semibold mb-2">{{ __('رسالة المستخدم الجديد') }}</div>
+                                        <div id="preview_new_user" class="text-wrap" style="white-space: pre-wrap;"></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6 mb-3">
+                                    <div class="border rounded-3 p-3 bg-light">
+                                        <div class="text-muted small mb-2">{{ __('سيصل إلى') }} <span data-preview-phone></span></div>
+                                        <div class="fw-semibold mb-2">{{ __('رسالة استعادة كلمة المرور') }}</div>
+                                        <div id="preview_forgot_password" class="text-wrap" style="white-space: pre-wrap;"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="divider pt-3">
                                 <h6 class="divider-text">{{ __('إعدادات الربط') }}</h6>
                             </div>
                             <div class="row">
@@ -75,3 +100,46 @@
         </form>
     </section>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const newMessage = document.getElementById('whatsapp_otp_message_new_user');
+            const forgotMessage = document.getElementById('whatsapp_otp_message_forgot_password');
+            const previewPhone = document.getElementById('whatsapp_preview_phone');
+            const previewPhoneLabels = document.querySelectorAll('[data-preview-phone]');
+            const previewNew = document.getElementById('preview_new_user');
+            const previewForgot = document.getElementById('preview_forgot_password');
+
+            const otpSample = '123456';
+            const defaultPhone = '+9677xxxxxxx';
+
+            const normalizeMessage = (value) =>
+                (value || '').toString().replace(/:otp/g, otpSample);
+
+            const updatePreview = () => {
+                if (!previewNew || !previewForgot) return;
+                const phoneValue = (previewPhone && previewPhone.value
+                    ? previewPhone.value.trim()
+                    : '') || defaultPhone;
+
+                if (previewPhoneLabels && previewPhoneLabels.length) {
+                    previewPhoneLabels.forEach((element) => {
+                        element.textContent = phoneValue;
+                    });
+                }
+
+                previewNew.textContent = normalizeMessage(newMessage ? newMessage.value : '');
+                previewForgot.textContent = normalizeMessage(forgotMessage ? forgotMessage.value : '');
+            };
+
+            [newMessage, forgotMessage, previewPhone].forEach((element) => {
+                if (element) {
+                    element.addEventListener('input', updatePreview);
+                }
+            });
+
+            updatePreview();
+        });
+    </script>
+@endpush
