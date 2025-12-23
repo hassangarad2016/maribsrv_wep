@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -650,6 +650,7 @@ class SettingController extends Controller {
                 'marib_guide'     => __('دليل مارب'),
                 'services_all'    => __('كل الخدمات'),
                 'other_services'  => __('الخدمات الأخرى'),
+                'wifi_cabin'      => __('كبينة الواي فاي'),
             ],
             __('الأقسام الرئيسية') => [
                 'real_estate_services' => __('العقارات'),
