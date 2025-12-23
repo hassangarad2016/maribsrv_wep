@@ -2703,7 +2703,7 @@ class ApiController extends Controller {
 
                 $etag = '"' . sha1((string) $etagPayload) . '"';
 
-                $lastModifiedHeader = null;
+                $lastModifiedHeader = null; 
 
                 if ($latestUpdatedAt instanceof Carbon) {
                     $lastModifiedHeader = $latestUpdatedAt->copy()->setTimezone('UTC')->toRfc7231String();
