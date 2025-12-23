@@ -1451,7 +1451,7 @@ class ApiController extends Controller {
 
         if (empty($userData)) {
             $pendingSignup->delete();
-            ResponseService::errorResponse('ÊÚĞÑ ÇÓÊßãÇá ÇáÊÓÌíá. íÑÌì ÇáãÍÇæáÉ ãÑÉ ÃÎÑì.');
+            ResponseService::errorResponse('ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.');
         }
 
         unset($userData['normalized_mobile']);
@@ -1508,7 +1508,7 @@ class ApiController extends Controller {
 
             DB::commit();
 
-            ResponseService::successResponse('Êã ÅäÔÇÁ ÇáÍÓÇÈ ÈäÌÇÍ.', $auth, ['token' => $token]);
+            ResponseService::successResponse('ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.', $auth, ['token' => $token]);
         } catch (Throwable $th) {
             DB::rollBack();
             ResponseService::logErrorResponse($th, 'API Controller -> finalizePendingSignup');
@@ -10028,7 +10028,7 @@ public function storeRequestDevice(Request $request)
 
         if (!$user && !$pendingSignup) {
             return ResponseService::errorResponse(
-                'áÇ íæÌÏ ØáÈ ÊÍŞŞ áåĞÇ ÇáÑŞã. íÑÌì ØáÈ ÑãÒ ÌÏíÏ.',
+                'ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.',
                 null,
                 422
             );
@@ -10043,7 +10043,7 @@ public function storeRequestDevice(Request $request)
             $user->is_verified = 1;
             $user->save();
 
-            return ResponseService::successResponse('Êã ÇáÊÍŞŞ ÈäÌÇÍ.');
+            return ResponseService::successResponse('ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.');
         }
 
         $otpRecord = OTP::where('otp', $request->otp)
@@ -10057,7 +10057,7 @@ public function storeRequestDevice(Request $request)
 
         if (!$otpRecord) {
             return ResponseService::errorResponse(
-                'ÑãÒ ÇáÊÍŞŞ ÛíÑ ÕÍíÍ.',
+                'ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.',
                 null,
                 404
             );
@@ -10065,7 +10065,7 @@ public function storeRequestDevice(Request $request)
 
         if ($otpRecord->expires_at < now()->timestamp) {
             return ResponseService::errorResponse(
-                'ÑãÒ ÇáÊÍŞŞ ãäÊåí ÇáÕáÇÍíÉ.',
+                'ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.',
                 null,
                 410
             );
@@ -10083,7 +10083,7 @@ public function storeRequestDevice(Request $request)
         $user->is_verified = 1;
         $user->save();
 
-        return ResponseService::successResponse('Êã ÇáÊÍŞŞ ÈäÌÇÍ.');
+        return ResponseService::successResponse('ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.');
 
     }
 
