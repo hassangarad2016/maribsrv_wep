@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
+        // Only create this table if manual_payment_requests exists
+        if (!Schema::hasTable('manual_payment_requests')) {
+            return;
+        }
+
         Schema::create('manual_payment_request_histories', function (Blueprint $table) {
             $table->id();
 

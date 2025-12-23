@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (!Schema::hasTable('manual_payment_requests')) {
+            return;
+        }
+        
         Schema::table('manual_payment_requests', function (Blueprint $table) {
             if (!Schema::hasColumn('manual_payment_requests', 'currency')) {
                 $table->string('currency', 8)->nullable()->after('amount');
@@ -17,6 +21,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (!Schema::hasTable('manual_payment_requests')) {
+            return;
+        }
+        
         Schema::table('manual_payment_requests', function (Blueprint $table) {
             if (Schema::hasColumn('manual_payment_requests', 'currency')) {
                 $table->dropColumn('currency');

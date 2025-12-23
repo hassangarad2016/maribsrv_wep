@@ -8,24 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('coupons')) {
-            Schema::create('coupons', function (Blueprint $table) {
-                $table->id();
-                $table->string('code')->unique();
-                $table->string('name')->nullable();
-                $table->text('description')->nullable();
-                $table->enum('discount_type', ['fixed', 'percentage'])->default('fixed');
-                $table->decimal('discount_value', 10, 2);
-                $table->integer('max_uses')->nullable();
-                $table->integer('max_uses_per_user')->nullable();
-                $table->timestamp('starts_at')->nullable();
-                $table->timestamp('ends_at')->nullable();
-                $table->json('metadata')->nullable();
-                $table->boolean('is_active')->default(true);
-                $table->timestamps();
-                $table->softDeletes();
-            });
-        }
+        // Note: 'coupons' table is created in 2024_11_20_000000_create_coupon_support_tables.php
+        // Removed duplicate creation to avoid conflicts
 
         if (!Schema::hasTable('department_notices')) {
             Schema::create('department_notices', function (Blueprint $table) {
@@ -70,6 +54,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('shipping_overrides');
         Schema::dropIfExists('department_notices');
-        Schema::dropIfExists('coupons');
+        // Note: 'coupons' table is managed in 2024_11_20_000000_create_coupon_support_tables.php
     }
 };

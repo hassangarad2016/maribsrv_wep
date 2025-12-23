@@ -16,13 +16,22 @@ return new class extends Migration
             return;
         }
 
+        // Add column first
         Schema::table('coupons', function (Blueprint $table) {
-            $table->foreignId('store_id')
+            $table->unsignedBigInteger('store_id')
                 ->after('id')
-                ->nullable()
-                ->constrained()
-                ->nullOnDelete();
+                ->nullable();
         });
+        
+        // Add FK only if stores table exists
+        if (Schema::hasTable('stores')) {
+            Schema::table('coupons', function (Blueprint $table) {
+                $table->foreign('store_id')
+                    ->references('id')
+                    ->on('stores')
+                    ->nullOnDelete();
+            });
+        }
     }
 
     public function down(): void

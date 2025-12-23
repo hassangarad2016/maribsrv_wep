@@ -18,7 +18,9 @@ return new class extends Migration {
                 $table->unsignedBigInteger('payable_id')->nullable()->after('payable_type');
             }
 
-            if (!Schema::hasColumn('payment_transactions', 'manual_payment_request_id')) {
+            // Only add FK if manual_payment_requests table exists
+            if (Schema::hasTable('manual_payment_requests') && 
+                !Schema::hasColumn('payment_transactions', 'manual_payment_request_id')) {
                 $table->foreignId('manual_payment_request_id')
                     ->nullable()
                     ->after('payable_id')

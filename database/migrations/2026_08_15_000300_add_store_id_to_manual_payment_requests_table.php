@@ -17,6 +17,10 @@ return new class extends Migration
             return;
         }
 
+        if (!Schema::hasTable('manual_payment_requests')) {
+            return;
+        }
+
         Schema::table('manual_payment_requests', function (Blueprint $table) {
             if (! Schema::hasColumn('manual_payment_requests', 'store_id')) {
                 $table->foreignId('store_id')

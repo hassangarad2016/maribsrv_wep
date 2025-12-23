@@ -16,7 +16,8 @@ return new class extends Migration {
             Schema::create('wifi_networks', static function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-                $table->foreignId('wallet_account_id')->nullable()->constrained()->nullOnDelete();
+                // wallet_account_id will be added later if wallet_accounts table exists
+                $table->unsignedBigInteger('wallet_account_id')->nullable();
                 $table->string('name');
                 $table->string('slug')->nullable()->unique();
                 $table->string('status')->default(WifiNetworkStatus::INACTIVE->value)->index();
@@ -35,6 +36,15 @@ return new class extends Migration {
                 $table->json('settings')->nullable();
                 $table->json('statistics')->nullable();
                 $table->timestamps();
+            });
+        }
+
+        // Add FK to wallet_accounts only if that table exists
+        if (Schema::hasTable('wallet_accounts') && 
+            Schema::hasTable('wifi_networks') && 
+            !$this->hasForeignKey('wifi_networks', 'wifi_networks_wallet_account_id_foreign')) {
+            Schema::table('wifi_networks', static function (Blueprint $table): void {
+                $table->foreign('wallet_account_id')->constrained()->nullOnDelete();
             });
         }
 
@@ -140,6 +150,7 @@ return new class extends Migration {
         }
     }
 
+
     public function down(): void
     {
         Schema::dropIfExists('wifi_reputation_counters');
@@ -148,5 +159,23 @@ return new class extends Migration {
         Schema::dropIfExists('wifi_code_batches');
         Schema::dropIfExists('wifi_plans');
         Schema::dropIfExists('wifi_networks');
+    }
+
+    private function hasForeignKey(string $table, string $foreignKey): bool
+    {
+        $conn = Schema::getConnection();
+        $dbName = $conn->getDatabaseName();
+        
+        $result = $conn->selectOne(
+            "SELECT CONSTRAINT_NAME 
+             FROM information_schema.TABLE_CONSTRAINTS 
+             WHERE TABLE_SCHEMA = ? 
+             AND TABLE_NAME = ? 
+             AND CONSTRAINT_NAME = ? 
+             AND CONSTRAINT_TYPE = 'FOREIGN KEY'",
+            [$dbName, $table, $foreignKey]
+        );
+        
+        return $result !== null;
     }
 };

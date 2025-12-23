@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
   public function up(): void {
+    if (!Schema::hasTable('manual_payment_requests')) {
+      return;
+    }
+    
     Schema::table('manual_payment_requests', function (Blueprint $t) {
       if (!Schema::hasColumn('manual_payment_requests','meta')) {
         $t->json('meta')->nullable()->after('payable_id');

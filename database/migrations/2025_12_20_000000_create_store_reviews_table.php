@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        // Only create this table if stores exists
+        if (!Schema::hasTable('stores')) {
+            return;
+        }
+
         Schema::create('store_reviews', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('store_id');

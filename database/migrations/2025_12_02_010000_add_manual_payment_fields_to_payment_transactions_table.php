@@ -7,8 +7,9 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void {
         Schema::table('payment_transactions', function (Blueprint $table) {
-            // FK باسم قصير
-            if (!Schema::hasColumn('payment_transactions', 'manual_payment_request_id')) {
+            // FK باسم قصير - only if manual_payment_requests table exists
+            if (Schema::hasTable('manual_payment_requests') && 
+                !Schema::hasColumn('payment_transactions', 'manual_payment_request_id')) {
                 $table->unsignedBigInteger('manual_payment_request_id')->nullable()->after('user_id');
                 $table->foreign('manual_payment_request_id', 'pt_mpr_fk')
                       ->references('id')->on('manual_payment_requests')

@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        if (!Schema::hasTable('manual_payment_requests')) {
+            return;
+        }
+        
         if (Schema::hasColumn('manual_payment_requests', 'service_request_id')) {
             return;
         }
