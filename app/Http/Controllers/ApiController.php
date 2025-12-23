@@ -135,6 +135,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Models\OTP;
+use App\Models\PendingSignup;
 use App\Jobs\SendOtpWhatsAppJob;
 use App\Services\EnjazatikWhatsAppService;
 use Throwable;
@@ -812,6 +813,10 @@ class ApiController extends Controller {
             $firebase_id = $request->firebase_id;
             $referralAttempt = null;
 
+            if ($type === 'phone') {
+                return $this->handleDeferredPhoneSignup($request, $firebase_id);
+            }
+
             if ($request->filled('email')) {
                 $request->merge(['email' => Str::lower(trim($request->email))]);
             }
@@ -1325,6 +1330,166 @@ class ApiController extends Controller {
             ResponseService::successResponse("Profile Updated Successfully", $app_user);
         } catch (Throwable $th) {
             ResponseService::logErrorResponse($th, 'API Controller -> updateProfile');
+            ResponseService::errorResponse();
+        }
+    }
+
+    private function handleDeferredPhoneSignup(Request $request, string $firebaseId)
+    {
+        $mobile = $request->mobile ?? '';
+        $normalizedMobile = $this->normalizePhoneNumber($request->country_code, $mobile);
+
+        $existingVerifiedUser = User::where('mobile', $mobile)
+            ->where(function ($query) {
+                $query->where('is_verified', 1)
+                    ->orWhereNotNull('email_verified_at');
+            })
+            ->first();
+
+        if ($existingVerifiedUser) {
+            ResponseService::errorResponse('هذا الرقم مسجل بالفعل، يرجى تسجيل الدخول');
+        }
+
+        $payload = $this->buildPendingSignupPayload($request, $firebaseId, $normalizedMobile);
+
+        $pendingSignup = PendingSignup::updateOrCreate(
+            ['normalized_mobile' => $normalizedMobile],
+            [
+                'mobile' => $mobile,
+                'country_code' => $request->country_code,
+                'firebase_id' => $firebaseId,
+                'type' => 'phone',
+                'payload' => json_encode($payload),
+                'expires_at' => now()->addMinutes(30),
+            ]
+        );
+
+        ResponseService::successResponse(
+            'سيتم إنشاء الحساب بعد التحقق من الرمز',
+            [
+                'pending_signup_id' => $pendingSignup->id,
+                'mobile' => $mobile,
+                'country_code' => $request->country_code,
+            ],
+            [
+                'pending_signup' => [
+                    'id' => $pendingSignup->id,
+                    'mobile' => $mobile,
+                    'country_code' => $request->country_code,
+                ],
+                'token' => null,
+            ]
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildPendingSignupPayload(Request $request, string $firebaseId, string $normalizedMobile): array
+    {
+        $accountType = (int) ($request->account_type ?? User::ACCOUNT_TYPE_CUSTOMER);
+        $password = $request->password ?? Str::random(12);
+
+        $userData = [
+            'name' => $request->name,
+            'mobile' => $request->mobile,
+            'email' => $request->email,
+            'password' => Hash::make($password),
+            'account_type' => $accountType,
+            'country_code' => $request->country_code,
+            'country_name' => $request->country_name,
+            'flag_emoji' => $request->flag_emoji ?? 'ye',
+            'firebase_id' => $firebaseId,
+            'type' => 'phone',
+            'platform_type' => $request->platform_type,
+            'is_verified' => 0,
+            'email_verified_at' => null,
+            'normalized_mobile' => $normalizedMobile,
+        ];
+
+        if ($request->filled('fcm_id')) {
+            $userData['fcm_id'] = $request->fcm_id;
+        }
+
+        if ($accountType === User::ACCOUNT_TYPE_SELLER) {
+            $userData['name'] = $this->fallbackSellerName($request, $userData);
+        }
+
+        $referralPayload = [
+            'code' => $request->code,
+            'contact' => $request->mobile ?? $request->email,
+            'location' => $this->buildReferralLocationPayload($request),
+            'meta' => $this->buildReferralRequestMeta($request),
+        ];
+
+        return [
+            'user' => $userData,
+            'referral' => $referralPayload,
+        ];
+    }
+
+    private function normalizePhoneNumber(?string $countryCode, ?string $mobile): string
+    {
+        $mobileDigits = preg_replace('/\D+/', '', (string) ($mobile ?? ''));
+        $codeDigits = preg_replace('/\D+/', '', (string) ($countryCode ?? ''));
+
+        if ($mobileDigits === '' && $codeDigits === '') {
+            return '';
+        }
+
+        if ($codeDigits !== '' && strncmp($mobileDigits, $codeDigits, strlen($codeDigits)) === 0) {
+            return $mobileDigits;
+        }
+
+        return $codeDigits . $mobileDigits;
+    }
+
+    private function finalizePendingSignup(PendingSignup $pendingSignup)
+    {
+        $payload = $pendingSignup->payloadAsArray();
+        $userData = $payload['user'] ?? [];
+
+        if (empty($userData)) {
+            $pendingSignup->delete();
+            ResponseService::errorResponse('تعذر استكمال التسجيل. يرجى المحاولة مرة أخرى.');
+        }
+
+        unset($userData['normalized_mobile']);
+        $userData['is_verified'] = 1;
+        $userData['email_verified_at'] = now();
+
+        DB::beginTransaction();
+        try {
+            $user = User::create($userData);
+
+            if (!$user->hasRole('User')) {
+                $user->assignRole('User');
+            }
+
+            Auth::guard('web')->login($user);
+            $auth = User::find($user->id);
+
+            $referral = $payload['referral'] ?? [];
+            if (!empty($referral['code'])) {
+                $this->handleReferralCode(
+                    $referral['code'],
+                    $auth,
+                    $referral['contact'] ?? $auth->mobile ?? $auth->email,
+                    $referral['location'] ?? [],
+                    $referral['meta'] ?? []
+                );
+            }
+
+            $pendingSignup->delete();
+
+            $token = $auth->createToken($auth->name ?? '')->plainTextToken;
+
+            DB::commit();
+
+            ResponseService::successResponse('تم تفعيل الحساب بنجاح', $auth, ['token' => $token]);
+        } catch (Throwable $th) {
+            DB::rollBack();
+            ResponseService::logErrorResponse($th, 'API Controller -> finalizePendingSignup');
             ResponseService::errorResponse();
         }
     }
@@ -9810,6 +9975,35 @@ public function storeRequestDevice(Request $request)
                 'أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€“â€œ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾أ¢â€¢â€کأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€¢ع¾أ¢â€¢طŒأ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آµ أ¢â€¢ع¾ط·آ«أ¢â€‌ع©ط£ع¾ أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ¯ أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£آ¢أ¢â€‌ع©ط¢â€  أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾ط·آ³أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾أ¢â€“â€™ أ¢â€¢ع¾أ¢â€¢آ£أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط£آ§',
                 404
             );
+        }
+
+        $pendingSignup = null;
+        if ($request->filled('pending_signup_id')) {
+            $pendingSignup = PendingSignup::find($request->pending_signup_id);
+            if ($pendingSignup && $pendingSignup->expires_at && $pendingSignup->expires_at->isPast()) {
+                $pendingSignup = null;
+            }
+        }
+
+        if ($pendingSignup === null) {
+            $normalizedCandidates = array_values(array_filter(array_map(static function ($candidate) {
+                $digits = preg_replace('/\D+/', '', (string) $candidate);
+                return $digits ?: null;
+            }, $phoneCandidates)));
+
+            if (!empty($normalizedCandidates)) {
+                $pendingSignup = PendingSignup::whereIn('normalized_mobile', $normalizedCandidates)
+                    ->where(function ($query) {
+                        $query->whereNull('expires_at')
+                            ->orWhere('expires_at', '>=', now());
+                    })
+                    ->latest()
+                    ->first();
+            }
+        }
+
+        if ($pendingSignup) {
+            return $this->finalizePendingSignup($pendingSignup);
         }
 
         if ($otpRecord->expires_at < now()->timestamp) {

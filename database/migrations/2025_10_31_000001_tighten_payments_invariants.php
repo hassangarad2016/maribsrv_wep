@@ -140,31 +140,28 @@ return new class extends Migration {
 
         // 5) تريجرات WT: يجب أن تشير إلى PT نوعه wallet فقط
         DB::unprepared("DROP TRIGGER IF EXISTS trg_wt_wallet_only_bi");
+        DB::unprepared("CREATE TRIGGER trg_wt_wallet_only_bi
+        BEFORE INSERT ON wallet_transactions FOR EACH ROW
+        BEGIN
+            IF NEW.payment_transaction_id IS NOT NULL THEN
+                SET @gw := (SELECT LOWER(TRIM(payment_gateway)) FROM payment_transactions WHERE id=NEW.payment_transaction_id);
+                IF COALESCE(@gw,'') <> 'wallet' THEN
+                    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='wallet_transactions must link to wallet PT';
+                END IF;
+            END IF;
+        END");
+
         DB::unprepared("DROP TRIGGER IF EXISTS trg_wt_wallet_only_bu");
-
-        if (Schema::hasTable('wallet_transactions')) {
-            DB::unprepared("CREATE TRIGGER trg_wt_wallet_only_bi
-            BEFORE INSERT ON wallet_transactions FOR EACH ROW
-            BEGIN
-                IF NEW.payment_transaction_id IS NOT NULL THEN
-                    SET @gw := (SELECT LOWER(TRIM(payment_gateway)) FROM payment_transactions WHERE id=NEW.payment_transaction_id);
-                    IF COALESCE(@gw,'') <> 'wallet' THEN
-                        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='wallet_transactions must link to wallet PT';
-                    END IF;
+        DB::unprepared("CREATE TRIGGER trg_wt_wallet_only_bu
+        BEFORE UPDATE ON wallet_transactions FOR EACH ROW
+        BEGIN
+            IF NEW.payment_transaction_id IS NOT NULL THEN
+                SET @gw := (SELECT LOWER(TRIM(payment_gateway)) FROM payment_transactions WHERE id=NEW.payment_transaction_id);
+                IF COALESCE(@gw,'') <> 'wallet' THEN
+                    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='wallet_transactions must link to wallet PT';
                 END IF;
-            END");
-
-            DB::unprepared("CREATE TRIGGER trg_wt_wallet_only_bu
-            BEFORE UPDATE ON wallet_transactions FOR EACH ROW
-            BEGIN
-                IF NEW.payment_transaction_id IS NOT NULL THEN
-                    SET @gw := (SELECT LOWER(TRIM(payment_gateway)) FROM payment_transactions WHERE id=NEW.payment_transaction_id);
-                    IF COALESCE(@gw,'') <> 'wallet' THEN
-                        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='wallet_transactions must link to wallet PT';
-                    END IF;
-                END IF;
-            END");
-        }
+            END IF;
+        END");
 
         // 6) إصلاح AUTO_INCREMENT (يتجاهل الجداول الفارغة تلقائياً)
         DB::unprepared("
@@ -179,15 +176,11 @@ return new class extends Migration {
             SET @n := (SELECT IFNULL(MAX(id),0)+1 FROM manual_payment_requests);
             SET @sql := CONCAT('ALTER TABLE manual_payment_requests AUTO_INCREMENT=', @n);
             PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
-        ");
 
-        if (Schema::hasTable('wallet_transactions')) {
-            DB::unprepared("
-                SET @n := (SELECT IFNULL(MAX(id),0)+1 FROM wallet_transactions);
-                SET @sql := CONCAT('ALTER TABLE wallet_transactions AUTO_INCREMENT=', @n);
-                PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
-            ");
-        }
+            SET @n := (SELECT IFNULL(MAX(id),0)+1 FROM wallet_transactions);
+            SET @sql := CONCAT('ALTER TABLE wallet_transactions AUTO_INCREMENT=', @n);
+            PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+        ");
     }
 
     public function down(): void
