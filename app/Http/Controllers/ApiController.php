@@ -1460,8 +1460,30 @@ class ApiController extends Controller {
 
         DB::beginTransaction();
         try {
-            $user = User::create($userData);
+            $existingUser = null;
 
+            if (!empty($userData['mobile'])) {
+                $existingUser = User::where('mobile', $userData['mobile'])->first();
+            }
+
+            if (!$existingUser && !empty($userData['email'])) {
+                $existingUser = User::where('email', $userData['email'])->first();
+            }
+
+            if ($existingUser) {
+                if ((int) $existingUser->is_verified === 1 || !empty($existingUser->email_verified_at)) {
+                    ResponseService::errorResponse('Account already exists.', null, 409);
+                }
+
+                $existingUser->fill($userData);
+                $existingUser->is_verified = 1;
+                $existingUser->email_verified_at = now();
+                $existingUser->save();
+
+                $user = $existingUser;
+            } else {
+                $user = User::create($userData);
+            }
             if (!$user->hasRole('User')) {
                 $user->assignRole('User');
             }
@@ -10004,7 +10026,7 @@ public function storeRequestDevice(Request $request)
             }
         })->first();
 
-        if (!\ && !\) {
+        if (!$user && !$pendingSignup) {
             return ResponseService::errorResponse(
                 '·« ÌÊÃœ ÿ·»  Õﬁﬁ ·Â–« «·—ﬁ„. Ì—ÃÏ ÿ·» —„“ ÃœÌœ.',
                 null,
@@ -10033,7 +10055,7 @@ public function storeRequestDevice(Request $request)
             ->latest()
             ->first();
 
-        if (!\) {
+        if (!$otpRecord) {
             return ResponseService::errorResponse(
                 '—„“ «· Õﬁﬁ €Ì— ’ÕÌÕ.',
                 null,
@@ -10041,7 +10063,7 @@ public function storeRequestDevice(Request $request)
             );
         }
 
-        if (\->expires_at < now()->timestamp) {
+        if ($otpRecord->expires_at < now()->timestamp) {
             return ResponseService::errorResponse(
                 '—„“ «· Õﬁﬁ „‰ ÂÌ «·’·«ÕÌ….',
                 null,
