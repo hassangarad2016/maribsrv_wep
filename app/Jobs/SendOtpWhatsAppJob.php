@@ -28,9 +28,17 @@ class SendOtpWhatsAppJob implements ShouldQueue
     {
         Log::info("SendOtpWhatsAppJob started: {$this->phone}");
         echo "Running job for {$this->phone}\n";
-        
-        $whatsApp->sendMessage($this->phone, $this->message);
-    
+
+        $response = $whatsApp->sendMessage($this->phone, $this->message);
+        if (($response['status'] ?? false) !== true) {
+            Log::warning('SendOtpWhatsAppJob failed', [
+                'phone' => $this->phone,
+                'response' => $response,
+            ]);
+        } else {
+            Log::info('SendOtpWhatsAppJob delivered', ['phone' => $this->phone]);
+        }
+
         Log::info("SendOtpWhatsAppJob finished.");
     }
     

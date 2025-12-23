@@ -9829,7 +9829,7 @@ public function storeRequestDevice(Request $request)
         $request->validate([
             'country_code' => 'required|string',
             'phone' => 'required|string',
-            'type' => 'nullable|in:new_user,forgot_password',
+            'type' => 'nullable|in:new_user,forgot_password,password',
         ]);
 
         $settings = CachingService::getSystemSettings([
@@ -9842,7 +9842,15 @@ public function storeRequestDevice(Request $request)
         $otpEnabled = filter_var($settings['whatsapp_otp_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         if (!$otpEnabled) {
-            return ResponseService::errorResponse('أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€“â€œ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾أ¢â€“â€™ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ° أ¢â€¢ع¾أ¢â€¢â€کأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€‌ع©ط£آ أ¢â€‌ع©ط¢ظ¾أ¢â€¢ع¾أ¢â€¢آ£أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط£آ¯.');
+            return ResponseService::errorResponse('WhatsApp OTP service is disabled.');
+        }
+
+        $configuredToken = CachingService::getSystemSettings('whatsapp_otp_token');
+        if (!is_string($configuredToken) || trim($configuredToken) === '') {
+            $configuredToken = config('services.whatsapp.token');
+        }
+        if (!is_string($configuredToken) || trim($configuredToken) === '') {
+            return ResponseService::errorResponse('WhatsApp OTP token is not configured.');
         }
 
         $rawCountryCode = (string) $request->country_code;
@@ -9859,10 +9867,35 @@ public function storeRequestDevice(Request $request)
         $deliveryPhone = $composite !== '' ? $composite : $normalizedPhone;
 
 
-        $check = $whatsApp->checkNumber($deliveryPhone);
+        $phoneCandidates = array_values(array_filter(array_unique([
+            $deliveryPhone,
+            '+' . $normalizedPhone,
+            $normalizedPhone,
+            '00' . $normalizedPhone,
+        ])));
 
-        if (!($check['status'] ?? false)) {
-            return ResponseService::errorResponse("أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ¯أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط£آ® أ¢â€‌ع©ط£آ§أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾ط·آ¯ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ  أ¢â€¢ع¾أ¢â€¢â€کأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾أ¢â€¢â€“ أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾ط·آµأ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ° أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ°.");
+        $check = null;
+        $validDeliveryPhone = null;
+        foreach ($phoneCandidates as $candidate) {
+            $check = $whatsApp->checkNumber($candidate);
+            if (($check['status'] ?? false) === true) {
+                $validDeliveryPhone = $candidate;
+                break;
+            }
+        }
+
+        if ($validDeliveryPhone === null) {
+            $checkMessage = null;
+            if (is_array($check)) {
+                $checkMessage = $check['message'] ?? $check['error'] ?? null;
+                if (is_array($checkMessage)) {
+                    $checkMessage = json_encode($checkMessage);
+                }
+            }
+            if (!is_string($checkMessage) || trim($checkMessage) === '') {
+                $checkMessage = 'Unable to verify WhatsApp number.';
+            }
+            return ResponseService::errorResponse($checkMessage);
         }
 
         $otp = rand(100000, 999999);
@@ -9898,7 +9931,7 @@ public function storeRequestDevice(Request $request)
         $messageTemplate = $templates[$type];
         $message = str_replace(':otp', $otp, $messageTemplate);
 
-        SendOtpWhatsAppJob::dispatch($deliveryPhone, $message);
+        SendOtpWhatsAppJob::dispatch($validDeliveryPhone, $message);
 
 
         return ResponseService::successResponse('أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€“â€œ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾أ¢â€“â€™ WhatsApp أ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط¢â€ أ¢â€¢ع¾ط·آ´أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آµ.');
@@ -13309,6 +13342,7 @@ public function storeRequestDevice(Request $request)
         return $ids;
     }
 }
+
 
 
 
