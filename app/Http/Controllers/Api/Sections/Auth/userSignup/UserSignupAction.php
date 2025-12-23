@@ -1,0 +1,564 @@
+<?php
+
+namespace App\Http\Controllers\Api\Sections\Auth\userSignup;
+
+use App\Events\ManualPaymentRequestCreated;
+use App\Events\MessageDelivered;
+use App\Events\MessageRead;
+use App\Events\MessageSent;
+use App\Events\UserPresenceUpdated;
+use App\Events\UserTyping;
+use App\Http\Resources\ItemCollection;
+use App\Http\Resources\ManualPaymentRequestResource;
+use App\Http\Resources\PaymentTransactionResource;
+use App\Http\Resources\WalletTransactionResource;
+use App\Http\Resources\SliderResource;
+use App\Services\SliderMetricService;
+use App\Models\ManualPaymentRequestHistory;
+use App\Services\DepartmentAdvertiserService;
+use App\Services\TelemetryService;
+use App\Models\Area;
+use App\Models\BlockUser;
+use App\Models\Blog;
+use App\Models\Category;
+use App\Models\Chat;
+use App\Models\ChatMessage;
+use App\Models\City;
+use App\Models\ContactUs;
+use App\Models\Country;
+use App\Models\CustomField;
+use App\Models\Faq;
+use App\Models\Favourite;
+use App\Models\FeaturedAdsConfig;
+use App\Models\FeaturedItems;
+use App\Models\Item;
+use App\Models\ItemCustomFieldValue;
+use App\Models\ItemImages;
+use App\Models\ItemOffer;
+use App\Models\Language;
+use App\Models\Notifications;
+use App\Models\Package;
+use App\Models\ManualBank;
+use App\Models\ManualPaymentRequest;
+use App\Models\PaymentConfiguration;
+use App\Models\PaymentTransaction;
+use App\Models\ReportReason;
+use App\Models\SellerRating;
+use App\Models\SeoSetting;
+use App\Models\Service;
+use App\Models\ServiceCustomField;
+use App\Models\ServiceCustomFieldValue;
+use App\Models\ServiceRequest;
+use App\Models\ServiceReview;
+use App\Models\Setting;
+use Illuminate\Pagination\AbstractPaginator;
+use App\Services\DelegateNotificationService;
+use App\Models\Slider;
+use App\Models\SocialLogin;
+use App\Models\State;
+use App\Models\Tip;
+use App\Models\TipTranslation;
+use App\Models\User;
+use App\Models\UserFcmToken;
+use App\Models\UserPurchasedPackage;
+use App\Models\UserReports;
+use App\Models\VerificationField;
+use App\Models\VerificationFieldRequest;
+use App\Models\VerificationFieldValue;
+use App\Models\VerificationPlan;
+use App\Models\VerificationRequest;
+use App\Models\WalletAccount;
+use App\Models\WalletTransaction;
+use App\Models\WalletWithdrawalRequest;
+use App\Models\ReferralAttempt;
+use App\Services\SliderEligibilityService;
+use App\Models\ServiceReviewReport;
+use App\Policies\SectionDelegatePolicy;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Http\UploadedFile;
+use App\Models\CurrencyRateQuote;
+use App\Events\CurrencyCreated;
+use App\Events\CurrencyRatesUpdated;
+use App\Models\Governorate;
+use App\Models\CurrencyRate;
+use App\Models\Challenge;
+use App\Models\Referral;
+use App\Models\DepartmentTicket;
+use App\Services\DepartmentSupportService;
+use App\Enums\NotificationFrequency;
+use App\Http\Resources\UserPreferenceResource;
+use App\Models\UserPreference;
+use App\Models\RequestDevice;
+use App\Models\Order;
+use App\Services\CachingService;
+use App\Services\DelegateAuthorizationService;
+use App\Services\DepartmentReportService;
+use App\Services\FileService;
+use App\Services\InterfaceSectionService;
+use App\Services\HelperService;
+use App\Services\NotificationService;
+use App\Services\PaymentFulfillmentService;
+use App\Services\WalletService;
+use App\Services\ResponseService;
+use App\Services\ServiceAuthorizationService;
+use App\Services\Location\MaribBoundaryService;
+use App\Services\ReferralAuditLogger;
+use DateTimeInterface;
+use App\Services\Pricing\ActivePricingPolicyCache;
+
+use App\Models\Pricing\PricingPolicy;
+use App\Models\Pricing\PricingDistanceRule;
+use App\Models\Pricing\PricingWeightTier;
+use App\Models\DeliveryPrice;
+
+
+
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model as EloquentModel;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Builder;
+use App\Http\Resources\WalletWithdrawalRequestResource;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
+
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+
+
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use App\Models\OTP;
+use App\Models\PendingSignup;
+use App\Jobs\SendOtpWhatsAppJob;
+use App\Services\EnjazatikWhatsAppService;
+use Throwable;
+use Exception;
+use Illuminate\Support\Facades\Hash;
+use RuntimeException;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
+use App\Services\ImageVariantService;
+
+use JsonException;
+
+
+trait UserSignupAction
+{
+    public function userSignup(Request $request) {
+            try {
+                \Log::info('أ¢â€°طŒط·آ§ط£آ´ط·آ¥ UserSignup Request:', [
+                    'type' => $request->type,
+                    'firebase_id' => $request->firebase_id,
+                    'mobile' => $request->mobile ?? 'not provided',
+                    'name' => $request->name ?? 'not provided',
+                    'email' => $request->email ?? 'not provided',
+                    'account_type' => $request->account_type ?? 'not provided'
+                ]);
+
+                $validationRules = [
+                    'type'          => 'required|in:email,google,phone,apple',
+                    'firebase_id'   => 'required',
+                    'country_code'  => 'nullable|string',
+                    'flag'          => 'boolean',
+                    'platform_type' => 'nullable|in:android,ios'
+                ];
+
+                // أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾أ¢â€¢آ¢أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢ظ¾أ¢â€¢ع¾ط·آ± validation أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ§أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط¢ظ¾ أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾ط·آ¯ أ¢â€‌ع©ط£آ¢أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€  أ¢â€‌ع©ط¢â€ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾أ¢â€¢آ£ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€‌ع©ط£آ§أ¢â€‌ع©ط£ع¾ google
+                if ($request->type == 'google') {
+                    $validationRules['mobile'] = 'nullable'; // أ¢â€¢ع¾ط·آ´أ¢â€¢ع¾أ¢â€¢آ£أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ§أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط¢ظ¾ أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ¨ أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط¢â‚¬ Google
+                } elseif ($request->type == 'phone') {
+                    $validationRules['mobile'] = 'required|unique:users,mobile';
+                } elseif ($request->type == 'email') {
+                    $validationRules['email'] = 'required|email';
+                }
+                if ($request->filled('code')) {
+                    $validationRules['lat'] = 'required|numeric';
+                    $validationRules['lng'] = 'required|numeric';
+                    $validationRules['device_time'] = 'required';
+                    $validationRules['admin_area'] = 'nullable|string|max:255';
+                }
+
+
+                // أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ®أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾أ¢â€¢â€“أ¢â€¢ع¾ط·آ« أ¢â€‌ع©ط£آ أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾أ¢â€¢طŒأ¢â€¢ع¾أ¢â€¢طŒأ¢â€¢ع¾ط·آ±
+                $customMessages = [
+                    'mobile.required' => 'أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ§أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط¢ظ¾ أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€¢â€“أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ°.',
+                    'mobile.unique'   => 'أ¢â€‌ع©ط£آ§أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾ط·آ¯ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ  أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ  أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آµأ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ° أ¢â€¢ع¾ط·ع¾أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾أ¢â€“â€™.',
+                    'email.required' => 'أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ­أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€¢â€“أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ°.',
+                    'email.email' => 'أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ« أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾ط¢آ»أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آ­أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾أ¢â€¢طŒأ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آµ.',
+                    'code.exists' => 'أ¢â€‌ع©ط£آ¢أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط¢آ» أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾أ¢â€¢â€کأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€¢ع¾أ¢â€¢طŒأ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آµ.'
+                ];
+
+                $validator = Validator::make($request->all(), $validationRules, $customMessages);
+
+                if ($validator->fails()) {
+                    ResponseService::validationError($validator->errors()->first());
+                }
+
+                $type = $request->type;
+                $firebase_id = $request->firebase_id;
+                $referralAttempt = null;
+
+                if ($type === 'phone') {
+                    return $this->handleDeferredPhoneSignup($request, $firebase_id);
+                }
+
+                if ($request->filled('email')) {
+                    $request->merge(['email' => Str::lower(trim($request->email))]);
+                }
+
+                if ($type === 'phone' && empty($request->email)) {
+                    $generatedEmail = $this->generatePhoneSignupEmail(
+                        $request->country_code,
+                        $request->mobile
+                    );
+
+                    $request->merge(['email' => $generatedEmail]);
+
+                    \Log::info('أ¢â€°طŒط·آ§ط£آ´ط·آ¯ Generated fallback email for phone signup', [
+                        'mobile' => $request->mobile,
+                        'country_code' => $request->country_code,
+                        'generated_email' => $generatedEmail,
+                    ]);
+                }
+
+                // أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ³ أ¢â€¢ع¾أ¢â€¢آ£أ¢â€‌ع©ط¢â€  أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ  أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط¢آ» أ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط¢â‚¬ Google firebase_id
+                $existingGoogleUser = null;
+                if ($type == 'google') {
+                    $existingGoogleUser = SocialLogin::where('firebase_id', $firebase_id)
+                        ->where('type', 'google')
+                        ->with('user')
+                        ->first();
+
+                    \Log::info('أ¢â€°طŒط·آ§ط¢آ¤ط¢ع† Searching for existing Google user by firebase_id:', [
+                        'firebase_id' => $firebase_id,
+                        'found' => $existingGoogleUser ? 'yes' : 'no',
+                        'user_id' => $existingGoogleUser ? $existingGoogleUser->user->id : null
+                    ]);
+                }
+
+                $socialLogin = SocialLogin::where('firebase_id', $firebase_id)->where('type', $type)->with('user', function ($q) {
+                    $q->withTrashed();
+                })->whereHas('user', function ($q) {
+                    $q->role('User');
+                })->first();
+
+                if (!empty($socialLogin->user->deleted_at)) {
+                    ResponseService::errorResponse("User is deactivated. Please Contact the administrator");
+                }
+
+                // أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ³ أ¢â€¢ع¾أ¢â€¢آ£أ¢â€‌ع©ط¢â€  أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ  أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط¢آ» أ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط¢â€ أ¢â€‌ع©ط¢ظ¾أ¢â€¢ع¾أ¢â€‌â€ڑ أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ§أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط¢ظ¾ أ¢â€¢ع¾ط·آ«أ¢â€‌ع©ط£ع¾ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ­أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍
+                $existingUser = null;
+                if ($request->type == 'phone' && !empty($request->mobile)) {
+                    $existingUser = User::where('mobile', $request->mobile)->first();
+                } elseif ($request->type == 'email' && !empty($request->email)) {
+                    $existingUser = User::where('email', $request->email)->first();
+                } elseif ($request->type == 'google') {
+                    // أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط¢â‚¬ Googleأ¢â€¢ع¾ط£آ® أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ³ أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط¢â‚¬ email أ¢â€¢ع¾ط·آ«أ¢â€‌ع©ط£ع¾أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط£آ¯أ¢â€¢ع¾ط£آ® أ¢â€¢ع¾ط·آ³أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط¢â‚¬ mobile أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾ط·آ¯ أ¢â€‌ع©ط£آ¢أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€  أ¢â€‌ع©ط£آ أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£ع¾أ¢â€‌ع©ط¢ظ¾أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط£آ¯
+                    if (!empty($request->email)) {
+                        $existingUser = User::where('email', $request->email)->first();
+                        \Log::info('أ¢â€°طŒط·آ§ط¢آ¤ط¢ع† Searching for Google user by email:', [
+                            'email' => $request->email,
+                            'found' => $existingUser ? 'yes' : 'no'
+                        ]);
+                    }
+                    if (!$existingUser && !empty($request->mobile)) {
+                        $existingUser = User::where('mobile', $request->mobile)->first();
+                        \Log::info('أ¢â€°طŒط·آ§ط¢آ¤ط¢ع† Searching for Google user by mobile:', [
+                            'mobile' => $request->mobile,
+                            'found' => $existingUser ? 'yes' : 'no'
+                        ]);
+                    }
+                }
+
+                // أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€‌ع©ط£آ أ¢â€‌ع©ط¢â€  أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط¢آ»
+                $shouldUpdateExistingUser = false;
+                if ($existingUser) {
+                    \Log::info('أ¢â€°طŒط·آ§ط¢آ¤ط¢ع† Found existing user:', [
+                        'user_id' => $existingUser->id,
+                        'email' => $existingUser->email,
+                        'mobile' => $existingUser->mobile,
+                        'is_verified' => $existingUser->is_verified,
+                        'email_verified_at' => $existingUser->email_verified_at,
+                        'type' => $request->type
+                    ]);
+
+                    if ($existingUser->is_verified == 0 && $existingUser->email_verified_at === null) {
+                        $shouldUpdateExistingUser = true;
+                        \Log::info('ط·آ¸ط¢آ£ط£آ  User is not verified, allowing update');
+                    } elseif ($existingUser->is_verified == 1 && $existingUser->email_verified_at !== null) {
+                        // أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط¢â‚¬ Google usersأ¢â€¢ع¾ط£آ® أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€‌ع©ط£آ أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آµ أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ³ أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ« أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£ع¾ أ¢â€‌ع©ط£آ¢أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€  أ¢â€‌ع©ط£آ أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ©أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط£آ¯
+                        if ($request->type == 'google') {
+                            $shouldUpdateExistingUser = true;
+                            \Log::info('ط·آ¸ط¢آ£ط£آ  Allowing Google user to update verified account:', [
+                                'user_id' => $existingUser->id,
+                                'email' => $existingUser->email
+                            ]);
+                        } else {
+                            // أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ  أ¢â€‌ع©ط£آ أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط£آ©أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط£آ¯ - أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾ط·آ´أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾أ¢â€¢آ£ أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾أ¢â€¢â€“أ¢â€¢ع¾ط·آ«
+                            if ($request->type == 'phone') {
+                                ResponseService::errorResponse('أ¢â€‌ع©ط£آ§أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾ط·آ¯ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آµأ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ° أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط¢آ» أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط£آ©أ¢â€¢ع¾ط·آ¯. أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ« أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ  أ¢â€‌ع©ط£آ§أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط¢ظ¾ أ¢â€¢ع¾ط·ع¾أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾أ¢â€“â€™.');
+                            } else {
+                                ResponseService::errorResponse('أ¢â€‌ع©ط£آ§أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾ط·آ¯ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آµأ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ° أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط¢آ». أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ« أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾ط·آ­أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·ع¾أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾أ¢â€“â€™.');
+                            }
+                        }
+                    }
+                } else {
+                    \Log::info('أ¢â€°طŒط·آ§ط¢آ¤ط¢ع† No existing user found for:', [
+                        'type' => $request->type,
+                        'email' => $request->email ?? 'not provided',
+                        'mobile' => $request->mobile ?? 'not provided'
+                    ]);
+                }
+
+                if ($type == 'google' && $existingGoogleUser) {
+                    \Log::info('أ¢â€°طŒط·آ§ط¢آ¤ط¢â€‍ Updating existing Google user:', [
+                        'firebase_id' => $firebase_id,
+                        'user_id' => $existingGoogleUser->user->id,
+                        'mobile' => $request->mobile,
+                        'name' => $request->name
+                    ]);
+
+                    DB::beginTransaction();
+
+                    $user = $existingGoogleUser->user;
+                    $userData = $request->all();
+
+                    // أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ³ أ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€ أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ² أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ 
+                    if (!empty($request->password)) {
+                        $userData['password'] = Hash::make($request->password);
+                    }
+                    $userData['profile'] = $request->hasFile('profile') ? $request->file('profile')->store('user_profile', 'public') : $request->profile;
+                    $targetAccountType = $userData['account_type'] ?? $user->account_type ?? null;
+                    if ((int) $targetAccountType === User::ACCOUNT_TYPE_SELLER) {
+                        $userData['name'] = $this->fallbackSellerName($request, $userData, $user);
+                    }
+
+                    // أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ³ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€ أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ² أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€¢â€“أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾ط·آ±
+                    $user->update([
+                        'name' => $userData['name'] ?? $user->name,
+                        'mobile' => $userData['mobile'] ?? $user->mobile,
+                        'email' => $userData['email'] ?? $user->email,
+                        'password' => $userData['password'] ?? $user->password,
+                        'account_type' => $userData['account_type'] ?? $user->account_type,
+                        'country_code' => $userData['country_code'] ?? $user->country_code,
+                        'country_name' => $userData['country_name'] ?? $user->country_name,
+                        'flag_emoji' => $userData['flag_emoji'] ?? $user->flag_emoji,
+                    ]);
+
+                    \Log::info('ط·آ¸ط¢آ£ط£آ  Google user updated successfully:', [
+                        'user_id' => $user->id,
+                        'updated_fields' => [
+                            'name' => $user->name,
+                            'mobile' => $user->mobile,
+                            'account_type' => $user->account_type
+                        ]
+                    ]);
+
+                    // أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ´أ¢â€¢ع¾ط·آ± أ¢â€‌ع©ط£آ¢أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط¢آ» أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾ط·آ¯ أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ§
+                    if (!empty($request->code)) {
+                        $referralAttempt = $this->handleReferralCode(
+                            $request->code,
+                            $user,
+                            $request->mobile ?? $request->email,
+                            $this->buildReferralLocationPayload($request),
+                            $this->buildReferralRequestMeta($request)
+
+                        );
+
+                    }
+
+                    Auth::guard('web')->login($user);
+                    $auth = User::find($user->id);
+
+                    DB::commit();
+                } elseif (empty($socialLogin)) {
+                    DB::beginTransaction();
+
+                    if ($shouldUpdateExistingUser) {
+                        // أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ³ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط¢آ»
+                        \Log::info('أ¢â€°طŒط·آ§ط¢آ¤ط¢â€‍ Updating existing user:', [
+                            'user_id' => $existingUser->id,
+                            'type' => $request->type,
+                            'mobile' => $request->mobile,
+                            'name' => $request->name
+                        ]);
+
+                        $userData = $request->all();
+                        $targetAccountType = $userData['account_type'] ?? $existingUser->account_type ?? null;
+                        if ((int) $targetAccountType === User::ACCOUNT_TYPE_SELLER) {
+                            $userData['name'] = null;
+                        }
+                        if (!empty($request->password)) {
+                            $userData['password'] = Hash::make($request->password);
+                        }
+                        $userData['profile'] = $request->hasFile('profile') ? $request->file('profile')->store('user_profile', 'public') : $request->profile;
+
+                        // أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€¢آ£أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€  أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾ط·آµأ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ° أ¢â€‌ع©ط¢â€ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾أ¢â€¢آ£ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍
+                        if (in_array($request->type, ['google', 'apple'])) {
+                            $userData['is_verified'] = 1;
+                            $userData['email_verified_at'] = now();
+                        } else {
+                            $userData['is_verified'] = 0;
+                            $userData['email_verified_at'] = null;
+                        }
+
+                        $existingUser->update($userData);
+                        $user = $existingUser;
+
+                        \Log::info('ط·آ¸ط¢آ£ط£آ  Existing user updated successfully:', [
+                            'user_id' => $user->id,
+                            'updated_fields' => [
+                                'name' => $user->name,
+                                'mobile' => $user->mobile,
+                                'account_type' => $user->account_type
+                            ]
+                        ]);
+
+                        // أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ´أ¢â€¢ع¾ط·آ± أ¢â€‌ع©ط£آ¢أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط¢آ» أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾ط·آ¯ أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ§
+                        if (!empty($request->code)) {
+                            $referralAttempt = $this->handleReferralCode(
+                                $request->code,
+                                $user,
+                                $request->mobile ?? $request->email,
+                                $this->buildReferralLocationPayload($request)
+                            );
+
+                        }
+
+                        SocialLogin::updateOrCreate([
+                            'type'    => $request->type,
+                            'user_id' => $user->id
+                        ], [
+                            'firebase_id' => $request->firebase_id,
+                        ]);
+
+                        if (!$user->hasRole('User')) {
+                            $user->assignRole('User');
+                        }
+
+                        Auth::guard('web')->login($user);
+                        $targetAccountType = $userData['account_type'] ?? null;
+                        if ((int) $targetAccountType === User::ACCOUNT_TYPE_SELLER) {
+                            $userData['name'] = $this->fallbackSellerName($request, $userData, $existingUser);
+                        }
+                        $auth = User::find($user->id);
+                    } else {
+                        // أ¢â€¢ع¾ط·آ­أ¢â€‌ع©ط¢â€ أ¢â€¢ع¾أ¢â€‌آ¤أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ© أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ´أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط¢آ»
+                        $userData = $request->all();
+                        if (!empty($request->password)) {
+                            $userData['password'] = Hash::make($request->password);
+                        }
+                        $userData['profile'] = $request->hasFile('profile') ? $request->file('profile')->store('user_profile', 'public') : $request->profile;
+                        $targetAccountType = $userData['account_type'] ?? null;
+                        if ((int) $targetAccountType === User::ACCOUNT_TYPE_SELLER) {
+                            $userData['name'] = $this->fallbackSellerName($request, $userData);
+                        }
+
+                        // أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€¢آ£أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€  أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾ط·آµأ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ° أ¢â€‌ع©ط¢â€ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾أ¢â€¢آ£ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍
+                        if (in_array($request->type, ['google', 'apple'])) {
+                            $userData['is_verified'] = 1;
+                            $userData['email_verified_at'] = now();
+                        } else {
+                            $userData['is_verified'] = 0;
+                            $userData['email_verified_at'] = null;
+                        }
+
+                        // أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط¢â‚¬ Google usersأ¢â€¢ع¾ط£آ® أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾ط·آ¯ أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ  أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ§أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط¢ظ¾أ¢â€¢ع¾ط£آ® أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ  email أ¢â€‌ع©ط£آ¢أ¢â€‌ع©ط¢â‚¬ mobile أ¢â€‌ع©ط£آ أ¢â€¢ع¾ط·آ¬أ¢â€‌ع©ط£آ©أ¢â€¢ع¾ط·آ²
+                        if ($type == 'google' && empty($request->mobile)) {
+                            $userData['mobile'] = $request->email ?? 'temp_' . time();
+                            \Log::info('أ¢â€°طŒط·آ§ط£آ´أ¢â€“â€™ Using temporary mobile for Google user:', [
+                                'email' => $request->email,
+                                'temp_mobile' => $userData['mobile']
+                            ]);
+                        }
+
+                        if ($type == 'google') {
+                            \Log::info('أ¢â€°طŒط·آ§ط¢â€ ط¸â‚¬ Creating new Google user:', [
+                                'firebase_id' => $firebase_id,
+                                'mobile' => $userData['mobile'],
+                                'name' => $request->name
+                            ]);
+                        }
+
+                        $user = User::create($userData);
+
+                        if ($type == 'google') {
+                            \Log::info('ط·آ¸ط¢آ£ط£آ  New Google user created:', [
+                                'user_id' => $user->id,
+                                'firebase_id' => $firebase_id
+                            ]);
+                        }
+
+                        // أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ´أ¢â€¢ع¾ط·آ± أ¢â€‌ع©ط£آ¢أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط¢آ» أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ± أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾ط·آ¯ أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ­أ¢â€¢ع¾أ¢â€“â€™أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ§
+                        if (!empty($request->code)) {
+                            $referralAttempt = $this->handleReferralCode(
+                                $request->code,
+                                $user,
+                                $request->mobile ?? $request->email,
+                                $this->buildReferralLocationPayload($request),
+                                $this->buildReferralRequestMeta($request)
+                            );
+
+                        }
+
+                        SocialLogin::updateOrCreate([
+                            'type'    => $request->type,
+                            'user_id' => $user->id
+                        ], [
+                            'firebase_id' => $request->firebase_id,
+                        ]);
+                        $user->assignRole('User');
+                        Auth::guard('web')->login($user);
+                        $auth = User::find($user->id);
+                    }
+
+                    DB::commit();
+                } else {
+                    Auth::guard('web')->login($socialLogin->user);
+                    $auth = Auth::user();
+                }
+                if (!$auth->hasRole('User')) {
+                    ResponseService::errorResponse('Invalid Login Credentials', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
+                }
+
+                if (!empty($request->fcm_id)) {
+    //                UserFcmToken::insertOrIgnore(['user_id' => $auth->id, 'fcm_token' => $request->fcm_id, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+                    UserFcmToken::updateOrCreate(
+                        ['fcm_token' => $request->fcm_id],
+                        [
+                            'user_id'          => $auth->id,
+                            'platform_type'    => $request->platform_type,
+                            'last_activity_at' => Carbon::now(),
+                        ]
+                    );
+                }
+
+                if (!empty($request->registration)) {
+                    //If registration is passed then don't create token
+                    $token = null;
+                } else {
+                    $token = $auth->createToken($auth->name ?? '')->plainTextToken;
+                }
+
+                $customResponseData = ['token' => $token];
+
+                if ($referralAttempt !== null) {
+                    $customResponseData['referral_attempt'] = $referralAttempt;
+                }
+
+                ResponseService::successResponse('User logged-in successfully', $auth, $customResponseData);
+
+
+            } catch (Throwable $th) {
+                DB::rollBack();
+                ResponseService::logErrorResponse($th, "API Controller -> Signup");
+                ResponseService::errorResponse();
+            }
+        }
+}
