@@ -137,7 +137,7 @@
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover mb-0" id="referrals_table" aria-describedby="referralsSummary"
-                                   data-table="true" data-url="{{ route('referrals.list') }}"
+                                   data-toggle="table" data-url="{{ route('referrals.list') }}"
                                    data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50]"
                                    data-mobile-responsive="true" data-query-params="referralsQueryParams"
                                    data-sort-name="created_at" data-sort-order="desc">
@@ -199,7 +199,7 @@
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover mb-0" id="attempts_table" aria-describedby="attemptsSummary"
-                                   data-table="true" data-url="{{ route('referrals.attempts') }}"
+                                   data-toggle="table" data-url="{{ route('referrals.attempts') }}"
                                    data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50]"
                                    data-mobile-responsive="true" data-query-params="attemptsQueryParams"
                                    data-sort-name="created_at" data-sort-order="desc">

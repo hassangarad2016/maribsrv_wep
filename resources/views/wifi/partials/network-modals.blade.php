@@ -256,7 +256,7 @@
                 </div>
                 <div class="table-responsive">
                     <table id="wifi-network-batches-table" class="table table-hover align-middle"
-                           data-table="true"
+                           data-toggle="table"
                            data-search="false"
                            data-pagination="true"
                            data-page-size="5"

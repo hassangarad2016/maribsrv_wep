@@ -278,7 +278,7 @@
                 <div class="modal-body">
                     <table class="table table-borderless table-striped"
                            id="user_notification_list"
-                           data-table="true"
+                           data-toggle="table"
                            data-url="{{ route('customer.list') }}"
                            data-click-to-select="true"
                            data-side-pagination="server"

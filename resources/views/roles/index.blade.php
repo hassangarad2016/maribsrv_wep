@@ -23,7 +23,7 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-body">
-                            <table aria-describedby="mydesc" class='table' id='table_list' data-table="true"
+                            <table aria-describedby="mydesc" class='table' id='table_list' data-toggle="table"
                                    data-url="{{ route('roles.list') }}" data-click-to-select="true" data-side-pagination="server"
                                    data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
                                    data-show-columns="true" data-show-refresh="true" data-fixed-columns="true"

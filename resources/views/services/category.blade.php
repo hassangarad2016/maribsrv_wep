@@ -248,7 +248,7 @@
                                 class="table-borderless table-striped"
                                 aria-describedby="reviewsTableCaption"
                                 id="reviewsTable"
-                                data-table="true"
+                                data-toggle="table"
                                 data-url="{{ route('services.category.reviews', $category) }}"
                                 data-side-pagination="server"
                                 data-pagination="true"

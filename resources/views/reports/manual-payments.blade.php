@@ -173,7 +173,7 @@
 
                 <table class="table table-striped mb-0"
                        id="payment-requests-table"
-                       data-table="true"
+                       data-toggle="table"
                        data-url="{{ route('reports.payment-requests.list') }}"
                        data-side-pagination="server"
                        data-pagination="true"

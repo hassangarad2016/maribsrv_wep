@@ -68,7 +68,7 @@
                         <div class="table-responsive">
                             <table class="table table-borderless table-striped"
                                    id="metal_rates_table"
-                                   data-table="true"
+                                   data-toggle="table"
                                    data-url="{{ route('metal-rates.show') }}"
                                    data-click-to-select="true"
                                    data-side-pagination="server"

@@ -49,7 +49,7 @@
                                 <div class="form-group row ">
                                     <div class="col-12">
                                         <table class="table table-borderless table-striped" aria-describedby="mydesc"
-                                               id="table_list" data-table="true"
+                                               id="table_list" data-toggle="table"
                                                data-url="{{ route('slider.show',1) }}" data-click-to-select="true"
                                                data-side-pagination="server" data-pagination="true"
                                                data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
@@ -186,7 +186,7 @@
                             <div class="col-md-6">
                                 <h6 class="fw-semibold">{{ __('التجميع اليومي') }}</h6>
                                 <table id="slider_daily_metrics" class="table table-striped"
-                                       data-table="true" data-pagination="false" data-search="false"
+                                       data-toggle="table" data-pagination="false" data-search="false"
                                        data-show-export="true" data-export-options='{"fileName": "slider-daily-metrics"}'>
                                     <thead>
                                     <tr>
@@ -201,7 +201,7 @@
                             <div class="col-md-6">
                                 <h6 class="fw-semibold">{{ __('التجميع الأسبوعي') }}</h6>
                                 <table id="slider_weekly_metrics" class="table table-striped"
-                                       data-table="true" data-pagination="false" data-search="false"
+                                       data-toggle="table" data-pagination="false" data-search="false"
                                        data-show-export="true" data-export-options='{"fileName": "slider-weekly-metrics"}'>
                                     <thead>
                                     <tr>
@@ -216,7 +216,7 @@
                             <div class="col-md-6">
                                 <h6 class="fw-semibold">{{ __('حسب الحالة') }}</h6>
                                 <table id="slider_status_metrics" class="table table-striped"
-                                       data-table="true" data-pagination="false" data-search="false"
+                                       data-toggle="table" data-pagination="false" data-search="false"
                                        data-show-export="true" data-export-options='{"fileName": "slider-status-metrics"}'>
                                     <thead>
                                     <tr>
@@ -231,7 +231,7 @@
                             <div class="col-md-6">
                                 <h6 class="fw-semibold">{{ __('حسب نوع الواجهة') }}</h6>
                                 <table id="slider_interface_metrics" class="table table-striped"
-                                       data-table="true" data-pagination="false" data-search="false"
+                                       data-toggle="table" data-pagination="false" data-search="false"
                                        data-show-export="true" data-export-options='{"fileName": "slider-interface-metrics"}'>
                                     <thead>
                                     <tr>
