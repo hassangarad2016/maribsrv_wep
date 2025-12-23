@@ -9940,43 +9940,6 @@ public function storeRequestDevice(Request $request)
 
         $otpEnabled = filter_var(CachingService::getSystemSettings('whatsapp_otp_enabled') ?? false, FILTER_VALIDATE_BOOLEAN);
 
-        $user = User::where(function ($query) use ($phoneCandidates) {
-            foreach ($phoneCandidates as $candidate) {
-                $query->orWhere('mobile', $candidate);
-            }
-        })->first();
-
-        if (!$user) {
-            return ResponseService::errorResponse(
-                'أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ  أ¢â€¢ع¾أ¢â€¢â€کأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط¢آ» أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ§أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾ط·آ¯ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ ',
-                404
-            );
-        }
-
-        if (!$otpEnabled) {
-            $user->email_verified_at = now();
-            $user->is_verified = 1;
-            $user->save();
-
-            return ResponseService::successResponse('أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط¢â€ أ¢â€¢ع¾ط·آ´أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آµ (أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾أ¢â€¢â€“أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾أ¢â€“â€™ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ° أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط£آ¯).');
-        }
-
-        $otpRecord = OTP::where('otp', $request->otp)
-            ->where(function ($query) use ($phoneCandidates) {
-                foreach ($phoneCandidates as $candidate) {
-                    $query->orWhere('phone', $candidate);
-                }
-            })
-            ->latest()
-            ->first();
-
-        if (!$otpRecord) {
-            return ResponseService::errorResponse(
-                'أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€“â€œ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾أ¢â€¢â€کأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€¢ع¾أ¢â€¢طŒأ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آµ أ¢â€¢ع¾ط·آ«أ¢â€‌ع©ط£ع¾ أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ¯ أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£آ¢أ¢â€‌ع©ط¢â€  أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾ط·آ³أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾أ¢â€“â€™ أ¢â€¢ع¾أ¢â€¢آ£أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط£آ§',
-                404
-            );
-        }
-
         $pendingSignup = null;
         if ($request->filled('pending_signup_id')) {
             $pendingSignup = PendingSignup::find($request->pending_signup_id);
@@ -10002,8 +9965,45 @@ public function storeRequestDevice(Request $request)
             }
         }
 
-        if ($pendingSignup) {
-            return $this->finalizePendingSignup($pendingSignup);
+        $user = User::where(function ($query) use ($phoneCandidates) {
+            foreach ($phoneCandidates as $candidate) {
+                $query->orWhere('mobile', $candidate);
+            }
+        })->first();
+
+        if (!$user && !$pendingSignup) {
+            return ResponseService::errorResponse(
+                'أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط¢آ«أ¢â€¢ع¾ط¢آ»أ¢â€‌ع©ط£آ  أ¢â€¢ع¾أ¢â€¢â€کأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ´أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط¢آ» أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ§أ¢â€¢ع¾أ¢â€“â€کأ¢â€¢ع¾ط·آ¯ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ ',
+                404
+            );
+        }
+
+        if (!$otpEnabled) {
+            if ($pendingSignup && !$user) {
+                return $this->finalizePendingSignup($pendingSignup);
+            }
+
+            $user->email_verified_at = now();
+            $user->is_verified = 1;
+            $user->save();
+
+            return ResponseService::successResponse('أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾ط·آ°أ¢â€‌ع©ط¢â€ أ¢â€¢ع¾ط·آ´أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آµ (أ¢â€¢ع¾ط·آ²أ¢â€‌ع©ط£آ  أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾أ¢â€¢â€“أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط¢â€‍ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾ط·آ°أ¢â€¢ع¾أ¢â€“â€™ أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾أ¢â€‌â€ڑأ¢â€¢ع¾ط·آ¯أ¢â€¢ع¾ط·آ° أ¢â€¢ع¾ط·آµأ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط£آ¯).');
+        }
+
+        $otpRecord = OTP::where('otp', $request->otp)
+            ->where(function ($query) use ($phoneCandidates) {
+                foreach ($phoneCandidates as $candidate) {
+                    $query->orWhere('phone', $candidate);
+                }
+            })
+            ->latest()
+            ->first();
+
+        if (!$otpRecord) {
+            return ResponseService::errorResponse(
+                'أ¢â€¢ع¾أ¢â€“â€™أ¢â€‌ع©ط£آ أ¢â€¢ع¾أ¢â€“â€œ أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ²أ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ©أ¢â€‌ع©ط£آ© أ¢â€¢ع¾أ¢â€¢â€کأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾أ¢â€“â€™ أ¢â€¢ع¾أ¢â€¢طŒأ¢â€¢ع¾ط·آµأ¢â€‌ع©ط£آ¨أ¢â€¢ع¾ط·آµ أ¢â€¢ع¾ط·آ«أ¢â€‌ع©ط£ع¾ أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾ط·آ¯ أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط£آ أ¢â€‌ع©ط£آ¢أ¢â€‌ع©ط¢â€  أ¢â€¢ع¾ط·آ¯أ¢â€‌ع©ط¢â€‍أ¢â€¢ع¾أ¢â€¢آ£أ¢â€¢ع¾ط·آ³أ¢â€‌ع©ط£ع¾أ¢â€¢ع¾أ¢â€“â€™ أ¢â€¢ع¾أ¢â€¢آ£أ¢â€‌ع©ط¢â€‍أ¢â€‌ع©ط£آ¨أ¢â€‌ع©ط£آ§',
+                404
+            );
         }
 
         if ($otpRecord->expires_at < now()->timestamp) {
@@ -10015,6 +10015,10 @@ public function storeRequestDevice(Request $request)
 
         $otpRecord->expires_at = $otpRecord->expires_at - 270;
         $otpRecord->save();
+
+        if ($pendingSignup && !$user) {
+            return $this->finalizePendingSignup($pendingSignup);
+        }
 
 
         $user->email_verified_at = now();
