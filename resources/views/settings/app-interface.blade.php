@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @section('title')
-    {{ __('ๆวฬๅษ วแสุศํÞ') }}
+    {{ __('ูุงุฌูุฉ ุงูุชุทุจูู') }}
 @endsection
 
 @section('page-title')
@@ -34,10 +34,10 @@
                             <table class="table align-middle">
                                 <thead>
                                     <tr>
-                                        <th>วแฺไีั</th>
-                                        <th class="text-center">ลูๅวั</th>
-                                        <th class="text-center">สÝฺํแ</th>
-                                        <th>ัำวแษ วแลํÞวÝ วแใฤÞส</th>
+                                        <th>ุงูุนูุตุฑ</th>
+                                        <th class="text-center">ุฅุธูุงุฑ</th>
+                                        <th class="text-center">ุชูุนูู</th>
+                                        <th>ุฑุณุงูุฉ ุงูุฅููุงู ุงูู…ุคูุช</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -65,7 +65,7 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <input type="text" name="app_interface[sections][{{ $sectionKey }}][message]" class="form-control form-control-sm" value="{{ $message }}" placeholder="ัำวแษ สูๅั ฺไฯ ใอวๆแษ วแฯฮๆแ">
+                                                <input type="text" name="app_interface[sections][{{ $sectionKey }}][message]" class="form-control form-control-sm" value="{{ $message }}" placeholder="ุฑุณุงูุฉ ุชุธูุฑ ุนูุฏ ู…ุญุงููุฉ ุงูุฏุฎูู">
                                             </td>
                                         </tr>
                                     @endforeach
@@ -79,16 +79,16 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <div class="divider pt-3">
-                        <h6 class="divider-text">วแรÞำวใ วแัฦํำํษ (วแÝฦวส)</h6>
+                        <h6 class="divider-text">ุงูุฃูุณุงู… ุงูุฑุฆูุณูุฉ (ุงููุฆุงุช)</h6>
                     </div>
                     <div class="table-responsive">
                         <table class="table align-middle">
                             <thead>
                                 <tr>
-                                    <th>วแÞำใ</th>
-                                    <th class="text-center">ลูๅวั</th>
-                                    <th class="text-center">สÝฺํแ</th>
-                                    <th>ัำวแษ วแลํÞวÝ วแใฤÞส</th>
+                                    <th>ุงููุณู…</th>
+                                    <th class="text-center">ุฅุธูุงุฑ</th>
+                                    <th class="text-center">ุชูุนูู</th>
+                                    <th>ุฑุณุงูุฉ ุงูุฅููุงู ุงูู…ุคูุช</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -116,12 +116,12 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <input type="text" name="app_interface[categories][{{ $category->id }}][message]" class="form-control form-control-sm" value="{{ $message }}" placeholder="ัำวแษ สูๅั ฺไฯ ใอวๆแษ วแฯฮๆแ">
+                                            <input type="text" name="app_interface[categories][{{ $category->id }}][message]" class="form-control form-control-sm" value="{{ $message }}" placeholder="ุฑุณุงูุฉ ุชุธูุฑ ุนูุฏ ู…ุญุงููุฉ ุงูุฏุฎูู">
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center">แว สๆฬฯ รÞำวใ ัฦํำํษ.</td>
+                                        <td colspan="4" class="text-center">ูุง ุชูุฌุฏ ุฃูุณุงู… ุฑุฆูุณูุฉ.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -131,7 +131,7 @@
             </div>
 
             <div class="mt-3">
-                <button type="submit" class="btn btn-primary">อÝู วแสÛํํัวส</button>
+                <button type="submit" class="btn btn-primary">ุญูุธ ุงูุชุบููุฑุงุช</button>
             </div>
         </form>
     </section>
