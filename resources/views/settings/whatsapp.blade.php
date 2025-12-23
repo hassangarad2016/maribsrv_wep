@@ -60,14 +60,13 @@
                                 <div class="col-12 mb-3">
                                     <label for="whatsapp_preview_phone" class="form-label">{{ __('رقم الهاتف للمعاينة') }}</label>
                                     <input type="text" id="whatsapp_preview_phone" class="form-control" placeholder="{{ __('مثال: +9677xxxxxxx') }}">
-                                    <small class="text-muted">{{ __('سيتم استبدال :otp بالرمز 123456 للعرض فقط.') }}</small>
+                                    <small class="text-muted">{{ __('سيتم استبدال :otp بالرمز XXXXX للعرض فقط.') }}</small>
                                 </div>
                                 <div class="col-12 col-lg-6 mb-3">
                                     <div class="border rounded-3 p-3 bg-light">
                                         <div class="text-muted small mb-2">{{ __('سيصل إلى') }} <span data-preview-phone></span></div>
                                         <div class="fw-semibold mb-2">{{ __('رسالة المستخدم الجديد') }}</div>
                                         <div id="preview_new_user" class="text-wrap" style="white-space: pre-wrap;"></div>
-                                        <div id="preview_new_user_hint" class="text-danger small mt-2"></div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-lg-6 mb-3">
@@ -75,7 +74,6 @@
                                         <div class="text-muted small mb-2">{{ __('سيصل إلى') }} <span data-preview-phone></span></div>
                                         <div class="fw-semibold mb-2">{{ __('رسالة استعادة كلمة المرور') }}</div>
                                         <div id="preview_forgot_password" class="text-wrap" style="white-space: pre-wrap;"></div>
-                                        <div id="preview_forgot_password_hint" class="text-danger small mt-2"></div>
                                     </div>
                                 </div>
                             </div>
@@ -112,10 +110,8 @@
             const previewPhoneLabels = document.querySelectorAll('[data-preview-phone]');
             const previewNew = document.getElementById('preview_new_user');
             const previewForgot = document.getElementById('preview_forgot_password');
-            const previewNewHint = document.getElementById('preview_new_user_hint');
-            const previewForgotHint = document.getElementById('preview_forgot_password_hint');
 
-            const otpSample = '123456';
+            const otpSample = 'XXXXX';
             const defaultPhone = '+9677xxxxxxx';
             const otpBadge = '<span class="badge bg-primary text-white">' + otpSample + '</span>';
             const escapeMap = {
@@ -145,18 +141,6 @@
 
                 previewNew.innerHTML = escapeHtml(newRaw).replace(/:otp/g, otpBadge);
                 previewForgot.innerHTML = escapeHtml(forgotRaw).replace(/:otp/g, otpBadge);
-
-                if (previewNewHint) {
-                    previewNewHint.textContent = newRaw.includes(':otp')
-                        ? ''
-                        : '{{ __('تنبيه: لا يوجد :otp في النص، لذلك لن يظهر كود التحقق.') }}';
-                }
-
-                if (previewForgotHint) {
-                    previewForgotHint.textContent = forgotRaw.includes(':otp')
-                        ? ''
-                        : '{{ __('تنبيه: لا يوجد :otp في النص، لذلك لن يظهر كود التحقق.') }}';
-                }
             };
 
             [newMessage, forgotMessage, previewPhone].forEach((element) => {
