@@ -39,7 +39,13 @@ class SettingController extends Controller {
     public function page() {
         ResponseService::noPermissionThenSendJson('settings-update');
         $type = last(request()->segments());
-        $settings = CachingService::getSystemSettings()->toArray();
+        $settings = CachingService::getSystemSettings();
+        if ($settings instanceof \Illuminate\Support\Collection) {
+            $settings = $settings->toArray();
+        }
+        if (!is_array($settings)) {
+            $settings = [];
+        }
         if (!empty($settings['place_api_key']) && config('app.demo_mode')) {
             $settings['place_api_key'] = "**************************";
         }
@@ -50,8 +56,14 @@ class SettingController extends Controller {
 
     public function appInterface()
     {
-        ResponseService::noPermissionThenSendJson('settings-update');
-        $settings = CachingService::getSystemSettings()->toArray();
+        ResponseService::noPermissionThenRedirect('settings-update');
+        $settings = CachingService::getSystemSettings();
+        if ($settings instanceof \Illuminate\Support\Collection) {
+            $settings = $settings->toArray();
+        }
+        if (!is_array($settings)) {
+            $settings = [];
+        }
         $interfaceSettings = $this->parseAppInterfaceSettings($settings);
         $sectionGroups = $this->appInterfaceSectionGroups();
 
