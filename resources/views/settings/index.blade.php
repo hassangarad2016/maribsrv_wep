@@ -38,6 +38,24 @@
     </div>
     @endif
 
+    @if(Route::has('settings.app-interface.index'))
+    <div class="col-xxl-3 col-xl-4 col-lg-6 col-md-12 mb-3">
+      <a href="{{ route('settings.app-interface.index') }}" class="card setting_active_tab h-100" style="text-decoration:none;">
+        <div class="content d-flex h-100">
+          <div class="row mx-2">
+            <div class="provider_a test">
+              <i class="fas fa-mobile-alt text-dark icon_font_size"></i>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <h5 class="title">واجهة التطبيق</h5>
+          <div>التحكم في أقسام وخدمات الواجهة <i class="fas fa-arrow-right mt-2 arrow_icon"></i></div>
+        </div>
+      </a>
+    </div>
+    @endif
+
 
 
     @if(Route::has('settings.invoice.index'))

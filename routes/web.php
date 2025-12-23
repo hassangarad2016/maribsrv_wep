@@ -869,6 +869,7 @@ Route::group(['prefix' => 'settings'], static function () {
         Route::post('/store', [SettingController::class, 'store'])->name('settings.store');
 
         Route::get('system', [SettingController::class, 'page'])->name('settings.system');
+        Route::get('app-interface', [SettingController::class, 'appInterface'])->name('settings.app-interface.index');
 
         Route::get('invoice', [SettingController::class, 'page'])->name('settings.invoice.index');
 

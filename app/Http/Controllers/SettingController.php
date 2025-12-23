@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ManualBank;
 use App\Models\Setting;
 use App\Models\PaymentConfiguration;
+use App\Models\Category;
 use App\Services\CachingService;
 use App\Services\FileService;
 use App\Services\HelperService;
@@ -45,6 +46,23 @@ class SettingController extends Controller {
         $stripe_currencies = ["USD", "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM", "BBD", "BDT", "BGN", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BWP", "BYN", "BZD", "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CVE", "CZK", "DJF", "DKK", "DOP", "DZD", "EGP", "ETB", "EUR", "FJD", "FKP", "GBP", "GEL", "GIP", "GMD", "GNF", "GTQ", "GYD", "HKD", "HNL", "HTG", "HUF", "IDR", "ILS", "INR", "ISK", "JMD", "JPY", "KES", "KGS", "KHR", "KMF", "KRW", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL", "MAD", "MDL", "MGA", "MKD", "MMK", "MNT", "MOP", "MRO", "MUR", "MVR", "MWK", "MXN", "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "PAB", "PEN", "PGK", "PHP", "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SBD", "SCR", "SEK", "SGD", "SHP", "SLE", "SOS", "SRD", "STD", "SZL", "THB", "TJS", "TOP", "TTD", "TWD", "TZS", "UAH", "UGX", "UYU", "UZS", "VND", "VUV", "WST", "XAF", "XCD", "XOF", "XPF", "YER", "ZAR", "ZMW"];
         $languages = CachingService::getLanguages();
         return view('settings.' . $type, compact('settings', 'type', 'languages', 'stripe_currencies'));
+    }
+
+    public function appInterface()
+    {
+        ResponseService::noPermissionThenSendJson('settings-update');
+        $settings = CachingService::getSystemSettings()->toArray();
+        $interfaceSettings = $this->parseAppInterfaceSettings($settings);
+        $sectionGroups = $this->appInterfaceSectionGroups();
+
+        $categories = Category::query()
+            ->select(['id', 'name', 'parent_category_id', 'sequence'])
+            ->whereNull('parent_category_id')
+            ->orderBy('sequence')
+            ->orderBy('id')
+            ->get();
+
+        return view('settings.app-interface', compact('settings', 'interfaceSettings', 'sectionGroups', 'categories'));
     }
 
     public function store(Request $request) {
@@ -152,6 +170,13 @@ class SettingController extends Controller {
                 $inputs['currency_symbol'] = Currency::preferredSymbol(
                     $inputs['currency_symbol'],
                     $inputs['currency_code'] ?? config('app.currency')
+                );
+            }
+
+            if (array_key_exists('app_interface', $inputs) && is_array($inputs['app_interface'])) {
+                $inputs['app_interface'] = json_encode(
+                    $this->normalizeAppInterfacePayload($inputs['app_interface']),
+                    JSON_UNESCAPED_UNICODE
                 );
             }
 
@@ -519,6 +544,110 @@ class SettingController extends Controller {
             ResponseService::logErrorResponse($throwable, 'Settings Controller -> eastYemenBankSettings');
             ResponseService::errorResponse('Unable to update East Yemen Bank gateway settings.');
         }
+    }
+
+    private function parseAppInterfaceSettings(array $settings): array
+    {
+        $raw = $settings['app_interface'] ?? null;
+        if ($raw === null || $raw === '') {
+            return [];
+        }
+
+        if (is_array($raw)) {
+            return $raw;
+        }
+
+        if (! is_string($raw)) {
+            return [];
+        }
+
+        try {
+            $decoded = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            return [];
+        }
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    private function normalizeAppInterfacePayload(array $payload): array
+    {
+        $normalized = [
+            'sections' => [],
+            'categories' => [],
+        ];
+
+        foreach ($payload['sections'] ?? [] as $key => $value) {
+            $sectionKey = is_string($key) ? trim($key) : (string) $key;
+            if ($sectionKey === '') {
+                continue;
+            }
+
+            $normalized['sections'][$sectionKey] = [
+                'visible' => $this->normalizeSettingToggle($value['visible'] ?? 1, true),
+                'enabled' => $this->normalizeSettingToggle($value['enabled'] ?? 1, true),
+                'message' => $this->normalizeSettingMessage($value['message'] ?? ''),
+            ];
+        }
+
+        foreach ($payload['categories'] ?? [] as $key => $value) {
+            $categoryId = is_numeric($key) ? (int) $key : null;
+            if (! $categoryId || $categoryId <= 0) {
+                continue;
+            }
+
+            $normalized['categories'][(string) $categoryId] = [
+                'visible' => $this->normalizeSettingToggle($value['visible'] ?? 1, true),
+                'enabled' => $this->normalizeSettingToggle($value['enabled'] ?? 1, true),
+                'message' => $this->normalizeSettingMessage($value['message'] ?? ''),
+            ];
+        }
+
+        return $normalized;
+    }
+
+    private function normalizeSettingToggle(mixed $value, bool $default = true): int
+    {
+        if ($value === null || $value === '') {
+            return $default ? 1 : 0;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ? 1 : 0;
+    }
+
+    private function normalizeSettingMessage(mixed $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        return trim((string) $value);
+    }
+
+    private function appInterfaceSectionGroups(): array
+    {
+        return [
+            __('الخدمات أسفل السلايدر') => [
+                'request_ad'      => __('اطلب إعلانك'),
+                'services_local'  => __('الخدمات المحلية'),
+                'services_medical' => __('الخدمات الطبية'),
+                'services_student' => __('الخدمات الطلابية'),
+                'jobs'            => __('الوظائف'),
+                'events_offers'   => __('العروض والفعاليات'),
+                'marib_lost'      => __('مفقودات مارب'),
+                'marib_guide'     => __('دليل مارب'),
+                'services_all'    => __('كل الخدمات'),
+                'other_services'  => __('الخدمات الأخرى'),
+            ],
+            __('الأقسام الرئيسية') => [
+                'real_estate_services' => __('العقارات'),
+                'tourism_services'     => __('السياحة'),
+                'e_store'              => __('المتاجر'),
+                'shein_products'       => __('منتجات شي إن'),
+                'computer_section'     => __('قسم الكمبيوتر'),
+                'public_ads'           => __('إعلانات الجمهور'),
+            ],
+        ];
     }
 
 
