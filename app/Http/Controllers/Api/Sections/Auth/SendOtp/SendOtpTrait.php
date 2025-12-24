@@ -167,7 +167,7 @@ trait SendOtpTrait
         $otpEnabled = filter_var($settings['whatsapp_otp_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         if (!$otpEnabled) {
-            return ResponseService::errorResponse('WhatsApp OTP is disabled. Enable it from settings.');
+            return ResponseService::errorResponse('خدمة إرسال رمز التحقق عبر واتساب غير مفعلة.');
         }
 
         $rawCountryCode = (string) $request->country_code;
@@ -176,7 +176,7 @@ trait SendOtpTrait
         $phoneDigits = preg_replace('/\D+/', '', $rawPhone);
 
         if ($countryCodeDigits === '' || $phoneDigits === '') {
-            return ResponseService::validationError('Invalid phone number provided.');
+            return ResponseService::validationError('رقم الهاتف غير صالح.');
         }
 
         $normalizedPhone = $countryCodeDigits . $phoneDigits;
@@ -184,17 +184,33 @@ trait SendOtpTrait
         $deliveryPhone = $composite !== '' ? $composite : $normalizedPhone;
 
 
-        $check = $whatsApp->checkNumber($deliveryPhone);
+        try {
+            $check = $whatsApp->checkNumber($deliveryPhone);
+        } catch (Throwable $th) {
+            Log::warning('WhatsApp OTP check failed', [
+                'phone' => $deliveryPhone,
+                'error' => $th->getMessage(),
+            ]);
+            return ResponseService::errorResponse('تعذر التحقق من رقم واتساب حالياً. حاول مرة أخرى.');
+        }
+
+        if (!is_array($check) || !array_key_exists('status', $check)) {
+            Log::warning('WhatsApp OTP check returned invalid response', [
+                'phone' => $deliveryPhone,
+                'response' => $check,
+            ]);
+            return ResponseService::errorResponse('تعذر التحقق من رقم واتساب حالياً. حاول مرة أخرى.');
+        }
 
         if (!($check['status'] ?? false)) {
-            return ResponseService::errorResponse('Phone number not found on WhatsApp. Provide a WhatsApp-enabled number.');
+            return ResponseService::errorResponse('الرقم غير مسجل في واتساب.');
         }
 
         $otp = rand(100000, 999999);
         $type = $request->type === 'new_user' ? 'new_user' : 'forgot_password';
 
 
-        OTP::create([
+        $otpRecord = OTP::create([
             'phone' => $normalizedPhone,
             'otp' => $otp,
             'type' => $type,
@@ -223,8 +239,42 @@ trait SendOtpTrait
         $messageTemplate = $templates[$type];
         $message = str_replace(':otp', $otp, $messageTemplate);
 
-        SendOtpWhatsAppJob::dispatch($deliveryPhone, $message);
+        try {
+            $sendResponse = $whatsApp->sendMessage($deliveryPhone, $message);
+        } catch (Throwable $th) {
+            Log::warning('WhatsApp OTP send failed', [
+                'phone' => $deliveryPhone,
+                'error' => $th->getMessage(),
+            ]);
+            if ($otpRecord) {
+                $otpRecord->delete();
+            }
+            return ResponseService::errorResponse('تعذر إرسال رمز التحقق عبر واتساب. حاول مرة أخرى.');
+        }
 
+        if (!is_array($sendResponse) || !array_key_exists('status', $sendResponse)) {
+            Log::warning('WhatsApp OTP send returned invalid response', [
+                'phone' => $deliveryPhone,
+                'response' => $sendResponse,
+            ]);
+            if ($otpRecord) {
+                $otpRecord->delete();
+            }
+            return ResponseService::errorResponse('تعذر إرسال رمز التحقق عبر واتساب. حاول مرة أخرى.');
+        }
+
+        if (!($sendResponse['status'] ?? false)) {
+            $providerMessage = $sendResponse['message'] ?? null;
+            $messageText = (is_string($providerMessage) && trim($providerMessage) !== '')
+                ? $providerMessage
+                : 'تعذر إرسال رمز التحقق عبر واتساب. حاول مرة أخرى.';
+            if ($otpRecord) {
+                $otpRecord->delete();
+            }
+            return ResponseService::errorResponse($messageText);
+        }
+
+        return ResponseService::successResponse('تم إرسال رمز التحقق عبر واتساب.');
 
         return ResponseService::successResponse('أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أ¢آ•آ–أ¢آ•آھأکآھأ¢آ”آ¬أ¢آ–آ“أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ€أƒآ®أ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أکآ±أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أکآ«أ¢آ•آھأکآھأ¢آ”آ¬أکآ¨ أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أ¢آ•آ–أ¢آ•آھأکآھأ¢آ”آ¬أکآµأ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ€أ‚آ£أ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ„أکآھأ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ€أƒآ®أ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آŒأ™آ‘أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أ¢آ•آ–أ¢آ•آھأکآھأ¢آ”آ¬أ‚آ»أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ€أƒآ®أ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أکآ±أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ€أ‚آچ أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ€أ‚آ£أ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ„أکآھأ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ€أƒآ®أ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أکآ±أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أکآ«أ¢آ•آھأکآھأ¢آ”آ¬أکآ¨أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ€أ‚آ£أ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¼أƒآ´ أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أ¢آ•آ–أ¢آ•آھأکآھأ¢آ”آ¬أ‚آ»أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ€أƒآ®أ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أکآ±أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ€أ‚آچأ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أ¢آ•آ–أ¢آ•آھأکآھأ¢آ”آ¬أ¢آ–آ“أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أ¢آ•آ–أ¢آ•آھأکآھأ¢آ”آ¬أ¢آ•آ،أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ€أƒآ®أ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أکآ±أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أکآ«أ¢آ•آھأکآھأ¢آ”آ¬أکآ±أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ€أƒآ®أ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أکآ±أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أکآ«أ¢آ•آھأکآھأ¢آ”آ¬أکآ± أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأکآھأ¢آ”آ¬أکآ«أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أ¢آ•آ–أ¢آ•آھأکآھأ¢آ”آ¬أ¢آ–آ‘أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ€أ‚آ£أ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ„أکآھ WhatsApp أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أ¢آ•آ–أ¢آ•آھأکآھأ¢آ”آ¬أ¢آ–آ‘أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أکآ¸أ‚آ€أƒآ®أ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أکآ±أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآ¨أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أ¢آ•آ–أ¢آ•آھأکآھأ¢آ”آ¬أ¢آ”آ¤أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أ¢آ•آ–أ¢آ•آھأکآھأ¢آ”آ¬أ‚آ»أ¢آ•آھأکآ«أ¢آ”آ¬أکآھأ¢آ”آœأکآھأکآ¸أƒآ©أکآ´أ¢آ”آ¬أکآھأ¢آ•آھأ¢آ•آ£أ¢آ”آ¬أ¢آ•آ›أ¢آ•آھأ¢آ•آ–أ¢آ”آ¬أ¢آ•آ–أ¢آ•آھأکآھأ¢آ”آ¬أ¢آ•آ،.');
     }

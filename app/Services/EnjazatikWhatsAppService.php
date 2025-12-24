@@ -26,6 +26,8 @@ class EnjazatikWhatsAppService
     public function checkNumber(string $phone): array
     {
         $response = Http::withToken($this->token)
+            ->timeout(10)
+            ->connectTimeout(5)
             ->post($this->baseUrl . 'check-number', ['number' => $phone]);
 
         return $response->json();
@@ -34,6 +36,8 @@ class EnjazatikWhatsAppService
     public function sendMessage(string $phone, string $message): array
     {
         $response = Http::withToken($this->token)
+            ->timeout(10)
+            ->connectTimeout(5)
             ->post($this->baseUrl . 'send-message', [
                 'number' => $phone,
                 'message' => $message,
