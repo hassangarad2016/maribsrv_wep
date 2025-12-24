@@ -158,7 +158,10 @@ trait DeleteItemTrait
             if ($validator->fails()) {
                 ResponseService::errorResponse($validator->errors()->first());
             }
-            $item = Item::owner()->with('gallery_images')->withTrashed()->findOrFail($request->id);
+            $item = Item::owner()->with('gallery_images')->withTrashed()->find($request->id);
+            if (!$item) {
+                ResponseService::successResponse("Item already deleted");
+            }
             ImageVariantService::deleteStoredVariants([
                 $item->getRawOriginal('image'),
                 $item->getRawOriginal('thumbnail_url'),
