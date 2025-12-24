@@ -180,16 +180,38 @@ trait AddItemTrait
             $requiresProductLink = $this->shouldRequireProductLink($categoryId);
 
             $allowedCustomFieldIds = collect();
+            $categoryIdsForFields = [];
 
             if ($categoryId !== null) {
-                $categoryWithCustomFields = Category::query()
+                $categoryIdsForFields[] = $categoryId;
+            }
+
+            if ($request->filled('all_category_ids')) {
+                $rawCategoryIds = $request->input('all_category_ids');
+                if (is_array($rawCategoryIds)) {
+                    $categoryIdsForFields = array_merge($categoryIdsForFields, $rawCategoryIds);
+                } elseif (is_string($rawCategoryIds)) {
+                    preg_match_all('/\d+/', $rawCategoryIds, $matches);
+                    if (! empty($matches[0])) {
+                        $categoryIdsForFields = array_merge($categoryIdsForFields, $matches[0]);
+                    }
+                }
+            }
+
+            $categoryIdsForFields = array_values(array_unique(array_filter(array_map('intval', $categoryIdsForFields))));
+
+            if (! empty($categoryIdsForFields)) {
+                $categoryCollection = Category::query()
                     ->with(['custom_fields' => static function ($query) {
                         $query->select('id', 'category_id', 'custom_field_id');
                     }])
-                    ->find($categoryId);
+                    ->whereIn('id', $categoryIdsForFields)
+                    ->get();
 
-                if ($categoryWithCustomFields !== null) {
-                    $allowedCustomFieldIds = $categoryWithCustomFields->custom_fields
+                if ($categoryCollection->isNotEmpty()) {
+                    $allowedCustomFieldIds = $categoryCollection
+                        ->pluck('custom_fields')
+                        ->flatten()
                         ->pluck('custom_field_id')
                         ->filter(static fn ($id) => $id !== null)
                         ->map(static fn ($id) => (int) $id)
