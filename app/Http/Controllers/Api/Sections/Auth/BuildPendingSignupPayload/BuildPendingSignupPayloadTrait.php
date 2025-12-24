@@ -154,10 +154,21 @@ trait BuildPendingSignupPayloadTrait
         $accountType = (int) ($request->account_type ?? User::ACCOUNT_TYPE_CUSTOMER);
         $password = $request->password ?? Str::random(12);
 
+        $rawEmail = $request->email;
+        $trimmedEmail = is_string($rawEmail) ? trim($rawEmail) : '';
+        if ($trimmedEmail === '' ||
+            strtolower($trimmedEmail) === 'null' ||
+            strtolower($trimmedEmail) === 'not provided') {
+            $rawEmail = $this->generatePhoneSignupEmail(
+                $request->country_code,
+                $request->mobile
+            );
+        }
+
         $userData = [
             'name' => $request->name,
             'mobile' => $request->mobile,
-            'email' => $request->email,
+            'email' => $rawEmail,
             'password' => Hash::make($password),
             'account_type' => $accountType,
             'country_code' => $request->country_code,
