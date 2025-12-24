@@ -233,7 +233,7 @@ trait VerifyOtpTrait
 
         if (!$otpEnabled) {
             if ($pendingSignup && !$user) {
-                if ($pendingAccountType === User::ACCOUNT_TYPE_REAL_ESTATE) {
+                if (in_array($pendingAccountType, [User::ACCOUNT_TYPE_REAL_ESTATE, User::ACCOUNT_TYPE_SELLER], true)) {
                     $pendingPayload = $pendingSignup->payloadAsArray();
                     $completionToken = $pendingPayload['completion_token'] ?? Str::random(40);
                     $pendingPayload['completion_token'] = $completionToken;
@@ -290,7 +290,7 @@ trait VerifyOtpTrait
         $otpRecord->save();
 
         if ($pendingSignup && !$user) {
-            if ($pendingAccountType === User::ACCOUNT_TYPE_REAL_ESTATE) {
+            if (in_array($pendingAccountType, [User::ACCOUNT_TYPE_REAL_ESTATE, User::ACCOUNT_TYPE_SELLER], true)) {
                 $pendingPayload = $pendingSignup->payloadAsArray();
                 $completionToken = $pendingPayload['completion_token'] ?? Str::random(40);
                 $pendingPayload['completion_token'] = $completionToken;

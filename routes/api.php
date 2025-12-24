@@ -244,7 +244,8 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
     Route::get('wallet/recipients/lookup', [ApiController::class, 'walletRecipientLookup']);
     Route::get('wallet/recipients/{recipient}', [ApiController::class, 'walletRecipient'])
         ->whereNumber('recipient');
-    Route::get('store-gateways', [StoreGatewayController::class, 'index']);
+    Route::get('store-gateways', [StoreGatewayController::class, 'index'])
+        ->withoutMiddleware('auth:sanctum');
     Route::get('store-gateway-accounts', [StoreGatewayAccountController::class, 'index']);
     Route::post('store-gateway-accounts', [StoreGatewayAccountController::class, 'store']);
     Route::match(['put', 'patch'], 'store-gateway-accounts/{storeGatewayAccount}', [StoreGatewayAccountController::class, 'update'])
@@ -254,7 +255,8 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
 
     Route::prefix('store')->group(function (): void {
         Route::get('onboarding', [StoreOnboardingController::class, 'show']);
-        Route::post('onboarding', [StoreOnboardingController::class, 'store']);
+        Route::post('onboarding', [StoreOnboardingController::class, 'store'])
+            ->withoutMiddleware('auth:sanctum');
     });
 
     Route::get('manual-banks', [ApiController::class, 'getManualBanks']);

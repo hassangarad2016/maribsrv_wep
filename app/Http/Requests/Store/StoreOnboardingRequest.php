@@ -16,7 +16,12 @@ class StoreOnboardingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        if ($this->user() !== null) {
+            return true;
+        }
+
+        return $this->filled('pending_signup_id') &&
+            $this->filled('pending_signup_token');
     }
 
     /**

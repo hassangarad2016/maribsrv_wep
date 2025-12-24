@@ -189,15 +189,20 @@ class ItemController extends Controller {
             ])
             ->filter();
 
-        $customFields = CustomField::whereHas('custom_field_category', function ($q) use ($categoryIds) {
-            $q->whereIn('category_id', $categoryIds);
+        $selectedCategoryId = (int) $request->get('category_id', 4);
+        if (! in_array($selectedCategoryId, $categoryIds, true)) {
+            $selectedCategoryId = 4;
+        }
+
+        $customFields = CustomField::whereHas('custom_field_category', function ($q) use ($selectedCategoryId) {
+            $q->where('category_id', $selectedCategoryId);
         })->where('status', 1)->orderBy('sequence')->get();
 
         return view('items.create_shein', [
             'categories' => $categories,
             'customFields' => $customFields,
             'categoryIcons' => $categoryIcons,
-            'selectedCategoryId' => (int) $request->get('category_id', 4),
+            'selectedCategoryId' => $selectedCategoryId,
             'sizeCatalog' => $this->defaultSizeCatalog(),
         ]);
 
@@ -374,8 +379,13 @@ class ItemController extends Controller {
             ]);
         }
 
-        $customFields = CustomField::whereHas('custom_field_category', function ($q) use ($categoryIds) {
-            $q->whereIn('category_id', $categoryIds);
+        $selectedCategoryId = (int) $item->category_id;
+        if (! in_array($selectedCategoryId, $categoryIds, true)) {
+            $selectedCategoryId = 4;
+        }
+
+        $customFields = CustomField::whereHas('custom_field_category', function ($q) use ($selectedCategoryId) {
+            $q->where('category_id', $selectedCategoryId);
         })->where('status', 1)->orderBy('sequence')->get();
             
         return view('items.edit_shein', compact('item', 'categories', 'customFields'));
