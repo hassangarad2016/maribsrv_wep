@@ -166,6 +166,8 @@ trait GetItemTrait
             'custom_fields',
         ];
 
+        $isMyItemsRequest = $request->is('api/my-items');
+
         $hasIdentifier = false;
         foreach ($guardFields as $field) {
             if ($request->filled($field)) {
@@ -174,7 +176,7 @@ trait GetItemTrait
             }
         }
 
-        if (! $hasIdentifier && ! $request->filled('view')) {
+        if (! $hasIdentifier && ! $request->filled('view') && ! $isMyItemsRequest) {
             return ResponseService::successResponse('OK', [
                 'data' => [],
                 'total' => 0,
@@ -232,8 +234,6 @@ trait GetItemTrait
             if ($isSummaryView) {
                 Log::info('getItem.params', $request->all());
             }
-
-            $isMyItemsRequest = $request->is('api/my-items');
 
             // If this is an e_store context and store_id is missing, infer it from user_id
             if ($request->interface_type === 'e_store'
