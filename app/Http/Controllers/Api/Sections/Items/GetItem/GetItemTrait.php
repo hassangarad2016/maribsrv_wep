@@ -51,6 +51,7 @@ use App\Models\ServiceCustomFieldValue;
 use App\Models\ServiceRequest;
 use App\Models\ServiceReview;
 use App\Models\Setting;
+use App\Models\Store;
 use Illuminate\Pagination\AbstractPaginator;
 use App\Services\DelegateNotificationService;
 use App\Models\Slider;
@@ -278,9 +279,12 @@ trait GetItemTrait
         $interfaceTypeFilter = null;
         $interfaceTypeVariants = [];
         $interfaceTypeCategoryIds = [];
+        $hasInterfaceTypeColumn = true;
 
         if ($request->filled('interface_type')) {
             $interfaceTypeFilter = InterfaceSectionService::normalizeSectionType($request->input('interface_type'));
+            $itemColumns = $this->getItemColumnAvailability();
+            $hasInterfaceTypeColumn = isset($itemColumns['interface_type']);
 
             if ($interfaceTypeFilter !== null && $interfaceTypeFilter !== 'all') {
                 $interfaceTypeVariants = InterfaceSectionService::sectionTypeVariants($interfaceTypeFilter);
@@ -395,8 +399,15 @@ trait GetItemTrait
                     }
 
                     return $sql->whereIn('category_id', $categoryIds);
-                })->when($interfaceTypeFilter !== null, function ($sql) use ($interfaceTypeFilter, $interfaceTypeVariants, $interfaceTypeCategoryIds) {
+                })->when($interfaceTypeFilter !== null, function ($sql) use ($interfaceTypeFilter, $interfaceTypeVariants, $interfaceTypeCategoryIds, $hasInterfaceTypeColumn) {
                     if ($interfaceTypeFilter === 'all') {
+                        return $sql;
+                    }
+
+                    if (! $hasInterfaceTypeColumn) {
+                        if (! empty($interfaceTypeCategoryIds)) {
+                            return $sql->whereIn('category_id', $interfaceTypeCategoryIds);
+                        }
                         return $sql;
                     }
 
