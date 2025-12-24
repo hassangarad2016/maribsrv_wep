@@ -25,6 +25,7 @@ class StoreDashboardController extends Controller
         /** @var Store|null $store */
         $store = $user->stores()
             ->with(['settings', 'workingHours', 'policies', 'staff', 'gatewayAccounts.storeGateway'])
+            ->withCount('followers')
             ->latest()
             ->first();
 
@@ -62,6 +63,7 @@ class StoreDashboardController extends Controller
                 'status' => $store->status,
                 'timezone' => $store->timezone,
                 'logo_url' => $this->logoUrl($store->logo_path),
+                'followers_count' => $store->followers_count ?? $store->followers()->count(),
             ],
             'overview' => $overview,
             'status' => array_merge($statusCard, $operatingState),

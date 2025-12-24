@@ -458,8 +458,7 @@ trait CompleteRegistrationTrait
         }
 
         unset($userData['normalized_mobile']);
-        $userData['is_verified'] = 1;
-        $userData['email_verified_at'] = now();
+        $userData['phone_verified_at'] = now();
 
         $user = User::create($userData);
         $walletCurrency = strtoupper((string) config('wallet.currency', config('app.currency', 'SAR')));

@@ -171,8 +171,7 @@ trait FinalizePendingSignupTrait
         }
 
         unset($userData['normalized_mobile']);
-        $userData['is_verified'] = 1;
-        $userData['email_verified_at'] = now();
+        $userData['phone_verified_at'] = now();
 
         DB::beginTransaction();
         try {

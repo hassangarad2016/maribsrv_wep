@@ -179,6 +179,7 @@ trait BuildPendingSignupPayloadTrait
             'platform_type' => $request->platform_type,
             'is_verified' => 0,
             'email_verified_at' => null,
+            'phone_verified_at' => null,
             'normalized_mobile' => $normalizedMobile,
         ];
 

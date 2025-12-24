@@ -72,7 +72,8 @@ class User extends Authenticatable {
         'terms_and_policy_accepted',
         'additional_info',
         'payment_info',
-        'email_verified_at'
+        'email_verified_at',
+        'phone_verified_at'
     ];
 
     /**
@@ -92,6 +93,7 @@ class User extends Authenticatable {
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'phone_verified_at' => 'datetime',
         'account_type' => 'integer',
         'additional_info' => 'json',
         'payment_info' => 'json',
