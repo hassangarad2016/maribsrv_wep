@@ -156,13 +156,13 @@ trait BuildPendingSignupPayloadTrait
 
         $rawEmail = $request->email;
         $trimmedEmail = is_string($rawEmail) ? trim($rawEmail) : '';
-        if ($trimmedEmail === '' ||
-            strtolower($trimmedEmail) === 'null' ||
-            strtolower($trimmedEmail) === 'not provided') {
-            $rawEmail = $this->generatePhoneSignupEmail(
-                $request->country_code,
-                $request->mobile
-            );
+        $normalizedEmail = strtolower($trimmedEmail);
+        if ($normalizedEmail === '' ||
+            $normalizedEmail === 'null' ||
+            $normalizedEmail === 'not provided' ||
+            (Str::startsWith($normalizedEmail, 'user_') &&
+                Str::endsWith($normalizedEmail, '@phone.marib.app'))) {
+            $rawEmail = null;
         }
 
         $userData = [

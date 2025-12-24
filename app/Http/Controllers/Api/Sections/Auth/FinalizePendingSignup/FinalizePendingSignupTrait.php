@@ -161,13 +161,13 @@ trait FinalizePendingSignupTrait
 
         $rawEmail = $userData['email'] ?? null;
         $trimmedEmail = is_string($rawEmail) ? trim($rawEmail) : '';
-        if ($trimmedEmail === '' ||
-            strtolower($trimmedEmail) === 'null' ||
-            strtolower($trimmedEmail) === 'not provided') {
-            $userData['email'] = $this->generatePhoneSignupEmail(
-                $userData['country_code'] ?? null,
-                $userData['mobile'] ?? null
-            );
+        $normalizedEmail = strtolower($trimmedEmail);
+        if ($normalizedEmail === '' ||
+            $normalizedEmail === 'null' ||
+            $normalizedEmail === 'not provided' ||
+            (Str::startsWith($normalizedEmail, 'user_') &&
+                Str::endsWith($normalizedEmail, '@phone.marib.app'))) {
+            $userData['email'] = null;
         }
 
         unset($userData['normalized_mobile']);
