@@ -11,17 +11,57 @@
                 @php
                     $sizeCatalogList = $sizeCatalog ?? [];
                     $colorRows = old('colors');
-                    if (! is_array($colorRows) || $colorRows === []) {
-                        $colorRows = [['code' => '#ffffff', 'label' => '', 'quantity' => null]];
+                    if (! is_array($colorRows)) {
+                        $colorRows = [];
                     } else {
                         $colorRows = array_values($colorRows);
                     }
+                    $selectedColors = collect($colorRows)
+                        ->map(function ($row) {
+                            if (! is_array($row)) {
+                                return null;
+                            }
+                            $code = trim((string) ($row['code'] ?? ''));
+                            if ($code === '') {
+                                return null;
+                            }
+                            $code = strtoupper($code);
+                            if ($code[0] !== '#') {
+                                $code = '#' . ltrim($code, '#');
+                            }
+                            $label = trim((string) ($row['label'] ?? ''));
+
+                            return [
+                                'code' => $code,
+                                'label' => $label,
+                            ];
+                        })
+                        ->filter()
+                        ->unique('code')
+                        ->values()
+                        ->all();
+
                     $sizeRows = old('sizes');
-                    if (! is_array($sizeRows) || $sizeRows === []) {
-                        $sizeRows = [['value' => '']];
+                    if (! is_array($sizeRows)) {
+                        $sizeRows = [];
                     } else {
                         $sizeRows = array_values($sizeRows);
                     }
+                    $sizeCatalogValues = collect($sizeCatalogList)
+                        ->map(static fn ($entry) => (string) $entry)
+                        ->values()
+                        ->all();
+                    $selectedSizes = collect($sizeRows)
+                        ->map(function ($row) {
+                            if (is_array($row) && array_key_exists('value', $row)) {
+                                $row = $row['value'];
+                            }
+                            return trim((string) $row);
+                        })
+                        ->filter(static fn ($value) => $value !== '')
+                        ->unique()
+                        ->values()
+                        ->all();
                     $customRows = old('custom_options');
                     if (! is_array($customRows) || $customRows === []) {
                         $customRows = [''];
@@ -256,88 +296,61 @@
                                     <p class="text-muted mb-3">{{ __('merchant_products.form.attributes_description') }}</p>
 
                                     <div class="border rounded p-3 mb-4">
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <h6 class="mb-0">{{ __('merchant_products.form.colors_title') }}</h6>
-                                            <button type="button" class="btn btn-sm btn-outline-primary" data-add-color>
-                                                <i class="bi bi-plus-lg"></i>
-                                                {{ __('merchant_products.form.add_color') }}
-                                            </button>
-                                        </div>
-                                        <div class="row text-muted mb-2">
-                                            <div class="col-md-3">{{ __('merchant_products.form.color_picker') }}</div>
-                                            <div class="col-md-4">{{ __('merchant_products.form.color_label') }}</div>
-                                            <div class="col-md-3">{{ __('merchant_products.form.color_quantity') }}</div>
-                                        </div>
-                                        <div class="d-flex flex-column gap-3" data-color-rows>
-                                            @foreach ($colorRows as $index => $color)
-                                                <div class="row g-3 align-items-end" data-repeater-row>
-                                                    <div class="col-md-3">
-                                                        <input type="color"
-                                                               name="colors[{{ $index }}][code]"
-                                                               class="form-control form-control-color"
-                                                               value="{{ old('colors.' . $index . '.code', $color['code'] ?? '#ffffff') }}">
+                                        <div class="row g-3">
+                                            <div class="col-lg-7">
+                                                <label for="shein_color_select" class="form-label">{{ __('merchant_products.form.colors_title') }}</label>
+                                                <select id="shein_color_select" class="form-control select2" multiple data-color-select>
+                                                    @foreach ($selectedColors as $color)
+                                                        @php
+                                                            $colorCode = $color['code'] ?? '';
+                                                            $colorLabel = $color['label'] ?? '';
+                                                            $colorText = $colorLabel !== '' ? $colorLabel . ' (' . $colorCode . ')' : $colorCode;
+                                                        @endphp
+                                                        <option value="{{ $colorCode }}" data-label="{{ $colorLabel }}" selected>{{ $colorText }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-5">
+                                                <label class="form-label">{{ __('merchant_products.form.add_color') }}</label>
+                                                <div class="row g-2 align-items-end">
+                                                    <div class="col-4 col-md-3">
+                                                        <label class="form-label small text-muted">{{ __('merchant_products.form.color_picker') }}</label>
+                                                        <input type="color" class="form-control form-control-color" value="#ffffff" data-custom-color-code>
                                                     </div>
-                                                    <div class="col-md-4">
-                                                        <input type="text" name="colors[{{ $index }}][label]"
-                                                               class="form-control"
-                                                               placeholder="{{ __('merchant_products.form.color_label_placeholder') }}"
-                                                               value="{{ old('colors.' . $index . '.label', $color['label'] ?? '') }}">
+                                                    <div class="col-8 col-md-6">
+                                                        <label class="form-label small text-muted">{{ __('merchant_products.form.color_label') }}</label>
+                                                        <input type="text" class="form-control" placeholder="{{ __('merchant_products.form.color_label_placeholder') }}" data-custom-color-label>
                                                     </div>
-                                                    <div class="col-md-3">
-                                                        <input type="number" min="0" name="colors[{{ $index }}][quantity]"
-                                                               class="form-control"
-                                                               placeholder="0"
-                                                               value="{{ old('colors.' . $index . '.quantity', $color['quantity'] ?? '') }}">
-                                                    </div>
-                                                    <div class="col-md-2 text-end">
-                                                        <button type="button" class="btn btn-outline-danger btn-sm" data-remove-row>
-                                                            <i class="bi bi-x-lg"></i>
+                                                    <div class="col-12 col-md-3 d-grid">
+                                                        <label class="form-label small text-muted d-none d-md-block">&nbsp;</label>
+                                                        <button type="button" class="btn btn-outline-primary btn-sm" data-add-custom-color>
+                                                            <i class="bi bi-plus-lg"></i>
+                                                            {{ __('merchant_products.form.add_color') }}
                                                         </button>
                                                     </div>
                                                 </div>
-                                            @endforeach
+                                            </div>
                                         </div>
+                                        <div class="d-none" data-color-inputs></div>
                                     </div>
 
                                     <div class="border rounded p-3 mb-4">
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <h6 class="mb-0">{{ __('merchant_products.form.sizes_title') }}</h6>
-                                            <button type="button" class="btn btn-sm btn-outline-primary" data-add-size>
-                                                <i class="bi bi-plus-lg"></i>
-                                                {{ __('merchant_products.form.add_size') }}
-                                            </button>
-                                        </div>
-                                        <div class="d-flex flex-column gap-3" data-size-rows>
-                                            @foreach ($sizeRows as $index => $size)
-                                                <div class="row g-3 align-items-end" data-repeater-row>
-                                                    <div class="col-md-10">
-                                                        @php
-                                                            $currentSizeValue = old('sizes.' . $index . '.value', $size['value'] ?? '');
-                                                            $normalizedSizeCatalog = collect($sizeCatalogList)->map(fn ($entry) => (string) $entry)->all();
-                                                            $isCustomSize = $currentSizeValue !== '' && ! in_array($currentSizeValue, $normalizedSizeCatalog, true);
-                                                        @endphp
-                                                        <select name="sizes[{{ $index }}][value]" class="form-select">
-                                                            <option value="">{{ __('merchant_products.form.size_placeholder') }}</option>
-                                                            @foreach ($sizeCatalogList as $option)
-                                                                @php
-                                                                    $optionValue = (string) $option;
-                                                                @endphp
-                                                                <option value="{{ $optionValue }}" @selected($currentSizeValue === $optionValue)>{{ $optionValue }}</option>
-                                                            @endforeach
-                                                            @if ($isCustomSize)
-                                                                <option value="{{ $currentSizeValue }}" selected>{{ $currentSizeValue }}</option>
-                                                            @endif
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-2 text-end">
-                                                        <button type="button" class="btn btn-outline-danger btn-sm" data-remove-row>
-                                                            <i class="bi bi-x-lg"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
+                                        <label for="shein_size_select" class="form-label">{{ __('merchant_products.form.sizes_title') }}</label>
+                                        <select id="shein_size_select" class="form-control select2" multiple data-size-select>
+                                            @foreach ($sizeCatalogList as $option)
+                                                @php
+                                                    $optionValue = (string) $option;
+                                                @endphp
+                                                <option value="{{ $optionValue }}" @selected(in_array($optionValue, $selectedSizes, true))>{{ $optionValue }}</option>
                                             @endforeach
-                                        </div>
+                                            @foreach ($selectedSizes as $sizeValue)
+                                                @if (! in_array($sizeValue, $sizeCatalogValues, true))
+                                                    <option value="{{ $sizeValue }}" selected>{{ $sizeValue }}</option>
+                                                @endif
+                                            @endforeach
+                                        </select>
                                         <small class="text-muted">{{ __('merchant_products.form.size_catalog_hint') }}</small>
+                                        <div class="d-none" data-size-inputs></div>
                                     </div>
 
                                     <div class="border rounded p-3">
@@ -375,31 +388,16 @@
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="card">
-                                <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="card-header">
                                     <h5 class="mb-0">{{ __('merchant_products.inventory.title') }}</h5>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" data-build-variants>
-                                        <i class="bi bi-arrow-repeat"></i>
-                                        Build variants
-                                    </button>
                                 </div>
                                 <div class="card-body">
                                     <p class="text-muted mb-3">
-                                        Variant stock rows are generated from the selected colors and sizes. Fill stock only for available combinations; leave stock empty for unavailable sizes per color. If no variants are defined, the general stock field is used.
+                                        {{ __('Set quantities for each size within every selected color.') }}
                                     </p>
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered align-middle" data-variant-table>
-                                            <thead>
-                                                <tr>
-                                                    <th>{{ __('merchant_products.form.colors_title') }}</th>
-                                                    <th>{{ __('merchant_products.form.sizes_title') }}</th>
-                                                    <th>{{ __('merchant_products.form.stock') }}</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody data-variant-rows></tbody>
-                                        </table>
-                                    </div>
+                                    <div data-variant-grid></div>
                                     <div class="text-muted small" data-variant-empty>
-                                        No variants yet. Add colors or sizes, then click "Build variants".
+                                        {{ __('Select colors and sizes to add quantity rows.') }}
                                     </div>
                                 </div>
                             </div>
@@ -515,43 +513,6 @@
             </div>
         </div>
 
-        <template id="colorRowTemplate">
-            <div class="row g-3 align-items-end" data-repeater-row>
-                <div class="col-md-3">
-                    <input type="color" name="colors[__INDEX__][code]" class="form-control form-control-color" value="#ffffff">
-                </div>
-                <div class="col-md-4">
-                    <input type="text" name="colors[__INDEX__][label]" class="form-control" placeholder="{{ __('merchant_products.form.color_label_placeholder') }}">
-                </div>
-                <div class="col-md-3">
-                    <input type="number" name="colors[__INDEX__][quantity]" class="form-control" min="0" placeholder="0">
-                </div>
-                <div class="col-md-2 text-end">
-                    <button type="button" class="btn btn-outline-danger btn-sm" data-remove-row>
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-            </div>
-        </template>
-
-        <template id="sizeRowTemplate">
-            <div class="row g-3 align-items-end" data-repeater-row>
-                <div class="col-md-10">
-                    <select name="sizes[__INDEX__][value]" class="form-select">
-                        <option value="">{{ __('merchant_products.form.size_placeholder') }}</option>
-                        @foreach ($sizeCatalogList as $option)
-                            <option value="{{ $option }}">{{ $option }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2 text-end">
-                    <button type="button" class="btn btn-outline-danger btn-sm" data-remove-row>
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-            </div>
-        </template>
-
         <template id="optionRowTemplate">
             <div class="row g-3 align-items-end" data-repeater-row>
                 <div class="col-md-10">
@@ -570,9 +531,20 @@
 @section('script')
     <script>
         $(document).ready(function() {
-            // Initialize Select2
-            $('.select2').select2({
-                width: '100%'
+            $('.select2').each(function() {
+                const $el = $(this);
+                const isMulti = $el.prop('multiple');
+                const isSizeSelector = $el.is('[data-size-select]');
+                const options = { width: '100%' };
+
+                if (isMulti) {
+                    options.closeOnSelect = false;
+                }
+                if (isSizeSelector) {
+                    options.tags = false;
+                }
+
+                $el.select2(options);
             });
 
             const setupRepeater = (containerSelector, templateId, addSelector) => {
@@ -610,8 +582,6 @@
                 });
             };
 
-            setupRepeater('[data-color-rows]', 'colorRowTemplate', '[data-add-color]');
-            setupRepeater('[data-size-rows]', 'sizeRowTemplate', '[data-add-size]');
             setupRepeater('[data-option-rows]', 'optionRowTemplate', '[data-add-option]');
 
             // Image preview
@@ -647,8 +617,20 @@
                 }
             });
 
+            const sizeHeader = @json(__('merchant_products.form.sizes_title'));
+            const stockHeader = @json(__('merchant_products.form.stock'));
             const variantStocksSeed = @json($variantStocks);
             const variantStockMap = {};
+
+            const colorSelect = document.querySelector('[data-color-select]');
+            const sizeSelect = document.querySelector('[data-size-select]');
+            const colorInputs = document.querySelector('[data-color-inputs]');
+            const sizeInputs = document.querySelector('[data-size-inputs]');
+            const variantGrid = document.querySelector('[data-variant-grid]');
+            const variantEmpty = document.querySelector('[data-variant-empty]');
+            const customColorButton = document.querySelector('[data-add-custom-color]');
+            const customColorCode = document.querySelector('[data-custom-color-code]');
+            const customColorLabel = document.querySelector('[data-custom-color-label]');
 
             const normalizeColorCode = (value) => {
                 if (value === null || value === undefined) {
@@ -681,6 +663,44 @@
                     .replace(/'/g, '&#039;');
             };
 
+            const escapeAttribute = (value) => escapeHtml(value);
+
+            const appendHiddenInput = (container, name, value) => {
+                if (!container) {
+                    return;
+                }
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value;
+                container.appendChild(input);
+            };
+
+            const getColorLabel = (code) => {
+                if (!colorSelect) {
+                    return '';
+                }
+                const options = Array.from(colorSelect.options);
+                for (const option of options) {
+                    if (normalizeColorCode(option.value) === code) {
+                        const dataLabel = option.getAttribute('data-label');
+                        if (dataLabel && dataLabel.trim() !== '') {
+                            return dataLabel.trim();
+                        }
+                        const text = (option.textContent || '').trim();
+                        if (text === '' || text === code) {
+                            return '';
+                        }
+                        const suffix = `(${code})`;
+                        if (text.endsWith(suffix)) {
+                            return text.slice(0, -suffix.length).trim();
+                        }
+                        return text;
+                    }
+                }
+                return '';
+            };
+
             if (Array.isArray(variantStocksSeed)) {
                 variantStocksSeed.forEach((row) => {
                     const color = normalizeColorCode(row.color || '');
@@ -691,14 +711,11 @@
                 });
             }
 
-            const variantRowsContainer = document.querySelector('[data-variant-rows]');
-            const variantEmpty = document.querySelector('[data-variant-empty]');
-
             const captureCurrentStockMap = () => {
-                if (!variantRowsContainer) {
+                if (!variantGrid) {
                     return;
                 }
-                variantRowsContainer.querySelectorAll('[data-variant-row]').forEach((row) => {
+                variantGrid.querySelectorAll('[data-variant-row]').forEach((row) => {
                     const color = row.getAttribute('data-color') || '';
                     const size = row.getAttribute('data-size') || '';
                     const stockInput = row.querySelector('input[name*="[stock]"]');
@@ -710,58 +727,77 @@
                 });
             };
 
-            const collectColors = () => {
-                const rows = document.querySelectorAll('[data-color-rows] [data-repeater-row]');
-                const result = [];
+            const collectSelectedColors = () => {
+                if (!colorSelect) {
+                    return [];
+                }
+                const values = $(colorSelect).val() || [];
                 const seen = new Set();
-                rows.forEach((row) => {
-                    const codeInput = row.querySelector('input[name*="[code]"]');
-                    if (!codeInput) {
-                        return;
-                    }
-                    const code = normalizeColorCode(codeInput.value);
+                const result = [];
+                values.forEach((value) => {
+                    const code = normalizeColorCode(value);
                     if (code === '' || seen.has(code)) {
                         return;
                     }
-                    const labelInput = row.querySelector('input[name*="[label]"]');
-                    const label = labelInput ? labelInput.value.toString().trim() : '';
                     seen.add(code);
-                    result.push({ code, label });
+                    result.push({
+                        code,
+                        label: getColorLabel(code),
+                    });
                 });
                 return result;
             };
 
-            const collectSizes = () => {
-                const rows = document.querySelectorAll('[data-size-rows] [data-repeater-row]');
-                const result = [];
+            const collectSelectedSizes = () => {
+                if (!sizeSelect) {
+                    return [];
+                }
+                const values = $(sizeSelect).val() || [];
                 const seen = new Set();
-                rows.forEach((row) => {
-                    const select = row.querySelector('select[name*="[value]"]');
-                    const input = row.querySelector('input[name*="[value]"]');
-                    const raw = select ? select.value : (input ? input.value : '');
-                    const value = normalizeSizeValue(raw);
-                    if (value === '' || seen.has(value)) {
+                const result = [];
+                values.forEach((value) => {
+                    const size = normalizeSizeValue(value);
+                    if (size === '' || seen.has(size)) {
                         return;
                     }
-                    seen.add(value);
-                    result.push(value);
+                    seen.add(size);
+                    result.push(size);
                 });
                 return result;
             };
 
-            const buildVariantRows = () => {
-                if (!variantRowsContainer) {
+            const syncColorInputs = (colors) => {
+                if (!colorInputs) {
+                    return;
+                }
+                colorInputs.innerHTML = '';
+                colors.forEach((color, index) => {
+                    appendHiddenInput(colorInputs, `colors[${index}][code]`, color.code);
+                    if (color.label) {
+                        appendHiddenInput(colorInputs, `colors[${index}][label]`, color.label);
+                    }
+                });
+            };
+
+            const syncSizeInputs = (sizes) => {
+                if (!sizeInputs) {
+                    return;
+                }
+                sizeInputs.innerHTML = '';
+                sizes.forEach((size, index) => {
+                    appendHiddenInput(sizeInputs, `sizes[${index}][value]`, size);
+                });
+            };
+
+            const buildVariantTables = (colors, sizes) => {
+                if (!variantGrid) {
                     return;
                 }
                 captureCurrentStockMap();
 
-                const colors = collectColors();
-                const sizes = collectSizes();
-                const hasVariants = colors.length > 0 || sizes.length > 0;
+                variantGrid.innerHTML = '';
 
-                variantRowsContainer.innerHTML = '';
-
-                if (!hasVariants) {
+                if (colors.length === 0 || sizes.length === 0) {
                     if (variantEmpty) {
                         variantEmpty.classList.remove('d-none');
                     }
@@ -772,44 +808,113 @@
                     variantEmpty.classList.add('d-none');
                 }
 
-                const colorList = colors.length ? colors : [{ code: '', label: '' }];
-                const sizeList = sizes.length ? sizes : [''];
                 let index = 0;
 
-                colorList.forEach((color) => {
-                    sizeList.forEach((size) => {
-                        const colorCode = normalizeColorCode(color.code || '');
+                colors.forEach((color) => {
+                    const colorCode = normalizeColorCode(color.code || '');
+                    const colorLabel = color.label || colorCode || '-';
+                    let rowsHtml = '';
+
+                    sizes.forEach((size) => {
                         const sizeValue = normalizeSizeValue(size || '');
                         const key = `${colorCode}||${sizeValue}`;
                         const stockValue = variantStockMap[key] ?? '';
-                        const colorLabel = color.label || colorCode || '-';
                         const sizeLabel = sizeValue || '-';
 
-                        variantRowsContainer.insertAdjacentHTML('beforeend', `
-                            <tr data-variant-row data-color="${colorCode}" data-size="${sizeValue}">
-                                <td>${escapeHtml(colorLabel)}</td>
+                        rowsHtml += `
+                            <tr data-variant-row data-color="${escapeAttribute(colorCode)}" data-size="${escapeAttribute(sizeValue)}">
                                 <td>${escapeHtml(sizeLabel)}</td>
                                 <td>
-                                    <input type="hidden" name="variant_stocks[${index}][color]" value="${colorCode}">
-                                    <input type="hidden" name="variant_stocks[${index}][size]" value="${sizeValue}">
-                                    <input type="number" name="variant_stocks[${index}][stock]" class="form-control" min="0" value="${stockValue}">
+                                    <input type="hidden" name="variant_stocks[${index}][color]" value="${escapeAttribute(colorCode)}">
+                                    <input type="hidden" name="variant_stocks[${index}][size]" value="${escapeAttribute(sizeValue)}">
+                                    <input type="number" name="variant_stocks[${index}][stock]" class="form-control" min="0" value="${escapeAttribute(stockValue)}">
                                 </td>
                             </tr>
-                        `);
+                        `;
                         index += 1;
                     });
+
+                    const swatch = colorCode !== '' ? `
+                        <span class="me-2" style="width:16px;height:16px;border-radius:3px;border:1px solid #ccc;display:inline-block;background:${escapeAttribute(colorCode)};"></span>
+                    ` : '';
+
+                    variantGrid.insertAdjacentHTML('beforeend', `
+                        <div class="mb-4" data-color-block data-color-code="${escapeAttribute(colorCode)}">
+                            <div class="d-flex align-items-center mb-2">
+                                ${swatch}
+                                <strong>${escapeHtml(colorLabel)}</strong>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>${escapeHtml(sizeHeader)}</th>
+                                            <th>${escapeHtml(stockHeader)}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${rowsHtml}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `);
                 });
             };
 
-            const buildButton = document.querySelector('[data-build-variants]');
-            if (buildButton) {
-                buildButton.addEventListener('click', (event) => {
+            const refreshVariants = () => {
+                const colors = collectSelectedColors();
+                const sizes = collectSelectedSizes();
+                syncColorInputs(colors);
+                syncSizeInputs(sizes);
+                buildVariantTables(colors, sizes);
+            };
+
+            if (colorSelect) {
+                $(colorSelect).on('change', refreshVariants);
+            }
+
+            if (sizeSelect) {
+                $(sizeSelect).on('change', refreshVariants);
+            }
+
+            if (customColorButton && colorSelect) {
+                customColorButton.addEventListener('click', (event) => {
                     event.preventDefault();
-                    buildVariantRows();
+                    const rawCode = customColorCode ? customColorCode.value : '';
+                    const code = normalizeColorCode(rawCode);
+                    if (code === '') {
+                        return;
+                    }
+                    const label = customColorLabel ? customColorLabel.value.toString().trim() : '';
+                    const displayText = label !== '' ? `${label} (${code})` : code;
+                    let option = null;
+                    if (colorSelect) {
+                        option = Array.from(colorSelect.options).find((entry) => normalizeColorCode(entry.value) === code) || null;
+                    }
+                    if (!option) {
+                        option = new Option(displayText, code, true, true);
+                        option.setAttribute('data-label', label);
+                        colorSelect.appendChild(option);
+                    } else {
+                        option.textContent = displayText;
+                        option.setAttribute('data-label', label);
+                        option.selected = true;
+                    }
+
+                    const current = $(colorSelect).val() || [];
+                    if (!current.includes(code)) {
+                        current.push(code);
+                    }
+                    $(colorSelect).val(current).trigger('change');
+
+                    if (customColorLabel) {
+                        customColorLabel.value = '';
+                    }
                 });
             }
 
-            buildVariantRows();
+            refreshVariants();
         });
 
         function formSuccessFunction(response) {
