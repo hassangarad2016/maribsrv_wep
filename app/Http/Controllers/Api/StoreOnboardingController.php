@@ -8,7 +8,6 @@ use App\Http\Resources\StoreResource;
 use App\Models\PendingSignup;
 use App\Models\User;
 use App\Models\WalletAccount;
-use App\Services\ResponseService;
 use App\Services\Store\StoreRegistrationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -47,16 +46,7 @@ class StoreOnboardingController extends Controller
 
     public function store(StoreOnboardingRequest $request): JsonResponse
     {
-        $logPayload = $request->all();
-        if (isset($logPayload['credentials']['password'])) {
-            $logPayload['credentials']['password'] = '[hidden]';
-        }
-        if (isset($logPayload['staff']['password'])) {
-            $logPayload['staff']['password'] = '[hidden]';
-        }
-        if (isset($logPayload['pending_signup_token'])) {
-            $logPayload['pending_signup_token'] = '[hidden]';
-        }
+        $logPayload = $request->sanitizePayloadForLog($request->all());
 
         \Log::info('store_onboarding.request', [
             'user_id' => $request->user()?->id,
@@ -97,7 +87,7 @@ class StoreOnboardingController extends Controller
             return response()->json($response, 201);
         } catch (RuntimeException $exception) {
             $status = $exception->getCode();
-            if ($status -lt 400) {
+            if ($status < 400) {
                 $status = HttpResponse::HTTP_UNPROCESSABLE_ENTITY;
             }
 
@@ -105,17 +95,7 @@ class StoreOnboardingController extends Controller
                 'message' => __($exception->getMessage()),
             ], $status);
         } catch (ValidationException $exception) {
-            $failedPayload = $request->all();
-            if (isset($failedPayload['credentials']['password'])) {
-                $failedPayload['credentials']['password'] = '[hidden]';
-            }
-            if (isset($failedPayload['staff']['password'])) {
-                $failedPayload['staff']['password'] = '[hidden]';
-            }
-
-            if (isset($failedPayload['pending_signup_token'])) {
-                $failedPayload['pending_signup_token'] = '[hidden]';
-            }
+            $failedPayload = $request->sanitizePayloadForLog($request->all());
 
             \Log::warning('store_onboarding.validation_failed', [
                 'user_id' => $request->user()?->id,
@@ -125,7 +105,13 @@ class StoreOnboardingController extends Controller
 
             throw $exception;
         } catch (Throwable $throwable) {
-            ResponseService::logErrorResponse($throwable, 'StoreOnboardingController -> store');
+            \Log::error('store_onboarding.failed', [
+                'user_id' => $request->user()?->id,
+                'message' => $throwable->getMessage(),
+                'file' => $throwable->getFile(),
+                'line' => $throwable->getLine(),
+                'payload' => $request->sanitizePayloadForLog($request->all()),
+            ]);
 
             return response()->json([
                 'message' => __('تعذر حفظ بيانات المتجر، يرجى المحاولة مرة أخرى.'),

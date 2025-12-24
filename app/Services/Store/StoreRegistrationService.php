@@ -116,8 +116,8 @@ class StoreRegistrationService
             'location_state' => $payload['state'] ?? null,
             'location_country' => $payload['country'] ?? null,
             'location_notes' => $payload['location_notes'] ?? null,
-            'logo_path' => $this->maybeStoreMedia($logoValue, 'stores/logos'),
-            'banner_path' => $this->maybeStoreMedia($bannerValue, 'stores/banners'),
+            'logo_path' => $this->maybeStoreMedia($logoValue, 'stores/logos', null, 'logo'),
+            'banner_path' => $this->maybeStoreMedia($bannerValue, 'stores/banners', null, 'banner'),
         ], static fn ($value) => $value !== null);
     }
 
@@ -499,42 +499,55 @@ class StoreRegistrationService
     /**
      * @param  string|UploadedFile|null  $media
      */
-    private function maybeStoreMedia($media, string $directory, ?string $existingPath = null): ?string
+    private function maybeStoreMedia(
+        $media,
+        string $directory,
+        ?string $existingPath = null,
+        string $attribute = 'logo'
+    ): ?string
     {
         if ($media instanceof UploadedFile) {
             return FileService::replace($media, $directory, $existingPath);
         }
 
-        if (is_string($media) && Str::contains($media, 'base64,')) {
-            return $this->storeBase64Image($media, $directory, $existingPath);
-        }
+        if (is_string($media)) {
+            $candidate = trim($media);
+            if ($candidate === '') {
+                return $existingPath;
+            }
 
-        if (is_string($media) && $media !== '') {
-            return $media;
+            if (Str::contains($candidate, 'base64,') || $this->isLikelyBase64Payload($candidate)) {
+                return $this->storeBase64Image($candidate, $directory, $existingPath, $attribute);
+            }
+
+            if (strlen($candidate) > 255) {
+                throw ValidationException::withMessages([
+                    $attribute => 'Invalid media payload provided.',
+                ]);
+            }
+
+            return $candidate;
         }
 
         return $existingPath;
     }
 
-    private function storeBase64Image(string $payload, string $directory, ?string $existingPath = null): ?string
+    private function storeBase64Image(
+        string $payload,
+        string $directory,
+        ?string $existingPath = null,
+        string $attribute = 'logo'
+    ): ?string
     {
-        if (! Str::contains($payload, 'base64,')) {
-            return $existingPath;
-        }
-
-        [, $data] = explode('base64,', $payload, 2);
-        $decoded = base64_decode($data, true);
+        $decoded = $this->decodeBase64Payload($payload, $attribute);
 
         if ($decoded === false) {
-            throw new RuntimeException('Invalid base64 encoded image provided.');
+            throw ValidationException::withMessages([
+                $attribute => 'Invalid base64 encoded image provided.',
+            ]);
         }
 
-        $extension = 'png';
-        if (Str::contains($payload, 'image/jpeg')) {
-            $extension = 'jpg';
-        } elseif (Str::contains($payload, 'image/webp')) {
-            $extension = 'webp';
-        }
+        $extension = $this->inferImageExtension($payload, $decoded);
 
         $filename = $directory . '/' . uniqid('store_', true) . '.' . $extension;
         Storage::disk(config('filesystems.default'))->put($filename, $decoded);
@@ -544,5 +557,67 @@ class StoreRegistrationService
         }
 
         return $filename;
+    }
+
+    private function isLikelyBase64Payload(string $payload): bool
+    {
+        $candidate = preg_replace('/\s+/', '', $payload) ?? '';
+        if ($candidate === '' || str_contains($candidate, '://')) {
+            return false;
+        }
+
+        if (strlen($candidate) <= 255) {
+            return false;
+        }
+
+        return preg_match('/^[A-Za-z0-9+\\/=]+$/', $candidate) === 1;
+    }
+
+    private function decodeBase64Payload(string $payload, string $attribute): string|false
+    {
+        $data = $payload;
+
+        if (Str::contains($payload, 'base64,')) {
+            [, $data] = explode('base64,', $payload, 2);
+        }
+
+        $data = preg_replace('/\s+/', '', $data) ?? '';
+        if ($data === '') {
+            return false;
+        }
+
+        $decoded = base64_decode($data, true);
+        if ($decoded === false) {
+            throw ValidationException::withMessages([
+                $attribute => 'Invalid base64 encoded image provided.',
+            ]);
+        }
+
+        return $decoded;
+    }
+
+    private function inferImageExtension(string $payload, string $decoded): string
+    {
+        if (Str::contains($payload, 'image/jpeg')) {
+            return 'jpg';
+        }
+        if (Str::contains($payload, 'image/webp')) {
+            return 'webp';
+        }
+        if (Str::contains($payload, 'image/png')) {
+            return 'png';
+        }
+
+        if (str_starts_with($decoded, "\x89PNG")) {
+            return 'png';
+        }
+        if (str_starts_with($decoded, "\xFF\xD8\xFF")) {
+            return 'jpg';
+        }
+        if (str_starts_with($decoded, 'RIFF') && str_contains(substr($decoded, 8, 8), 'WEBP')) {
+            return 'webp';
+        }
+
+        return 'png';
     }
 }
