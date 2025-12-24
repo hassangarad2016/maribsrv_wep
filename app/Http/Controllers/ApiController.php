@@ -10146,6 +10146,11 @@ public function storeRequestDevice(Request $request)
                 // For merchant accounts rely on store/business name instead of a personal username
                 $user->name = $this->fallbackSellerName($request, $user->toArray(), $user);
             }
+            if ((int) $user->account_type === User::ACCOUNT_TYPE_REAL_ESTATE &&
+                $request->has('office_name') &&
+                !empty($request->office_name)) {
+                $user->name = $request->office_name;
+            }
             
             if ($request->has('email') && !empty($request->email)) {
                 $user->email = $request->email;
