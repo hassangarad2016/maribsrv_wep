@@ -486,6 +486,11 @@ trait UserSignupTrait
                     }
                     
                     $user = User::create($userData);
+                    $walletCurrency = strtoupper((string) config('wallet.currency', config('app.currency', 'SAR')));
+                    WalletAccount::firstOrCreate(
+                        ['user_id' => $user->getKey()],
+                        ['balance' => 0, 'currency' => $walletCurrency]
+                    );
                     
                     if ($type == 'google') {
                         \Log::info('â•ھâ•–â”¬â•–â•ھطھâ”¬â••â•ھâ•–â”¬طھâ•ھطھâ”¬ط«â•ھâ•–â”¬ط«â•ھطھâ”¬ط¨ New Google user created:', [

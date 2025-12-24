@@ -209,6 +209,15 @@ trait VerifyOtpTrait
             }
         }
 
+        $pendingAccountType = null;
+        if ($pendingSignup) {
+            $pendingPayload = $pendingSignup->payloadAsArray();
+            $pendingUserData = $pendingPayload['user'] ?? [];
+            if (is_array($pendingUserData)) {
+                $pendingAccountType = (int) ($pendingUserData['account_type'] ?? 0);
+            }
+        }
+
         $user = User::where(function ($query) use ($phoneCandidates) {
             foreach ($phoneCandidates as $candidate) {
                 $query->orWhere('mobile', $candidate);
@@ -224,6 +233,19 @@ trait VerifyOtpTrait
 
         if (!$otpEnabled) {
             if ($pendingSignup && !$user) {
+                if ($pendingAccountType === User::ACCOUNT_TYPE_REAL_ESTATE) {
+                    return ResponseService::successResponse(
+                        'OTP verified.',
+                        [
+                            'pending_signup_id' => $pendingSignup->id,
+                            'account_type' => $pendingAccountType,
+                            'mobile' => $pendingSignup->mobile,
+                            'country_code' => $pendingSignup->country_code,
+                        ],
+                        ['token' => null]
+                    );
+                }
+
                 return $this->finalizePendingSignup($pendingSignup);
             }
 
@@ -261,6 +283,19 @@ trait VerifyOtpTrait
         $otpRecord->save();
 
         if ($pendingSignup && !$user) {
+            if ($pendingAccountType === User::ACCOUNT_TYPE_REAL_ESTATE) {
+                return ResponseService::successResponse(
+                    'OTP verified.',
+                    [
+                        'pending_signup_id' => $pendingSignup->id,
+                        'account_type' => $pendingAccountType,
+                        'mobile' => $pendingSignup->mobile,
+                        'country_code' => $pendingSignup->country_code,
+                    ],
+                    ['token' => null]
+                );
+            }
+
             return $this->finalizePendingSignup($pendingSignup);
         }
 

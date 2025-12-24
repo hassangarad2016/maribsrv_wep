@@ -166,6 +166,11 @@ trait FinalizePendingSignupTrait
         DB::beginTransaction();
         try {
             $user = User::create($userData);
+            $walletCurrency = strtoupper((string) config('wallet.currency', config('app.currency', 'SAR')));
+            WalletAccount::firstOrCreate(
+                ['user_id' => $user->getKey()],
+                ['balance' => 0, 'currency' => $walletCurrency]
+            );
 
             if (!$user->hasRole('User')) {
                 $user->assignRole('User');

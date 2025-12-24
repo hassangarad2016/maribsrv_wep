@@ -173,7 +173,47 @@ trait CompleteRegistrationTrait
                 return ResponseService::validationError($validator->errors()->first());
             }
 
+            $pendingToken = null;
             $user = Auth::user();
+            if (!$user && $request->filled('pending_signup_id')) {
+                $pendingSignup = PendingSignup::find($request->pending_signup_id);
+                if ($pendingSignup && $pendingSignup->expires_at && $pendingSignup->expires_at->isPast()) {
+                    $pendingSignup = null;
+                }
+
+                if (!$pendingSignup) {
+                    DB::rollBack();
+                    return ResponseService::errorResponse(
+                        'Pending signup expired.',
+                        null,
+                        HttpResponse::HTTP_UNPROCESSABLE_ENTITY
+                    );
+                }
+
+                $pendingPayload = $pendingSignup->payloadAsArray();
+                $pendingUserData = $pendingPayload['user'] ?? [];
+                $pendingAccountType = (int) ($pendingUserData['account_type'] ?? 0);
+
+                if ($pendingAccountType !== (int) $request->account_type) {
+                    DB::rollBack();
+                    return ResponseService::errorResponse(
+                        'Pending signup does not match account type.',
+                        null,
+                        HttpResponse::HTTP_UNPROCESSABLE_ENTITY
+                    );
+                }
+
+                [$user, $pendingToken] = $this->finalizePendingSignupForCompletion($pendingSignup);
+            }
+
+            if (!$user) {
+                DB::rollBack();
+                return ResponseService::errorResponse(
+                    'Unauthenticated.',
+                    null,
+                    HttpResponse::HTTP_UNAUTHORIZED
+                );
+            }
             
             // â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬â–“â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬â•،â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬طھâ•ھطھâ”¬â•—â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â•ھâ•£â”¬ط±â•ھâ•–â”¬ط«â•ھطھâ”¬ط°â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬â”‚ â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬آ»â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â•ھâ•£â”¬ط±â•ھâ•–â”¬طھâ”œطھط¸أ©ط´ط¸آ€آچâ•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬â–‘â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â•ھâ•£â”¬ط±â•ھâ•–â”¬ط«â•ھطھâ”¬ط°â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬آ»â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â•ھâ•£â”¬ط±â•ھâ•–â”¬طھâ”œطھط¸أ©ط´â”¬ط¨â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬آ»â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬â–“ â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬آ»â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â•ھâ•£â”¬ط±â•ھâ•–â”¬طھâ”œطھط¸أ©ط´ط¸آ€آچâ•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬ط³â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â”œطھط¸أ©ط´â”Œظ‘â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬آ»â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â”œطھط¸أ©ط´â”Œظ‘â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â•ھâ•£â”¬ط±â•ھâ•–â”¬ط«â•ھطھâ”¬ط°â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬â–’ â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â•ھâ•£â”¬ط±â•ھâ•–â”¬طھâ•ھâ••â”¬â•›â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â•ھâ•£â”¬ط±â•ھâ•–â”¬ط«â•ھطھâ”¬ط±â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ”œطھط¸أ©ط´ط¸آ€آ£ â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬طµâ•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€آ£â”œطھط¸أ©ط´â”Œط±â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬آ» â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â•ھâ•£â”¬ط±â•ھâ•–â”¬ط«â•ھطھâ”¬طھâ•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬آ»â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â•ھâ•£â”¬ط±â•ھâ•–â”¬طھâ”œطھط¸أ©ط´â”¬ط¨â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬â–“ â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â•ھâ•£â”¬ط±â•ھâ•–â”¬ط«â•ھطھâ”¬ط¨â•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€آ£â”œطھط¸أ©ط´ط¸آ„طھâ•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â”œطھط¸أ©ط´â”Œظ‘â•ھط«â”¬طھâ”œطھط¸أ©ط´ط¸آ€أ®â•ھâ•£â”¬ط±â•ھâ•–â”¬طھâ”œطھط¸أ©ط´ط¸آ€آچâ•ھط«â”¬طھâ”œطھط¸أ©ط´â”¬طھâ•ھâ•£â”¬â•›â•ھâ•–â”¬â•–â•ھطھâ”¬â–’
             if ($request->has('phone_number') && !empty($request->phone_number)) {
@@ -185,6 +225,10 @@ trait CompleteRegistrationTrait
             }
             
             $user->account_type = $request->account_type;
+            if ((int) $user->account_type === User::ACCOUNT_TYPE_REAL_ESTATE &&
+                $request->filled('office_name')) {
+                $user->name = $request->office_name;
+            }
             if ((int) $user->account_type === User::ACCOUNT_TYPE_SELLER) {
                 // For merchant accounts rely on store/business name instead of a personal username
                 $user->name = $this->fallbackSellerName($request, $user->toArray(), $user);
