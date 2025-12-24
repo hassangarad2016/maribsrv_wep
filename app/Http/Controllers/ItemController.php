@@ -26,10 +26,12 @@ use App\Models\Category;
 use App\Models\CustomField;
 use Throwable;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 use Illuminate\Support\Collection;
+use App\Support\VariantKeyGenerator;
 
 class ItemController extends Controller {
 
@@ -195,6 +197,7 @@ class ItemController extends Controller {
             'customFields' => $customFields,
             'categoryIcons' => $categoryIcons,
             'selectedCategoryId' => (int) $request->get('category_id', 4),
+            'sizeCatalog' => $this->defaultSizeCatalog(),
         ]);
 
     }
@@ -213,6 +216,8 @@ class ItemController extends Controller {
             $categoryPool = $this->getCategoryPool();
             $allowedCategoryIds = $this->collectSectionCategoryIds($categoryPool, 4);
 
+            $hasVariantInput = $this->hasSheinVariantInput($request);
+
             $validationRules = [
                 'name' => 'required|string|max:255',
                 'description' => 'required|string',
@@ -221,10 +226,28 @@ class ItemController extends Controller {
                 'category_id' => 'required|exists:categories,id',
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'video_link' => ['nullable', 'url', 'max:2048'],
+                'delivery_size' => ['nullable', 'numeric', 'min:0.01'],
+                'discount_type' => ['nullable', 'string', 'in:none,percentage,fixed'],
+                'discount_value' => ['nullable', 'numeric', 'min:0', 'required_if:discount_type,percentage,fixed'],
+                'discount_start' => ['nullable', 'date', 'required_if:discount_type,percentage,fixed'],
+                'discount_end' => ['nullable', 'date', 'after_or_equal:discount_start', 'required_if:discount_type,percentage,fixed'],
+                'stock' => ['nullable', 'integer', 'min:0'],
+                'colors' => ['nullable', 'array'],
+                'colors.*.code' => ['nullable', 'string', 'max:16'],
+                'colors.*.label' => ['nullable', 'string', 'max:120'],
+                'colors.*.quantity' => ['nullable', 'integer', 'min:0'],
+                'sizes' => ['nullable', 'array'],
+                'sizes.*.value' => ['nullable', 'string', 'max:120'],
+                'custom_options' => ['nullable', 'array'],
+                'custom_options.*' => ['nullable', 'string', 'max:255'],
+                'variant_stocks' => [Rule::requiredIf($hasVariantInput), 'array'],
+                'variant_stocks.*.color' => ['nullable', 'string', 'max:16'],
+                'variant_stocks.*.size' => ['nullable', 'string', 'max:120'],
+                'variant_stocks.*.stock' => ['nullable', 'integer', 'min:0'],
             ];
 
-
-            $this->handleItemCreation($request, [
+            $item = $this->handleItemCreation($request, [
                 'allowed_category_ids' => $allowedCategoryIds,
                 'default_category_id' => 4,
                 'section_root_id' => 4,
@@ -238,12 +261,15 @@ class ItemController extends Controller {
                 'additional_attributes' => [
                     'product_link' => $request->input('product_link'),
                     'review_link' => $request->input('review_link'),
+                    'video_link' => $request->input('video_link'),
 
 
                 ],
 
 
             ]);
+
+            $this->syncSheinPurchaseOptions($item, $request);
 
             
 
@@ -1311,6 +1337,276 @@ class ItemController extends Controller {
         }
     }
 
+    private function syncSheinPurchaseOptions(Item $item, Request $request): void
+    {
+        $attributesPayload = $this->buildSheinAttributePayload($request);
+        $deliverySizeProvided = $request->filled('delivery_size');
+
+        if ($attributesPayload !== [] || $deliverySizeProvided) {
+            $payload = [
+                'attributes' => $attributesPayload,
+            ];
+
+            if ($deliverySizeProvided) {
+                $payload['delivery_size'] = $request->input('delivery_size');
+            }
+
+            $subRequest = Request::create('', 'POST', $payload);
+            $subRequest->setUserResolver(fn () => $request->user());
+
+            app(ItemPurchaseManagementController::class)->updateAttributes($subRequest, $item);
+            $item->refresh();
+        }
+
+        $stockRows = $this->buildSheinVariantStockRows($item, $request);
+        if ($stockRows !== []) {
+            $stockRequest = Request::create('', 'POST', [
+                'rows' => $stockRows,
+            ]);
+            $stockRequest->setUserResolver(fn () => $request->user());
+
+            app(ItemPurchaseManagementController::class)->bulkSetStock($stockRequest, $item);
+        }
+
+        $this->syncSheinDiscount($item, $request);
+    }
+
+    private function syncSheinDiscount(Item $item, Request $request): void
+    {
+        $discountType = (string) $request->input('discount_type', 'none');
+
+        if ($discountType === '') {
+            return;
+        }
+
+        if ($discountType === 'none') {
+            $subRequest = Request::create('', 'PATCH', [
+                'enabled' => false,
+            ]);
+            $subRequest->setUserResolver(fn () => $request->user());
+
+            app(ItemPurchaseManagementController::class)->updateDiscount($subRequest, $item);
+            return;
+        }
+
+        $subRequest = Request::create('', 'PATCH', [
+            'enabled' => true,
+            'discount_type' => $discountType,
+            'discount_value' => $request->input('discount_value'),
+            'discount_start' => $request->input('discount_start'),
+            'discount_end' => $request->input('discount_end'),
+        ]);
+        $subRequest->setUserResolver(fn () => $request->user());
+
+        app(ItemPurchaseManagementController::class)->updateDiscount($subRequest, $item);
+    }
+
+    private function buildSheinVariantStockRows(Item $item, Request $request): array
+    {
+        $variantRows = $request->input('variant_stocks', []);
+        if (! is_array($variantRows)) {
+            $variantRows = [];
+        }
+
+        $item->loadMissing('purchaseAttributes');
+
+        $colorKey = null;
+        $sizeKey = null;
+
+        foreach ($item->purchaseAttributes as $attribute) {
+            $type = strtolower((string) ($attribute->type ?? ''));
+
+            if ($type === 'color' && $colorKey === null) {
+                $colorKey = $this->attributeKeyForId($attribute->id);
+            }
+
+            if ($type === 'size' && $sizeKey === null) {
+                $sizeKey = $this->attributeKeyForId($attribute->id);
+            }
+        }
+
+        $rows = [];
+        foreach ($variantRows as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+            $stockRaw = $row['stock'] ?? null;
+            if ($stockRaw === null || $stockRaw === '') {
+                continue;
+            }
+
+            $stock = (int) max(0, (int) $stockRaw);
+            $attributes = [];
+            $missing = false;
+
+            if ($colorKey !== null) {
+                $colorValue = $this->normalizeColorValue($row['color'] ?? null);
+                if ($colorValue === null || $colorValue === '') {
+                    $missing = true;
+                } else {
+                    $attributes[$colorKey] = $colorValue;
+                }
+            }
+
+            if ($sizeKey !== null) {
+                $sizeValue = trim((string) ($row['size'] ?? ''));
+                if ($sizeValue === '') {
+                    $missing = true;
+                } else {
+                    $attributes[$sizeKey] = $sizeValue;
+                }
+            }
+
+            if ($missing) {
+                continue;
+            }
+
+            $variantKey = VariantKeyGenerator::fromAttributes($attributes);
+            $rows[$variantKey] = [
+                'variant_key' => $variantKey,
+                'stock' => $stock,
+            ];
+        }
+
+        if ($rows === []) {
+            $generalStock = $request->input('stock');
+            if ($generalStock !== null && $generalStock !== '') {
+                $rows[''] = [
+                    'variant_key' => '',
+                    'stock' => (int) max(0, (int) $generalStock),
+                ];
+            }
+        }
+
+        return array_values($rows);
+    }
+
+    private function normalizeColorValue(mixed $value): ?string
+    {
+        $code = ColorFieldParser::normalizeCode($value);
+
+        return $code === null ? null : strtoupper($code);
+    }
+
+    private function buildSheinAttributePayload(Request $request): array
+    {
+        $payload = [];
+
+        $colors = $this->normalizeColorRows($request);
+        if ($colors->isNotEmpty()) {
+            $payload[] = [
+                'type' => 'color',
+                'name' => __('merchant_products.attributes.color'),
+                'required_for_checkout' => true,
+                'affects_stock' => true,
+                'values' => $colors->all(),
+            ];
+        }
+
+        $sizes = $this->normalizeSimpleValues($request->input('sizes', []));
+        if ($sizes->isNotEmpty()) {
+            $payload[] = [
+                'type' => 'size',
+                'name' => __('merchant_products.attributes.size'),
+                'required_for_checkout' => true,
+                'affects_stock' => true,
+                'values' => $sizes->all(),
+            ];
+        }
+
+        $customOptions = $this->normalizeSimpleValues($request->input('custom_options', []));
+        if ($customOptions->isNotEmpty()) {
+            $payload[] = [
+                'type' => 'custom',
+                'name' => __('merchant_products.attributes.options'),
+                'required_for_checkout' => false,
+                'affects_stock' => false,
+                'values' => $customOptions->all(),
+            ];
+        }
+
+        return $payload;
+    }
+
+    private function normalizeColorRows(Request $request): Collection
+    {
+        $rows = $request->input('colors', []);
+        if (! is_array($rows)) {
+            return collect();
+        }
+
+        return collect($rows)
+            ->map(function ($row) {
+                if (! is_array($row)) {
+                    return null;
+                }
+
+                $code = isset($row['code']) ? ColorFieldParser::normalizeCode($row['code']) : null;
+                if ($code === null) {
+                    return null;
+                }
+
+                $entry = ['code' => strtoupper($code)];
+
+                $label = isset($row['label']) ? trim((string) $row['label']) : '';
+                if ($label !== '') {
+                    $entry['label'] = $label;
+                }
+
+                $quantity = $row['quantity'] ?? null;
+                if ($quantity !== null && $quantity !== '') {
+                    $intQty = (int) max(0, (int) $quantity);
+                    $entry['quantity'] = $intQty;
+                }
+
+                return $entry;
+            })
+            ->filter()
+            ->values();
+    }
+
+    private function normalizeSimpleValues(mixed $input): Collection
+    {
+        if (! is_array($input)) {
+            return collect();
+        }
+
+        return collect($input)
+            ->map(static function ($value) {
+                if (is_array($value) && array_key_exists('value', $value)) {
+                    $value = $value['value'];
+                }
+
+                $string = trim((string) $value);
+
+                return $string === '' ? null : $string;
+            })
+            ->filter()
+            ->unique()
+            ->values();
+    }
+
+    private function attributeKeyForId(int $id): string
+    {
+        return sprintf('attr%d', $id);
+    }
+
+    private function hasSheinVariantInput(Request $request): bool
+    {
+        $colors = $this->normalizeColorRows($request);
+        if ($colors->isNotEmpty()) {
+            return true;
+        }
+
+        $sizes = $this->normalizeSimpleValues($request->input('sizes', []));
+        if ($sizes->isNotEmpty()) {
+            return true;
+        }
+
+        return false;
+    }
+
 
     private function shouldAutoApproveSection(?string $section): bool
     {
@@ -1470,6 +1766,38 @@ class ItemController extends Controller {
         }
 
         return null;
+    }
+
+    private function defaultSizeCatalog(): array
+    {
+        return [
+            'XS',
+            'S',
+            'M',
+            'L',
+            'XL',
+            'XXL',
+            '3XL',
+            '4XL',
+            '5XL',
+            '6XL',
+            '28',
+            '30',
+            '32',
+            '34',
+            '36',
+            '38',
+            '40',
+            '42',
+            '44',
+            '46',
+            '48',
+            '50',
+            '52',
+            '54',
+            '56',
+            'Free Size',
+        ];
     }
 
     private function userHasAnyPermission(array $permissions): bool
