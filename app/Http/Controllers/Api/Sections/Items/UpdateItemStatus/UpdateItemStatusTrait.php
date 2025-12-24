@@ -174,7 +174,11 @@ trait UpdateItemStatusTrait
                 }
             }
 
-            $item = Item::owner()->whereNotIn('status', ['review', 'rejected'])->withTrashed()->findOrFail($request->item_id);
+            $itemQuery = Item::owner()->withTrashed()->where('status', '!=', 'rejected');
+            if ($request->status !== 'active') {
+                $itemQuery->where('status', '!=', 'review');
+            }
+            $item = $itemQuery->findOrFail($request->item_id);
             
             $section = $this->resolveSectionByCategoryId($item->category_id);
             $authorization = Gate::inspect('section.update', $section);
