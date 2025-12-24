@@ -165,7 +165,6 @@ class ApiController extends Controller {
     use \App\Http\Controllers\Api\Sections\Auth\BuildPendingSignupPayload\BuildPendingSignupPayloadTrait;
     use \App\Http\Controllers\Api\Sections\Auth\CompleteRegistration\CompleteRegistrationTrait;
     use \App\Http\Controllers\Api\Sections\Auth\FinalizePendingSignup\FinalizePendingSignupTrait;
-    use \App\Http\Controllers\Api\Sections\Auth\GeneratePhoneSignupEmail\GeneratePhoneSignupEmailTrait;
     use \App\Http\Controllers\Api\Sections\Auth\HandleDeferredPhoneSignup\HandleDeferredPhoneSignupTrait;
     use \App\Http\Controllers\Api\Sections\Auth\NormalizePhoneNumber\NormalizePhoneNumberTrait;
     use \App\Http\Controllers\Api\Sections\Auth\SendOtp\SendOtpTrait;
