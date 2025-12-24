@@ -471,6 +471,10 @@ class ResponseService
     }
     protected static function finalizeResponse(Response|JsonResponse $response): void
     {
+        if ($response instanceof JsonResponse) {
+            $response->setEncodingOptions(JSON_UNESCAPED_UNICODE);
+            $response->headers->set('Content-Type', 'application/json; charset=UTF-8');
+        }
         if (App::runningUnitTests()) {
             throw new ResponseServiceTestException($response);
         }
