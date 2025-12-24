@@ -159,6 +159,17 @@ trait FinalizePendingSignupTrait
             ResponseService::errorResponse('أ¢آ•آھأکآ²أ¢آ•آھأ¢آ•آ£أ¢آ•آھأ¢آ–آ‘أ¢آ•آھأ¢آ–آ’ أ¢آ•آھأکآ¯أ¢آ•آھأ¢آ”آ‚أ¢آ•آھأکآ²أ¢آ”آکأƒآ¢أ¢آ”آکأƒآ أ¢آ•آھأکآ¯أ¢آ”آکأ‚آ„ أ¢آ•آھأکآ¯أ¢آ”آکأ‚آ„أ¢آ•آھأکآ²أ¢آ•آھأ¢آ”آ‚أ¢آ•آھأکآ´أ¢آ”آکأƒآ¨أ¢آ”آکأ‚آ„. أ¢آ”آکأƒآ¨أ¢آ•آھأ¢آ–آ’أ¢آ•آھأکآ´أ¢آ”آکأƒآ« أ¢آ•آھأکآ¯أ¢آ”آکأ‚آ„أ¢آ”آکأƒآ أ¢آ•آھأکآµأ¢آ•آھأکآ¯أ¢آ”آکأƒآھأ¢آ”آکأ‚آ„أ¢آ•آھأکآ± أ¢آ”آکأƒآ أ¢آ•آھأ¢آ–آ’أ¢آ•آھأکآ± أ¢آ•آھأکآ«أ¢آ•آھأ‚آ«أ¢آ•آھأ¢آ–آ’أ¢آ”آکأƒآ«.');
         }
 
+        $rawEmail = $userData['email'] ?? null;
+        $trimmedEmail = is_string($rawEmail) ? trim($rawEmail) : '';
+        if ($trimmedEmail === '' ||
+            strtolower($trimmedEmail) === 'null' ||
+            strtolower($trimmedEmail) === 'not provided') {
+            $userData['email'] = $this->generatePhoneSignupEmail(
+                $userData['country_code'] ?? null,
+                $userData['mobile'] ?? null
+            );
+        }
+
         unset($userData['normalized_mobile']);
         $userData['is_verified'] = 1;
         $userData['email_verified_at'] = now();
