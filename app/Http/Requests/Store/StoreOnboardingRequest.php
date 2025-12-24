@@ -31,16 +31,7 @@ class StoreOnboardingRequest extends FormRequest
      */
     public function rules(): array
     {
-        $payloadForLog = $this->all();
-        if (isset($payloadForLog['credentials']['password'])) {
-            $payloadForLog['credentials']['password'] = '[hidden]';
-        }
-        if (isset($payloadForLog['staff']['password'])) {
-            $payloadForLog['staff']['password'] = '[hidden]';
-        }
-        if (isset($payloadForLog['pending_signup_token'])) {
-            $payloadForLog['pending_signup_token'] = '[hidden]';
-        }
+        $payloadForLog = $this->sanitizePayloadForLog($this->all());
 
         Log::info('store_onboarding.request_payload', [
             'user_id' => $this->user()?->id,
@@ -157,16 +148,7 @@ class StoreOnboardingRequest extends FormRequest
      */
     protected function failedValidation(Validator $validator)
     {
-        $logPayload = $this->all();
-        if (isset($logPayload['credentials']['password'])) {
-            $logPayload['credentials']['password'] = '[hidden]';
-        }
-        if (isset($logPayload['staff']['password'])) {
-            $logPayload['staff']['password'] = '[hidden]';
-        }
-        if (isset($logPayload['pending_signup_token'])) {
-            $logPayload['pending_signup_token'] = '[hidden]';
-        }
+        $logPayload = $this->sanitizePayloadForLog($this->all());
 
         Log::warning('store_onboarding.validation_failed', [
             'user_id' => $this->user()?->id,
@@ -175,5 +157,38 @@ class StoreOnboardingRequest extends FormRequest
         ]);
 
         parent::failedValidation($validator);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    public function sanitizePayloadForLog(array $payload): array
+    {
+        if (isset($payload['credentials']['password'])) {
+            $payload['credentials']['password'] = '[hidden]';
+        }
+        if (isset($payload['staff']['password'])) {
+            $payload['staff']['password'] = '[hidden]';
+        }
+        if (isset($payload['pending_signup_token'])) {
+            $payload['pending_signup_token'] = '[hidden]';
+        }
+
+        foreach (['logo', 'banner', 'business_logo', 'business_banner'] as $mediaKey) {
+            if (isset($payload[$mediaKey])) {
+                $payload[$mediaKey] = '[omitted]';
+            }
+        }
+
+        if (isset($payload['policies']) && is_array($payload['policies'])) {
+            foreach ($payload['policies'] as $index => $policy) {
+                if (is_array($policy) && isset($policy['content'])) {
+                    $payload['policies'][$index]['content'] = '[omitted]';
+                }
+            }
+        }
+
+        return $payload;
     }
 }
