@@ -113,6 +113,10 @@ class StoreOnboardingController extends Controller
                 $failedPayload['staff']['password'] = '[hidden]';
             }
 
+            if (isset($failedPayload['pending_signup_token'])) {
+                $failedPayload['pending_signup_token'] = '[hidden]';
+            }
+
             \Log::warning('store_onboarding.validation_failed', [
                 'user_id' => $request->user()?->id,
                 'errors' => $exception->errors(),

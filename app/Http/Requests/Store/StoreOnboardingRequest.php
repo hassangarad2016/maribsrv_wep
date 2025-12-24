@@ -38,6 +38,9 @@ class StoreOnboardingRequest extends FormRequest
         if (isset($payloadForLog['staff']['password'])) {
             $payloadForLog['staff']['password'] = '[hidden]';
         }
+        if (isset($payloadForLog['pending_signup_token'])) {
+            $payloadForLog['pending_signup_token'] = '[hidden]';
+        }
 
         Log::info('store_onboarding.request_payload', [
             'user_id' => $this->user()?->id,
@@ -160,6 +163,9 @@ class StoreOnboardingRequest extends FormRequest
         }
         if (isset($logPayload['staff']['password'])) {
             $logPayload['staff']['password'] = '[hidden]';
+        }
+        if (isset($logPayload['pending_signup_token'])) {
+            $logPayload['pending_signup_token'] = '[hidden]';
         }
 
         Log::warning('store_onboarding.validation_failed', [
