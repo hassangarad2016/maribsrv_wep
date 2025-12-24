@@ -321,6 +321,8 @@ class ApiController extends Controller {
     use \App\Http\Controllers\Api\Sections\Chat\UpdatePresenceStatus\UpdatePresenceStatusTrait;
     use \App\Http\Controllers\Api\Sections\Chat\UpdateTypingStatus\UpdateTypingStatusTrait;
 
+    use \App\Http\Controllers\Api\Sections\Delegates\GetAllowedSections\GetAllowedSectionsTrait;
+
     use \App\Http\Controllers\Api\Sections\Blocking\BlockUser\BlockUserTrait;
     use \App\Http\Controllers\Api\Sections\Blocking\GetBlockedUsers\GetBlockedUsersTrait;
     use \App\Http\Controllers\Api\Sections\Blocking\UnblockUser\UnblockUserTrait;
@@ -383,6 +385,8 @@ class ApiController extends Controller {
     use \App\Http\Controllers\Api\Sections\Referrals\GetUserReferralPoints\GetUserReferralPointsTrait;
     use \App\Http\Controllers\Api\Sections\Referrals\HandleReferralCode\HandleReferralCodeTrait;
     use \App\Http\Controllers\Api\Sections\Referrals\SendReferralStatusNotification\SendReferralStatusNotificationTrait;
+
+    use \App\Http\Controllers\Api\Sections\Shared\ResolvePerPage\ResolvePerPageTrait;
 
 
 
