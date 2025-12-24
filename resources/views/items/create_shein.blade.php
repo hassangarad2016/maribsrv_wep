@@ -457,30 +457,32 @@
                                                             @endforeach
                                                         </select>
                                                     @elseif($field->type == 'radio')
-                                                        @foreach($field->values as $value)
-                                                            <div class="form-check">
-                                                                <input 
-                                                                    type="radio" 
-                                                                    id="custom_field_{{ $field->id }}_{{ $loop->index }}" 
-                                                                    name="custom_fields[{{ $field->id }}]" 
-                                                                    value="{{ $value }}" 
-                                                                    class="form-check-input"
-                                                                    {{ $loop->first && $field->required ? 'required' : '' }}>
-                                                                <label class="form-check-label" for="custom_field_{{ $field->id }}_{{ $loop->index }}">{{ $value }}</label>
-                                                            </div>
-                                                        @endforeach
+                                                        <select 
+                                                            id="custom_field_{{ $field->id }}" 
+                                                            name="custom_fields[{{ $field->id }}]" 
+                                                            class="form-control select2" 
+                                                            {{ $field->required ? 'required' : '' }}>
+                                                            <option value="">{{ __('Select') }}</option>
+                                                            @foreach($field->values as $value)
+                                                                <option value="{{ $value }}" {{ old('custom_fields.' . $field->id) == $value ? 'selected' : '' }}>{{ $value }}</option>
+                                                            @endforeach
+                                                        </select>
                                                     @elseif($field->type == 'checkbox')
-                                                        @foreach($field->values as $value)
-                                                            <div class="form-check">
-                                                                <input 
-                                                                    type="checkbox" 
-                                                                    id="custom_field_{{ $field->id }}_{{ $loop->index }}" 
-                                                                    name="custom_fields[{{ $field->id }}][]" 
-                                                                    value="{{ $value }}" 
-                                                                    class="form-check-input">
-                                                                <label class="form-check-label" for="custom_field_{{ $field->id }}_{{ $loop->index }}">{{ $value }}</label>
-                                                            </div>
-                                                        @endforeach
+                                                        @php
+                                                            $selectedValues = old('custom_fields.' . $field->id, []);
+                                                            if (! is_array($selectedValues)) {
+                                                                $selectedValues = [$selectedValues];
+                                                            }
+                                                        @endphp
+                                                        <select 
+                                                            id="custom_field_{{ $field->id }}" 
+                                                            name="custom_fields[{{ $field->id }}][]" 
+                                                            class="form-control select2" 
+                                                            multiple>
+                                                            @foreach($field->values as $value)
+                                                                <option value="{{ $value }}" {{ in_array($value, $selectedValues, true) ? 'selected' : '' }}>{{ $value }}</option>
+                                                            @endforeach
+                                                        </select>
                                                     @elseif($field->type == 'fileinput')
                                                         <input 
                                                             type="file" 
