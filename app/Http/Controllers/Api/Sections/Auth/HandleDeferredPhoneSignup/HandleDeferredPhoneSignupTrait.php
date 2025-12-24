@@ -162,7 +162,7 @@ trait HandleDeferredPhoneSignupTrait
             ->first();
 
         if ($existingVerifiedUser) {
-            ResponseService::errorResponse('â”کأ§â•ھâ–‘â•ھط¯ â•ھط¯â”کآ„â•ھâ–’â”کأ©â”کأ  â”کأ â•ھâ”‚â•ھط´â”کآ„ â•ھط°â•ھط¯â”کآ„â”کآپâ•ھâ•£â”کآ„â•ھأ® â”کأ¨â•ھâ–’â•ھط´â”کأ« â•ھط²â•ھâ”‚â•ھط´â”کأ¨â”کآ„ â•ھط¯â”کآ„â•ھآ»â•ھآ«â”کأھâ”کآ„');
+            ResponseService::errorResponse('┘ç╪░╪د ╪د┘╪▒┘é┘à ┘à╪│╪ش┘ ╪ذ╪د┘┘╪╣┘╪î ┘è╪▒╪ش┘ë ╪ز╪│╪ش┘è┘ ╪د┘╪»╪«┘ê┘');
         }
 
         $payload = $this->buildPendingSignupPayload($request, $firebaseId, $normalizedMobile);
@@ -180,7 +180,7 @@ trait HandleDeferredPhoneSignupTrait
         );
 
         ResponseService::successResponse(
-            'â•ھâ”‚â”کأ¨â•ھط²â”کأ  â•ھط­â”کآ†â•ھâ”¤â•ھط¯â•ھط© â•ھط¯â”کآ„â•ھطµâ•ھâ”‚â•ھط¯â•ھط° â•ھط°â•ھâ•£â•ھآ» â•ھط¯â”کآ„â•ھط²â•ھطµâ”کأ©â”کأ© â”کأ â”کآ† â•ھط¯â”کآ„â•ھâ–’â”کأ â•ھâ–“',
+            '╪│┘è╪ز┘à ╪ح┘╪┤╪د╪ة ╪د┘╪ص╪│╪د╪ذ ╪ذ╪╣╪» ╪د┘╪ز╪ص┘é┘é ┘à┘ ╪د┘╪▒┘à╪▓',
             [
                 'pending_signup_id' => $pendingSignup->id,
                 'mobile' => $mobile,

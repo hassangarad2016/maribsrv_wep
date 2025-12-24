@@ -156,7 +156,7 @@ trait FinalizePendingSignupTrait
 
         if (empty($userData)) {
             $pendingSignup->delete();
-            ResponseService::errorResponse('â•ھط²â•ھâ•£â•ھâ–‘â•ھâ–’ â•ھط¯â•ھâ”‚â•ھط²â”کأ¢â”کأ â•ھط¯â”کآ„ â•ھط¯â”کآ„â•ھط²â•ھâ”‚â•ھط´â”کأ¨â”کآ„. â”کأ¨â•ھâ–’â•ھط´â”کأ« â•ھط¯â”کآ„â”کأ â•ھطµâ•ھط¯â”کأھâ”کآ„â•ھط± â”کأ â•ھâ–’â•ھط± â•ھط«â•ھآ«â•ھâ–’â”کأ«.');
+            ResponseService::errorResponse('╪ز╪╣╪░╪▒ ╪د╪│╪ز┘â┘à╪د┘ ╪د┘╪ز╪│╪ش┘è┘. ┘è╪▒╪ش┘ë ╪د┘┘à╪ص╪د┘ê┘╪ر ┘à╪▒╪ر ╪ث╪«╪▒┘ë.');
         }
 
         unset($userData['normalized_mobile']);
@@ -196,7 +196,7 @@ trait FinalizePendingSignupTrait
 
             DB::commit();
 
-            ResponseService::successResponse('â•ھط²â”کأ  â•ھط²â”کآپâ•ھâ•£â”کأ¨â”کآ„ â•ھط¯â”کآ„â•ھطµâ•ھâ”‚â•ھط¯â•ھط° â•ھط°â”کآ†â•ھط´â•ھط¯â•ھطµ', $auth, ['token' => $token]);
+            ResponseService::successResponse('╪ز┘à ╪ز┘╪╣┘è┘ ╪د┘╪ص╪│╪د╪ذ ╪ذ┘╪ش╪د╪ص', $auth, ['token' => $token]);
         } catch (Throwable $th) {
             DB::rollBack();
             ResponseService::logErrorResponse($th, 'API Controller -> finalizePendingSignup');
