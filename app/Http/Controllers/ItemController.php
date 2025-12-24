@@ -168,11 +168,12 @@ class ItemController extends Controller {
         ResponseService::noAnyPermissionThenRedirect(['shein-products-create']);
         $categoryPool = $this->getCategoryPool();
         $categoryIds = $this->collectSectionCategoryIds($categoryPool, 4);
+        $categoryPool = $categoryPool->whereIn('id', $categoryIds);
 
         $categories = collect($this->buildCategoryOptionTree($categoryPool, 4));
         $rootCategory = $categoryPool->firstWhere('id', 4);
 
-        if ($rootCategory) {
+        if ($rootCategory && $categories->isEmpty()) {
             $categories->prepend([
                 'id' => $rootCategory->id,
                 'label' => $rootCategory->name,
@@ -359,8 +360,19 @@ class ItemController extends Controller {
 
 
         $categoryPool = $this->getCategoryPool();
-        $categories = collect($this->buildCategoryOptionTree($categoryPool, 4));
         $categoryIds = $this->collectSectionCategoryIds($categoryPool, 4);
+        $categoryPool = $categoryPool->whereIn('id', $categoryIds);
+        $categories = collect($this->buildCategoryOptionTree($categoryPool, 4));
+        $rootCategory = $categoryPool->firstWhere('id', 4);
+
+        if ($rootCategory && ($categories->isEmpty() || (int) $item->category_id === 4)) {
+            $categories->prepend([
+                'id' => $rootCategory->id,
+                'label' => $rootCategory->name,
+                'name' => $rootCategory->name,
+                'icon' => $rootCategory->image,
+            ]);
+        }
 
         $customFields = CustomField::whereHas('custom_field_category', function ($q) use ($categoryIds) {
             $q->whereIn('category_id', $categoryIds);

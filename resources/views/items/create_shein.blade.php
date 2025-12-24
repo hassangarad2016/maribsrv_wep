@@ -384,7 +384,7 @@
                                 </div>
                                 <div class="card-body">
                                     <p class="text-muted mb-3">
-                                        Variant stock rows are generated from the selected colors and sizes. If no variants are defined, the general stock field is used.
+                                        Variant stock rows are generated from the selected colors and sizes. Fill stock only for available combinations; leave stock empty for unavailable sizes per color. If no variants are defined, the general stock field is used.
                                     </p>
                                     <div class="table-responsive">
                                         <table class="table table-bordered align-middle" data-variant-table>
