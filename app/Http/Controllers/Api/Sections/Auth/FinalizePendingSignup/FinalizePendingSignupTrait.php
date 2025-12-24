@@ -156,7 +156,7 @@ trait FinalizePendingSignupTrait
 
         if (empty($userData)) {
             $pendingSignup->delete();
-            ResponseService::errorResponse('╪ز╪╣╪░╪▒ ╪د╪│╪ز┘â┘à╪د┘ ╪د┘╪ز╪│╪ش┘è┘. ┘è╪▒╪ش┘ë ╪د┘┘à╪ص╪د┘ê┘╪ر ┘à╪▒╪ر ╪ث╪«╪▒┘ë.');
+            ResponseService::errorResponse('أ¢آ•آھأکآ²أ¢آ•آھأ¢آ•آ£أ¢آ•آھأ¢آ–آ‘أ¢آ•آھأ¢آ–آ’ أ¢آ•آھأکآ¯أ¢آ•آھأ¢آ”آ‚أ¢آ•آھأکآ²أ¢آ”آکأƒآ¢أ¢آ”آکأƒآ أ¢آ•آھأکآ¯أ¢آ”آکأ‚آ„ أ¢آ•آھأکآ¯أ¢آ”آکأ‚آ„أ¢آ•آھأکآ²أ¢آ•آھأ¢آ”آ‚أ¢آ•آھأکآ´أ¢آ”آکأƒآ¨أ¢آ”آکأ‚آ„. أ¢آ”آکأƒآ¨أ¢آ•آھأ¢آ–آ’أ¢آ•آھأکآ´أ¢آ”آکأƒآ« أ¢آ•آھأکآ¯أ¢آ”آکأ‚آ„أ¢آ”آکأƒآ أ¢آ•آھأکآµأ¢آ•آھأکآ¯أ¢آ”آکأƒآھأ¢آ”آکأ‚آ„أ¢آ•آھأکآ± أ¢آ”آکأƒآ أ¢آ•آھأ¢آ–آ’أ¢آ•آھأکآ± أ¢آ•آھأکآ«أ¢آ•آھأ‚آ«أ¢آ•آھأ¢آ–آ’أ¢آ”آکأƒآ«.');
         }
 
         unset($userData['normalized_mobile']);
@@ -196,7 +196,7 @@ trait FinalizePendingSignupTrait
 
             DB::commit();
 
-            ResponseService::successResponse('╪ز┘à ╪ز┘╪╣┘è┘ ╪د┘╪ص╪│╪د╪ذ ╪ذ┘╪ش╪د╪ص', $auth, ['token' => $token]);
+            ResponseService::successResponse('أ¢آ•آھأکآ²أ¢آ”آکأƒآ  أ¢آ•آھأکآ²أ¢آ”آکأ‚آپأ¢آ•آھأ¢آ•آ£أ¢آ”آکأƒآ¨أ¢آ”آکأ‚آ„ أ¢آ•آھأکآ¯أ¢آ”آکأ‚آ„أ¢آ•آھأکآµأ¢آ•آھأ¢آ”آ‚أ¢آ•آھأکآ¯أ¢آ•آھأکآ° أ¢آ•آھأکآ°أ¢آ”آکأ‚آ†أ¢آ•آھأکآ´أ¢آ•آھأکآ¯أ¢آ•آھأکآµ', $auth, ['token' => $token]);
         } catch (Throwable $th) {
             DB::rollBack();
             ResponseService::logErrorResponse($th, 'API Controller -> finalizePendingSignup');

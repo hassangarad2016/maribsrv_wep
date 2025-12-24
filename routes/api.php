@@ -192,7 +192,8 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
 
     Route::get('get-package', [ApiController::class, 'getPackage']);
     Route::post('update-profile', [ApiController::class, 'updateProfile']);
-    Route::post('complete-registration', [ApiController::class, 'completeRegistration']);
+    Route::post('complete-registration', [ApiController::class, 'completeRegistration'])
+        ->withoutMiddleware('auth:sanctum');
     Route::delete('delete-user', [ApiController::class, 'deleteUser']);
     Route::get('user-profile-stats', [ApiController::class, 'getUserProfileStats']);
 
