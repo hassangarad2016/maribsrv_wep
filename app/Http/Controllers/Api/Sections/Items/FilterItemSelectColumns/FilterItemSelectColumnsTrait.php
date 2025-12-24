@@ -153,6 +153,10 @@ trait FilterItemSelectColumnsTrait
     {
         $availability = $this->getItemColumnAvailability();
 
+        if ($availability === []) {
+            return ['items.*'];
+        }
+
         return array_values(array_filter($columns, static function ($column) use ($availability) {
             $expression = $column;
 
@@ -178,6 +182,6 @@ trait FilterItemSelectColumnsTrait
             }
 
             return isset($availability[$columnName]);
-        }));
+        })) ?: ['items.*'];
     }
 }
