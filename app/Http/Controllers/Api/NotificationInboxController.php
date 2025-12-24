@@ -40,7 +40,7 @@ class NotificationInboxController extends Controller
     public function unreadCount(Request $request): JsonResponse
     {
         return response()->json([
-            'unread_count' => $this->inboxService->unreadCount($request->user()),
+            'unread_count' => $this->inboxService->unreadCount($request->user(), true),
         ]);
     }
 
