@@ -51,8 +51,7 @@
                                 <label for="currency" class="form-label mandatory">{{ __('Currency') }}</label>
                                 <select id="currency" name="currency" class="form-control" required>
                                     <option value="USD">USD</option>
-                                    <option value="EUR">EUR</option>
-                                    <option value="GBP">GBP</option>
+                                    <option value="YER">YER</option>
                                     <option value="SAR">SAR</option>
                                 </select>
                             </div>

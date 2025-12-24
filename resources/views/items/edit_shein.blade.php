@@ -68,8 +68,7 @@
                                 <label for="currency" class="form-label mandatory">{{ __('Currency') }}</label>
                                 <select id="currency" name="currency" class="form-control" required>
                                     <option value="USD" {{ $item->currency == 'USD' ? 'selected' : '' }}>USD</option>
-                                    <option value="EUR" {{ $item->currency == 'EUR' ? 'selected' : '' }}>EUR</option>
-                                    <option value="GBP" {{ $item->currency == 'GBP' ? 'selected' : '' }}>GBP</option>
+                                    <option value="YER" {{ $item->currency == 'YER' ? 'selected' : '' }}>YER</option>
                                     <option value="SAR" {{ $item->currency == 'SAR' ? 'selected' : '' }}>SAR</option>
                                 </select>
                             </div>
