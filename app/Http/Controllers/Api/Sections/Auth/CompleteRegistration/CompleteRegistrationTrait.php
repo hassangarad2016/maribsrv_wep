@@ -203,7 +203,7 @@ trait CompleteRegistrationTrait
                 }
 
                 $completionToken = (string) ($pendingPayload['completion_token'] ?? '');
-                $requestToken = (string) $request->pending_signup_token;
+                $requestToken = trim((string) $request->pending_signup_token);
                 if ($completionToken === '' || !hash_equals($completionToken, $requestToken)) {
                     DB::rollBack();
                     return ResponseService::errorResponse(
