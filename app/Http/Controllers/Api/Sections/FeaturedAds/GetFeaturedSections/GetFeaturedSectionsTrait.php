@@ -306,54 +306,10 @@ trait GetFeaturedSectionsTrait
                 ->get();
 
             if ($configs->isEmpty()) {
-                // â”کآ„â•ھط¯ â•ھط²â”کأھâ•ھط´â•ھآ» â•ھط­â•ھâ•£â•ھآ»â•ھط¯â•ھآ»â•ھط¯â•ھط² â”کأ â•ھآ«â•ھâ•،â•ھâ•،â•ھط±: â•ھط¯â•ھâ•£â•ھâ–’â•ھâ•¢ â•ھط«â•ھطµâ•ھآ»â•ھط³ â•ھط¯â”کآ„â•ھط­â•ھâ•£â”کآ„â•ھط¯â”کآ†â•ھط¯â•ھط² â•ھط°â•ھآ»â”کأھâ”کآ† â•ھط²â”کأ©â”کأ¨â”کأ¨â•ھآ» â•ھط¯â”کآ„â”کأ©â•ھâ”‚â”کأ /â•ھط¯â”کآ„â”کآپâ•ھط®â•ھط±
-                $applyInterfaceFilter = false;
-                $categoryIds = null;
-                $baseQuery = Item::query()
-                    ->approved()
-                    ->with($relations)
-                    ->withCount('favourites')
-                    ->withCount('featured_items');
-
-                $items = (clone $baseQuery)
-                    ->orderByDesc('items.created_at')
-                    ->skip($offset)
-                    ->limit($limit)
-                    ->get();
-
-                $sections = [];
-
-                if ($items->isNotEmpty()) {
-                    $sectionData = array_values((new ItemCollection($items))->toArray($request));
-                    $sections[] = [
-                        'id' => null,
-                        'title' => $titleMap['latest'] ?? 'Latest Listings',
-                        'style' => 'list',
-                        'section_type' => $sectionType,
-                        'filter' => 'latest',
-                        'slug' => $request->input('slug')
-                            ?? Str::slug(($sectionType ?: 'all') . '-latest'),
-                        'sequence' => 1,
-                        'root_identifier' => $rootIdentifier,
-                        'total_data' => count($sectionData),
-                        'min_price' => $items->min('price'),
-                        'max_price' => $items->max('price'),
-                        'has_more' => $items->count() === $limit,
-                        'section_data' => $sectionData,
-                    ];
-                }
-
-                Log::info('API Controller -> getFeaturedSections fallback response', [
+                Log::info('API Controller -> getFeaturedSections empty-config response', [
                     'user_id' => $requestUser?->getAuthIdentifier(),
                     'interface_type' => $sectionType,
-                    'sections_count' => count($sections),
-                    'sections' => array_map(static function ($section) {
-                        return [
-                            'title' => $section['title'] ?? null,
-                            'filter' => $section['filter'] ?? null,
-                            'items' => $section['total_data'] ?? null,
-                        ];
-                    }, $sections),
+                    'sections_count' => 0,
                 ]);
 
                 ResponseService::successResponse(
@@ -363,13 +319,12 @@ trait GetFeaturedSectionsTrait
                         'filters' => $filters,
                         'page' => $page,
                         'per_page' => $limit,
-                        'sections' => array_values($sections),
+                        'sections' => [],
                     ]
                 );
 
                 return;
             }
-
             $allSections = [];
             $sequenceOffset = 0;
 
@@ -556,187 +511,11 @@ trait GetFeaturedSectionsTrait
                     }
                 }
 
-                if ($sectionsForConfig === [] && $page === 1) {
-                    $baseQuery ??= $makeBaseQuery($applyInterfaceFilterConfig);
-
-                    $fallbackItems = (clone $baseQuery)
-                        ->orderByDesc('items.created_at')
-                        ->skip($offset)
-                        ->limit($limit)
-                        ->get();
-
-                    if ($fallbackItems->isNotEmpty()) {
-                        $sectionData = array_values((new ItemCollection($fallbackItems))->toArray($request));
-                        $sectionsForConfig[] = [
-                            'id' => null,
-                            'title' => $config->title ?? $titleMap['latest'] ?? 'Latest Listings',
-                            'style' => $config->style_key ?? 'list',
-                            'section_type' => $sectionTypeForConfig,
-                            'filter' => 'latest',
-                            'slug' => $config->slug
-                                ?? $request->input('slug')
-                                ?? Str::slug($sectionTypeForConfig . '-latest'),
-                            'sequence' => $sequenceOffset + 1,
-                            'root_identifier' => $config->root_identifier ?? $rootIdentifierForConfig,
-                            'total_data' => count($sectionData),
-                            'min_price' => $fallbackItems->min('price'),
-                            'max_price' => $fallbackItems->max('price'),
-                            'has_more' => $fallbackItems->count() === $limit,
-                            'section_data' => $sectionData,
-                        ];
-                    }
-                }
-
-                if ($sectionsForConfig === []) {
-                    $singleItemQuery = Item::query()
-                        ->approved()
-                        ->with($relations)
-                        ->withCount('favourites')
-                        ->withCount('featured_items');
-
-                    if ($categoryIdsForConfig !== null) {
-                        $singleItemQuery->whereIn('category_id', $categoryIdsForConfig);
-                    } elseif ($applyInterfaceFilterConfig) {
-                        $singleItemQuery->whereIn('interface_type', $interfaceVariantsForConfig);
-                    }
-
-                    $singleItem = $singleItemQuery
-                        ->orderByDesc('items.created_at')
-                        ->first();
-
-                    $sectionData = $singleItem
-                        ? array_values((new ItemCollection([$singleItem]))->toArray($request))
-                        : [];
-
-                    $sectionsForConfig[] = [
-                        'id' => null,
-                        'title' => $config->title ?? $titleMap['latest'] ?? 'Latest Listings',
-                        'style' => $config->style_key ?? 'list',
-                        'section_type' => $sectionTypeForConfig,
-                        'filter' => $config->order_mode ?? 'latest',
-                        'slug' => $config->slug
-                            ?? $request->input('slug')
-                            ?? Str::slug($sectionTypeForConfig . '-latest'),
-                        'sequence' => $sequenceOffset + 1,
-                        'root_identifier' => $config->root_identifier ?? $rootIdentifierForConfig,
-                        'total_data' => count($sectionData),
-                        'min_price' => $singleItem?->price,
-                        'max_price' => $singleItem?->price,
-                        'has_more' => false,
-                        'section_data' => $sectionData,
-                    ];
-                }
-
                 $sequenceOffset += count($sectionsForConfig);
                 $allSections = array_merge($allSections, $sectionsForConfig);
             }
 
             // â•ھط­â•ھâ–‘â•ھط¯ â”کآ„â”کأ  â•ھط²â”کآڈâ•ھâ–’â•ھط´â•ھâ•£ â•ھط«â”کأ¨â”کظ‘ â•ھط¯â”کآ„â•ھط«â”کأ©â•ھâ”‚â•ھط¯â”کأ  â”کأ â”کآ† â•ھط¯â”کآ„â•ھط­â•ھâ•£â•ھآ»â•ھط¯â•ھآ»â•ھط¯â•ھط²â•ھأ® â”کأ©â•ھآ»â”کظ‘â”کأ  â”کأ©â•ھâ”‚â”کأ â”کأ¯â•ھط¯ â•ھط¯â”کآپâ•ھط²â•ھâ–’â•ھط¯â•ھâ•¢â”کأ¨â”کأ¯â•ھط¯ â•ھط°â•ھط«â•ھطµâ•ھآ»â•ھط³ â•ھط¯â”کآ„â•ھط­â•ھâ•£â”کآ„â•ھط¯â”کآ†â•ھط¯â•ھط² â•ھط°â•ھآ»â”کأھâ”کآ† â•ھط«â”کأ¨ â”کأ©â”کأ¨â”کأھâ•ھآ»
-            if ($allSections === []) {
-                $fallbackItems = Item::query()
-                    ->approved()
-                    ->with($relations)
-                    ->withCount('favourites')
-                    ->withCount('featured_items')
-                    ->orderByDesc('items.created_at')
-                    ->skip($offset)
-                    ->limit($limit)
-                    ->get();
-
-                if ($fallbackItems->isNotEmpty()) {
-                    $sectionData = array_values((new ItemCollection($fallbackItems))->toArray($request));
-                    $allSections[] = [
-                        'id' => null,
-                        'title' => $titleMap['latest'] ?? 'Latest Listings',
-                        'style' => 'list',
-                        'section_type' => 'all',
-                        'filter' => 'latest',
-                        'slug' => $request->input('slug') ?? Str::slug('all-latest'),
-                        'sequence' => 1,
-                        'root_identifier' => null,
-                        'total_data' => count($sectionData),
-                        'min_price' => $fallbackItems->min('price'),
-                        'max_price' => $fallbackItems->max('price'),
-                        'has_more' => $fallbackItems->count() === $limit,
-                        'section_data' => $sectionData,
-                    ];
-                }
-            }
-
-            $hasNonFeaturedSections = collect($allSections)->contains(static function (array $section) {
-                $filter = $section['filter'] ?? null;
-                if (! is_string($filter) || $filter === '') {
-                    return true;
-                }
-
-                return strtolower($filter) !== 'featured';
-            });
-
-            if (! $hasNonFeaturedSections) {
-                $fallbackQuery = Item::query()
-                    ->approved()
-                    ->with($relations)
-                    ->withCount('favourites')
-                    ->withCount('featured_items');
-
-                if ($categoryIds !== null) {
-                    $fallbackQuery->whereIn('category_id', $categoryIds);
-                }
-
-                if ($sectionType !== null && $sectionType !== 'all') {
-                    $fallbackQuery->where(static function ($inner) use ($interfaceVariants, $categoryIds) {
-                        $inner->whereIn('interface_type', $interfaceVariants);
-                        if ($categoryIds !== null) {
-                            $inner->orWhere(static function ($legacy) use ($categoryIds) {
-                                $legacy->whereNull('interface_type')
-                                    ->whereIn('category_id', $categoryIds);
-                            });
-                        } else {
-                            $inner->orWhereNull('interface_type');
-                        }
-                    });
-                }
-
-                $fallbackItems = $fallbackQuery
-                    ->orderByDesc('items.created_at')
-                    ->skip($offset)
-                    ->limit($limit)
-                    ->get();
-
-                if ($fallbackItems->isEmpty()) {
-                    $fallbackItems = Item::query()
-                        ->approved()
-                        ->with($relations)
-                        ->withCount('favourites')
-                        ->withCount('featured_items')
-                        ->orderByDesc('items.created_at')
-                        ->skip($offset)
-                        ->limit($limit)
-                        ->get();
-                }
-
-                if ($fallbackItems->isNotEmpty()) {
-                    $fallbackSectionData = array_values((new ItemCollection($fallbackItems))->toArray($request));
-                    $allSections[] = [
-                        'id' => null,
-                        'title' => $titleMap['latest'] ?? 'Latest Listings',
-                        'style' => 'list',
-                        'section_type' => $sectionType,
-                        'filter' => 'latest',
-                        'slug' => $request->input('slug')
-                            ?? Str::slug(($sectionType ?: 'all') . '-latest'),
-                        'sequence' => count($allSections) + 1,
-                        'root_identifier' => $rootIdentifier,
-                        'total_data' => count($fallbackSectionData),
-                        'min_price' => $fallbackItems->min('price'),
-                        'max_price' => $fallbackItems->max('price'),
-                        'has_more' => $fallbackItems->count() === $limit,
-                        'section_data' => $fallbackSectionData,
-                    ];
-                }
-
-            }
-
             Log::info('featured_sections.response', [
                 'requested_interface' => $requestContext['interface_type'],
                 'resolved_section_type' => $sectionType,
