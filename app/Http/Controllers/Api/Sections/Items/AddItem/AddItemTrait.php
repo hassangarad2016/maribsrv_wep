@@ -212,14 +212,14 @@ trait AddItemTrait
                 'show_only_to_premium' => 'required|boolean',
                 'video_link'           => 'nullable|url',
                 'gallery_images'       => 'nullable|array|min:1',
-                'gallery_images.*'     => 'nullable|mimes:jpeg,png,jpg|max:4096',
-                'image'                => 'required|mimes:jpeg,png,jpg|max:4096',
+                'gallery_images.*'     => 'nullable|mimes:jpeg,png,jpg,webp|max:4096',
+                'image'                => 'required|mimes:jpeg,png,jpg,webp|max:4096',
                 'country'              => 'required',
                 'state'                => 'nullable',
                 'city'                 => 'required',
                 'area_id'              => 'nullable',
                 'custom_field_files'   => 'nullable|array',
-                'custom_field_files.*' => 'nullable|mimes:jpeg,png,jpg,pdf,doc|max:4096',
+                'custom_field_files.*' => 'nullable|mimes:jpeg,png,jpg,webp,pdf,doc|max:4096',
                 'custom_fields'        => 'nullable|array',
                 'custom_fields.*'      => 'nullable',
                 'slug'                 => 'nullable|regex:/^[a-z0-9-]+$/',
@@ -239,7 +239,7 @@ trait AddItemTrait
                 foreach (['latitude', 'longitude', 'city', 'area_id', 'address', 'country', 'state'] as $geoField) {
                     $validationRules[$geoField] = 'nullable';
                 }
-                $validationRules['image'] = 'nullable|mimes:jpeg,png,jpg|max:4096';
+                $validationRules['image'] = 'nullable|mimes:jpeg,png,jpg,webp|max:4096';
             }
 
             $validator = Validator::make($request->all(), $validationRules);

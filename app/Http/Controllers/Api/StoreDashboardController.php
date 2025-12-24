@@ -103,6 +103,59 @@ class StoreDashboardController extends Controller
         ]);
     }
 
+    public function followers(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user || ! $user->isSeller()) {
+            return response()->json([
+                'message' => __('ط؛ظٹط± ظ…طµط±ط­ ظ„ظƒ ط¨ط§ظ„ظˆطµظˆظ„ ط¥ظ„ظ‰ ظ„ظˆط­ط© ط§ظ„ظ…طھط¬ط±.'),
+            ], 403);
+        }
+
+        /** @var Store|null $store */
+        $store = $user->stores()->latest()->first();
+
+        if (! $store) {
+            return response()->json([
+                'message' => __('ظ„ظ… ظٹطھظ… طھط³ط¬ظٹظ„ ظ…طھط¬ط± ظ„ظ‡ط°ط§ ط§ظ„ط­ط³ط§ط¨ ط­طھظ‰ ط§ظ„ط¢ظ†.'),
+            ], 404);
+        }
+
+        $perPage = (int) $request->integer('per_page', 20);
+        if ($perPage < 1) {
+            $perPage = 20;
+        }
+        $perPage = min($perPage, 50);
+
+        $followers = $store->followers()
+            ->with(['user:id,name,profile'])
+            ->latest()
+            ->paginate($perPage);
+
+        return response()->json([
+            'data' => $followers->getCollection()
+                ->map(fn ($follower) => [
+                    'id' => $follower->id,
+                    'user_id' => $follower->user_id,
+                    'followed_at' => $follower->created_at?->toIso8601String(),
+                    'user' => $follower->user
+                        ? [
+                            'id' => $follower->user->id,
+                            'name' => $follower->user->name,
+                            'profile' => $follower->user->profile,
+                        ]
+                        : null,
+                ])->values(),
+            'meta' => [
+                'current_page' => $followers->currentPage(),
+                'per_page' => $followers->perPage(),
+                'total' => $followers->total(),
+                'has_more' => $followers->hasMorePages(),
+            ],
+        ]);
+    }
+
     /**
      * @return array<string, mixed>
      */

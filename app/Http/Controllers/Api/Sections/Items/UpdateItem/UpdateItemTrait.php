@@ -172,10 +172,10 @@ trait UpdateItemTrait
             'longitude'            => 'nullable',
             'address'              => 'nullable',
             'contact'              => 'nullable',
-            'image'                => 'nullable|mimes:jpeg,jpg,png|max:4096',
+            'image'                => 'nullable|mimes:jpeg,jpg,png,webp|max:4096',
             'custom_fields'        => 'nullable',
             'custom_field_files'   => 'nullable|array',
-            'custom_field_files.*' => 'nullable|mimes:jpeg,png,jpg,pdf,doc|max:4096',
+            'custom_field_files.*' => 'nullable|mimes:jpeg,png,jpg,webp,pdf,doc|max:4096',
             'gallery_images'       => 'nullable|array',
             'currency'             => 'required',
             'product_link'         => [

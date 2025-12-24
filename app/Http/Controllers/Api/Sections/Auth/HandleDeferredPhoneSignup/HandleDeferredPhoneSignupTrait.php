@@ -156,7 +156,7 @@ trait HandleDeferredPhoneSignupTrait
 
         $existingVerifiedUser = User::where('mobile', $mobile)
             ->where(function ($query) {
-                $query->where('is_verified', 1)
+                $query->whereNotNull('phone_verified_at')
                     ->orWhereNotNull('email_verified_at');
             })
             ->first();

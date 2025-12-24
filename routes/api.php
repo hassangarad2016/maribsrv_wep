@@ -124,6 +124,7 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
 
     Route::prefix('store')->group(function (): void {
         Route::get('dashboard/summary', [ApiStoreDashboardController::class, 'summary']);
+        Route::get('dashboard/followers', [ApiStoreDashboardController::class, 'followers']);
         Route::get('orders', [ApiStoreOrderController::class, 'index']);
         Route::post('orders/{order}/status', [ApiStoreOrderController::class, 'updateStatus'])->whereNumber('order');
         Route::get('manual-payments', [ApiStoreManualPaymentController::class, 'index']);
