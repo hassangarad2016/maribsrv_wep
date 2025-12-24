@@ -1007,12 +1007,6 @@ class ItemController extends Controller {
 
                 if (is_array($notificationResponse) && ($notificationResponse['error'] ?? false)) {
                     Log::error('ItemController: Failed to send status notification', $notificationResponse);
-
-                    ResponseService::warningResponse(
-                        $notificationResponse['message'] ?? 'Failed to send item notification.',
-                        $notificationResponse,
-                        $notificationResponse['code'] ?? null
-                    );
                 }
 
             }
