@@ -153,7 +153,8 @@ trait SetItemTotalClickTrait
         try {
 
             $validator = Validator::make($request->all(), [
-                'item_id' => 'required',
+                'item_id' => 'required_without:service_id',
+                'service_id' => 'required_without:item_id',
             ]);
 
             if ($validator->fails()) {
@@ -161,13 +162,37 @@ trait SetItemTotalClickTrait
             }
 
             $itemId = (int) $request->item_id;
+            $serviceId = (int) $request->service_id;
             $recorded = false;
 
-            $item = Item::find($itemId);
-            if ($item) {
-                $item->increment('clicks');
-                $recorded = true;
-            } else {
+            $department = strtolower((string) ($request->department ?? $request->type ?? ''));
+            $forceService = $serviceId > 0 || in_array($department, ['service', 'services'], true);
+
+            if ($serviceId > 0) {
+                $service = Service::find($serviceId);
+                if ($service) {
+                    $service->increment('views');
+                    $recorded = true;
+                }
+            }
+
+            if (!$recorded && $forceService && $itemId > 0) {
+                $service = Service::find($itemId);
+                if ($service) {
+                    $service->increment('views');
+                    $recorded = true;
+                }
+            }
+
+            if (!$recorded && $itemId > 0) {
+                $item = Item::find($itemId);
+                if ($item) {
+                    $item->increment('clicks');
+                    $recorded = true;
+                }
+            }
+
+            if (!$recorded && !$forceService && $itemId > 0) {
                 $service = Service::find($itemId);
                 if ($service) {
                     $service->increment('views');
