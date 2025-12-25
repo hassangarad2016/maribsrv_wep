@@ -166,6 +166,7 @@ trait WalletWithdrawalOptionsTrait
 
             $methods = array_values($this->getWalletWithdrawalMethods());
 
+            $minimumAmount = (float) config('wallet.withdrawals.minimum_amount', 0);
             $data = [
                 'methods' => array_map(static function (array $method) {
                     $methodData = [
@@ -188,9 +189,11 @@ trait WalletWithdrawalOptionsTrait
                     return $methodData;
                 
                 }, $methods),
-                'minimum_amount' => (float) config('wallet.withdrawals.minimum_amount', 1),
                 'currency' => $walletCurrency,
             ];
+            if ($minimumAmount > 0) {
+                $data['minimum_amount'] = $minimumAmount;
+            }
 
             ResponseService::successResponse('Wallet withdrawal options fetched successfully', $data);
         } catch (Throwable $th) {

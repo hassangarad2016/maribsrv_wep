@@ -153,10 +153,14 @@ trait StoreWalletWithdrawalRequestTrait
     {
         $methods = $this->getWalletWithdrawalMethods();
 
-        $minimumAmount = max(0.01, (float) config('wallet.withdrawals.minimum_amount', 1));
+        $minimumAmount = (float) config('wallet.withdrawals.minimum_amount', 0);
+        $amountRules = ['required', 'numeric'];
+        if ($minimumAmount > 0) {
+            $amountRules[] = 'min:' . $minimumAmount;
+        }
 
         $validator = Validator::make($request->all(), [
-            'amount' => ['required', 'numeric', 'min:' . $minimumAmount],
+            'amount' => $amountRules,
             'preferred_method' => ['required', Rule::in(array_keys($methods))],
             'notes' => ['nullable', 'string', 'max:500'],
             'meta' => ['nullable', 'array'],

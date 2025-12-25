@@ -17,63 +17,45 @@ return [
 
 
     'withdrawals' => [
-        'minimum_amount' => (float) env('WALLET_WITHDRAWAL_MINIMUM_AMOUNT', 1),
+        'minimum_amount' => (float) env('WALLET_WITHDRAWAL_MINIMUM_AMOUNT', 0),
         'methods' => [
             [
                 'key' => 'bank_transfer',
-                'name' => 'Bank Transfer',
-                'description' => 'Receive funds via bank transfer.',
+                'name' => 'بنك الشرق',
+                'description' => 'سحب الرصيد عبر بنك الشرق.',
 
                 'fields' => [
                     [
-                        'key' => 'account_name',
-                        'label' => 'Account name',
-                        'required' => true,
-                        'rules' => ['required', 'string', 'max:191'],
-                    ],
-                    [
                         'key' => 'account_number',
-                        'label' => 'Account number',
+                        'label' => 'رقم الحساب',
                         'required' => true,
                         'rules' => ['required', 'string', 'max:64'],
                     ],
                     [
-                        'key' => 'bank_name',
-                        'label' => 'Bank name',
-                        'required' => false,
-                        'rules' => ['nullable', 'string', 'max:191'],
-                    ],
-                    [
-                        'key' => 'iban',
-                        'label' => 'IBAN',
-                        'required' => false,
-                        'rules' => ['nullable', 'string', 'max:34'],
+                        'key' => 'contact_number',
+                        'label' => 'رقم الهاتف',
+                        'required' => true,
+                        'rules' => ['required', 'string', 'max:32'],
                     ],
                 ],
 
             ],
             [
                 'key' => 'cash_pickup',
-                'name' => 'Cash Pickup',
-                'description' => 'Collect cash from the service desk.',
+                'name' => 'تحويل صرافات',
+                'description' => 'سحب الرصيد عبر الصرافات.',
                 'fields' => [
                     [
                         'key' => 'recipient_name',
-                        'label' => 'Recipient name',
+                        'label' => 'اسم المستلم الرباعي',
                         'required' => true,
                         'rules' => ['required', 'string', 'max:191'],
                     ],
                     [
                         'key' => 'contact_number',
-                        'label' => 'Contact number',
+                        'label' => 'رقم الهاتف',
                         'required' => true,
                         'rules' => ['required', 'string', 'max:32'],
-                    ],
-                    [
-                        'key' => 'national_id',
-                        'label' => 'National ID',
-                        'required' => false,
-                        'rules' => ['nullable', 'string', 'max:64'],
                     ],
                 ],
 
