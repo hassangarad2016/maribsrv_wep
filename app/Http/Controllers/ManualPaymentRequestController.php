@@ -1732,10 +1732,12 @@ class ManualPaymentRequestController extends Controller
                     }
                 }
                 if (! $manualPaymentRequest instanceof ManualPaymentRequest) {
-                    $manualPaymentRequest = ManualPaymentRequest::query()
-                        ->where('payment_transaction_id', $transaction->getKey())
-                        ->orderByDesc('id')
-                        ->first();
+                    if ($this->manualPaymentRequestsSupportsPaymentTransactionId()) {
+                        $manualPaymentRequest = ManualPaymentRequest::query()
+                            ->where('payment_transaction_id', $transaction->getKey())
+                            ->orderByDesc('id')
+                            ->first();
+                    }
                 }
 
                 if (! $manualPaymentRequest instanceof ManualPaymentRequest) {
@@ -1782,6 +1784,8 @@ class ManualPaymentRequestController extends Controller
         if ($rows->isEmpty()) {
             return;
         }
+
+        $manualPaymentRequestHasPaymentTransactionId = $this->manualPaymentRequestsSupportsPaymentTransactionId();
 
         $transactionIds = $rows
             ->map(function (object $row) {
@@ -1841,10 +1845,12 @@ class ManualPaymentRequestController extends Controller
             }
 
             if (! $manualPaymentRequest instanceof ManualPaymentRequest) {
-                $manualPaymentRequest = ManualPaymentRequest::query()
-                    ->where('payment_transaction_id', $transaction->getKey())
-                    ->orderByDesc('id')
-                    ->first();
+                if ($manualPaymentRequestHasPaymentTransactionId) {
+                    $manualPaymentRequest = ManualPaymentRequest::query()
+                        ->where('payment_transaction_id', $transaction->getKey())
+                        ->orderByDesc('id')
+                        ->first();
+                }
             }
 
             if (! $manualPaymentRequest instanceof ManualPaymentRequest) {
@@ -1884,6 +1890,25 @@ class ManualPaymentRequestController extends Controller
             $row->manual_payment_request_id = $manualPaymentRequest->getKey();
             $this->manualPaymentRequestLookupCache[$manualPaymentRequest->id] = $manualPaymentRequest;
         }
+    }
+
+    private function manualPaymentRequestsSupportsPaymentTransactionId(): bool
+    {
+        static $supports = null;
+
+        if ($supports !== null) {
+            return $supports;
+        }
+
+        try {
+            $manualPaymentConnection = ManualPaymentRequest::query()->getConnection();
+            $manualPaymentSchema = Schema::connection($manualPaymentConnection->getName());
+            $supports = $manualPaymentSchema->hasColumn('manual_payment_requests', 'payment_transaction_id');
+        } catch (Throwable) {
+            $supports = false;
+        }
+
+        return $supports;
     }
 
     private function normalizeManualPaymentIdentifier($value): ?int

@@ -27,7 +27,11 @@
       @endphp
       <ul class="menu">
 
-        @if(!auth()->check() || auth()->user()->account_type !== \App\Models\User::ACCOUNT_TYPE_SELLER)
+        @php
+          $currentUser = auth()->user();
+          $showDashboard = $currentUser && $currentUser->hasAnyRole(['Super Admin', 'Admin']);
+        @endphp
+        @if($showDashboard)
           <li class="sidebar-item">
             <a href="{{ route('home') }}" class="sidebar-link">
               <span class="menu-text">
