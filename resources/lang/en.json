@@ -465,5 +465,11 @@
     "merchant_insights_sales_nav": "Sales reports",
     "merchant_insights_customers_nav": "Customer reports",
     "merchant_insights_back_to_dashboard": "Back to store dashboard",
-    "merchant_insights_placeholder_hint": "This module is being activated for all merchants. Keep an eye out for the upcoming release!"
+    "merchant_insights_placeholder_hint": "This module is being activated for all merchants. Keep an eye out for the upcoming release!",
+    "wallet.reminder.title.stage_2": "Your wallet is ready",
+    "wallet.reminder.body.stage_2": "Top up in seconds and pay with one tap inside the app. Open the wallet now.",
+    "wallet.reminder.title.stage_7": "Pay easily with your wallet",
+    "wallet.reminder.body.stage_7": "The wallet keeps top-ups, payments, and transfers in one place. Try adding balance today.",
+    "wallet.reminder.title.stage_14": "Your wallet benefits are waiting",
+    "wallet.reminder.body.stage_14": "Keep a balance ready for purchases and transfers. Add funds when you need them and track every move."
 }

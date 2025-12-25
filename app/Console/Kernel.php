@@ -28,6 +28,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\BackfillManualBankPaymentRequestsCommand::class,
         \App\Console\Commands\BackfillTransferDetailsCommand::class,
         \App\Console\Commands\SyncManualTransferDetailsCommand::class,
+        \App\Console\Commands\SendWalletReminderNotifications::class,
 
     ];
     /**
@@ -49,6 +50,10 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('currency:history-snapshot')
             ->hourly()
+            ->withoutOverlapping();
+
+        $schedule->command('wallet:send-reminders')
+            ->dailyAt('10:00')
             ->withoutOverlapping();
 
         $schedule->call(static function () {
