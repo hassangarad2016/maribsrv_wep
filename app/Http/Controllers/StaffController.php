@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Service;
 use App\Models\User;
 use App\Services\BootstrapTableService;
@@ -19,21 +20,21 @@ class StaffController extends Controller {
     public function index() {
         ResponseService::noAnyPermissionThenRedirect(['staff-list', 'staff-create', 'staff-update', 'staff-delete']);
         $roles = Role::where('custom_role', 1)->get();
-        $services = Service::query()
-            ->with('category:id,name')
-            ->orderBy('title')
-            ->get(['id', 'title', 'category_id']);
-        return view('staff.index', compact('roles', 'services'));
+        $serviceCategories = Category::query()
+            ->whereIn('id', [2, 8, 174, 175, 176, 114, 181, 180, 177])
+            ->orderBy('name')
+            ->get(['id', 'name']);
+        return view('staff.index', compact('roles', 'serviceCategories'));
     }
 
     public function create() {
         ResponseService::noPermissionThenRedirect('staff-create');
         $roles = Role::where('custom_role', 1)->get();
-        $services = Service::query()
-            ->with('category:id,name')
-            ->orderBy('title')
-            ->get(['id', 'title', 'category_id']);
-        return view('staff.create', compact('roles', 'services'));
+        $serviceCategories = Category::query()
+            ->whereIn('id', [2, 8, 174, 175, 176, 114, 181, 180, 177])
+            ->orderBy('name')
+            ->get(['id', 'name']);
+        return view('staff.create', compact('roles', 'serviceCategories'));
     }
 
     public function store(Request $request) {
@@ -43,8 +44,8 @@ class StaffController extends Controller {
             'email'    => 'required|email|unique:users',
             'password' => 'required',
             'role'     => 'required',
-            'service_ids' => 'nullable|array',
-            'service_ids.*' => 'integer|exists:services,id'
+            'category_ids' => 'nullable|array',
+            'category_ids.*' => 'integer|exists:categories,id'
         ]);
 
         if ($validator->fails()) {
@@ -59,13 +60,13 @@ class StaffController extends Controller {
             ]);
 
             $user->syncRoles($request->role);
-            $serviceIds = collect($request->input('service_ids', []))
+            $categoryIds = collect($request->input('category_ids', []))
                 ->filter()
                 ->map(static fn ($id) => (int) $id)
                 ->unique()
                 ->values()
                 ->all();
-            $user->managedServices()->sync($serviceIds);
+            $user->managedCategories()->sync($categoryIds);
             DB::commit();
             ResponseService::successResponse('User created Successfully');
         } catch (Throwable $th) {
@@ -82,8 +83,8 @@ class StaffController extends Controller {
             'name'    => 'required',
             'email'   => 'required|email|unique:users,email,' . $id,
             'role_id' => 'required',
-            'service_ids' => 'nullable|array',
-            'service_ids.*' => 'integer|exists:services,id'
+            'category_ids' => 'nullable|array',
+            'category_ids.*' => 'integer|exists:categories,id'
         ]);
         if ($validator->fails()) {
             ResponseService::validationError($validator->errors()->first());
@@ -101,13 +102,13 @@ class StaffController extends Controller {
                 }
                 $user->assignRole($newRole);
             }
-            $serviceIds = collect($request->input('service_ids', []))
+            $categoryIds = collect($request->input('category_ids', []))
                 ->filter()
                 ->map(static fn ($id) => (int) $id)
                 ->unique()
                 ->values()
                 ->all();
-            $user->managedServices()->sync($serviceIds);
+            $user->managedCategories()->sync($categoryIds);
 
             DB::commit();
             ResponseService::successResponse('User Update Successfully');
@@ -126,7 +127,7 @@ class StaffController extends Controller {
         $order = $request->order ?? 'DESC';
 
         $sql = User::withTrashed()
-            ->with(['roles', 'managedServices:id'])
+            ->with(['roles', 'managedServices:id', 'managedCategories:id'])
             ->orderBy($sort, $order)
             ->whereHas('roles', function ($q) {
             $q->where('custom_role', 1);
@@ -155,6 +156,11 @@ class StaffController extends Controller {
             $tempRow = $row->toArray();
             $tempRow['status'] = empty($row->deleted_at);
             $tempRow['managed_service_ids'] = $row->managedServices
+                ->pluck('id')
+                ->map(static fn ($id) => (int) $id)
+                ->values()
+                ->all();
+            $tempRow['managed_category_ids'] = $row->managedCategories
                 ->pluck('id')
                 ->map(static fn ($id) => (int) $id)
                 ->values()

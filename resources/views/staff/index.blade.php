@@ -78,15 +78,10 @@
 
                                 <div class="col-md-12 col-12">
                                     <div class="form-group">
-                                        <label for="edit_service_ids" class="form-label col-12 ">{{ __('services.labels.services') }}</label>
-                                        <select name="service_ids[]" id="edit_service_ids" class="form-control" multiple>
-                                            @forelse ($services as $service)
-                                                <option value="{{ $service->id }}">
-                                                    {{ $service->title }}
-                                                    @if($service->category)
-                                                        ({{ $service->category->name }})
-                                                    @endif
-                                                </option>
+                                        <label for="edit_category_ids" class="form-label col-12 ">{{ __('services.labels.services') }}</label>
+                                        <select name="category_ids[]" id="edit_category_ids" class="form-control" multiple>
+                                            @forelse ($serviceCategories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
                                             @empty
                                                 <option value="" disabled>{{ __('services.messages.no_data_found') }}</option>
                                             @endforelse
