@@ -10,74 +10,86 @@
         background-color: #ffffff;
         color: #212529;
     }
-    .service-requests-panel {
+    .service-requests-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    .service-requests-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+    .service-requests-metrics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .metric-pill {
+        background: #f8f9fa;
         border: 1px solid rgba(15, 23, 42, 0.08);
-        border-radius: 0.85rem;
-        padding: 1.25rem;
-        margin-bottom: 1.5rem;
-        background-color: #ffffff;
-        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
-    }
-    .metric-grid {
-        display: grid;
-        gap: 1rem;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        margin-bottom: 1.25rem;
-    }
-    .metric-card {
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        border-radius: 0.75rem;
-        padding: 0.85rem 1rem;
-        background-color: #ffffff;
-        position: relative;
-        overflow: hidden;
-    }
-    .metric-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: var(--metric-accent, #6c757d);
-    }
-    .metric-card--primary { --metric-accent: #0d6efd; }
-    .metric-card--warning { --metric-accent: #f59e0b; }
-    .metric-card--neutral { --metric-accent: #6c757d; }
-    .metric-label {
+        border-radius: 999px;
+        padding: 0.3rem 0.7rem;
         font-size: 0.85rem;
         font-weight: 600;
-        color: #6c757d;
-        margin-bottom: 0.35rem;
+        color: #495057;
     }
-    .metric-value {
-        font-size: 1.05rem;
-        font-weight: 700;
+    .metric-pill strong {
         color: #212529;
-        word-break: break-word;
+        font-weight: 700;
     }
     .filter-bar {
-        border-top: 1px solid rgba(15, 23, 42, 0.08);
-        padding-top: 1rem;
-    }
-    .filter-bar .form-label {
-        font-weight: 600;
-        color: #212529;
-    }
-    .filter-bar .form-control,
-    .filter-bar .form-select {
-        height: 44px;
-        font-size: 0.95rem;
-        border-radius: 0.6rem;
-    }
-    .filter-actions {
         display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    .status-tabs {
+        display: flex;
+        flex-wrap: wrap;
         gap: 0.5rem;
+    }
+    .status-tab {
+        border: 1px solid rgba(15, 23, 42, 0.15);
+        background: #ffffff;
+        color: #495057;
+        border-radius: 999px;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .status-tab.active {
+        background: #0d6efd;
+        color: #ffffff;
+        border-color: #0d6efd;
+    }
+    .search-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-inline-start: auto;
+    }
+    .search-group .form-control {
+        height: 38px;
+        font-size: 0.9rem;
+        border-radius: 0.6rem;
+        min-width: 220px;
+    }
+    .search-group .btn {
+        height: 38px;
+        padding: 0 0.75rem;
+        font-size: 0.85rem;
+        border-radius: 0.6rem;
     }
     .service-requests-table {
         border-radius: 0.85rem;
         border: 1px solid rgba(15, 23, 42, 0.08);
-        margin-bottom: 4rem;
+        margin-bottom: 0;
     }
     .service-requests-table .card-body {
         padding: 1.25rem;
@@ -101,11 +113,16 @@
     #table_list { width: 100%; }
 
     @media (max-width: 768px) {
-        .service-requests-panel {
-            padding: 1rem;
+        .service-requests-toolbar {
+            align-items: flex-start;
         }
-        .metric-grid {
-            gap: 0.75rem;
+        .search-group {
+            width: 100%;
+            margin-inline-start: 0;
+        }
+        .search-group .form-control {
+            flex: 1;
+            min-width: 0;
         }
     }
 </style>
@@ -129,52 +146,43 @@
             $reviewRequests = (int) ($stats['review'] ?? 0);
         @endphp
 
-        <div class="service-requests-panel">
-            <div class="metric-grid">
-                <div class="metric-card metric-card--neutral">
-                    <div class="metric-label">{{ __('services.labels.category') }}</div>
-                    <div class="metric-value">
+        <div class="service-requests-toolbar">
+            <h5 class="service-requests-title">@yield('title')</h5>
+            <div class="service-requests-metrics">
+                <span class="metric-pill">
+                    {{ __('services.labels.category') }}:
+                    <strong>
                         @if($selectedCategory)
                             {{ $selectedCategory->name }}
                         @else
                             {{ __('services.filters.all_categories') }}
                         @endif
-                    </div>
-                </div>
-                <div class="metric-card metric-card--primary">
-                    <div class="metric-label">{{ __('services.labels.total_requests') }}</div>
-                    <div class="metric-value">{{ number_format($totalRequests) }}</div>
-                </div>
-                <div class="metric-card metric-card--warning">
-                    <div class="metric-label">{{ __('services.labels.under_review') }}</div>
-                    <div class="metric-value">{{ number_format($reviewRequests) }}</div>
-                </div>
+                    </strong>
+                </span>
+                <span class="metric-pill">
+                    {{ __('services.labels.total_requests') }}:
+                    <strong>{{ number_format($totalRequests) }}</strong>
+                </span>
+                <span class="metric-pill">
+                    {{ __('services.labels.under_review') }}:
+                    <strong>{{ number_format($reviewRequests) }}</strong>
+                </span>
             </div>
+        </div>
 
-            <div class="filter-bar">
-                <div class="row g-3 align-items-end" id="filters">
-                    <div class="col-sm-6 col-lg-3">
-                        <label for="filter" class="form-label">{{ __('services.labels.status') }}</label>
-                        <select class="form-select" id="filter">
-                            <option value="">{{ __('services.filters.all') }}</option>
-                            <option value="review">{{ __('services.labels.under_review') }}</option>
-                            <option value="approved">{{ __('services.labels.approved') }}</option>
-                            <option value="rejected">{{ __('services.labels.rejected') }}</option>
-                            <option value="sold out">{{ __('services.labels.sold_out') }}</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-6 col-lg-5">
-                        <label for="request_number" class="form-label">{{ __('services.labels.search_by_transaction_number') }}</label>
-                        <input type="text" class="form-control" id="request_number" placeholder="{{ __('services.placeholders.transaction_number') }}" autocomplete="off">
-                    </div>
-                    <div class="col-sm-6 col-lg-4">
-                        <label class="form-label d-none d-lg-block">&nbsp;</label>
-                        <div class="filter-actions">
-                            <button class="btn btn-primary" type="button" id="requestNumberApply">{{ __('services.buttons.search') }}</button>
-                            <button class="btn btn-outline-secondary" type="button" id="requestNumberReset">{{ __('services.buttons.reset') }}</button>
-                        </div>
-                    </div>
-                </div>
+        <div class="filter-bar">
+            <div class="status-tabs" role="tablist">
+                <button type="button" class="status-tab active" data-status="">{{ __('services.filters.all') }}</button>
+                <button type="button" class="status-tab" data-status="review">{{ __('services.labels.under_review') }}</button>
+                <button type="button" class="status-tab" data-status="approved">{{ __('services.labels.approved') }}</button>
+                <button type="button" class="status-tab" data-status="rejected">{{ __('services.labels.rejected') }}</button>
+                <button type="button" class="status-tab" data-status="sold out">{{ __('services.labels.sold_out') }}</button>
+            </div>
+            <input type="hidden" id="status_filter" value="">
+            <div class="search-group">
+                <input type="text" class="form-control" id="request_number" placeholder="{{ __('services.placeholders.transaction_number') }}" autocomplete="off">
+                <button class="btn btn-primary" type="button" id="requestNumberApply">{{ __('services.buttons.search') }}</button>
+                <button class="btn btn-outline-secondary" type="button" id="requestNumberReset">{{ __('services.buttons.reset') }}</button>
             </div>
         </div>
 
@@ -191,9 +199,9 @@
                        data-side-pagination="server"
                        data-pagination="true"
                        data-page-list="[5, 10, 20, 50, 100, 200]"
-                       data-search="true"
-                       data-show-columns="true"
-                       data-show-refresh="true"
+                       data-search="false"
+                       data-show-columns="false"
+                       data-show-refresh="false"
                        data-trim-on-search="false"
                        data-escape="true"
                        data-responsive="true"
@@ -202,7 +210,7 @@
                        data-pagination-successively-size="3"
                        data-table="items"
                        data-status-column="deleted_at"
-                       data-show-export="true"
+                       data-show-export="false"
                        data-export-options='{"fileName": "service-requests-list","ignoreColumn": ["operate"]}'
                        data-export-types='["pdf","json","xml","csv","txt","sql","doc","excel"]'
                        data-mobile-responsive="true"
@@ -358,7 +366,7 @@
     // طھظ…ط±ظٹط± ط§ظ„ظپظ„ط§طھط± ظ„ظ„ط³ظٹط±ظپط±
     function queryParams(params) {
         const query = {
-            status_filter: $('#filter').val(),
+            status_filter: $('#status_filter').val(),
             request_number: ($('#request_number').val() || '').trim(),
             offset: params.offset,
             limit: params.limit,
@@ -385,6 +393,7 @@
     $(document).ready(function() {
         const $table = $('#table_list');
         const $requestNumber = $('#request_number');
+        const $statusFilter = $('#status_filter');
 
         function refreshTableToFirstPage() {
             const options = $table.bootstrapTable('getOptions');
@@ -392,7 +401,12 @@
             $table.bootstrapTable('refresh');
         }
 
-        $('#filter').on('change', refreshTableToFirstPage);
+        $('.status-tab').on('click', function () {
+            $('.status-tab').removeClass('active');
+            $(this).addClass('active');
+            $statusFilter.val($(this).data('status'));
+            refreshTableToFirstPage();
+        });
 
         $('#requestNumberApply').on('click', function () {
             refreshTableToFirstPage();
@@ -416,6 +430,8 @@
     });
 </script>
 @endsection
+
+
 
 
 
