@@ -49,6 +49,9 @@
         border-radius: 0.85rem;
         border: 1px solid rgba(15, 23, 42, 0.08);
     }
+    .service-requests-table {
+        margin-bottom: 4rem;
+    }
     .service-requests-table .card-body {
         padding: 1.25rem;
     }
