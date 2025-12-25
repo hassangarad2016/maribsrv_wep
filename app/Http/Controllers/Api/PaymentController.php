@@ -1098,18 +1098,30 @@ class PaymentController extends Controller
             ['status' => 'pending']
         );
 
-        if ($transaction->payable_type !== VerificationRequest::class || $transaction->payable_id !== $verificationRequest->getKey()) {
-            $transaction->payable_type = VerificationRequest::class;
-            $transaction->payable_id = $verificationRequest->getKey();
+        $existingSucceeded = PaymentTransaction::query()
+            ->where('payable_type', VerificationRequest::class)
+            ->where('payable_id', $verificationRequest->getKey())
+            ->where('payment_gateway', $method)
+            ->where('payment_status', 'succeed')
+            ->orderByDesc('id')
+            ->first();
+
+        if ($existingSucceeded && $existingSucceeded->getKey() !== $transaction->getKey()) {
+            $transaction = $existingSucceeded;
+        } else {
+            if ($transaction->payable_type !== VerificationRequest::class || $transaction->payable_id !== $verificationRequest->getKey()) {
+                $transaction->payable_type = VerificationRequest::class;
+                $transaction->payable_id = $verificationRequest->getKey();
+            }
+
+            $transaction->payment_gateway = $method;
+            $transaction->currency = $currency;
+            $transaction->amount = $validated['amount'] ?? $transaction->amount;
+            $transaction->payment_status = 'succeed';
+            $transaction->save();
         }
 
         $statusCode = $this->inferStatusCode($transaction);
-
-        $transaction->payment_gateway = $method;
-        $transaction->currency = $currency;
-        $transaction->amount = $validated['amount'] ?? $transaction->amount;
-        $transaction->payment_status = 'succeed';
-        $transaction->save();
 
         $verificationPayment = VerificationPayment::updateOrCreate(
             [
