@@ -174,6 +174,7 @@ class ManualPaymentRequestService
 
 
         $department = $this->determineDepartmentForOrderPayable($payableType, $payableId, $existingRequest);
+        $storeId = $this->resolveStoreIdForPayable($payableType, $payableId);
 
 
         $duplicateRequest = null;
