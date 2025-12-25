@@ -27,10 +27,11 @@ class MetalRateUpdatedNotification extends Notification
 
     public function toFcm(object $notifiable): array
     {
-        $title = __('تم تحديث سعر المعدن');
-        $governorateLabel = $this->governorateName ?: __('السوق الافتراضي');
+        $title = __('notifications.metal.updated.title');
+        $governorateLabel = $this->governorateName
+            ?: __('notifications.metal.updated.governorate_fallback');
 
-        $body = __('تم تحديث سعر :metal في :governorate.', [
+        $body = __('notifications.metal.updated.body', [
             'metal' => $this->metalName,
             'governorate' => $governorateLabel,
         ]);
@@ -38,11 +39,11 @@ class MetalRateUpdatedNotification extends Notification
         $priceSegments = [];
 
         if ($this->sellPrice !== null) {
-            $priceSegments[] = __('سعر البيع: :value', ['value' => $this->sellPrice]);
+            $priceSegments[] = __('notifications.metal.price.sell', ['value' => $this->sellPrice]);
         }
 
         if ($this->buyPrice !== null) {
-            $priceSegments[] = __('سعر الشراء: :value', ['value' => $this->buyPrice]);
+            $priceSegments[] = __('notifications.metal.price.buy', ['value' => $this->buyPrice]);
         }
 
         if (!empty($priceSegments)) {
@@ -54,8 +55,12 @@ class MetalRateUpdatedNotification extends Notification
             'body' => $body,
             'type' => 'metal_rate_updated',
             'data' => [
+                'entity' => 'metal',
+                'entity_id' => $this->metalId,
                 'metal_id' => $this->metalId,
                 'governorate_id' => $this->governorateId,
+                'sell_price' => $this->sellPrice,
+                'buy_price' => $this->buyPrice,
             ],
         ];
     }

@@ -60,8 +60,12 @@ class CurrencyCreatedNotification extends Notification
             'body' => $body,
             'type' => 'currency_created',
             'data' => [
+                'entity' => 'currency',
+                'entity_id' => $this->currencyId,
                 'currency_id' => $this->currencyId,
                 'default_governorate_id' => $this->defaultGovernorateId,
+                'sell_price' => $this->sellPrice,
+                'buy_price' => $this->buyPrice,
             ],
         ];
     }

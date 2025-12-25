@@ -101,6 +101,7 @@ use App\Services\PaymentFulfillmentService;
 use App\Services\WalletService;
 use App\Services\ResponseService;
 use App\Services\ServiceAuthorizationService;
+use App\Services\ServiceNotificationService;
 use App\Services\Location\MaribBoundaryService;
 use App\Services\ReferralAuditLogger;
 use DateTimeInterface;
@@ -166,7 +167,7 @@ trait AddServiceReviewReportTrait
         try {
             /** @var User $user */
             $user = Auth::user();
-            $review = ServiceReview::with('service')->findOrFail($request->review_id);
+            $review = ServiceReview::with(['service', 'user'])->findOrFail($request->review_id);
 
             if ((int) $review->user_id === (int) $user->id) {
                 ResponseService::errorResponse(__('You cannot report your own review.'));
@@ -199,9 +200,23 @@ trait AddServiceReviewReportTrait
                 'status' => 'pending',
             ]);
 
+            $service = $review->service;
+            $isOwner = $service && (int) ($service->owner_id ?? 0) === (int) $user->id;
+            $canManageService = $service
+                ? $this->serviceAuthorizationService->userCanManageService($user, $service)
+                : false;
+            $shouldMarkPending = $service && ($isOwner || $canManageService);
+
+            if ($shouldMarkPending && $review->status !== ServiceReview::STATUS_PENDING) {
+                $review->status = ServiceReview::STATUS_PENDING;
+                $review->save();
+                app(ServiceNotificationService::class)->notifyReviewUnderReview($review);
+            }
+
             ResponseService::successResponse(__('Your report has been submitted successfully.'), [
                 'id' => $report->id,
                 'status' => $report->status,
+                'review_status' => $review->status,
             ]);
         } catch (Throwable $th) {
             ResponseService::logErrorResponse($th, 'API Controller -> addServiceReviewReport');

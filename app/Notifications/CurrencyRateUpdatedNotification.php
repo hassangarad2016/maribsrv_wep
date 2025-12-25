@@ -57,8 +57,12 @@ class CurrencyRateUpdatedNotification extends Notification
             'body' => $body,
             'type' => 'currency_rate_updated',
             'data' => [
+                'entity' => 'currency',
+                'entity_id' => $this->currencyId,
                 'currency_id' => $this->currencyId,
                 'governorate_id' => $this->governorateId,
+                'sell_price' => $this->sellPrice,
+                'buy_price' => $this->buyPrice,
             ],
         ];
     }

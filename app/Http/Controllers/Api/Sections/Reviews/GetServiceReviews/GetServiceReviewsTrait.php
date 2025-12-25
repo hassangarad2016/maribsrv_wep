@@ -165,7 +165,15 @@ trait GetServiceReviewsTrait
             $authenticatedUser = Auth::user();
 
             $requestedStatus = $request->input('status');
-            $status = $requestedStatus ?: 'all';
+            $isOwner = $authenticatedUser && (int) ($service->owner_id ?? 0) === (int) $authenticatedUser->id;
+            $canManageService = $authenticatedUser
+                ? $this->serviceAuthorizationService->userCanManageService($authenticatedUser, $service)
+                : false;
+
+            $canAccessAllStatuses = $authenticatedUser && ($isOwner || $canManageService);
+            $status = $canAccessAllStatuses
+                ? ($requestedStatus ?? ServiceReview::STATUS_APPROVED)
+                : ServiceReview::STATUS_APPROVED;
 
 
             $reviewsQuery = ServiceReview::where('service_id', $service->id)

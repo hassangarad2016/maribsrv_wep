@@ -17,6 +17,7 @@ class ServiceNotificationService
     private const TYPE_REQUEST_UPDATED = 'service-request-update';
     private const TYPE_PAYMENT_CONFIRMED = 'service_payment_confirmed';
     private const TYPE_REVIEW_RECEIVED = 'service-review';
+    private const TYPE_REVIEW_UNDER_REVIEW = 'service-review-under-review';
 
     public function notifyRequestCreated(ServiceRequest $request, User $requester): void
     {
@@ -192,6 +193,41 @@ class ServiceNotificationService
         $this->sendToUser(
             $owner,
             self::TYPE_REVIEW_RECEIVED,
+            $title,
+            $body,
+            $payload
+        );
+    }
+
+    public function notifyReviewUnderReview(ServiceReview $review): void
+    {
+        $reviewer = $review->user;
+        if (! $reviewer instanceof User || (int) $reviewer->notification !== 1) {
+            return;
+        }
+
+        $service = $review->service;
+        if (! $service instanceof Service) {
+            return;
+        }
+
+        $title = __('service.notifications.review_under_review.title');
+        $body = __('service.notifications.review_under_review.body', [
+            'service' => $this->resolveServiceTitle($service),
+        ]);
+
+        $payload = [
+            'service_id' => $service->getKey(),
+            'service_title' => $service->title,
+            'review_id' => $review->getKey(),
+            'review_status' => $review->status,
+            'entity' => 'service-review',
+            'entity_id' => $service->getKey() . '-review-' . $review->getKey(),
+        ];
+
+        $this->sendToUser(
+            $reviewer,
+            self::TYPE_REVIEW_UNDER_REVIEW,
             $title,
             $body,
             $payload

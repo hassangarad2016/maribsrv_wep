@@ -57,6 +57,12 @@ class NotificationInboxService
         'listing',
         'store',
         'merchant',
+        'currency',
+        'exchange',
+        'rate',
+        'metal',
+        'gold',
+        'silver',
     ];
 
     private ?Repository $cache = null;
