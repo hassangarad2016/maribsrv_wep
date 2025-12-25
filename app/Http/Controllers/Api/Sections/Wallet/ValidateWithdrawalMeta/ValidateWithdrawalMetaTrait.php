@@ -181,10 +181,15 @@ trait ValidateWithdrawalMetaTrait
         $metaValidator = Validator::make($metaData, $metaRules, [], $attributeNames);
 
         if ($metaValidator->fails()) {
-            ResponseService::validationError($metaValidator->errors()->first());
+            Log::warning('wallet_withdrawal_meta_validation_failed', [
+                'user_id' => optional(Auth::user())->id,
+                'errors' => $metaValidator->errors()->toArray(),
+                'meta' => $metaData,
+            ]);
+            $validatedMeta = [];
+        } else {
+            $validatedMeta = $metaValidator->validated();
         }
-
-        $validatedMeta = $metaValidator->validated();
 
         $sanitizedMeta = [];
 
