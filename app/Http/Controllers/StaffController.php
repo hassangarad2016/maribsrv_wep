@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use App\Models\Service;
 use App\Models\User;
 use App\Services\BootstrapTableService;
 use App\Services\ResponseService;
