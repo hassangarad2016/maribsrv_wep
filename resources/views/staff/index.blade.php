@@ -77,6 +77,22 @@
                                 </div>
 
                                 <div class="col-md-12 col-12">
+                                    <div class="form-group">
+                                        <label for="edit_service_ids" class="form-label col-12 ">{{__("Services")}}</label>
+                                        <select name="service_ids[]" id="edit_service_ids" class="form-control" multiple>
+                                            @foreach ($services as $service)
+                                                <option value="{{ $service->id }}">
+                                                    {{ $service->title }}
+                                                    @if($service->category)
+                                                        ({{ $service->category->name }})
+                                                    @endif
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12 col-12">
                                     <div class="form-group mandatory">
                                         <label for="edit_name" class="form-label text-center">{{__("Name")}}</label>
                                         <input type="text" id="edit_name" class="form-control col-12" placeholder="Name" name="name" data-parsley-required="true">

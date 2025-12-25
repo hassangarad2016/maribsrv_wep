@@ -148,6 +148,8 @@ window.staffEvents = {
         $('#edit_role').val(row.roles[0].id);
         $('#edit_name').val(row.name);
         $('#edit_email').val(row.email);
+        const serviceIds = Array.isArray(row.managed_service_ids) ? row.managed_service_ids : [];
+        $('#edit_service_ids').val(serviceIds).trigger('change');
     }
 }
 window.verificationfeildEvents = {

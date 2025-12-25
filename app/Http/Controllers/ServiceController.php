@@ -467,7 +467,7 @@ class ServiceController extends Controller
 
         $user = Auth::user();
         if ($user && !$this->serviceAuthorizationService->userHasFullAccess($user)) {
-            $categoryIds = $this->serviceAuthorizationService->getManagedCategoryIds($user);
+            $categoryIds = $this->serviceAuthorizationService->getVisibleCategoryIds($user);
             if (empty($categoryIds)) {
                 return collect();
             }

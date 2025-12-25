@@ -106,7 +106,7 @@ class ViewServiceProvider extends ServiceProvider {
 
                 $serviceAuthorizationService = app(ServiceAuthorizationService::class);
                 if (! $serviceAuthorizationService->userHasFullAccess($user)) {
-                    $managedCategoryIds = $serviceAuthorizationService->getManagedCategoryIds($user);
+                    $managedCategoryIds = $serviceAuthorizationService->getVisibleCategoryIds($user);
 
                     if (empty($managedCategoryIds)) {
                         $categoryQuery = null;

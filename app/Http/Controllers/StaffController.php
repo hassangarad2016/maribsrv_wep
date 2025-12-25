@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Service;
 use App\Models\User;
 use App\Services\BootstrapTableService;
 use App\Services\ResponseService;
@@ -18,13 +19,21 @@ class StaffController extends Controller {
     public function index() {
         ResponseService::noAnyPermissionThenRedirect(['staff-list', 'staff-create', 'staff-update', 'staff-delete']);
         $roles = Role::where('custom_role', 1)->get();
-        return view('staff.index', compact('roles'));
+        $services = Service::query()
+            ->with('category:id,name')
+            ->orderBy('title')
+            ->get(['id', 'title', 'category_id']);
+        return view('staff.index', compact('roles', 'services'));
     }
 
     public function create() {
         ResponseService::noPermissionThenRedirect('staff-create');
         $roles = Role::where('custom_role', 1)->get();
-        return view('staff.create', compact('roles'));
+        $services = Service::query()
+            ->with('category:id,name')
+            ->orderBy('title')
+            ->get(['id', 'title', 'category_id']);
+        return view('staff.create', compact('roles', 'services'));
     }
 
     public function store(Request $request) {
@@ -33,7 +42,9 @@ class StaffController extends Controller {
             'name'     => 'required',
             'email'    => 'required|email|unique:users',
             'password' => 'required',
-            'role'     => 'required'
+            'role'     => 'required',
+            'service_ids' => 'nullable|array',
+            'service_ids.*' => 'integer|exists:services,id'
         ]);
 
         if ($validator->fails()) {
@@ -48,6 +59,13 @@ class StaffController extends Controller {
             ]);
 
             $user->syncRoles($request->role);
+            $serviceIds = collect($request->input('service_ids', []))
+                ->filter()
+                ->map(static fn ($id) => (int) $id)
+                ->unique()
+                ->values()
+                ->all();
+            $user->managedServices()->sync($serviceIds);
             DB::commit();
             ResponseService::successResponse('User created Successfully');
         } catch (Throwable $th) {
@@ -63,7 +81,9 @@ class StaffController extends Controller {
         $validator = Validator::make($request->all(), [
             'name'    => 'required',
             'email'   => 'required|email|unique:users,email,' . $id,
-            'role_id' => 'required'
+            'role_id' => 'required',
+            'service_ids' => 'nullable|array',
+            'service_ids.*' => 'integer|exists:services,id'
         ]);
         if ($validator->fails()) {
             ResponseService::validationError($validator->errors()->first());
@@ -71,16 +91,23 @@ class StaffController extends Controller {
         try {
             DB::beginTransaction();
             $user = User::withTrashed()->findOrFail($id);
-            $user->update([
-                ...$request->all()
-            ]);
+            $user->update($request->only(['name', 'email']));
 
             $oldRole = $user->roles;
-            if ($oldRole[0]->id !== $request->role_id) {
+            if ($oldRole->isEmpty() || $oldRole[0]->id !== (int) $request->role_id) {
                 $newRole = Role::findById($request->role_id);
-                $user->removeRole($oldRole[0]);
+                if (! $oldRole->isEmpty()) {
+                    $user->removeRole($oldRole[0]);
+                }
                 $user->assignRole($newRole);
             }
+            $serviceIds = collect($request->input('service_ids', []))
+                ->filter()
+                ->map(static fn ($id) => (int) $id)
+                ->unique()
+                ->values()
+                ->all();
+            $user->managedServices()->sync($serviceIds);
 
             DB::commit();
             ResponseService::successResponse('User Update Successfully');
@@ -98,7 +125,10 @@ class StaffController extends Controller {
         $sort = $request->sort ?? 'id';
         $order = $request->order ?? 'DESC';
 
-        $sql = User::withTrashed()->with('roles')->orderBy($sort, $order)->whereHas('roles', function ($q) {
+        $sql = User::withTrashed()
+            ->with(['roles', 'managedServices:id'])
+            ->orderBy($sort, $order)
+            ->whereHas('roles', function ($q) {
             $q->where('custom_role', 1);
         });
 
@@ -124,6 +154,11 @@ class StaffController extends Controller {
 
             $tempRow = $row->toArray();
             $tempRow['status'] = empty($row->deleted_at);
+            $tempRow['managed_service_ids'] = $row->managedServices
+                ->pluck('id')
+                ->map(static fn ($id) => (int) $id)
+                ->values()
+                ->all();
             $tempRow['operate'] = $operate;
             $rows[] = $tempRow;
         }

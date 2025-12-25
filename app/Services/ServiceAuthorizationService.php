@@ -35,6 +35,10 @@ class ServiceAuthorizationService
             return false;
         }
 
+        if ($this->userManagesService($user, $serviceModel)) {
+            return true;
+        }
+
         if ($this->userOwnsService($user, $serviceModel)) {
             return true;
         }
@@ -152,15 +156,15 @@ class ServiceAuthorizationService
     public function getManagedServiceIds(User $user): array
     {
 
-        $serviceIds = [];
+        $serviceIds = $this->getExplicitManagedServiceIds($user);
 
         $categoryIds = $this->getManagedCategoryIds($user);
 
         if (! empty($categoryIds)) {
-            $serviceIds = Service::query()
+            $serviceIds = array_merge($serviceIds, Service::query()
                 ->whereIn('category_id', $categoryIds)
                 ->pluck('id')
-                ->all();
+                ->all());
         }
 
         $ownedServiceIds = $this->getOwnedServiceIds($user);
@@ -172,6 +176,17 @@ class ServiceAuthorizationService
         return collect($serviceIds)
 
 
+            ->filter()
+            ->map(static fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    public function getExplicitManagedServiceIds(User $user): array
+    {
+        return $user->managedServices()
+            ->pluck('services.id')
             ->filter()
             ->map(static fn ($id) => (int) $id)
             ->unique()
@@ -213,6 +228,13 @@ class ServiceAuthorizationService
         return false;
     }
 
+    private function userManagesService(User $user, Service $service): bool
+    {
+        return $user->managedServices()
+            ->where('services.id', $service->getKey())
+            ->exists();
+    }
+
 
     public function getManagedCategoryIds(User $user): array
     {
@@ -220,6 +242,25 @@ class ServiceAuthorizationService
             ->pluck('categories.id')
             ->filter()
             ->map(static fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    public function getVisibleCategoryIds(User $user): array
+    {
+        $categoryIds = $this->getManagedCategoryIds($user);
+
+        $serviceCategoryIds = $user->managedServices()
+            ->pluck('services.category_id')
+            ->filter()
+            ->map(static fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        return collect(array_merge($categoryIds, $serviceCategoryIds))
+            ->filter()
             ->unique()
             ->values()
             ->all();

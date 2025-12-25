@@ -333,6 +333,11 @@ class Service extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
+    public function managers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'service_managers')->withTimestamps();
+    }
+
 
 
 

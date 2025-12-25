@@ -322,6 +322,11 @@ class User extends Authenticatable {
         return $this->belongsToMany(Category::class, 'category_managers')->withTimestamps();
     }
 
+    public function managedServices(): BelongsToMany
+    {
+        return $this->belongsToMany(Service::class, 'service_managers')->withTimestamps();
+    }
+
 
 
     /** الخدمات التي يملكها المستخدم */
@@ -495,3 +500,4 @@ class User extends Authenticatable {
         $this->additional_info = $additionalInfo;
     }
 }
+
