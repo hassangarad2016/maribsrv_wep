@@ -203,6 +203,9 @@ return [
         'service_number' => 'Service #:id',
         'review_request_help' => 'Review the submitted service information and respond to the requester.',
         'service_reviews_caption' => 'Service reviews and reports for the current category',
+        'requests_subtitle' => 'Track incoming service requests, review statuses, and respond quickly.',
+        'filters_hint' => 'Filter by status or transaction number to focus the queue.',
+        'table_hint' => 'Use column controls to customize the table view.',
     ],
     'placeholders' => [
         'transaction_number' => 'Enter transaction number',

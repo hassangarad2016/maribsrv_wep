@@ -1,4 +1,4 @@
-@extends('layouts.main')
+﻿@extends('layouts.main')
 
 @section('title')
     {{ __('services.titles.requests') }}
@@ -6,17 +6,157 @@
 
 @section('page-style')
 <style>
-    .card-body { overflow-x: hidden; }
-    .table-responsive { overflow-x: auto; margin-bottom: 1rem; }
+    .service-requests-page {
+        --ink: #0f172a;
+        --muted: #64748b;
+        --brand: #1d4f7a;
+        --brand-strong: #0b1b2b;
+        --accent: #f59e0b;
+        --card-border: rgba(15, 23, 42, 0.08);
+        --card-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+        color: var(--ink);
+    }
+    .service-requests-page .card {
+        border-radius: 1.25rem;
+        border: 1px solid var(--card-border);
+        box-shadow: var(--card-shadow);
+    }
+
+    .service-requests-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 1.75rem;
+        color: #f8fafc;
+        background: linear-gradient(135deg, #0b1b2b 0%, #153456 45%, #1c4f7f 100%);
+    }
+    .service-requests-hero::before {
+        content: '';
+        position: absolute;
+        top: -120px;
+        right: -120px;
+        width: 260px;
+        height: 260px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.35), rgba(245, 158, 11, 0));
+    }
+    .service-requests-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -140px;
+        left: -140px;
+        width: 320px;
+        height: 320px;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.3), rgba(56, 189, 248, 0));
+    }
+    .service-requests-hero__content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    .service-requests-hero__title h3 {
+        margin: 0 0 0.45rem;
+        font-size: 1.75rem;
+        font-weight: 700;
+    }
+    .service-requests-hero__title p {
+        margin: 0;
+        color: rgba(248, 250, 252, 0.75);
+        font-size: 1rem;
+    }
+    .service-requests-hero__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .meta-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.85rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.16);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .meta-chip__label {
+        font-size: 0.75rem;
+        letter-spacing: 0.02em;
+        color: rgba(248, 250, 252, 0.75);
+    }
+    .meta-chip__value {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #f8fafc;
+    }
+    .meta-chip--light {
+        background: #ffffff;
+        border-color: rgba(15, 23, 42, 0.1);
+    }
+    .meta-chip--light .meta-chip__label {
+        color: var(--muted);
+    }
+    .meta-chip--light .meta-chip__value {
+        color: var(--ink);
+    }
+
+    .service-requests-filters {
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
+    }
+    .service-requests-filters .card-body {
+        padding: 1.6rem;
+    }
+    .service-requests-filters__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    .service-requests-filters__title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+    .service-requests-filters__hint {
+        margin: 0.25rem 0 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+    }
+
     #filters select,
-    #filters input { height: 45px; font-size: 1.05rem; padding: 8px 12px; }
-    #filters label { font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; }
-    #filters .input-group > .btn { height: 45px; }
-    #filters .input-group .btn + .btn { border-radius: 0 .5rem .5rem 0; }
+    #filters input {
+        height: 48px;
+        font-size: 1rem;
+        padding: 10px 14px;
+        border-radius: 0.85rem;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        background-color: #ffffff;
+    }
+    #filters label {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--ink);
+    }
+    #filters .form-control-plaintext {
+        padding: 10px 14px;
+        background: rgba(15, 23, 42, 0.04);
+        border-radius: 0.85rem;
+    }
+    #filters .input-group {
+        gap: 0.5rem;
+    }
+    #filters .input-group > .btn {
+        height: 48px;
+        border-radius: 0.85rem;
+    }
     #table_list { width: 100%; }
 
-
-    .requests-stats-row { margin-bottom: 1.5rem; }
+    .requests-stats-row { margin-bottom: 1.75rem; }
     .requests-stat-card {
         --stat-color: #0d6efd;
         --stat-soft: rgba(13, 110, 253, 0.35);
@@ -77,9 +217,9 @@
 
     .requests-stat-card__label {
         color: rgba(33, 37, 41, 0.75);
-        font-size: 0.75rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.02em;
+        text-transform: none;
         font-weight: 600;
     }
     .requests-stat-card__value {
@@ -168,7 +308,6 @@
         }
     }
 
-
     .btn-with-label {
         display: inline-flex;
         align-items: center;
@@ -188,6 +327,57 @@
         display: inline-block;
     }
 
+    .service-requests-table .card-body {
+        padding: 1.6rem;
+    }
+    .service-requests-table__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    .service-requests-table__title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+    .service-requests-table__hint {
+        margin: 0.25rem 0 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+    }
+    .service-requests-table .table {
+        margin-bottom: 0;
+    }
+    .service-requests-table .table thead th {
+        background: #0f172a;
+        color: #f8fafc;
+        border-bottom: none;
+        padding: 1rem;
+        font-weight: 600;
+    }
+    .service-requests-table .table tbody td {
+        padding: 0.9rem 1rem;
+    }
+    .service-requests-table .table-striped > tbody > tr:nth-of-type(odd) {
+        background-color: rgba(15, 23, 42, 0.02);
+    }
+
+    @media (max-width: 768px) {
+        .service-requests-hero {
+            padding: 1.5rem;
+        }
+        .service-requests-hero__title h3 {
+            font-size: 1.5rem;
+        }
+        .service-requests-filters__header,
+        .service-requests-table__header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
 </style>
 @endsection
 
@@ -203,195 +393,232 @@
 @endsection
 
 @section('content')
-    <section class="section">
-        <div class="card">
-            <div class="card-body">
+    <section class="section service-requests-page">
+        @php
+            $totalRequests = (int) ($stats['total'] ?? 0);
+            $share = static function (int $value) use ($totalRequests): string {
+                if ($totalRequests <= 0) {
+                    return '0%';
+                }
 
-                {{-- فلاتر --}}
-                <div class="row">
-                    <div class="col-12">
-                        <div id="filters" class="row g-3 align-items-end mb-4">
-                            <div class="col-sm-6 col-lg-3">
-                                <label for="filter" class="d-block">{{ __('services.labels.status') }}</label>
-                                <select class="form-control bootstrap-table-filter-control-status" id="filter">
-                                    <option value="">{{ __('services.filters.all') }}</option>
-                                    <option value="review">{{ __('services.labels.under_review') }}</option>
-                                    <option value="approved">{{ __('services.labels.approved') }}</option>
-                                    <option value="rejected">{{ __('services.labels.rejected') }}</option>
-                                    <option value="sold out">{{ __('services.labels.sold_out') }}</option>
-                                </select>
-                            </div>
-                            <div class="col-sm-6 col-lg-3">
-                                <label class="d-block">{{ __('services.labels.category') }}</label>
-                                @if($selectedCategory)
-                                    <div class="form-control-plaintext fw-semibold">{{ $selectedCategory->name }}</div>
-                                @else
-                                    <div class="form-control-plaintext text-muted">{{ __('services.filters.all_categories') }}</div>
-                                @endif
-                            </div>
+                $percentage = ($value / max($totalRequests, 1)) * 100;
+                $decimals = $percentage >= 10 ? 0 : 1;
+                $formatted = number_format($percentage, $decimals, '.', '');
+                $formatted = rtrim(rtrim($formatted, '0'), '.');
 
-                            <div class="col-12 col-lg-6">
-                                <label for="request_number" class="d-block">{{ __('services.labels.search_by_transaction_number') }}</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="request_number" placeholder="{{ __('services.placeholders.transaction_number') }}" autocomplete="off">
-                                    <button class="btn btn-outline-primary" type="button" id="requestNumberApply">{{ __('services.buttons.search') }}</button>
-                                    <button class="btn btn-outline-secondary" type="button" id="requestNumberReset">{{ __('services.buttons.reset') }}</button>
-                                </div>
-                            </div>
-                        </div>
+                return $formatted . '%';
+            };
+
+            $statCards = [
+                [
+                    'label' => __('services.labels.total_requests'),
+                    'value' => $totalRequests,
+                    'icon' => 'bi-clipboard-data',
+                    'variant' => 'primary',
+                ],
+                [
+                    'label' => __('services.labels.under_review'),
+                    'value' => (int) ($stats['review'] ?? 0),
+                    'icon' => 'bi-hourglass-split',
+                    'variant' => 'warning',
+                ],
+                [
+                    'label' => __('services.labels.approved'),
+                    'value' => (int) ($stats['approved'] ?? 0),
+                    'icon' => 'bi-check-circle',
+                    'variant' => 'success',
+                ],
+                [
+                    'label' => __('services.labels.rejected'),
+                    'value' => (int) ($stats['rejected'] ?? 0),
+                    'icon' => 'bi-x-circle',
+                    'variant' => 'danger',
+                ],
+                [
+                    'label' => __('services.labels.sold_out'),
+                    'value' => (int) ($stats['sold_out'] ?? 0),
+                    'icon' => 'bi-bag-x',
+                    'variant' => 'info',
+                ],
+            ];
+        @endphp
+
+        <div class="service-requests-hero">
+            <div class="service-requests-hero__content">
+                <div class="service-requests-hero__title">
+                    <h3>@yield('title')</h3>
+                    <p>{{ __('services.messages.requests_subtitle') }}</p>
+                </div>
+                <div class="service-requests-hero__meta">
+                    <div class="meta-chip">
+                        <span class="meta-chip__label">{{ __('services.labels.category') }}</span>
+                        <span class="meta-chip__value">
+                            @if($selectedCategory)
+                                {{ $selectedCategory->name }}
+                            @else
+                                {{ __('services.filters.all_categories') }}
+                            @endif
+                        </span>
+                    </div>
+                    <div class="meta-chip">
+                        <span class="meta-chip__label">{{ __('services.labels.total_requests') }}</span>
+                        <span class="meta-chip__value">{{ number_format($totalRequests) }}</span>
+                    </div>
+                    <div class="meta-chip">
+                        <span class="meta-chip__label">{{ __('services.labels.under_review') }}</span>
+                        <span class="meta-chip__value">{{ number_format((int) ($stats['review'] ?? 0)) }}</span>
                     </div>
                 </div>
-
-                {{-- نظرة عامة سريعة --}}
-
-                @php
-                    $totalRequests = (int) ($stats['total'] ?? 0);
-                    $share = static function (int $value) use ($totalRequests): string {
-                        if ($totalRequests <= 0) {
-                            return '0%';
-                        }
-
-                        $percentage = ($value / max($totalRequests, 1)) * 100;
-                        $decimals = $percentage >= 10 ? 0 : 1;
-                        $formatted = number_format($percentage, $decimals, '.', '');
-                        $formatted = rtrim(rtrim($formatted, '0'), '.');
-
-                        return $formatted . '%';
-                    };
-
-                    $statCards = [
-                        [
-                            'label' => __('services.labels.total_requests'),
-                            'value' => $totalRequests,
-                            'icon' => 'bi-clipboard-data',
-                            'variant' => 'primary',
-                        ],
-                        [
-                            'label' => __('services.labels.under_review'),
-                            'value' => (int) ($stats['review'] ?? 0),
-                            'icon' => 'bi-hourglass-split',
-                            'variant' => 'warning',
-                        ],
-                        [
-                            'label' => __('services.labels.approved'),
-                            'value' => (int) ($stats['approved'] ?? 0),
-                            'icon' => 'bi-check-circle',
-                            'variant' => 'success',
-                        ],
-                        [
-                            'label' => __('services.labels.rejected'),
-                            'value' => (int) ($stats['rejected'] ?? 0),
-                            'icon' => 'bi-x-circle',
-                            'variant' => 'danger',
-                        ],
-                        [
-                            'label' => __('services.labels.sold_out'),
-                            'value' => (int) ($stats['sold_out'] ?? 0),
-                            'icon' => 'bi-bag-x',
-                            'variant' => 'info',
-                        ],
-                    ];
-                @endphp
-
-                <div class="row g-3 requests-stats-row">
-                    @foreach ($statCards as $card)
-                        @php
-                            $progress = $totalRequests > 0
-                                ? max(0, min(100, round(($card['value'] / max($totalRequests, 1)) * 100, 1)))
-                                : 0;
-                        @endphp
-                        <div class="col-12 col-sm-6 col-xl-3">
-                            <div class="requests-stat-card requests-stat-card--{{ $card['variant'] }}">
-                                <div class="requests-stat-card__header">
-                                    <div class="requests-stat-card__icon">
-                                        <i class="bi {{ $card['icon'] }}"></i>
-                                    </div>
-                                    <div class="requests-stat-card__figures">
-                                        <span class="requests-stat-card__label">{{ $card['label'] }}</span>
-                                        <span class="requests-stat-card__value">{{ number_format($card['value']) }}</span>
-                                    </div>
-                                </div>
-                                <div class="requests-stat-card__indicator">
-                                    <span>{{ __('services.labels.requests') }}</span>
-                                    <span class="requests-stat-card__indicator-share">{{ $share($card['value']) }}</span>
-                                </div>
-                                <div class="requests-stat-card__progress">
-                                    <span class="requests-stat-card__progress-bar" style="width: {{ $progress }}%;"></span>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                {{-- الجدول --}}
-                <div class="row">
-                    <div class="table-responsive">
-                        <table
-                           class="table-borderless table-striped"
-                           aria-describedby="mydesc"
-                           id="table_list"
-                           data-toggle="table"
-                           data-url="{{ route('service.requests.datatable') }}"
-                           data-click-to-select="true"
-                           data-side-pagination="server"
-                           data-pagination="true"
-                           data-page-list="[5, 10, 20, 50, 100, 200]"
-                           data-search="true"
-                           data-show-columns="true"
-                           data-show-refresh="true"
-                           data-trim-on-search="false"
-                           data-escape="true"
-                           data-responsive="true"
-                           data-sort-name="id"
-                           data-sort-order="desc"
-                           data-pagination-successively-size="3"
-                           data-table="items"
-                           data-status-column="deleted_at"
-                           data-show-export="true"
-                           data-export-options='{"fileName": "service-requests-list","ignoreColumn": ["operate"]}'
-                           data-export-types='["pdf","json","xml","csv","txt","sql","doc","excel"]'
-                           data-mobile-responsive="true"
-                           data-filter-control="true"
-                           data-filter-control-container="#filters"
-                           data-toolbar="#filters"
-                           data-query-params="queryParams">
-                            <thead class="thead-dark">
-                            <tr>
-                                <th data-field="request_number" data-sortable="true" data-sort-name="request_number" data-formatter="requestNumberFormatter">{{ __('services.labels.transaction_identifier') }}</th>
-                                <th data-field="id" data-sortable="true" data-visible="false">{{ __('services.labels.id') }}</th>
-                                
-                                <th data-field="name" data-sortable="true">{{ __('services.labels.name') }}</th>
-
-                                <th data-field="custom_fields" data-sortable="false" data-escape="false" data-formatter="customFieldsFormatter" data-events="fieldsEvents">{{ __('services.labels.filled_fields') }}</th>
-
-                                <th data-field="submitted_at" data-sortable="true" data-sort-name="created_at" data-formatter="submissionDateFormatter">{{ __('services.labels.submitted_at') }}</th>
-                                <th data-field="category.name" data-sortable="true" data-visible="false" data-formatter="serviceTypeFormatter">{{ __('services.labels.service_type') }}</th>
-                                <th data-field="description" data-align="center" data-sortable="true" data-visible="false" data-formatter="descriptionFormatter">{{ __('services.labels.description') }}</th>
-                                <th data-field="user.name" data-sort-name="user_name" data-sortable="true" data-visible="false">{{ __('services.labels.user') }}</th>
-                                <th data-field="status" data-sortable="true" data-filter-control="select" data-escape="false" data-visible="false" data-formatter="itemStatusFormatter">{{ __('services.labels.status') }}</th>
-
-
-                                <th data-field="rejected_reason" data-sortable="true" data-visible="false">{{ __('services.labels.rejected_reason') }}</th>
-
-                                {{-- أخفي تواريخ/معرّفات إضافية فقط للبحث --}}
-                                <th data-field="created_at" data-sortable="true" data-visible="false">{{ __('services.labels.created_at') }}</th>
-                                <th data-field="updated_at" data-sortable="true" data-visible="false">{{ __('services.labels.updated_at') }}</th>
-                                <th data-field="user_id" data-sortable="true" data-visible="false">{{ __('services.labels.user_id') }}</th>
-                                <th data-field="category_id" data-sortable="true" data-visible="false">{{ __('services.labels.category_id') }}</th>
-
-                                @canany(['service-requests-list','service-requests-update'])
-                                    <th data-field="operate" data-align="center" data-sortable="false" data-events="itemEvents" data-escape="false">{{ __('services.labels.actions') }}</th>
-                                @endcanany
-                            </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-
             </div>
         </div>
 
-        {{-- مودال عرض الحقول المعبأة --}}
+        <div class="card service-requests-filters">
+            <div class="card-body">
+                <div class="service-requests-filters__header">
+                    <div>
+                        <h5 class="service-requests-filters__title">{{ __('services.buttons.filter') }}</h5>
+                        <p class="service-requests-filters__hint">{{ __('services.messages.filters_hint') }}</p>
+                    </div>
+                    <div class="service-requests-filters__meta">
+                        <span class="meta-chip meta-chip--light">
+                            <span class="meta-chip__label">{{ __('services.labels.total_requests') }}</span>
+                            <span class="meta-chip__value">{{ number_format($totalRequests) }}</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div id="filters" class="row g-3 align-items-end">
+                    <div class="col-sm-6 col-lg-3">
+                        <label for="filter" class="d-block">{{ __('services.labels.status') }}</label>
+                        <select class="form-control bootstrap-table-filter-control-status" id="filter">
+                            <option value="">{{ __('services.filters.all') }}</option>
+                            <option value="review">{{ __('services.labels.under_review') }}</option>
+                            <option value="approved">{{ __('services.labels.approved') }}</option>
+                            <option value="rejected">{{ __('services.labels.rejected') }}</option>
+                            <option value="sold out">{{ __('services.labels.sold_out') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <label class="d-block">{{ __('services.labels.category') }}</label>
+                        @if($selectedCategory)
+                            <div class="form-control-plaintext fw-semibold">{{ $selectedCategory->name }}</div>
+                        @else
+                            <div class="form-control-plaintext text-muted">{{ __('services.filters.all_categories') }}</div>
+                        @endif
+                    </div>
+
+                    <div class="col-12 col-lg-6">
+                        <label for="request_number" class="d-block">{{ __('services.labels.search_by_transaction_number') }}</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="request_number" placeholder="{{ __('services.placeholders.transaction_number') }}" autocomplete="off">
+                            <button class="btn btn-outline-primary" type="button" id="requestNumberApply">{{ __('services.buttons.search') }}</button>
+                            <button class="btn btn-outline-secondary" type="button" id="requestNumberReset">{{ __('services.buttons.reset') }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 requests-stats-row">
+            @foreach ($statCards as $card)
+                @php
+                    $progress = $totalRequests > 0
+                        ? max(0, min(100, round(($card['value'] / max($totalRequests, 1)) * 100, 1)))
+                        : 0;
+                @endphp
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="requests-stat-card requests-stat-card--{{ $card['variant'] }}">
+                        <div class="requests-stat-card__header">
+                            <div class="requests-stat-card__icon">
+                                <i class="bi {{ $card['icon'] }}"></i>
+                            </div>
+                            <div class="requests-stat-card__figures">
+                                <span class="requests-stat-card__label">{{ $card['label'] }}</span>
+                                <span class="requests-stat-card__value">{{ number_format($card['value']) }}</span>
+                            </div>
+                        </div>
+                        <div class="requests-stat-card__indicator">
+                            <span>{{ __('services.labels.requests') }}</span>
+                            <span class="requests-stat-card__indicator-share">{{ $share($card['value']) }}</span>
+                        </div>
+                        <div class="requests-stat-card__progress">
+                            <span class="requests-stat-card__progress-bar" style="width: {{ $progress }}%;"></span>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        <div class="card service-requests-table">
+            <div class="card-body">
+                <div class="service-requests-table__header">
+                    <div>
+                        <h5 class="service-requests-table__title">{{ __('services.labels.service_requests') }}</h5>
+                        <p class="service-requests-table__hint">{{ __('services.messages.table_hint') }}</p>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table
+                       class="table table-striped table-hover align-middle"
+                       aria-describedby="mydesc"
+                       id="table_list"
+                       data-toggle="table"
+                       data-url="{{ route('service.requests.datatable') }}"
+                       data-click-to-select="true"
+                       data-side-pagination="server"
+                       data-pagination="true"
+                       data-page-list="[5, 10, 20, 50, 100, 200]"
+                       data-search="true"
+                       data-show-columns="true"
+                       data-show-refresh="true"
+                       data-trim-on-search="false"
+                       data-escape="true"
+                       data-responsive="true"
+                       data-sort-name="id"
+                       data-sort-order="desc"
+                       data-pagination-successively-size="3"
+                       data-table="items"
+                       data-status-column="deleted_at"
+                       data-show-export="true"
+                       data-export-options='{"fileName": "service-requests-list","ignoreColumn": ["operate"]}'
+                       data-export-types='["pdf","json","xml","csv","txt","sql","doc","excel"]'
+                       data-mobile-responsive="true"
+                       data-filter-control="true"
+                       data-filter-control-container="#filters"
+                       data-toolbar="#filters"
+                       data-query-params="queryParams">
+                        <thead class="service-requests-table__head">
+                        <tr>
+                            <th data-field="request_number" data-sortable="true" data-sort-name="request_number" data-formatter="requestNumberFormatter">{{ __('services.labels.transaction_identifier') }}</th>
+                            <th data-field="id" data-sortable="true" data-visible="false">{{ __('services.labels.id') }}</th>
+
+                            <th data-field="name" data-sortable="true">{{ __('services.labels.name') }}</th>
+
+                            <th data-field="custom_fields" data-sortable="false" data-escape="false" data-formatter="customFieldsFormatter" data-events="fieldsEvents">{{ __('services.labels.filled_fields') }}</th>
+
+                            <th data-field="submitted_at" data-sortable="true" data-sort-name="created_at" data-formatter="submissionDateFormatter">{{ __('services.labels.submitted_at') }}</th>
+                            <th data-field="category.name" data-sortable="true" data-visible="false" data-formatter="serviceTypeFormatter">{{ __('services.labels.service_type') }}</th>
+                            <th data-field="description" data-align="center" data-sortable="true" data-visible="false" data-formatter="descriptionFormatter">{{ __('services.labels.description') }}</th>
+                            <th data-field="user.name" data-sort-name="user_name" data-sortable="true" data-visible="false">{{ __('services.labels.user') }}</th>
+                            <th data-field="status" data-sortable="true" data-filter-control="select" data-escape="false" data-visible="false" data-formatter="itemStatusFormatter">{{ __('services.labels.status') }}</th>
+
+
+                            <th data-field="rejected_reason" data-sortable="true" data-visible="false">{{ __('services.labels.rejected_reason') }}</th>
+
+                            <th data-field="created_at" data-sortable="true" data-visible="false">{{ __('services.labels.created_at') }}</th>
+                            <th data-field="updated_at" data-sortable="true" data-visible="false">{{ __('services.labels.updated_at') }}</th>
+                            <th data-field="user_id" data-sortable="true" data-visible="false">{{ __('services.labels.user_id') }}</th>
+                            <th data-field="category_id" data-sortable="true" data-visible="false">{{ __('services.labels.category_id') }}</th>
+
+                            @canany(['service-requests-list','service-requests-update'])
+                                <th data-field="operate" data-align="center" data-sortable="false" data-events="itemEvents" data-escape="false">{{ __('services.labels.actions') }}</th>
+                            @endcanany
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
         <div id="editModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -406,7 +633,7 @@
             </div>
         </div>
 
-        {{-- مودال تغيير الحالة --}}
+        {{-- ظ…ظˆط¯ط§ظ„ طھط؛ظٹظٹط± ط§ظ„ط­ط§ظ„ط© --}}
         <div id="editStatusModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -444,7 +671,7 @@
     function updateApprovalSuccess() { $('#editStatusModal').modal('hide'); }
     const CATEGORY_ID = @json($selectedCategoryId);
 
-    // اسم الفئة كبادج
+    // ط§ط³ظ… ط§ظ„ظپط¦ط© ظƒط¨ط§ط¯ط¬
     function serviceTypeFormatter(value, row) {
         if (row.category && row.category.name) {
             return '<span class="badge bg-light-primary">' + row.category.name + '</span>';
@@ -458,7 +685,7 @@
         return '<span class="badge bg-primary text-white fw-semibold px-3 py-2">' + escapeHtml(reference) + '</span>';
     }
 
-    // زر "عرض الحقول" + عدّاد
+    // ط²ط± "ط¹ط±ط¶ ط§ظ„ط­ظ‚ظˆظ„" + ط¹ط¯ظ‘ط§ط¯
     function customFieldsFormatter(value, row) {
         var count = Array.isArray(row.custom_fields) ? row.custom_fields.length : 0;
         return '<button class="btn btn-sm btn-outline-secondary view-fields">'+
@@ -475,7 +702,7 @@
         return '<span class="text-nowrap">' + escapeHtml(value) + '</span>';
     }
 
-    // بناء جدول الحقول داخل المودال
+    // ط¨ظ†ط§ط، ط¬ط¯ظˆظ„ ط§ظ„ط­ظ‚ظˆظ„ ط¯ط§ط®ظ„ ط§ظ„ظ…ظˆط¯ط§ظ„
     function renderCustomFieldsTable(fields) {
         if (!Array.isArray(fields) || !fields.length) {
             return '<div class="text-muted">{{ __('services.messages.no_custom_fields_filled') }}</div>';
@@ -500,7 +727,7 @@
         return html;
     }
 
-    // أحداث عمود الحقول
+    // ط£ط­ط¯ط§ط« ط¹ظ…ظˆط¯ ط§ظ„ط­ظ‚ظˆظ„
     window.fieldsEvents = {
         'click .view-fields': function (e, value, row, index) {
             var html = renderCustomFieldsTable(row.custom_fields || row.attributes || []);
@@ -509,7 +736,7 @@
         }
     };
 
-    // تمرير الفلاتر للسيرفر
+    // طھظ…ط±ظٹط± ط§ظ„ظپظ„ط§طھط± ظ„ظ„ط³ظٹط±ظپط±
     function queryParams(params) {
         const query = {
 
@@ -534,7 +761,7 @@
 
     }
 
-    // أدوات مساعدة
+    // ط£ط¯ظˆط§طھ ظ…ط³ط§ط¹ط¯ط©
     function escapeHtml(s) {
         if (s === null || s === undefined) return '';
         return String(s).replace(/[&<>"'`=\/]/g, function (c) {
@@ -554,7 +781,7 @@
         }
 
 
-        // تحديث الجدول عند تغيير الفلاتر
+        // طھط­ط¯ظٹط« ط§ظ„ط¬ط¯ظˆظ„ ط¹ظ†ط¯ طھط؛ظٹظٹط± ط§ظ„ظپظ„ط§طھط±
         $('#filter').on('change', function() {
             refreshTableToFirstPage();
         });
@@ -575,11 +802,12 @@
             }
         });
 
-        // إظهار/إخفاء سبب الرفض
+        // ط¥ط¸ظ‡ط§ط±/ط¥ط®ظپط§ط، ط³ط¨ط¨ ط§ظ„ط±ظپط¶
         $('#status').on('change', function() {
             $('#rejected_reason_container').toggle($(this).val() === 'rejected');
         });
     });
 </script>
 @endsection
+
 
