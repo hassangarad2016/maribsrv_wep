@@ -137,6 +137,7 @@ use Illuminate\Validation\Rule;
 use App\Models\OTP;
 use App\Models\PendingSignup;
 use App\Jobs\SendOtpWhatsAppJob;
+use App\Jobs\SendWelcomeNotificationJob;
 use App\Services\EnjazatikWhatsAppService;
 use Throwable;
 use Exception;
@@ -466,6 +467,10 @@ trait CompleteRegistrationTrait
             ['user_id' => $user->getKey()],
             ['balance' => 0, 'currency' => $walletCurrency]
         );
+        DB::afterCommit(function () use ($user): void {
+            SendWelcomeNotificationJob::dispatch($user->id)
+                ->delay(now()->addMinute());
+        });
 
         if (!$user->hasRole('User')) {
             $user->assignRole('User');
