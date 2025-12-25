@@ -26,6 +26,7 @@ use App\Listeners\SendDelegateAssignmentNotifications;
 use App\Listeners\SendOrderNoteNotification;
 use App\Listeners\SendMetalRateCreatedNotification;
 use App\Listeners\SendMetalRateUpdatedNotification;
+use App\Listeners\SendWalletTopUpRequestNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -65,6 +66,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         ManualPaymentRequestCreated::class => [
             DispatchManualPaymentRequestDelegateNotifications::class,
+            SendWalletTopUpRequestNotification::class,
         ],
 
         CurrencyCreated::class => [
