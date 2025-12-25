@@ -11,18 +11,29 @@
         color: #212529;
     }
     .service-requests-summary {
-        margin-bottom: 1rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.25rem;
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #495057;
+        margin-bottom: 1.25rem;
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
-    .service-requests-summary span {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
+    .summary-card {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 0.75rem;
+        padding: 0.85rem 1rem;
+        background-color: #ffffff;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+    }
+    .summary-card__label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #6c757d;
+        margin-bottom: 0.35rem;
+    }
+    .summary-card__value {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #212529;
+        word-break: break-word;
     }
     .service-requests-filters {
         border: 1px solid rgba(15, 23, 42, 0.08);
@@ -103,16 +114,24 @@
         @endphp
 
         <div class="service-requests-summary">
-            <span>
-                {{ __('services.labels.category') }}:
-                @if($selectedCategory)
-                    {{ $selectedCategory->name }}
-                @else
-                    {{ __('services.filters.all_categories') }}
-                @endif
-            </span>
-            <span>{{ __('services.labels.total_requests') }}: {{ number_format($totalRequests) }}</span>
-            <span>{{ __('services.labels.under_review') }}: {{ number_format($reviewRequests) }}</span>
+            <div class="summary-card">
+                <div class="summary-card__label">{{ __('services.labels.category') }}</div>
+                <div class="summary-card__value">
+                    @if($selectedCategory)
+                        {{ $selectedCategory->name }}
+                    @else
+                        {{ __('services.filters.all_categories') }}
+                    @endif
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card__label">{{ __('services.labels.total_requests') }}</div>
+                <div class="summary-card__value">{{ number_format($totalRequests) }}</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card__label">{{ __('services.labels.under_review') }}</div>
+                <div class="summary-card__value">{{ number_format($reviewRequests) }}</div>
+            </div>
         </div>
 
         <div class="service-requests-filters">
