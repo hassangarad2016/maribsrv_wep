@@ -67,6 +67,7 @@ use App\Models\VerificationFieldRequest;
 use App\Models\VerificationFieldValue;
 use App\Models\VerificationPlan;
 use App\Models\VerificationRequest;
+use App\Models\VerificationPayment;
 use App\Models\WalletAccount;
 use App\Models\WalletTransaction;
 use App\Models\WalletWithdrawalRequest;
@@ -153,6 +154,8 @@ trait GetVerificationRequestTrait
         try {
             $verificationRequest = VerificationRequest::with(['verification_field_values.verification_field'])
                 ->owner()
+                ->orderByDesc('approved_at')
+                ->orderByDesc('id')
                 ->first();
 
             if (empty($verificationRequest)) {
@@ -160,6 +163,26 @@ trait GetVerificationRequestTrait
             }
             $response = $verificationRequest->toArray();
             $response['verification_fields'] = [];
+
+            $needsApprovedAt = empty($response['approved_at']);
+            $needsExpiresAt = empty($response['expires_at']);
+            if ($needsApprovedAt || $needsExpiresAt) {
+                $latestPayment = VerificationPayment::query()
+                    ->where('user_id', $verificationRequest->user_id)
+                    ->where('status', 'paid')
+                    ->orderByDesc('id')
+                    ->first();
+
+                if ($latestPayment) {
+                    if ($needsApprovedAt) {
+                        $startsAt = $latestPayment->starts_at ?? $latestPayment->created_at;
+                        $response['approved_at'] = $startsAt?->toIso8601String();
+                    }
+                    if ($needsExpiresAt) {
+                        $response['expires_at'] = $latestPayment->expires_at?->toIso8601String();
+                    }
+                }
+            }
 
             foreach ($verificationRequest->verification_field_values as $verificationFieldValue) {
                 if (!$verificationFieldValue->relationLoaded('verification_field')) {

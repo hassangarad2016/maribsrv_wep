@@ -1,10 +1,12 @@
 <?php
 
 namespace App\Providers;
+use App\Models\Category;
 use App\Models\DeliveryRequest;
 use App\Models\ManualPaymentRequest;
 use App\Models\VerificationRequest;
 use App\Models\WalletWithdrawalRequest;
+use App\Services\ServiceAuthorizationService;
 
 use App\Services\CachingService;
 use Illuminate\Support\Facades\Session;
@@ -83,10 +85,46 @@ class ViewServiceProvider extends ServiceProvider {
                     ->count();
             }
 
+            $serviceCategories = collect();
+            $servicePermissions = [
+                'service-list',
+                'service-create',
+                'service-update',
+                'service-delete',
+                'service-requests-list',
+                'service-requests-create',
+                'service-requests-update',
+                'service-requests-delete',
+            ];
+
+            if ($user && $user->canAny($servicePermissions)) {
+                $serviceCategoryIds = [2, 8, 174, 175, 176, 114, 181, 180, 177];
+                $categoryQuery = Category::query()
+                    ->whereIn('id', $serviceCategoryIds)
+                    ->orderBy('name')
+                    ->select(['id', 'name']);
+
+                $serviceAuthorizationService = app(ServiceAuthorizationService::class);
+                if (! $serviceAuthorizationService->userHasFullAccess($user)) {
+                    $managedCategoryIds = $serviceAuthorizationService->getManagedCategoryIds($user);
+
+                    if (empty($managedCategoryIds)) {
+                        $categoryQuery = null;
+                    } else {
+                        $categoryQuery->whereIn('id', $managedCategoryIds);
+                    }
+                }
+
+                if ($categoryQuery) {
+                    $serviceCategories = $categoryQuery->get();
+                }
+            }
+
             $view->with([
                 'company_logo' => $settings ?? '',
                 'pendingWalletWithdrawalCount' => $pendingCount,
                 'sidebarBadgeCounts' => $badgeCounts,
+                'sidebarServiceCategories' => $serviceCategories,
             ]);
         
         

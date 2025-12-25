@@ -704,14 +704,26 @@
               </span>
             </a>
             <ul class="submenu">
-              <li class="submenu-item">
-                <a href="{{ route('services.index') }}">
-                  <span class="menu-text">
-                    <i class="bi bi-tools"></i>
-                    <span class="menu-item">{{ __('sidebar.services_section_menu') }}</span>
-                  </span>
-                </a>
-              </li>
+              @php($serviceCategories = $sidebarServiceCategories ?? collect())
+              @forelse($serviceCategories as $serviceCategory)
+                <li class="submenu-item">
+                  <a href="{{ route('services.category', $serviceCategory->id) }}">
+                    <span class="menu-text">
+                      <i class="bi bi-grid"></i>
+                      <span class="menu-item">{{ $serviceCategory->name }}</span>
+                    </span>
+                  </a>
+                </li>
+              @empty
+                <li class="submenu-item">
+                  <a href="{{ route('services.index') }}">
+                    <span class="menu-text">
+                      <i class="bi bi-tools"></i>
+                      <span class="menu-item">{{ __('sidebar.services_section_menu') }}</span>
+                    </span>
+                  </a>
+                </li>
+              @endforelse
             </ul>
           </li>
         @endcanany
