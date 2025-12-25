@@ -30,6 +30,18 @@ class SystemUpgradeSeeder extends Seeder {
             'service-managers'            => [
                 'custom' => ['manage']
             ],
+            'shein-products'              => '*',
+            'shein-orders'                => '*',
+            'shein-requests'              => [
+                'only' => ['list', 'delete']
+            ],
+            'computer-ads'                => '*',
+            'computer-orders'             => [
+                'only' => ['list']
+            ],
+            'computer-requests'           => [
+                'only' => ['list', 'delete']
+            ],
             'item'                        => [
                 'only' => ['list', 'update']
             ],
