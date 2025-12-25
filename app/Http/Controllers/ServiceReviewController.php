@@ -19,6 +19,7 @@ class ServiceReviewController extends Controller
 
     public function index(Service $service, Request $request)
     {
+        ResponseService::noPermissionThenSendJson('service-reviews-list');
         try {
             $this->serviceAuthorizationService->ensureUserCanManageService(Auth::user(), $service);
 
@@ -66,6 +67,7 @@ class ServiceReviewController extends Controller
 
     public function updateStatus(Request $request, Service $service, ServiceReview $serviceReview)
     {
+        ResponseService::noPermissionThenSendJson('service-reviews-update');
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:pending,approved,rejected',
         ]);

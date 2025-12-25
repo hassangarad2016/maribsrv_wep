@@ -693,7 +693,8 @@
 
         @canany([
             'service-list','service-create','service-update','service-delete',
-            'service-requests-list','service-requests-create','service-requests-update','service-requests-delete'
+            'service-requests-list','service-requests-create','service-requests-update','service-requests-delete',
+            'service-reviews-list','service-reviews-update'
         ])
           <li class="sidebar-item has-sub sidebar-group">
             <a href="#" class="sidebar-link">

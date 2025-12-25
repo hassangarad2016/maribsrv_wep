@@ -24,6 +24,9 @@ class SystemUpgradeSeeder extends Seeder {
             'custom-field'                => '*',
             'service'                     => '*',
             'service-requests'            => '*',
+            'service-reviews'             => [
+                'only' => ['list', 'update']
+            ],
             'service-managers'            => [
                 'custom' => ['manage']
             ],

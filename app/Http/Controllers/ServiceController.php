@@ -178,7 +178,7 @@ class ServiceController extends Controller
 
     public function categoryReviews(Category $category, Request $request)
     {
-        ResponseService::noPermissionThenSendJson('service-list');
+        ResponseService::noPermissionThenSendJson('service-reviews-list');
 
         if (!in_array($category->id, self::SERVICE_CATEGORY_IDS, true)) {
             abort(404);

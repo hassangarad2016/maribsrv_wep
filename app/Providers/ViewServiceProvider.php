@@ -91,6 +91,7 @@ class ViewServiceProvider extends ServiceProvider {
                 'service-create',
                 'service-update',
                 'service-delete',
+                'service-reviews-list',
                 'service-requests-list',
                 'service-requests-create',
                 'service-requests-update',

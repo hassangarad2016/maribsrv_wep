@@ -75,6 +75,8 @@
         'requestsCreate' => auth()->user()?->can('service-requests-create') ?? false,
         'requestsUpdate' => auth()->user()?->can('service-requests-update') ?? false,
         'requestsDelete' => auth()->user()?->can('service-requests-delete') ?? false,
+        'reviewsList' => auth()->user()?->can('service-reviews-list') ?? false,
+        'reviewsUpdate' => auth()->user()?->can('service-reviews-update') ?? false,
 
 
 
@@ -91,6 +93,8 @@
         $servicePermissions['requestsUpdate'] ||
         $servicePermissions['requestsDelete']
     );
+
+    $canAccessReviews = $servicePermissions['reviewsList'];
 
 @endphp
 
@@ -114,13 +118,15 @@
                         </button>
                     </li>
 
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews-pane"
-                                type="button" role="tab" aria-controls="reviews-pane" aria-selected="false">
-                            <i class="bi bi-chat-quote"></i>
-                            <span class="ms-1">{{ __('services.tabs.reviews_reports') }}</span>
-                        </button>
-                    </li>
+                    @if ($canAccessReviews)
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews-pane"
+                                    type="button" role="tab" aria-controls="reviews-pane" aria-selected="false">
+                                <i class="bi bi-chat-quote"></i>
+                                <span class="ms-1">{{ __('services.tabs.reviews_reports') }}</span>
+                            </button>
+                        </li>
+                    @endif
 
 
                     @if ($canAccessRequestsIndex)
@@ -230,6 +236,7 @@
 
 
 
+                    @if ($canAccessReviews)
                     <div class="tab-pane fade" id="reviews-pane" role="tabpanel" aria-labelledby="reviews-tab">
                         <div id="reviewsFilters" class="row g-3 align-items-end mb-3">
                             <div class="col-12 col-md-4 col-lg-3">
@@ -282,6 +289,7 @@
 
                         <div id="reviewsTableCaption" class="visually-hidden">{{ __('services.messages.service_reviews_caption') }}</div>
                     </div>
+                    @endif
                 </div>
 
 

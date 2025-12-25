@@ -199,22 +199,22 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
     Route::group([
         'prefix' => 'services',
         'as' => 'services.',
-        'middleware' => ['permission:service-list|service-create|service-update|service-delete|service-managers-manage']
+        'middleware' => ['permission:service-list|service-create|service-update|service-delete|service-reviews-list|service-reviews-update|service-managers-manage']
     ], function () {
         Route::get('/', [ServiceController::class, 'index'])->name('index');
         Route::get('/list', [ServiceController::class, 'list'])->name('list');
         Route::get('/create', [ServiceController::class, 'create'])->name('create');
         Route::post('/', [ServiceController::class, 'store'])->name('store');
         Route::get('/category/{category}', [ServiceController::class, 'category'])->name('category')->middleware('category.manager');
-        Route::get('/category/{category}/reviews', [ServiceController::class, 'categoryReviews'])->name('category.reviews')->middleware('category.manager');
+        Route::get('/category/{category}/reviews', [ServiceController::class, 'categoryReviews'])->name('category.reviews')->middleware(['category.manager', 'permission:service-reviews-list']);
 
         Route::get('/{service}', [ServiceController::class, 'show'])->name('show')->middleware('service.manager');
         Route::get('/{service}/edit', [ServiceController::class, 'edit'])->name('edit')->middleware('service.manager');
         Route::put('/{service}', [ServiceController::class, 'update'])->name('update')->middleware('service.manager');
         Route::delete('/{service}', [ServiceController::class, 'destroy'])->name('destroy')->middleware('service.manager');
 
-        Route::get('/{service}/reviews', [ServiceReviewController::class, 'index'])->name('reviews.index')->middleware('service.manager');
-        Route::patch('/{service}/reviews/{serviceReview}', [ServiceReviewController::class, 'updateStatus'])->name('reviews.update')->middleware(['service.manager', 'permission:service-managers-manage']);
+        Route::get('/{service}/reviews', [ServiceReviewController::class, 'index'])->name('reviews.index')->middleware(['service.manager', 'permission:service-reviews-list']);
+        Route::patch('/{service}/reviews/{serviceReview}', [ServiceReviewController::class, 'updateStatus'])->name('reviews.update')->middleware(['service.manager', 'permission:service-reviews-update']);
 
 
 
@@ -397,7 +397,7 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
     Route::group([
         'prefix' => 'wifi',
         'as' => 'wifi.',
-        'middleware' => ['permission:service-list|service-create|service-update|service-delete'],
+        'middleware' => ['permission:service-list|service-create|service-update|service-delete|service-reviews-list|service-reviews-update'],
     ], function () {
         Route::get('networks', [WifiOwnerNetworkController::class, 'index'])->name('networks.index');
         Route::post('networks', [WifiOwnerNetworkController::class, 'store'])->name('networks.store');

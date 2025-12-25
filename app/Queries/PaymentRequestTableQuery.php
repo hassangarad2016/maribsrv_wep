@@ -90,6 +90,8 @@ class PaymentRequestTableQuery
 
         $supportsManualMeta = Schema::hasTable('manual_payment_requests')
             && Schema::hasColumn('manual_payment_requests', 'meta');
+        $supportsManualCurrency = Schema::hasTable('manual_payment_requests')
+            && Schema::hasColumn('manual_payment_requests', 'currency');
 
         $supportsManualBankLookupTable = Schema::hasTable('manual_banks');
         $supportsManualBankLookup = $supportsManualBankId && $supportsManualBankLookupTable;
@@ -103,8 +105,12 @@ class PaymentRequestTableQuery
             && Schema::hasColumn('payment_transactions', 'payment_gateway_name');
         $supportsPaymentTransactionMeta = Schema::hasTable('payment_transactions')
             && Schema::hasColumn('payment_transactions', 'meta');
-        $supportsWalletMeta = Schema::hasTable('wallet_transactions')
+        $supportsWalletTransactions = Schema::hasTable('wallet_transactions');
+        $supportsWalletAccounts = Schema::hasTable('wallet_accounts');
+        $supportsWalletMeta = $supportsWalletTransactions
             && Schema::hasColumn('wallet_transactions', 'meta');
+        $supportsWalletCurrency = $supportsWalletTransactions
+            && Schema::hasColumn('wallet_transactions', 'currency');
 
 
         $supportsOrderLookup = Schema::hasTable('orders');
@@ -776,7 +782,13 @@ class PaymentRequestTableQuery
 
 
 
-        $walletTopUps = DB::table('wallet_transactions as wt')
+        $walletCurrencySelect = $supportsWalletCurrency
+            ? "COALESCE(NULLIF(wt.currency, ''), '')"
+            : ($supportsManualCurrency ? "COALESCE(NULLIF(mpr.currency, ''), '')" : "''");
+
+        $walletTopUps = null;
+        if ($supportsWalletTransactions && $supportsWalletAccounts) {
+            $walletTopUps = DB::table('wallet_transactions as wt')
             ->selectRaw("CONCAT('wt-', wt.id) as row_key")
             ->selectRaw('NULL as payment_transaction_id')
             ->selectRaw('wt.id as wallet_transaction_id')
@@ -785,7 +797,7 @@ class PaymentRequestTableQuery
             ->selectRaw('users.name as user_name')
             ->selectRaw('users.mobile as user_mobile')
             ->selectRaw('wt.amount')
-            ->selectRaw("COALESCE(NULLIF(wt.currency, ''), '') as currency")
+            ->selectRaw($walletCurrencySelect . ' as currency')
             ->selectRaw(
                 "COALESCE(NULLIF(mpr.payable_type, ''), ?) as payable_type",
                 [ManualPaymentRequest::PAYABLE_TYPE_WALLET_TOP_UP]
@@ -856,6 +868,7 @@ class PaymentRequestTableQuery
                 "JSON_UNQUOTE(JSON_EXTRACT(wt.meta, '$.\\\"reason\\\"')) IN ('wallet_top_up','wallet-top-up','wallet_topup','admin_manual_credit')"
             )
             ->whereNotNull('wt.manual_payment_request_id');
+        }
 
         $manualRequestStatusSource = "LOWER(COALESCE(NULLIF(mpr.status, ''), 'pending'))";
 
@@ -925,18 +938,26 @@ class PaymentRequestTableQuery
                     ->from('payment_transactions as pt')
                     ->whereColumn('pt.manual_payment_request_id', 'mpr.id');
             })
-            ->whereNotExists(static function (Builder $query): void {
-                $query->selectRaw('1')
-                    ->from('wallet_transactions as wt')
-                    ->whereColumn('wt.manual_payment_request_id', 'mpr.id')
-                    ->whereNull('wt.payment_transaction_id')
-                    ->whereRaw("wt.type = 'credit'")
-                    ->whereRaw(
-                        "JSON_UNQUOTE(JSON_EXTRACT(wt.meta, '$.\\\"reason\\\"')) IN ('wallet_top_up','wallet-top-up','wallet_topup','admin_manual_credit')"
-                    );
-            });
+            ->when(
+                $supportsWalletTransactions,
+                static function (Builder $query): void {
+                    $query->whereNotExists(static function (Builder $inner): void {
+                        $inner->selectRaw('1')
+                            ->from('wallet_transactions as wt')
+                            ->whereColumn('wt.manual_payment_request_id', 'mpr.id')
+                            ->whereNull('wt.payment_transaction_id')
+                            ->whereRaw("wt.type = 'credit'")
+                            ->whereRaw(
+                                "JSON_UNQUOTE(JSON_EXTRACT(wt.meta, '$.\\\"reason\\\"')) IN ('wallet_top_up','wallet-top-up','wallet_topup','admin_manual_credit')"
+                            );
+                    });
+                }
+            );
 
-        $result = $paymentTransactions->unionAll($walletTopUps);
+        $result = $paymentTransactions;
+        if ($walletTopUps !== null) {
+            $result = $result->unionAll($walletTopUps);
+        }
 
         return $result->unionAll($manualRequests);
     

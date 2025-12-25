@@ -64,6 +64,11 @@ class ComprehensivePermissionSeeder extends Seeder
             'service-requests-delete',
         ];
 
+        $serviceReviewPermissions = [
+            'service-reviews-list',
+            'service-reviews-update',
+        ];
+
         $serviceManagerPermissions = [
             'service-managers-manage',
         ];
@@ -82,6 +87,7 @@ class ComprehensivePermissionSeeder extends Seeder
             $contactPermissions,
             $notificationPermissions,
             $serviceRequestPermissions,
+            $serviceReviewPermissions,
             $serviceManagerPermissions,
             $walletPermissions
         );
