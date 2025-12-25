@@ -165,15 +165,7 @@ trait GetServiceReviewsTrait
             $authenticatedUser = Auth::user();
 
             $requestedStatus = $request->input('status');
-            $isOwner = $authenticatedUser && (int) ($service->owner_id ?? 0) === (int) $authenticatedUser->id;
-            $canManageService = $authenticatedUser
-                ? $this->serviceAuthorizationService->userCanManageService($authenticatedUser, $service)
-                : false;
-
-            $canAccessAllStatuses = $authenticatedUser && ($isOwner || $canManageService);
-            $status = $canAccessAllStatuses
-                ? ($requestedStatus ?? ServiceReview::STATUS_APPROVED)
-                : ServiceReview::STATUS_APPROVED;
+            $status = $requestedStatus ?: 'all';
 
 
             $reviewsQuery = ServiceReview::where('service_id', $service->id)
@@ -208,9 +200,11 @@ trait GetServiceReviewsTrait
                 ];
             });
 
-            $average = ServiceReview::where('service_id', $service->id)
-                ->where('status', ServiceReview::STATUS_APPROVED)
-                ->avg('rating');
+            $averageQuery = ServiceReview::where('service_id', $service->id);
+            if ($status !== 'all') {
+                $averageQuery->where('status', $status ?: ServiceReview::STATUS_APPROVED);
+            }
+            $average = $averageQuery->avg('rating');
 
 
             $response = [
