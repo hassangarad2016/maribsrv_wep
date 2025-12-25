@@ -40,12 +40,14 @@
 
 
         @canany(['category-list','category-create','category-update','category-delete',
-                 'custom-field-list','custom-field-create','custom-field-update','custom-field-delete'])
+                 'custom-field-list','custom-field-create','custom-field-update','custom-field-delete',
+                 'item-list','item-create','item-update','item-delete',
+                 'tip-list','tip-create','tip-update','tip-delete'])
           <li class="sidebar-item has-sub sidebar-group">
             <a href="#" class="sidebar-link">
               <span class="menu-text">
                 <i class="bi bi-megaphone"></i>
-                <span class="menu-item">{{ __('Ads Listing') }}</span>
+                <span class="menu-item">&#x0625;&#x062F;&#x0627;&#x0631;&#x0629; &#x0627;&#x0644;&#x0625;&#x0639;&#x0644;&#x0627;&#x0646;&#x0627;&#x062A;</span>
               </span>
             </a>
             <ul class="submenu">
@@ -70,21 +72,7 @@
                   </a>
                 </li>
               @endcanany
-            </ul>
-          </li>
-        @endcanany
 
-
-        @canany(['item-list','item-create','item-update','item-delete',
-                'tip-list','tip-create','tip-update','tip-delete'])
-          <li class="sidebar-item has-sub sidebar-group">
-            <a href="#" class="sidebar-link">
-              <span class="menu-text">
-                <i class="bi bi-boxes"></i>
-                <span class="menu-item">{{ __('Items Management') }}</span>
-              </span>
-            </a>
-            <ul class="submenu">
               @canany(['item-list','item-create','item-update','item-delete'])
                 <li class="submenu-item">
                   <a href="{{ route('item.index') }}">
@@ -109,7 +97,6 @@
             </ul>
           </li>
         @endcanany
-
 
         @canany(['item-listing-package-list','item-listing-package-create','item-listing-package-update','item-listing-package-delete',
                  'advertisement-package-list','advertisement-package-create','advertisement-package-update','advertisement-package-delete',
@@ -265,7 +252,7 @@
             <a href="#" class="sidebar-link">
               <span class="menu-text">
                 <i class="bi bi-shield-check"></i>
-                <span class="menu-item">{{ __('Seller Management') }}</span>
+                <span class="menu-item">&#x0625;&#x062F;&#x0627;&#x0631;&#x0629; &#x0627;&#x0644;&#x0628;&#x0627;&#x0626;&#x0639;&#x064A;&#x0646; &#x0648;&#x0627;&#x0644;&#x0645;&#x062A;&#x0627;&#x062C;&#x0631;</span>
               </span>
             </a>
             <ul class="submenu">
@@ -313,6 +300,14 @@
                     <span class="menu-text">
                       <i class="bi bi-gear"></i>
                       <span class="menu-item">{{ __('Store Settings') }}</span>
+                    </span>
+                  </a>
+                </li>
+                <li class="submenu-item">
+                  <a href="{{ route('merchant-stores.index') }}">
+                    <span class="menu-text">
+                      <i class="bi bi-shop-window"></i>
+                      <span class="menu-item">{{ __('sidebar.merchant_directory') }}</span>
                     </span>
                   </a>
                 </li>
@@ -413,28 +408,6 @@
             </ul>
           </li>
         @endif
-
-        @can('seller-store-settings-manage')
-          <li class="sidebar-item has-sub sidebar-group">
-            <a href="#" class="sidebar-link">
-              <span class="menu-text">
-                <i class="bi bi-shop-window"></i>
-                <span class="menu-item">{{ __('Stores & Merchants') }}</span>
-              </span>
-            </a>
-            <ul class="submenu">
-              <li class="submenu-item">
-                <a href="{{ route('merchant-stores.index') }}">
-                  <span class="menu-text">
-                    <i class="bi bi-shop-window"></i>
-                    <span class="menu-item">{{ __('sidebar.merchant_directory') }}</span>
-                  </span>
-                </a>
-              </li>
-            </ul>
-          </li>
-        @endcan
-
 
         @canany(['slider-list','slider-create','slider-update','slider-delete'])
           <li class="sidebar-item has-sub sidebar-group">
