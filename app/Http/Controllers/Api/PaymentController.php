@@ -614,17 +614,21 @@ class PaymentController extends Controller
         return DB::transaction(function () use ($requestUser, $canonicalMethod, $amount, $currency, $idempotencyKey) {
             $transaction = PaymentTransaction::query()
                 ->where('user_id', $requestUser->getKey())
-                ->where('payment_gateway', $canonicalMethod)
                 ->where('idempotency_key', $idempotencyKey)
                 ->lockForUpdate()
                 ->first();
 
             if (! $transaction) {
+                $gatewayForInsert = $canonicalMethod;
+                if ($canonicalMethod === 'manual_bank') {
+                    $gatewayForInsert = '';
+                }
+
                 $transaction = PaymentTransaction::create([
                     'user_id' => $requestUser->getKey(),
                     'amount' => $amount,
                     'currency' => $currency,
-                    'payment_gateway' => $canonicalMethod,
+                    'payment_gateway' => $gatewayForInsert,
                     'payment_status' => 'pending',
                     'idempotency_key' => $idempotencyKey,
                     'meta' => [
@@ -634,10 +638,15 @@ class PaymentController extends Controller
                     ],
                 ]);
             } else {
+                $gatewayForUpdate = $canonicalMethod;
+                if ($canonicalMethod === 'manual_bank' && ! $transaction->manual_payment_request_id) {
+                    $gatewayForUpdate = $transaction->payment_gateway;
+                }
+
                 $transaction->fill([
                     'amount' => $amount,
                     'currency' => $currency,
-                    'payment_gateway' => $canonicalMethod,
+                    'payment_gateway' => $gatewayForUpdate,
                 ]);
 
                 $meta = $transaction->meta ?? [];
