@@ -223,6 +223,40 @@
     .service-requests-table .table-striped > tbody > tr:nth-of-type(odd) {
         background-color: rgba(15, 23, 42, 0.02);
     }
+    .service-requests-table .fixed-table-toolbar {
+        margin-bottom: 0.75rem;
+    }
+    .service-requests-table .fixed-table-toolbar .columns {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.15rem;
+        background: #4b5563;
+        border-radius: 0.75rem;
+        padding: 0.25rem;
+        box-shadow: 0 10px 18px rgba(15, 23, 42, 0.18);
+    }
+    .service-requests-table .fixed-table-toolbar .columns .btn,
+    .service-requests-table .fixed-table-toolbar .columns .btn-group > .btn {
+        background: transparent;
+        border: 0;
+        color: #ffffff;
+        width: 36px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: none;
+    }
+    .service-requests-table .fixed-table-toolbar .columns .btn:hover,
+    .service-requests-table .fixed-table-toolbar .columns .btn-group > .btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+    .service-requests-table .fixed-table-toolbar .columns .dropdown-toggle::after {
+        display: none;
+    }
+    .service-requests-table .fixed-table-toolbar .columns .btn i {
+        font-size: 1rem;
+    }
     #table_list { width: 100%; }
 
     @media (min-width: 992px) {
@@ -358,8 +392,8 @@
                            data-pagination="true"
                            data-page-list="[5, 10, 20, 50, 100, 200]"
                            data-search="false"
-                           data-show-columns="false"
-                           data-show-refresh="false"
+                           data-show-columns="true"
+                           data-show-refresh="true"
                            data-trim-on-search="false"
                            data-escape="true"
                            data-responsive="true"
@@ -368,9 +402,11 @@
                            data-pagination-successively-size="3"
                            data-table="items"
                            data-status-column="deleted_at"
-                           data-show-export="false"
+                           data-show-export="true"
                            data-export-options='{"fileName": "service-requests-list","ignoreColumn": ["operate"]}'
                            data-export-types='["pdf","json","xml","csv","txt","sql","doc","excel"]'
+                           data-icons="serviceRequestsTableIcons"
+                           data-icons-prefix="bi"
                            data-mobile-responsive="true"
                            data-query-params="queryParams">
                             <thead>
@@ -455,6 +491,11 @@
 
 @section('script')
 <script>
+    window.serviceRequestsTableIcons = {
+        refresh: 'bi-arrow-clockwise',
+        columns: 'bi-list-ul',
+        export: 'bi-download'
+    };
     function updateApprovalSuccess() { $('#editStatusModal').modal('hide'); }
     const CATEGORY_ID = @json($selectedCategoryId);
 

@@ -37,6 +37,7 @@ use App\Models\ItemImages;
 use App\Models\ItemOffer;
 use App\Models\Language;
 use App\Models\Notifications;
+use App\Models\NotificationDelivery;
 use App\Models\Package;
 use App\Models\ManualBank;
 use App\Models\ManualPaymentRequest;
@@ -152,6 +153,7 @@ trait UserSignupTrait
 {
     public function userSignup(Request $request) {
         try {
+            $shouldSendWelcome = false;
             \Log::info('ط£آ¢ط¢â€¢ط¢ع¾ط£ع©ط¢آ«ط£آ¢ط¢â€‌ط¢آ¬ط£ع©ط¢ع¾ط£آ¢ط¢â€‌ط¢إ“ط£ع©ط¢ع¾ط£ع©ط¢آ¸ط£ئ’ط¢آ©ط£ع©ط¢آ´ط£آ¢ط¢â€‌ط¢آ¬ط£آ¢ط¢â€“ط¢â€کط£آ¢ط¢â€¢ط¢ع¾ط£آ¢ط¢â€¢ط¢â€“ط£آ¢ط¢â€‌ط¢آ¼ط£â„¢ط¢â€™ط£آ¢ط¢â€¢ط¢ع¾ط£آ¢ط¢â€¢ط¢â€“ط£آ¢ط¢â€‌ط¢آ¬ط£آ¢ط¢â€¢ط¢â€“ط£آ¢ط¢â€¢ط¢ع¾ط£ع©ط¢ع¾ط£آ¢ط¢â€‌ط¢آ¬ط£ع©ط¢آ¯ط£آ¢ط¢â€¢ط¢ع¾ط£آ¢ط¢â€¢ط¢â€“ط£آ¢ط¢â€‌ط¢آ¬ط£ع©ط¢آ«ط£آ¢ط¢â€¢ط¢ع¾ط£ع©ط¢ع¾ط£آ¢ط¢â€‌ط¢آ¬ط£آ¢ط¢â€‌ط¢آ¤ط£آ¢ط¢â€¢ط¢ع¾ط£آ¢ط¢â€¢ط¢â€“ط£آ¢ط¢â€‌ط¢آ¬ط£آ¢ط¢â€¢ط¢â€“ط£آ¢ط¢â€¢ط¢ع¾ط£ع©ط¢ع¾ط£آ¢ط¢â€‌ط¢آ¬ط£ع©ط¢آ­ UserSignup Request:', [
                 'type' => $request->type,
                 'firebase_id' => $request->firebase_id,
@@ -473,10 +475,7 @@ trait UserSignupTrait
                     }
                     
                     $user = User::create($userData);
-                    DB::afterCommit(function () use ($user): void {
-                        SendWelcomeNotificationJob::dispatch($user->id)
-                            ->delay(now()->addMinute());
-                    });
+                    $shouldSendWelcome = true;
                     $walletCurrency = strtoupper((string) config('wallet.currency', config('app.currency', 'SAR')));
                     WalletAccount::firstOrCreate(
                         ['user_id' => $user->getKey()],
@@ -532,6 +531,18 @@ trait UserSignupTrait
                         'last_activity_at' => Carbon::now(),
                     ]
                 );
+            }
+
+            if ($shouldSendWelcome) {
+                $alreadySent = NotificationDelivery::query()
+                    ->where('user_id', $auth->id)
+                    ->where('type', 'account.welcome')
+                    ->exists();
+
+                if (!$alreadySent) {
+                    SendWelcomeNotificationJob::dispatch($auth->id)
+                        ->delay(now()->addMinute());
+                }
             }
 
             if (!empty($request->registration)) {
