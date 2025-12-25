@@ -10,57 +10,73 @@
         background-color: #ffffff;
         color: #212529;
     }
-    .service-requests-summary {
-        margin-bottom: 1.25rem;
+    .service-requests-panel {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 0.85rem;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        background-color: #ffffff;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
+    }
+    .metric-grid {
         display: grid;
         gap: 1rem;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin-bottom: 1.25rem;
     }
-    .summary-card {
+    .metric-card {
         border: 1px solid rgba(15, 23, 42, 0.08);
         border-radius: 0.75rem;
         padding: 0.85rem 1rem;
         background-color: #ffffff;
-        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+        position: relative;
+        overflow: hidden;
     }
-    .summary-card__label {
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--metric-accent, #6c757d);
+    }
+    .metric-card--primary { --metric-accent: #0d6efd; }
+    .metric-card--warning { --metric-accent: #f59e0b; }
+    .metric-card--neutral { --metric-accent: #6c757d; }
+    .metric-label {
         font-size: 0.85rem;
         font-weight: 600;
         color: #6c757d;
         margin-bottom: 0.35rem;
     }
-    .summary-card__value {
+    .metric-value {
         font-size: 1.05rem;
         font-weight: 700;
         color: #212529;
         word-break: break-word;
     }
-    .service-requests-filters {
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        border-radius: 0.75rem;
-        padding: 1rem;
-        margin-bottom: 1.25rem;
-        background-color: #ffffff;
+    .filter-bar {
+        border-top: 1px solid rgba(15, 23, 42, 0.08);
+        padding-top: 1rem;
     }
-    .service-requests-filters .form-label {
+    .filter-bar .form-label {
         font-weight: 600;
         color: #212529;
     }
-    .service-requests-filters .form-control,
-    .service-requests-filters .form-select {
+    .filter-bar .form-control,
+    .filter-bar .form-select {
         height: 44px;
         font-size: 0.95rem;
         border-radius: 0.6rem;
     }
-    .service-requests-filters .filter-actions {
+    .filter-actions {
         display: flex;
         gap: 0.5rem;
     }
-    .service-requests-table .card {
+    .service-requests-table {
         border-radius: 0.85rem;
         border: 1px solid rgba(15, 23, 42, 0.08);
-    }
-    .service-requests-table {
         margin-bottom: 4rem;
     }
     .service-requests-table .card-body {
@@ -85,11 +101,11 @@
     #table_list { width: 100%; }
 
     @media (max-width: 768px) {
-        .service-requests-summary {
-            gap: 0.75rem;
+        .service-requests-panel {
+            padding: 1rem;
         }
-        .service-requests-filters {
-            padding: 0.85rem;
+        .metric-grid {
+            gap: 0.75rem;
         }
     }
 </style>
@@ -113,48 +129,50 @@
             $reviewRequests = (int) ($stats['review'] ?? 0);
         @endphp
 
-        <div class="service-requests-summary">
-            <div class="summary-card">
-                <div class="summary-card__label">{{ __('services.labels.category') }}</div>
-                <div class="summary-card__value">
-                    @if($selectedCategory)
-                        {{ $selectedCategory->name }}
-                    @else
-                        {{ __('services.filters.all_categories') }}
-                    @endif
+        <div class="service-requests-panel">
+            <div class="metric-grid">
+                <div class="metric-card metric-card--neutral">
+                    <div class="metric-label">{{ __('services.labels.category') }}</div>
+                    <div class="metric-value">
+                        @if($selectedCategory)
+                            {{ $selectedCategory->name }}
+                        @else
+                            {{ __('services.filters.all_categories') }}
+                        @endif
+                    </div>
+                </div>
+                <div class="metric-card metric-card--primary">
+                    <div class="metric-label">{{ __('services.labels.total_requests') }}</div>
+                    <div class="metric-value">{{ number_format($totalRequests) }}</div>
+                </div>
+                <div class="metric-card metric-card--warning">
+                    <div class="metric-label">{{ __('services.labels.under_review') }}</div>
+                    <div class="metric-value">{{ number_format($reviewRequests) }}</div>
                 </div>
             </div>
-            <div class="summary-card">
-                <div class="summary-card__label">{{ __('services.labels.total_requests') }}</div>
-                <div class="summary-card__value">{{ number_format($totalRequests) }}</div>
-            </div>
-            <div class="summary-card">
-                <div class="summary-card__label">{{ __('services.labels.under_review') }}</div>
-                <div class="summary-card__value">{{ number_format($reviewRequests) }}</div>
-            </div>
-        </div>
 
-        <div class="service-requests-filters">
-            <div class="row g-3 align-items-end" id="filters">
-                <div class="col-sm-6 col-lg-3">
-                    <label for="filter" class="form-label">{{ __('services.labels.status') }}</label>
-                    <select class="form-select" id="filter">
-                        <option value="">{{ __('services.filters.all') }}</option>
-                        <option value="review">{{ __('services.labels.under_review') }}</option>
-                        <option value="approved">{{ __('services.labels.approved') }}</option>
-                        <option value="rejected">{{ __('services.labels.rejected') }}</option>
-                        <option value="sold out">{{ __('services.labels.sold_out') }}</option>
-                    </select>
-                </div>
-                <div class="col-sm-6 col-lg-5">
-                    <label for="request_number" class="form-label">{{ __('services.labels.search_by_transaction_number') }}</label>
-                    <input type="text" class="form-control" id="request_number" placeholder="{{ __('services.placeholders.transaction_number') }}" autocomplete="off">
-                </div>
-                <div class="col-sm-6 col-lg-4">
-                    <label class="form-label d-none d-lg-block">&nbsp;</label>
-                    <div class="filter-actions">
-                        <button class="btn btn-primary" type="button" id="requestNumberApply">{{ __('services.buttons.search') }}</button>
-                        <button class="btn btn-outline-secondary" type="button" id="requestNumberReset">{{ __('services.buttons.reset') }}</button>
+            <div class="filter-bar">
+                <div class="row g-3 align-items-end" id="filters">
+                    <div class="col-sm-6 col-lg-3">
+                        <label for="filter" class="form-label">{{ __('services.labels.status') }}</label>
+                        <select class="form-select" id="filter">
+                            <option value="">{{ __('services.filters.all') }}</option>
+                            <option value="review">{{ __('services.labels.under_review') }}</option>
+                            <option value="approved">{{ __('services.labels.approved') }}</option>
+                            <option value="rejected">{{ __('services.labels.rejected') }}</option>
+                            <option value="sold out">{{ __('services.labels.sold_out') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 col-lg-5">
+                        <label for="request_number" class="form-label">{{ __('services.labels.search_by_transaction_number') }}</label>
+                        <input type="text" class="form-control" id="request_number" placeholder="{{ __('services.placeholders.transaction_number') }}" autocomplete="off">
+                    </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <label class="form-label d-none d-lg-block">&nbsp;</label>
+                        <div class="filter-actions">
+                            <button class="btn btn-primary" type="button" id="requestNumberApply">{{ __('services.buttons.search') }}</button>
+                            <button class="btn btn-outline-secondary" type="button" id="requestNumberReset">{{ __('services.buttons.reset') }}</button>
+                        </div>
                     </div>
                 </div>
             </div>
