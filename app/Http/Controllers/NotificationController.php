@@ -194,7 +194,8 @@ class NotificationController extends Controller {
                         'send_to' => $request->send_to,
                         'category' => $notification->category ?? 'general',
                         'meta' => $notification->meta ?? [],
-                    ]
+                    ],
+                    $notification
                 );
             } else {
                 \Log::warning('NotificationController: No recipients found for broadcast');
@@ -309,19 +310,25 @@ class NotificationController extends Controller {
         return $query->pluck('id')->map(fn ($id) => (int) $id)->all();
     }
 
-    private function dispatchBroadcastNotifications(array $userIds, string $title, string $body, array $data): void
+    private function dispatchBroadcastNotifications(
+        array $userIds,
+        string $title,
+        string $body,
+        array $data,
+        ?Notifications $notification = null
+    ): void
     {
         $dispatcher = app(NotificationDispatchService::class);
         $deeplink = (string) ($data['deeplink'] ?? 'marib://notifications');
         $intentData = $data;
         $intentData['category'] = $data['category'] ?? 'general';
         $intentData['source'] = 'manual-broadcast';
-        $metaPayload = $notification->meta ?? [];
-        if (! empty($metaPayload['payment_request'])) {
+        $metaPayload = is_array($notification?->meta)
+            ? $notification->meta
+            : (is_array($data['meta'] ?? null) ? $data['meta'] : []);
+        if (!empty($metaPayload['payment_request'])) {
             $intentData['payment_request'] = $metaPayload['payment_request'];
         }
-
-        $metaPayload = $notification->meta ?? [];
         foreach (array_chunk($userIds, 500) as $chunk) {
             foreach ($chunk as $userId) {
                 $intent = new NotificationIntent(
