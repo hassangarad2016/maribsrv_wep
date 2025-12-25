@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\NotificationFrequency;
 use App\Models\MetalRate;
 use App\Models\MetalRateChangeLog;
+use App\Models\User;
 use App\Models\UserPreference;
 use App\Notifications\MetalRateCreatedNotification;
 use App\Notifications\MetalRateUpdatedNotification;
@@ -33,9 +34,9 @@ class MetalWatchlistNotificationService
             return;
         }
 
-        $preferences = $this->resolveWatchPreferences($metalId);
+        $recipients = $this->resolveBroadcastRecipients();
 
-        if ($preferences->isEmpty()) {
+        if ($recipients->isEmpty()) {
             return;
         }
 
@@ -51,16 +52,7 @@ class MetalWatchlistNotificationService
             return;
         }
 
-        $watchers = $preferences
-            ->pluck('user')
-            ->filter()
-            ->values();
-
-        if ($watchers->isEmpty()) {
-            return;
-        }
-
-        Notification::send($watchers, new MetalRateCreatedNotification(
+        Notification::send($recipients, new MetalRateCreatedNotification(
             metalId: $metal->getKey(),
             metalName: $metal->display_name,
             governorateId: $defaultQuote['governorate_id'],
@@ -88,9 +80,9 @@ class MetalWatchlistNotificationService
             return;
         }
 
-        $preferences = $this->resolveWatchPreferences($metalId);
+        $recipients = $this->resolveBroadcastRecipients();
 
-        if ($preferences->isEmpty()) {
+        if ($recipients->isEmpty()) {
             return;
         }
 
@@ -108,52 +100,31 @@ class MetalWatchlistNotificationService
 
         $changeSignals = $this->resolveChangeSignals($quoteCollection, $metalId);
 
-        $preferences->each(function (UserPreference $preference) use ($metal, $defaultQuote, $metalId, $changeSignals): void {
-            $user = $preference->user;
+        $signal = $changeSignals[$defaultQuote['governorate_id']] ?? null;
+        $notification = $signal
+            ? new MetalRateUpdatedNotification(
+                metalId: $metal->getKey(),
+                metalName: $metal->display_name,
+                governorateId: $defaultQuote['governorate_id'],
+                governorateName: $defaultQuote['governorate_name'],
+                sellPrice: $defaultQuote['sell_price'],
+                buyPrice: $defaultQuote['buy_price'],
+                changePercent: $signal['percent'],
+                changeDirection: $signal['direction'],
+                notificationType: 'metal_rate_spike',
+                titleKey: 'notifications.metal.spike.title',
+                bodyKey: 'notifications.metal.spike.body'
+            )
+            : new MetalRateUpdatedNotification(
+                metalId: $metal->getKey(),
+                metalName: $metal->display_name,
+                governorateId: $defaultQuote['governorate_id'],
+                governorateName: $defaultQuote['governorate_name'],
+                sellPrice: $defaultQuote['sell_price'],
+                buyPrice: $defaultQuote['buy_price']
+            );
 
-            if (!$user) {
-                return;
-            }
-
-            $frequency = NotificationFrequency::tryFrom($preference->notification_frequency)
-                ?? NotificationFrequency::DAILY;
-
-            if ($frequency === NotificationFrequency::NEVER) {
-                return;
-            }
-
-            if (!$this->frequencyAllows($frequency, $user->getKey(), $metalId)) {
-                return;
-            }
-
-            $signal = $changeSignals[$defaultQuote['governorate_id']] ?? null;
-            $notification = $signal
-                ? new MetalRateUpdatedNotification(
-                    metalId: $metal->getKey(),
-                    metalName: $metal->display_name,
-                    governorateId: $defaultQuote['governorate_id'],
-                    governorateName: $defaultQuote['governorate_name'],
-                    sellPrice: $defaultQuote['sell_price'],
-                    buyPrice: $defaultQuote['buy_price'],
-                    changePercent: $signal['percent'],
-                    changeDirection: $signal['direction'],
-                    notificationType: 'metal_rate_spike',
-                    titleKey: 'notifications.metal.spike.title',
-                    bodyKey: 'notifications.metal.spike.body'
-                )
-                : new MetalRateUpdatedNotification(
-                    metalId: $metal->getKey(),
-                    metalName: $metal->display_name,
-                    governorateId: $defaultQuote['governorate_id'],
-                    governorateName: $defaultQuote['governorate_name'],
-                    sellPrice: $defaultQuote['sell_price'],
-                    buyPrice: $defaultQuote['buy_price']
-                );
-
-            Notification::send($user, $notification);
-
-            $this->rememberNotification($frequency, $user->getKey(), $metalId);
-        });
+        Notification::send($recipients, $notification);
     }
 
     /**
@@ -282,6 +253,22 @@ class MetalWatchlistNotificationService
     private function makeThrottleKey(int $userId, int $metalId): string
     {
         return sprintf('metal-watchlist:%d:%d', $userId, $metalId);
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    private function resolveBroadcastRecipients(): Collection
+    {
+        return User::query()
+            ->where('notification', 1)
+            ->whereHas('fcm_tokens', static function ($query): void {
+                $query->whereNotNull('fcm_token')->where('fcm_token', '!=', '');
+            })
+            ->with(['fcm_tokens' => static function ($query): void {
+                $query->select('id', 'user_id', 'fcm_token');
+            }])
+            ->get();
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Enums\NotificationFrequency;
 use App\Models\CurrencyRate;
 use App\Models\CurrencyRateChangeLog;
 use App\Models\CurrencyRateQuote;
+use App\Models\User;
 use App\Notifications\CurrencyRateUpdatedNotification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -26,10 +27,9 @@ class CurrencyWatchlistNotificationService
             return;
         }
 
-        $preferences = $this->resolveWatchPreferences($currencyId);
+        $recipients = $this->resolveBroadcastRecipients();
 
-
-        if ($preferences->isEmpty()) {
+        if ($recipients->isEmpty()) {
             return;
         }
 
@@ -49,17 +49,7 @@ class CurrencyWatchlistNotificationService
         );
 
 
-        $watchers = $preferences
-            ->pluck('user')
-            ->filter()
-            ->values();
-
-        if ($watchers->isEmpty()) {
-            return;
-        }
-
-
-        Notification::send($watchers, $notification);
+        Notification::send($recipients, $notification);
     }
 
 
@@ -85,9 +75,9 @@ class CurrencyWatchlistNotificationService
             return;
         }
 
-        $preferences = $this->resolveWatchPreferences($currencyId);
+        $recipients = $this->resolveBroadcastRecipients();
 
-        if ($preferences->isEmpty()) {
+        if ($recipients->isEmpty()) {
             return;
         }
 
@@ -117,74 +107,37 @@ class CurrencyWatchlistNotificationService
 
         $changeSignals = $this->resolveChangeSignals($quoteCollection, $currencyId);
 
-        $quotesByCode = $quoteCollection
-            ->filter(static fn (array $quote): bool => !empty($quote['governorate_code']))
-            ->keyBy(static fn (array $quote): string => $quote['governorate_code']);
-
         $defaultQuote = $quoteCollection->firstWhere('is_default', true) ?? $quoteCollection->first();
 
-        $preferences->each(function (UserPreference $preference) use ($currency, $quotesByCode, $defaultQuote, $currencyId, $changeSignals): void {
-            $user = $preference->user;
+        if (!$defaultQuote) {
+            return;
+        }
 
-            if (!$user) {
-                return;
-            }
+        $signal = $changeSignals[$defaultQuote['governorate_id']] ?? null;
+        $notification = $signal
+            ? new CurrencyRateUpdatedNotification(
+                currencyId: $currency->getKey(),
+                currencyName: $currency->currency_name,
+                governorateId: $defaultQuote['governorate_id'],
+                governorateName: $defaultQuote['governorate_name'],
+                sellPrice: $defaultQuote['sell_price'],
+                buyPrice: $defaultQuote['buy_price'],
+                changePercent: $signal['percent'],
+                changeDirection: $signal['direction'],
+                notificationType: 'currency_rate_spike',
+                titleKey: 'notifications.currency.spike.title',
+                bodyKey: 'notifications.currency.spike.body'
+            )
+            : new CurrencyRateUpdatedNotification(
+                currencyId: $currency->getKey(),
+                currencyName: $currency->currency_name,
+                governorateId: $defaultQuote['governorate_id'],
+                governorateName: $defaultQuote['governorate_name'],
+                sellPrice: $defaultQuote['sell_price'],
+                buyPrice: $defaultQuote['buy_price']
+            );
 
-            $frequency = NotificationFrequency::tryFrom($preference->notification_frequency)
-                ?? NotificationFrequency::DAILY;
-
-            if ($frequency === NotificationFrequency::NEVER) {
-                return;
-            }
-
-            if (!$this->frequencyAllows($frequency, $user->getKey(), $currencyId)) {
-                return;
-            }
-
-            $regions = $preference->currency_notification_regions ?? [];
-            $selectedQuote = null;
-
-            $preferredCode = $regions[$currencyId] ?? null;
-            if (is_string($preferredCode) && $preferredCode !== '') {
-                $selectedQuote = $quotesByCode->get(Str::upper($preferredCode));
-            }
-
-            if (!$selectedQuote) {
-                $selectedQuote = $defaultQuote;
-            }
-
-            if (!$selectedQuote) {
-                return;
-            }
-
-            $signal = $changeSignals[$selectedQuote['governorate_id']] ?? null;
-            $notification = $signal
-                ? new CurrencyRateUpdatedNotification(
-                    currencyId: $currency->getKey(),
-                    currencyName: $currency->currency_name,
-                    governorateId: $selectedQuote['governorate_id'],
-                    governorateName: $selectedQuote['governorate_name'],
-                    sellPrice: $selectedQuote['sell_price'],
-                    buyPrice: $selectedQuote['buy_price'],
-                    changePercent: $signal['percent'],
-                    changeDirection: $signal['direction'],
-                    notificationType: 'currency_rate_spike',
-                    titleKey: 'notifications.currency.spike.title',
-                    bodyKey: 'notifications.currency.spike.body'
-                )
-                : new CurrencyRateUpdatedNotification(
-                    currencyId: $currency->getKey(),
-                    currencyName: $currency->currency_name,
-                    governorateId: $selectedQuote['governorate_id'],
-                    governorateName: $selectedQuote['governorate_name'],
-                    sellPrice: $selectedQuote['sell_price'],
-                    buyPrice: $selectedQuote['buy_price']
-                );
-
-            Notification::send($user, $notification);
-
-            $this->rememberNotification($frequency, $user->getKey(), $currencyId);
-        });
+        Notification::send($recipients, $notification);
     }
 
     /**
@@ -235,6 +188,22 @@ class CurrencyWatchlistNotificationService
     private function makeThrottleKey(int $userId, int $currencyId): string
     {
         return sprintf('currency-watchlist:%d:%d', $userId, $currencyId);
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    private function resolveBroadcastRecipients(): Collection
+    {
+        return User::query()
+            ->where('notification', 1)
+            ->whereHas('fcm_tokens', static function ($query): void {
+                $query->whereNotNull('fcm_token')->where('fcm_token', '!=', '');
+            })
+            ->with(['fcm_tokens' => static function ($query): void {
+                $query->select('id', 'user_id', 'fcm_token');
+            }])
+            ->get();
     }
 
     /**
