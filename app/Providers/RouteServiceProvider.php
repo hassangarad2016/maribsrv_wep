@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Services\ServiceAuthorizationService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -25,6 +26,26 @@ class RouteServiceProvider extends ServiceProvider {
     public static function resolveHomePath(?User $user): string {
         if ($user && $user->account_type === User::ACCOUNT_TYPE_SELLER) {
             return route('merchant.dashboard');
+        }
+
+        if ($user) {
+            $hasServiceAccess = $user->canAny([
+                'service-list',
+                'service-requests-list',
+                'service-reviews-list',
+            ]);
+
+            if ($hasServiceAccess) {
+                $serviceAuthorization = app(ServiceAuthorizationService::class);
+                if (! $serviceAuthorization->userHasFullAccess($user)) {
+                    $categoryIds = $serviceAuthorization->getVisibleCategoryIds($user);
+                    if (! empty($categoryIds)) {
+                        return route('services.category', $categoryIds[0]);
+                    }
+
+                    return route('services.index');
+                }
+            }
         }
 
         return static::HOME;
