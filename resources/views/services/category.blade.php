@@ -6,6 +6,238 @@
 
 @section('css')
     <style>
+        .service-category-page {
+            background: linear-gradient(180deg, rgba(13, 110, 253, 0.07), rgba(13, 110, 253, 0.02));
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 1.25rem;
+            color: #212529;
+            padding: 1.25rem;
+        }
+        .service-requests-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .service-requests-hero {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .service-requests-title {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .service-requests-subtitle {
+            margin: 0.35rem 0 0;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .service-category-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .service-requests-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+        }
+        .metric-card {
+            background: #ffffff;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 0.9rem;
+            padding: 0.85rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+            min-height: 76px;
+        }
+        .metric-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #0d6efd;
+            background: rgba(13, 110, 253, 0.12);
+        }
+        .metric-card.category .metric-icon {
+            color: #198754;
+            background: rgba(25, 135, 84, 0.12);
+        }
+        .metric-card.active .metric-icon {
+            color: #0f766e;
+            background: rgba(13, 148, 136, 0.15);
+        }
+        .metric-card.paid .metric-icon {
+            color: #b58100;
+            background: rgba(255, 193, 7, 0.18);
+        }
+        .metric-label {
+            font-size: 0.78rem;
+            color: #6c757d;
+            font-weight: 600;
+        }
+        .metric-value {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #212529;
+        }
+        .metric-value.text-truncate {
+            max-width: 180px;
+        }
+        .service-requests-filters {
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 1rem;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+        }
+        .service-requests-filters .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            padding: 1.1rem;
+        }
+        .filters-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+        .filters-title {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .filters-hint {
+            margin: 0.2rem 0 0;
+            font-size: 0.82rem;
+            color: #6c757d;
+        }
+        .service-category-tabs {
+            border-bottom: 0;
+            gap: 0.5rem;
+        }
+        .service-category-tabs .nav-link {
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            background: #ffffff;
+            color: #495057;
+            border-radius: 0.75rem;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .service-category-tabs .nav-link:hover {
+            border-color: #0d6efd;
+            color: #0d6efd;
+        }
+        .service-category-tabs .nav-link.active {
+            background: #0d6efd;
+            color: #ffffff;
+            border-color: #0d6efd;
+            box-shadow: 0 10px 18px rgba(13, 110, 253, 0.2);
+        }
+        .service-category-tabs .nav-link.active:hover {
+            color: #ffffff;
+        }
+        .service-requests-table {
+            border-radius: 1rem;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            margin-bottom: 0;
+            overflow: hidden;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+        }
+        .service-requests-table .card-header {
+            background: #f8f9fb;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+            padding: 0.9rem 1.1rem;
+        }
+        .service-requests-table .card-body {
+            padding: 1.15rem;
+        }
+        .table-title {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .table-hint {
+            margin: 0.2rem 0 0;
+            font-size: 0.82rem;
+            color: #6c757d;
+        }
+        .service-requests-table .table {
+            margin-bottom: 0;
+        }
+        .service-requests-table .table thead th {
+            background: #f8f9fa;
+            color: #212529;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+            padding: 0.85rem 1rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .service-requests-table .table tbody td {
+            padding: 0.85rem 1rem;
+        }
+        .service-requests-table .table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        .service-requests-table .table tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.04);
+        }
+        .service-requests-table .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: rgba(15, 23, 42, 0.02);
+        }
+        .service-requests-table .fixed-table-toolbar {
+            margin-bottom: 0.75rem;
+        }
+        .service-requests-table .fixed-table-toolbar .columns {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.15rem;
+            background: #4b5563;
+            border-radius: 0.75rem;
+            padding: 0.25rem;
+            box-shadow: 0 10px 18px rgba(15, 23, 42, 0.18);
+        }
+        .service-requests-table .fixed-table-toolbar .columns .btn,
+        .service-requests-table .fixed-table-toolbar .columns .btn-group > .btn {
+            background: transparent;
+            border: 0;
+            color: #ffffff;
+            width: 36px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+        }
+        .service-requests-table .fixed-table-toolbar .columns .btn:hover,
+        .service-requests-table .fixed-table-toolbar .columns .btn-group > .btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+        .service-requests-table .fixed-table-toolbar .columns .dropdown-toggle::after {
+            display: none;
+        }
+        .service-requests-table .fixed-table-toolbar .columns .btn i {
+            font-size: 1rem;
+        }
+        .service-card {
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        .service-card .card-img-top {
+            border-radius: 0;
+        }
         .service-card .line-clamp-3 {
             display: -webkit-box;
             -webkit-box-orient: vertical;
@@ -16,17 +248,28 @@
             word-break: break-word;
         }
 
-
-        .nav-tabs .nav-link {
-            font-weight: 600;
-        }
-
-        .nav-tabs .nav-link .badge {
-            font-weight: 500;
-        }
-
         .tab-pane {
             min-height: 200px;
+        }
+
+        @media (min-width: 992px) {
+            .service-requests-hero {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .service-requests-metrics {
+                max-width: 760px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .service-category-page {
+                padding: 1rem;
+            }
+            .metric-value.text-truncate {
+                max-width: 140px;
+            }
         }
     </style>
 @endsection
@@ -42,20 +285,8 @@
         <div class="row">
             <div class="col-12 col-md-6 order-md-1 order-last">
                 <h4>@yield('title')</h4>
-                <p class="text-muted mb-0">{{ __('services.messages.viewing_category', ['category' => $category->name]) }}</p>
             </div>
-            <div class="col-12 col-md-6 order-md-2 order-first">
-                <div class="float-end d-flex gap-2">
-                    <a class="btn btn-outline-secondary" href="{{ route('services.index') }}">
-                        <i class="bi bi-arrow-left"></i> {{ __('services.buttons.back_to_categories') }}
-                    </a>
-                    @can('service-create')
-                        <a class="btn btn-primary" href="{{ route('services.create', ['category_id' => $category->id]) }}">
-                            <i class="bi bi-plus-circle"></i> {{ __('services.buttons.create_service') }}
-                        </a>
-                    @endcan
-                </div>
-            </div>
+            <div class="col-12 col-md-6 order-md-2 order-first"></div>
         </div>
     </div>
 @endsection
@@ -104,198 +335,277 @@
 
 
 @section('content')
-    <section class="section">
-        <div class="card">
-            <div class="card-body">
+    <section class="section service-category-page">
+        @php
+            $servicesCollection = collect($initialServices ?? []);
+            $totalServices = $servicesCollection->count();
+            $activeServices = $servicesCollection->where('status', true)->count();
+            $paidServices = $servicesCollection->where('is_paid', true)->count();
+        @endphp
+        <div class="service-requests-shell">
+            <div class="service-requests-hero">
+                <div>
+                    <h5 class="service-requests-title">@yield('title')</h5>
+                    <p class="service-requests-subtitle">{{ __('services.messages.viewing_category', ['category' => $category->name]) }}</p>
+                </div>
+                <div class="service-category-actions">
+                    <a class="btn btn-outline-secondary" href="{{ route('services.index') }}">
+                        <i class="bi bi-arrow-left"></i> {{ __('services.buttons.back_to_categories') }}
+                    </a>
+                    @can('service-create')
+                        <a class="btn btn-primary" href="{{ route('services.create', ['category_id' => $category->id]) }}">
+                            <i class="bi bi-plus-circle"></i> {{ __('services.buttons.create_service') }}
+                        </a>
+                    @endcan
+                </div>
+            </div>
 
+            <div class="service-requests-metrics">
+                <div class="metric-card category">
+                    <span class="metric-icon"><i class="bi bi-folder2-open"></i></span>
+                    <div>
+                        <div class="metric-label">{{ __('services.labels.category') }}</div>
+                        <div class="metric-value text-truncate" title="{{ $category->name }}">{{ $category->name }}</div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-icon"><i class="bi bi-grid-3x3-gap"></i></span>
+                    <div>
+                        <div class="metric-label">{{ __('services.labels.total_services') }}</div>
+                        <div class="metric-value">{{ number_format($totalServices) }}</div>
+                    </div>
+                </div>
+                <div class="metric-card active">
+                    <span class="metric-icon"><i class="bi bi-lightning-charge"></i></span>
+                    <div>
+                        <div class="metric-label">{{ __('services.labels.active_services') }}</div>
+                        <div class="metric-value">{{ number_format($activeServices) }}</div>
+                    </div>
+                </div>
+                <div class="metric-card paid">
+                    <span class="metric-icon"><i class="bi bi-credit-card-2-front"></i></span>
+                    <div>
+                        <div class="metric-label">{{ __('services.labels.paid_services') }}</div>
+                        <div class="metric-value">{{ number_format($paidServices) }}</div>
+                    </div>
+                </div>
+            </div>
 
-                <ul class="nav nav-tabs" id="categoryTabs" role="tablist">
+            <ul class="nav nav-tabs service-category-tabs" id="categoryTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="services-tab" data-bs-toggle="tab" data-bs-target="#services-pane"
+                            type="button" role="tab" aria-controls="services-pane" aria-selected="true">
+                        <i class="bi bi-grid"></i>
+                        <span class="ms-1">{{ __('services.tabs.services') }}</span>
+                    </button>
+                </li>
+
+                @if ($canAccessReviews)
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="services-tab" data-bs-toggle="tab" data-bs-target="#services-pane"
-                                type="button" role="tab" aria-controls="services-pane" aria-selected="true">
-                            <i class="bi bi-grid"></i>
-                            <span class="ms-1">{{ __('services.tabs.services') }}</span>
+                        <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews-pane"
+                                type="button" role="tab" aria-controls="reviews-pane" aria-selected="false">
+                            <i class="bi bi-chat-quote"></i>
+                            <span class="ms-1">{{ __('services.tabs.reviews_reports') }}</span>
                         </button>
                     </li>
-
-                    @if ($canAccessReviews)
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews-pane"
-                                    type="button" role="tab" aria-controls="reviews-pane" aria-selected="false">
-                                <i class="bi bi-chat-quote"></i>
-                                <span class="ms-1">{{ __('services.tabs.reviews_reports') }}</span>
-                            </button>
-                        </li>
-                    @endif
+                @endif
 
 
-                    @if ($canAccessRequestsIndex)
-                        <li class="nav-item" role="presentation">
-                            <a class="nav-link" href="{{ route('service.requests.index', ['category_id' => $category->id]) }}">
-                                <i class="bi bi-list-check"></i>
-                                <span class="ms-1">{{ __('services.tabs.requests') }}</span>
-                            </a>
-                        </li>
-                    @endif
+                @if ($canAccessRequestsIndex)
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" href="{{ route('service.requests.index', ['category_id' => $category->id]) }}">
+                            <i class="bi bi-list-check"></i>
+                            <span class="ms-1">{{ __('services.tabs.requests') }}</span>
+                        </a>
+                    </li>
+                @endif
 
-                </ul>
+            </ul>
 
-                <div class="tab-content pt-4" id="categoryTabsContent">
-                    <div class="tab-pane fade show active" id="services-pane" role="tabpanel" aria-labelledby="services-tab">
-                        <form id="servicesFilterForm" class="row g-3 mb-4">
-                            <div class="col-12 col-sm-6 col-lg-3">
-                                <label class="form-label">{{ __('services.labels.category') }}</label>
-                                <div class="form-control-plaintext fw-semibold">{{ $category->name }}</div>
-                                <input type="hidden" name="category_id" value="{{ $category->id }}">
+            <div class="tab-content pt-4" id="categoryTabsContent">
+                <div class="tab-pane fade show active" id="services-pane" role="tabpanel" aria-labelledby="services-tab">
+                    <div class="card service-requests-filters">
+                        <div class="card-body">
+                            <div class="filters-header">
+                                <div>
+                                    <h6 class="filters-title">{{ __('services.buttons.filter') }}</h6>
+                                </div>
                             </div>
+                            <form id="servicesFilterForm" class="row g-3 align-items-end">
+                                <div class="col-12 col-sm-6 col-lg-3">
+                                    <label class="form-label">{{ __('services.labels.category') }}</label>
+                                    <div class="form-control-plaintext fw-semibold">{{ $category->name }}</div>
+                                    <input type="hidden" name="category_id" value="{{ $category->id }}">
+                                </div>
 
 
 
 
 
-                            <div class="col-12 col-sm-6 col-lg-2">
-                                <label for="status_filter" class="form-label">{{ __('services.labels.status') }}</label>
-                                <select id="status_filter" name="status" class="form-select">
-                                    <option value="">{{ __('services.filters.all_status') }}</option>
-                                    <option value="1">{{ __('services.labels.active') }}</option>
-                                    <option value="0">{{ __('services.labels.inactive') }}</option>
-                                </select>
-                            </div>
+                                <div class="col-12 col-sm-6 col-lg-2">
+                                    <label for="status_filter" class="form-label">{{ __('services.labels.status') }}</label>
+                                    <select id="status_filter" name="status" class="form-select">
+                                        <option value="">{{ __('services.filters.all_status') }}</option>
+                                        <option value="1">{{ __('services.labels.active') }}</option>
+                                        <option value="0">{{ __('services.labels.inactive') }}</option>
+                                    </select>
+                                </div>
 
-                            <div class="col-12 col-sm-6 col-lg-2">
-                                <label for="is_main_filter" class="form-label">{{ __('services.labels.is_main') }}</label>
-                                <select id="is_main_filter" name="is_main" class="form-select">
-                                    <option value="">{{ __('services.filters.all') }}</option>
-                                    <option value="1">{{ __('services.labels.yes') }}</option>
-                                    <option value="0">{{ __('services.labels.no') }}</option>
-                                </select>
-                            </div>
-
-
-
-
-                            <div class="col-12 col-sm-6 col-lg-2">
-                                <label for="is_paid_filter" class="form-label">{{ __('services.labels.is_paid') }}</label>
-                                <select id="is_paid_filter" name="is_paid" class="form-select">
-                                    <option value="">{{ __('services.filters.all') }}</option>
-                                    <option value="1">{{ __('services.labels.yes') }}</option>
-                                    <option value="0">{{ __('services.labels.no') }}</option>
-                                </select>
-                            </div>
-
-
-
-                            <div class="col-12 col-sm-6 col-lg-2">
-                                <label for="has_cf_filter" class="form-label">{{ __('services.labels.has_custom_fields') }}</label>
-                                <select id="has_cf_filter" name="has_custom_fields" class="form-select">
-                                    <option value="">{{ __('services.filters.all') }}</option>
-                                    <option value="1">{{ __('services.labels.yes') }}</option>
-                                    <option value="0">{{ __('services.labels.no') }}</option>
-                                </select>
-                            </div>
+                                <div class="col-12 col-sm-6 col-lg-2">
+                                    <label for="is_main_filter" class="form-label">{{ __('services.labels.is_main') }}</label>
+                                    <select id="is_main_filter" name="is_main" class="form-select">
+                                        <option value="">{{ __('services.filters.all') }}</option>
+                                        <option value="1">{{ __('services.labels.yes') }}</option>
+                                        <option value="0">{{ __('services.labels.no') }}</option>
+                                    </select>
+                                </div>
 
 
 
 
-                            <div class="col-12 col-sm-6 col-lg-2">
-                                <label for="direct_user_filter" class="form-label">{{ __('services.labels.direct_to_user') }}</label>
-                                <select id="direct_user_filter" name="direct_to_user" class="form-select">
-                                    <option value="">{{ __('services.filters.all') }}</option>
-                                    <option value="1">{{ __('services.labels.yes') }}</option>
-                                    <option value="0">{{ __('services.labels.no') }}</option>
-                                </select>
-                            </div>
+                                <div class="col-12 col-sm-6 col-lg-2">
+                                    <label for="is_paid_filter" class="form-label">{{ __('services.labels.is_paid') }}</label>
+                                    <select id="is_paid_filter" name="is_paid" class="form-select">
+                                        <option value="">{{ __('services.filters.all') }}</option>
+                                        <option value="1">{{ __('services.labels.yes') }}</option>
+                                        <option value="0">{{ __('services.labels.no') }}</option>
+                                    </select>
+                                </div>
+
+
+
+                                <div class="col-12 col-sm-6 col-lg-2">
+                                    <label for="has_cf_filter" class="form-label">{{ __('services.labels.has_custom_fields') }}</label>
+                                    <select id="has_cf_filter" name="has_custom_fields" class="form-select">
+                                        <option value="">{{ __('services.filters.all') }}</option>
+                                        <option value="1">{{ __('services.labels.yes') }}</option>
+                                        <option value="0">{{ __('services.labels.no') }}</option>
+                                    </select>
+                                </div>
 
 
 
 
-                            <div class="col-12 col-lg-3 ms-auto">
-                                <label class="form-label d-none d-lg-block">&nbsp;</label>
-                                <button type="submit" class="btn btn-secondary w-100">
-                                    <i class="bi bi-funnel"></i> {{ __('services.buttons.filter') }}
-                                </button>
-                            </div>
-                        </form>
+                                <div class="col-12 col-sm-6 col-lg-2">
+                                    <label for="direct_user_filter" class="form-label">{{ __('services.labels.direct_to_user') }}</label>
+                                    <select id="direct_user_filter" name="direct_to_user" class="form-select">
+                                        <option value="">{{ __('services.filters.all') }}</option>
+                                        <option value="1">{{ __('services.labels.yes') }}</option>
+                                        <option value="0">{{ __('services.labels.no') }}</option>
+                                    </select>
+                                </div>
 
 
 
 
-                        <div id="servicesFeedback" class="alert alert-danger d-none" role="alert"></div>
-
-                        <div id="servicesEmptyState" class="text-center text-muted py-5 {{ empty($initialServices) ? '' : 'd-none' }}">
-                            <i class="bi bi-grid-3x3-gap display-6 d-block mb-3"></i>
-                            <p class="mb-2">{{ __('services.messages.no_data_found') }}</p>
-                            <p class="mb-0 small">{{ __('services.messages.adjust_filters') }}</p>
+                                <div class="col-12 col-lg-3 ms-auto">
+                                    <label class="form-label d-none d-lg-block">&nbsp;</label>
+                                    <button type="submit" class="btn btn-secondary w-100">
+                                        <i class="bi bi-funnel"></i> {{ __('services.buttons.filter') }}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-
-                        <div id="servicesCardsContainer" class="row g-4"></div>
-
-
-
                     </div>
 
-
-
-                    @if ($canAccessReviews)
-                    <div class="tab-pane fade" id="reviews-pane" role="tabpanel" aria-labelledby="reviews-tab">
-                        <div id="reviewsFilters" class="row g-3 align-items-end mb-3">
-                            <div class="col-12 col-md-4 col-lg-3">
-                                <label for="reviews_status_filter" class="form-label">{{ __('services.labels.status') }}</label>
-                                <select id="reviews_status_filter" class="form-select">
-                                    <option value="">{{ __('services.filters.all') }}</option>
-                                    <option value="pending">{{ __('services.labels.pending') }}</option>
-                                    <option value="approved">{{ __('services.labels.approved') }}</option>
-                                    <option value="rejected">{{ __('services.labels.rejected') }}</option>
-                                </select>
+                    <div class="card service-requests-table mt-3">
+                        <div class="card-header">
+                            <div>
+                                <h6 class="table-title">{{ __('services.tabs.services') }}</h6>
+                                <p class="table-hint">{{ __('services.messages.manage_review_category') }}</p>
                             </div>
                         </div>
+                        <div class="card-body">
+                            <div id="servicesFeedback" class="alert alert-danger d-none" role="alert"></div>
 
-                        <div class="table-responsive">
-                            <table
-                                class="table-borderless table-striped"
-                                aria-describedby="reviewsTableCaption"
-                                id="reviewsTable"
-                                data-toggle="table"
-                                data-url="{{ route('services.category.reviews', $category) }}"
-                                data-side-pagination="server"
-                                data-pagination="true"
-                                data-page-list="[5, 10, 20, 50, 100, 200]"
-                                data-search="true"
-                                data-show-columns="true"
-                                data-show-refresh="true"
-                                data-trim-on-search="false"
-                                data-escape="true"
-                                data-responsive="true"
-                                data-sort-name="id"
-                                data-sort-order="desc"
-                                data-pagination-successively-size="3"
-                                data-mobile-responsive="true"
-                                data-query-params="categoryReviewsQueryParams"
-                                data-toolbar="#reviewsFilters"
-                            >
-                                <thead class="thead-dark">
-                                <tr>
-                                    <th data-field="id" data-sortable="true">{{ __('services.labels.id') }}</th>
-                                    <th data-field="service.title" data-sortable="true" data-formatter="reviewServiceFormatter" data-escape="false">{{ __('services.labels.service') }}</th>
-                                    <th data-field="user.name" data-sortable="true" data-formatter="reviewUserFormatter" data-escape="false">{{ __('services.labels.user') }}</th>
-                                    <th data-field="rating" data-sortable="true" data-formatter="reviewRatingFormatter" data-escape="false">{{ __('services.labels.rating') }}</th>
-                                    <th data-field="status" data-sortable="true" data-formatter="reviewStatusFormatter" data-escape="false">{{ __('services.labels.status') }}</th>
-                                    <th data-field="review" data-formatter="reviewTextFormatter" data-escape="false">{{ __('services.labels.review_text') }}</th>
-                                    <th data-field="created_at" data-sortable="true">{{ __('services.labels.created_at') }}</th>
-                                </tr>
-                                </thead>
-                            </table>
+                            <div id="servicesEmptyState" class="text-center text-muted py-5 {{ empty($initialServices) ? '' : 'd-none' }}">
+                                <i class="bi bi-grid-3x3-gap display-6 d-block mb-3"></i>
+                                <p class="mb-2">{{ __('services.messages.no_data_found') }}</p>
+                                <p class="mb-0 small">{{ __('services.messages.adjust_filters') }}</p>
+                            </div>
+
+                            <div id="servicesCardsContainer" class="row g-4"></div>
                         </div>
-
-                        <div id="reviewsTableCaption" class="visually-hidden">{{ __('services.messages.service_reviews_caption') }}</div>
                     </div>
-                    @endif
                 </div>
 
 
 
+                @if ($canAccessReviews)
+                <div class="tab-pane fade" id="reviews-pane" role="tabpanel" aria-labelledby="reviews-tab">
+                    <div class="card service-requests-filters">
+                        <div class="card-body">
+                            <div class="filters-header">
+                                <div>
+                                    <h6 class="filters-title">{{ __('services.labels.status') }}</h6>
+                                </div>
+                            </div>
+                            <div id="reviewsFilters" class="row g-3 align-items-end">
+                                <div class="col-12 col-md-4 col-lg-3">
+                                    <label for="reviews_status_filter" class="form-label">{{ __('services.labels.status') }}</label>
+                                    <select id="reviews_status_filter" class="form-select">
+                                        <option value="">{{ __('services.filters.all') }}</option>
+                                        <option value="pending">{{ __('services.labels.pending') }}</option>
+                                        <option value="approved">{{ __('services.labels.approved') }}</option>
+                                        <option value="rejected">{{ __('services.labels.rejected') }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
+                    <div class="card service-requests-table mt-3">
+                        <div class="card-header">
+                            <div>
+                                <h6 class="table-title">{{ __('services.tabs.reviews_reports') }}</h6>
+                                <p class="table-hint">{{ __('services.messages.service_reviews_caption') }}</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table
+                                    class="table table-striped table-hover align-middle"
+                                    aria-describedby="reviewsTableCaption"
+                                    id="reviewsTable"
+                                    data-toggle="table"
+                                    data-url="{{ route('services.category.reviews', $category) }}"
+                                    data-side-pagination="server"
+                                    data-pagination="true"
+                                    data-page-list="[5, 10, 20, 50, 100, 200]"
+                                    data-search="true"
+                                    data-show-columns="true"
+                                    data-show-refresh="true"
+                                    data-trim-on-search="false"
+                                    data-escape="true"
+                                    data-responsive="true"
+                                    data-sort-name="id"
+                                    data-sort-order="desc"
+                                    data-pagination-successively-size="3"
+                                    data-mobile-responsive="true"
+                                    data-query-params="categoryReviewsQueryParams"
+                                    data-toolbar="#reviewsFilters"
+                                    data-icons="serviceReviewsTableIcons"
+                                    data-icons-prefix="bi"
+                                >
+                                    <thead>
+                                    <tr>
+                                        <th data-field="id" data-sortable="true">{{ __('services.labels.id') }}</th>
+                                        <th data-field="service.title" data-sortable="true" data-formatter="reviewServiceFormatter" data-escape="false">{{ __('services.labels.service') }}</th>
+                                        <th data-field="user.name" data-sortable="true" data-formatter="reviewUserFormatter" data-escape="false">{{ __('services.labels.user') }}</th>
+                                        <th data-field="rating" data-sortable="true" data-formatter="reviewRatingFormatter" data-escape="false">{{ __('services.labels.rating') }}</th>
+                                        <th data-field="status" data-sortable="true" data-formatter="reviewStatusFormatter" data-escape="false">{{ __('services.labels.status') }}</th>
+                                        <th data-field="review" data-formatter="reviewTextFormatter" data-escape="false">{{ __('services.labels.review_text') }}</th>
+                                        <th data-field="created_at" data-sortable="true">{{ __('services.labels.created_at') }}</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
 
+                            <div id="reviewsTableCaption" class="visually-hidden">{{ __('services.messages.service_reviews_caption') }}</div>
+                        </div>
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
     </section>
@@ -394,6 +704,10 @@
     const HAS_SERVICE_REQUESTS = @json($supportsServiceRequests);
     const INITIAL_SERVICES = @json($initialServices);
     const PERMISSIONS = @json($servicePermissions);
+    window.serviceReviewsTableIcons = {
+        refresh: 'bi-arrow-clockwise',
+        columns: 'bi-list-ul'
+    };
 
     const LABELS = {
         yes: "{{ __('services.labels.yes') }}",
