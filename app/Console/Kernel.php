@@ -29,6 +29,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\BackfillTransferDetailsCommand::class,
         \App\Console\Commands\SyncManualTransferDetailsCommand::class,
         \App\Console\Commands\SendWalletReminderNotifications::class,
+        \App\Console\Commands\SendSmartWalletNotifications::class,
 
     ];
     /**
@@ -54,6 +55,10 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('wallet:send-reminders')
             ->dailyAt('10:00')
+            ->withoutOverlapping();
+
+        $schedule->command('wallet:send-smart')
+            ->dailyAt('10:30')
             ->withoutOverlapping();
 
         $schedule->call(static function () {

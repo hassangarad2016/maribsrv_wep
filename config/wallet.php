@@ -81,4 +81,12 @@ return [
         ],
     ],
 
+    'notifications' => [
+        'low_balance_threshold' => (float) env('WALLET_LOW_BALANCE_THRESHOLD', 1000),
+        'low_balance_min_inactivity_days' => (int) env('WALLET_LOW_BALANCE_MIN_INACTIVITY_DAYS', 2),
+        'low_balance_cooldown_days' => (int) env('WALLET_LOW_BALANCE_COOLDOWN_DAYS', 7),
+        'inactive_balance_days' => (int) env('WALLET_INACTIVE_BALANCE_DAYS', 10),
+        'inactive_balance_cooldown_days' => (int) env('WALLET_INACTIVE_BALANCE_COOLDOWN_DAYS', 10),
+    ],
+
 ];

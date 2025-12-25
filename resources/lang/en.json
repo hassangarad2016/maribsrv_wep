@@ -472,6 +472,10 @@
     "wallet.reminder.body.stage_7": "The wallet keeps top-ups, payments, and transfers in one place. Try adding balance today.",
     "wallet.reminder.title.stage_14": "Your wallet benefits are waiting",
     "wallet.reminder.body.stage_14": "Keep a balance ready for purchases and transfers. Add funds when you need them and track every move.",
+    "wallet.smart.low_balance.title": "Your wallet balance is low",
+    "wallet.smart.low_balance.body": "Your current balance is :balance :currency. Top up now to complete purchases easily.",
+    "wallet.smart.inactive_balance.title": "Your wallet is ready to use",
+    "wallet.smart.inactive_balance.body": "You have :balance :currency and have not used the wallet for :days days. Open the wallet to get started.",
     "Manual payment approved": "Manual payment approved",
     "Manual payment rejected": "Manual payment rejected",
     "Reference #:ref - Amount: :amount": "Reference #:ref - Amount: :amount"
