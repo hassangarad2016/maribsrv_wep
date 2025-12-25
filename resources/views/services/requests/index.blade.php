@@ -324,7 +324,6 @@
                             <button type="button" class="status-tab" data-status="review">{{ __('services.labels.under_review') }}</button>
                             <button type="button" class="status-tab" data-status="approved">{{ __('services.labels.approved') }}</button>
                             <button type="button" class="status-tab" data-status="rejected">{{ __('services.labels.rejected') }}</button>
-                            <button type="button" class="status-tab" data-status="sold out">{{ __('services.labels.sold_out') }}</button>
                         </div>
                         <input type="hidden" id="status_filter" value="">
                         <div class="search-group">
