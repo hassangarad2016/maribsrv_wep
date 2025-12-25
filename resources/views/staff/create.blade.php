@@ -38,16 +38,18 @@
                                 </div>
 
                                 <div class="form-group col-md-6 col-sm-12">
-                                    <label for="service_ids" class="form-label col-12 ">{{__("Services")}}</label>
+                                    <label for="service_ids" class="form-label col-12 ">{{ __('services.labels.services') }}</label>
                                     <select name="service_ids[]" id="service_ids" class="form-control" multiple>
-                                        @foreach ($services as $service)
+                                        @forelse ($services as $service)
                                             <option value="{{ $service->id }}">
                                                 {{ $service->title }}
                                                 @if($service->category)
                                                     ({{ $service->category->name }})
                                                 @endif
                                             </option>
-                                        @endforeach
+                                        @empty
+                                            <option value="" disabled>{{ __('services.messages.no_data_found') }}</option>
+                                        @endforelse
                                     </select>
                                 </div>
 
