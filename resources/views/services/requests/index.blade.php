@@ -7,46 +7,115 @@
 @section('page-style')
 <style>
     .service-requests-page {
-        background-color: #ffffff;
+        background: linear-gradient(180deg, rgba(13, 110, 253, 0.07), rgba(13, 110, 253, 0.02));
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        border-radius: 1.25rem;
+        color: #212529;
+        padding: 1.25rem;
+    }
+    .service-requests-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .service-requests-hero {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .service-requests-title {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .service-requests-subtitle {
+        margin: 0.35rem 0 0;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .service-requests-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.75rem;
+    }
+    .metric-card {
+        background: #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 0.9rem;
+        padding: 0.85rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+        min-height: 76px;
+    }
+    .metric-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #0d6efd;
+        background: rgba(13, 110, 253, 0.12);
+    }
+    .metric-card.category .metric-icon {
+        color: #198754;
+        background: rgba(25, 135, 84, 0.12);
+    }
+    .metric-card.review .metric-icon {
+        color: #b58100;
+        background: rgba(255, 193, 7, 0.18);
+    }
+    .metric-label {
+        font-size: 0.78rem;
+        color: #6c757d;
+        font-weight: 600;
+    }
+    .metric-value {
+        font-size: 1.05rem;
+        font-weight: 700;
         color: #212529;
     }
-    .service-requests-toolbar {
+    .metric-value.text-truncate {
+        max-width: 180px;
+    }
+    .service-requests-filters {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 1rem;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+    }
+    .service-requests-filters .card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+        padding: 1.1rem;
+    }
+    .filters-header {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
         gap: 0.75rem;
-        margin-bottom: 0.75rem;
     }
-    .service-requests-title {
+    .filters-title {
         margin: 0;
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         font-weight: 700;
+        color: #0f172a;
     }
-    .service-requests-metrics {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
+    .filters-hint {
+        margin: 0.2rem 0 0;
+        font-size: 0.82rem;
+        color: #6c757d;
     }
-    .metric-pill {
-        background: #f8f9fa;
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        border-radius: 999px;
-        padding: 0.3rem 0.7rem;
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: #495057;
-    }
-    .metric-pill strong {
-        color: #212529;
-        font-weight: 700;
-    }
-    .filter-bar {
+    .filters-row {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         gap: 0.75rem;
-        margin-bottom: 1rem;
     }
     .status-tabs {
         display: flex;
@@ -57,42 +126,79 @@
         border: 1px solid rgba(15, 23, 42, 0.15);
         background: #ffffff;
         color: #495057;
-        border-radius: 999px;
-        padding: 0.35rem 0.75rem;
+        border-radius: 0.75rem;
+        padding: 0.4rem 0.9rem;
         font-size: 0.85rem;
         font-weight: 600;
         cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .status-tab:hover {
+        border-color: #0d6efd;
+        color: #0d6efd;
     }
     .status-tab.active {
         background: #0d6efd;
         color: #ffffff;
         border-color: #0d6efd;
+        box-shadow: 0 10px 18px rgba(13, 110, 253, 0.2);
+    }
+    .status-tab.active:hover {
+        color: #ffffff;
     }
     .search-group {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         gap: 0.5rem;
         margin-inline-start: auto;
     }
+    .search-group .input-group {
+        min-width: 240px;
+        max-width: 320px;
+    }
+    .search-group .input-group-text {
+        background: #f8f9fa;
+        border-radius: 0.75rem 0 0 0.75rem;
+        border-color: rgba(15, 23, 42, 0.12);
+    }
     .search-group .form-control {
         height: 38px;
         font-size: 0.9rem;
-        border-radius: 0.6rem;
-        min-width: 220px;
+        border-radius: 0 0.75rem 0.75rem 0;
+        border-color: rgba(15, 23, 42, 0.12);
     }
     .search-group .btn {
         height: 38px;
-        padding: 0 0.75rem;
+        padding: 0 0.9rem;
         font-size: 0.85rem;
-        border-radius: 0.6rem;
+        border-radius: 0.75rem;
     }
     .service-requests-table {
-        border-radius: 0.85rem;
+        border-radius: 1rem;
         border: 1px solid rgba(15, 23, 42, 0.08);
         margin-bottom: 0;
+        overflow: hidden;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+    }
+    .service-requests-table .card-header {
+        background: #f8f9fb;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        padding: 0.9rem 1.1rem;
     }
     .service-requests-table .card-body {
-        padding: 1.25rem;
+        padding: 1.15rem;
+    }
+    .table-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .table-hint {
+        margin: 0.2rem 0 0;
+        font-size: 0.82rem;
+        color: #6c757d;
     }
     .service-requests-table .table {
         margin-bottom: 0;
@@ -103,26 +209,48 @@
         border-bottom: 1px solid rgba(15, 23, 42, 0.08);
         padding: 0.85rem 1rem;
         font-weight: 600;
+        white-space: nowrap;
     }
     .service-requests-table .table tbody td {
         padding: 0.85rem 1rem;
+    }
+    .service-requests-table .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    .service-requests-table .table tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.04);
     }
     .service-requests-table .table-striped > tbody > tr:nth-of-type(odd) {
         background-color: rgba(15, 23, 42, 0.02);
     }
     #table_list { width: 100%; }
 
+    @media (min-width: 992px) {
+        .service-requests-hero {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .service-requests-metrics {
+            max-width: 720px;
+        }
+    }
+
     @media (max-width: 768px) {
-        .service-requests-toolbar {
-            align-items: flex-start;
+        .service-requests-page {
+            padding: 1rem;
         }
         .search-group {
             width: 100%;
             margin-inline-start: 0;
         }
-        .search-group .form-control {
+        .search-group .input-group {
             flex: 1;
             min-width: 0;
+            max-width: none;
+        }
+        .metric-value.text-truncate {
+            max-width: 140px;
         }
     }
 </style>
@@ -145,104 +273,137 @@
             $totalRequests = (int) ($stats['total'] ?? 0);
             $reviewRequests = (int) ($stats['review'] ?? 0);
         @endphp
-
-        <div class="service-requests-toolbar">
-            <h5 class="service-requests-title">@yield('title')</h5>
-            <div class="service-requests-metrics">
-                <span class="metric-pill">
-                    {{ __('services.labels.category') }}:
-                    <strong>
-                        @if($selectedCategory)
-                            {{ $selectedCategory->name }}
-                        @else
-                            {{ __('services.filters.all_categories') }}
-                        @endif
-                    </strong>
-                </span>
-                <span class="metric-pill">
-                    {{ __('services.labels.total_requests') }}:
-                    <strong>{{ number_format($totalRequests) }}</strong>
-                </span>
-                <span class="metric-pill">
-                    {{ __('services.labels.under_review') }}:
-                    <strong>{{ number_format($reviewRequests) }}</strong>
-                </span>
+        <div class="service-requests-shell">
+            <div class="service-requests-hero">
+                <div>
+                    <h5 class="service-requests-title">@yield('title')</h5>
+                    <p class="service-requests-subtitle">{{ __('services.messages.requests_subtitle') }}</p>
+                </div>
+                <div class="service-requests-metrics">
+                    <div class="metric-card category">
+                        <span class="metric-icon"><i class="bi bi-folder2-open"></i></span>
+                        <div>
+                            <div class="metric-label">{{ __('services.labels.category') }}</div>
+                            <div class="metric-value text-truncate" title="{{ $selectedCategory ? $selectedCategory->name : __('services.filters.all_categories') }}">
+                                @if($selectedCategory)
+                                    {{ $selectedCategory->name }}
+                                @else
+                                    {{ __('services.filters.all_categories') }}
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-icon"><i class="bi bi-collection"></i></span>
+                        <div>
+                            <div class="metric-label">{{ __('services.labels.total_requests') }}</div>
+                            <div class="metric-value">{{ number_format($totalRequests) }}</div>
+                        </div>
+                    </div>
+                    <div class="metric-card review">
+                        <span class="metric-icon"><i class="bi bi-hourglass-split"></i></span>
+                        <div>
+                            <div class="metric-label">{{ __('services.labels.under_review') }}</div>
+                            <div class="metric-value">{{ number_format($reviewRequests) }}</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="filter-bar">
-            <div class="status-tabs" role="tablist">
-                <button type="button" class="status-tab active" data-status="">{{ __('services.filters.all') }}</button>
-                <button type="button" class="status-tab" data-status="review">{{ __('services.labels.under_review') }}</button>
-                <button type="button" class="status-tab" data-status="approved">{{ __('services.labels.approved') }}</button>
-                <button type="button" class="status-tab" data-status="rejected">{{ __('services.labels.rejected') }}</button>
-                <button type="button" class="status-tab" data-status="sold out">{{ __('services.labels.sold_out') }}</button>
+            <div class="card service-requests-filters">
+                <div class="card-body">
+                    <div class="filters-header">
+                        <div>
+                            <h6 class="filters-title">{{ __('services.buttons.filter') }}</h6>
+                            <p class="filters-hint">{{ __('services.messages.filters_hint') }}</p>
+                        </div>
+                    </div>
+                    <div class="filters-row">
+                        <div class="status-tabs" role="tablist">
+                            <button type="button" class="status-tab active" data-status="">{{ __('services.filters.all') }}</button>
+                            <button type="button" class="status-tab" data-status="review">{{ __('services.labels.under_review') }}</button>
+                            <button type="button" class="status-tab" data-status="approved">{{ __('services.labels.approved') }}</button>
+                            <button type="button" class="status-tab" data-status="rejected">{{ __('services.labels.rejected') }}</button>
+                            <button type="button" class="status-tab" data-status="sold out">{{ __('services.labels.sold_out') }}</button>
+                        </div>
+                        <input type="hidden" id="status_filter" value="">
+                        <div class="search-group">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control" id="request_number" placeholder="{{ __('services.placeholders.transaction_number') }}" autocomplete="off">
+                            </div>
+                            <button class="btn btn-primary" type="button" id="requestNumberApply">{{ __('services.buttons.search') }}</button>
+                            <button class="btn btn-outline-secondary" type="button" id="requestNumberReset">{{ __('services.buttons.reset') }}</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <input type="hidden" id="status_filter" value="">
-            <div class="search-group">
-                <input type="text" class="form-control" id="request_number" placeholder="{{ __('services.placeholders.transaction_number') }}" autocomplete="off">
-                <button class="btn btn-primary" type="button" id="requestNumberApply">{{ __('services.buttons.search') }}</button>
-                <button class="btn btn-outline-secondary" type="button" id="requestNumberReset">{{ __('services.buttons.reset') }}</button>
-            </div>
-        </div>
 
-        <div class="card service-requests-table">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table
-                       class="table table-striped table-hover align-middle"
-                       aria-describedby="mydesc"
-                       id="table_list"
-                       data-toggle="table"
-                       data-url="{{ route('service.requests.datatable') }}"
-                       data-click-to-select="true"
-                       data-side-pagination="server"
-                       data-pagination="true"
-                       data-page-list="[5, 10, 20, 50, 100, 200]"
-                       data-search="false"
-                       data-show-columns="false"
-                       data-show-refresh="false"
-                       data-trim-on-search="false"
-                       data-escape="true"
-                       data-responsive="true"
-                       data-sort-name="id"
-                       data-sort-order="desc"
-                       data-pagination-successively-size="3"
-                       data-table="items"
-                       data-status-column="deleted_at"
-                       data-show-export="false"
-                       data-export-options='{"fileName": "service-requests-list","ignoreColumn": ["operate"]}'
-                       data-export-types='["pdf","json","xml","csv","txt","sql","doc","excel"]'
-                       data-mobile-responsive="true"
-                       data-query-params="queryParams">
-                        <thead>
-                        <tr>
-                            <th data-field="request_number" data-sortable="true" data-sort-name="request_number" data-formatter="requestNumberFormatter">{{ __('services.labels.transaction_identifier') }}</th>
-                            <th data-field="id" data-sortable="true" data-visible="false">{{ __('services.labels.id') }}</th>
+            <div class="card service-requests-table">
+                <div class="card-header">
+                    <div>
+                        <h6 class="table-title">{{ __('services.labels.service_requests') }}</h6>
+                        <p class="table-hint">{{ __('services.messages.table_hint') }}</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table
+                           class="table table-striped table-hover align-middle"
+                           aria-describedby="serviceRequestsTableCaption"
+                           id="table_list"
+                           data-toggle="table"
+                           data-url="{{ route('service.requests.datatable') }}"
+                           data-click-to-select="true"
+                           data-side-pagination="server"
+                           data-pagination="true"
+                           data-page-list="[5, 10, 20, 50, 100, 200]"
+                           data-search="false"
+                           data-show-columns="false"
+                           data-show-refresh="false"
+                           data-trim-on-search="false"
+                           data-escape="true"
+                           data-responsive="true"
+                           data-sort-name="id"
+                           data-sort-order="desc"
+                           data-pagination-successively-size="3"
+                           data-table="items"
+                           data-status-column="deleted_at"
+                           data-show-export="false"
+                           data-export-options='{"fileName": "service-requests-list","ignoreColumn": ["operate"]}'
+                           data-export-types='["pdf","json","xml","csv","txt","sql","doc","excel"]'
+                           data-mobile-responsive="true"
+                           data-query-params="queryParams">
+                            <thead>
+                            <tr>
+                                <th data-field="request_number" data-sortable="true" data-sort-name="request_number" data-formatter="requestNumberFormatter">{{ __('services.labels.transaction_identifier') }}</th>
+                                <th data-field="id" data-sortable="true" data-visible="false">{{ __('services.labels.id') }}</th>
 
-                            <th data-field="name" data-sortable="true">{{ __('services.labels.name') }}</th>
+                                <th data-field="name" data-sortable="true">{{ __('services.labels.name') }}</th>
 
-                            <th data-field="custom_fields" data-sortable="false" data-escape="false" data-formatter="customFieldsFormatter" data-events="fieldsEvents">{{ __('services.labels.filled_fields') }}</th>
+                                <th data-field="custom_fields" data-sortable="false" data-escape="false" data-formatter="customFieldsFormatter" data-events="fieldsEvents">{{ __('services.labels.filled_fields') }}</th>
 
-                            <th data-field="submitted_at" data-sortable="true" data-sort-name="created_at" data-formatter="submissionDateFormatter">{{ __('services.labels.submitted_at') }}</th>
-                            <th data-field="category.name" data-sortable="true" data-visible="false" data-formatter="serviceTypeFormatter">{{ __('services.labels.service_type') }}</th>
-                            <th data-field="description" data-align="center" data-sortable="true" data-visible="false" data-formatter="descriptionFormatter">{{ __('services.labels.description') }}</th>
-                            <th data-field="user.name" data-sort-name="user_name" data-sortable="true" data-visible="false">{{ __('services.labels.user') }}</th>
-                            <th data-field="status" data-sortable="true" data-filter-control="select" data-escape="false" data-visible="false" data-formatter="itemStatusFormatter">{{ __('services.labels.status') }}</th>
+                                <th data-field="submitted_at" data-sortable="true" data-sort-name="created_at" data-formatter="submissionDateFormatter">{{ __('services.labels.submitted_at') }}</th>
+                                <th data-field="category.name" data-sortable="true" data-visible="false" data-formatter="serviceTypeFormatter">{{ __('services.labels.service_type') }}</th>
+                                <th data-field="description" data-align="center" data-sortable="true" data-visible="false" data-formatter="descriptionFormatter">{{ __('services.labels.description') }}</th>
+                                <th data-field="user.name" data-sort-name="user_name" data-sortable="true" data-visible="false">{{ __('services.labels.user') }}</th>
+                                <th data-field="status" data-sortable="true" data-filter-control="select" data-escape="false" data-visible="false" data-formatter="itemStatusFormatter">{{ __('services.labels.status') }}</th>
 
-                            <th data-field="rejected_reason" data-sortable="true" data-visible="false">{{ __('services.labels.rejected_reason') }}</th>
+                                <th data-field="rejected_reason" data-sortable="true" data-visible="false">{{ __('services.labels.rejected_reason') }}</th>
 
-                            <th data-field="created_at" data-sortable="true" data-visible="false">{{ __('services.labels.created_at') }}</th>
-                            <th data-field="updated_at" data-sortable="true" data-visible="false">{{ __('services.labels.updated_at') }}</th>
-                            <th data-field="user_id" data-sortable="true" data-visible="false">{{ __('services.labels.user_id') }}</th>
-                            <th data-field="category_id" data-sortable="true" data-visible="false">{{ __('services.labels.category_id') }}</th>
+                                <th data-field="created_at" data-sortable="true" data-visible="false">{{ __('services.labels.created_at') }}</th>
+                                <th data-field="updated_at" data-sortable="true" data-visible="false">{{ __('services.labels.updated_at') }}</th>
+                                <th data-field="user_id" data-sortable="true" data-visible="false">{{ __('services.labels.user_id') }}</th>
+                                <th data-field="category_id" data-sortable="true" data-visible="false">{{ __('services.labels.category_id') }}</th>
 
-                            @canany(['service-requests-list','service-requests-update'])
-                                <th data-field="operate" data-align="center" data-sortable="false" data-events="itemEvents" data-escape="false">{{ __('services.labels.actions') }}</th>
-                            @endcanany
-                        </tr>
-                        </thead>
-                    </table>
+                                @canany(['service-requests-list','service-requests-update'])
+                                    <th data-field="operate" data-align="center" data-sortable="false" data-events="itemEvents" data-escape="false">{{ __('services.labels.actions') }}</th>
+                                @endcanany
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <div id="serviceRequestsTableCaption" class="visually-hidden">{{ __('services.messages.table_hint') }}</div>
                 </div>
             </div>
         </div>
