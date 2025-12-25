@@ -185,6 +185,28 @@ trait GetServiceReviewsTrait
             }
 
             $reviews = $reviewsQuery->get();
+            $formattedReviews = $reviews->map(static function (ServiceReview $review) {
+                $userPayload = $review->user ? [
+                    'id' => $review->user->id,
+                    'name' => $review->user->name,
+                    'profile' => $review->user->profile,
+                ] : null;
+
+                return [
+                    'id' => $review->id,
+                    'service_id' => $review->service_id,
+                    'user_id' => $review->user_id,
+                    'rating' => $review->rating,
+                    'ratings' => $review->rating,
+                    'review' => $review->review,
+                    'status' => $review->status,
+                    'created_at' => optional($review->created_at)->toDateTimeString(),
+                    'updated_at' => optional($review->updated_at)->toDateTimeString(),
+                    'buyer_id' => $review->user_id,
+                    'buyer' => $userPayload,
+                    'user' => $userPayload,
+                ];
+            });
 
             $average = ServiceReview::where('service_id', $service->id)
                 ->where('status', ServiceReview::STATUS_APPROVED)
@@ -194,8 +216,8 @@ trait GetServiceReviewsTrait
             $response = [
                 'service_id'     => $service->id,
                 'average_rating' => $average !== null ? round((float) $average, 2) : null,
-                'total_reviews'  => $reviews->count(),
-                'reviews'        => $reviews,
+                'total_reviews'  => $formattedReviews->count(),
+                'reviews'        => $formattedReviews,
             ];
 
             if ($authenticatedUser) {
