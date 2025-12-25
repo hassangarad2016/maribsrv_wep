@@ -8,76 +8,28 @@
 <style>
     .service-requests-page {
         color: #212529;
+        background-color: #ffffff;
     }
     .service-requests-page .card {
         border-radius: 1rem;
         border: 1px solid rgba(15, 23, 42, 0.08);
     }
-    .service-requests-header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 1rem;
-        flex-wrap: wrap;
+    .service-requests-summary {
+        margin-bottom: 1rem;
     }
-    .service-requests-title {
-        margin: 0;
-        font-size: 1.15rem;
-        font-weight: 700;
-    }
-    .service-requests-subtitle {
-        margin: 0.25rem 0 0;
-        color: #6c757d;
-        font-size: 0.95rem;
-    }
-    .service-requests-header__meta {
+    .service-requests-meta {
+        margin-top: 0.35rem;
         display: flex;
         flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-    .service-requests-header__meta .badge {
-        padding: 0.45rem 0.7rem;
-        border-radius: 999px;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-    .service-requests-filters {
-        margin-bottom: 1.25rem;
-    }
-    .service-requests-filters .card-body {
-        padding: 1.5rem;
-    }
-    .service-requests-filters__hint {
-        margin: 0.75rem 0 0;
+        gap: 0.9rem;
         color: #6c757d;
         font-size: 0.95rem;
-    }
-
-    #filters select,
-    #filters input {
-        height: 44px;
-        font-size: 0.95rem;
-        padding: 8px 12px;
-        border-radius: 0.6rem;
-        border: 1px solid rgba(15, 23, 42, 0.15);
-        background-color: #ffffff;
-    }
-    #filters label {
-        font-size: 0.9rem;
         font-weight: 600;
-        margin-bottom: 6px;
     }
-    #filters .form-control-plaintext {
-        padding: 8px 12px;
-        background: rgba(15, 23, 42, 0.04);
-        border-radius: 0.6rem;
-    }
-    #filters .input-group {
-        gap: 0.5rem;
-    }
-    #filters .input-group > .btn {
-        height: 44px;
-        border-radius: 0.6rem;
+    .service-requests-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
     }
     #table_list { width: 100%; }
 
@@ -103,23 +55,6 @@
     .service-requests-table .card-body {
         padding: 1.6rem;
     }
-    .service-requests-table__header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 1rem;
-        margin-bottom: 1.25rem;
-    }
-    .service-requests-table__title {
-        margin: 0;
-        font-size: 1.1rem;
-        font-weight: 700;
-    }
-    .service-requests-table__hint {
-        margin: 0.25rem 0 0;
-        color: #6c757d;
-        font-size: 0.95rem;
-    }
     .service-requests-table .table {
         margin-bottom: 0;
     }
@@ -138,10 +73,8 @@
     }
 
     @media (max-width: 768px) {
-        .service-requests-header,
-        .service-requests-table__header {
-            flex-direction: column;
-            align-items: flex-start;
+        .service-requests-meta {
+            gap: 0.6rem;
         }
     }
 
@@ -165,73 +98,23 @@
             $totalRequests = (int) ($stats['total'] ?? 0);
         @endphp
 
-        <div class="card service-requests-filters">
-            <div class="card-body">
-                <div class="service-requests-header">
-                    <div>
-                        <h5 class="service-requests-title">@yield('title')</h5>
-                        <p class="service-requests-subtitle">{{ __('services.messages.requests_subtitle') }}</p>
-                    </div>
-                    <div class="service-requests-header__meta">
-                        <span class="badge bg-light-primary">
-                            {{ __('services.labels.category') }}:
-                            @if($selectedCategory)
-                                {{ $selectedCategory->name }}
-                            @else
-                                {{ __('services.filters.all_categories') }}
-                            @endif
-                        </span>
-                        <span class="badge bg-light-secondary">
-                            {{ __('services.labels.total_requests') }}: {{ number_format($totalRequests) }}
-                        </span>
-                        <span class="badge bg-light-warning">
-                            {{ __('services.labels.under_review') }}: {{ number_format((int) ($stats['review'] ?? 0)) }}
-                        </span>
-                    </div>
-                </div>
-
-                <p class="service-requests-filters__hint">{{ __('services.messages.filters_hint') }}</p>
-
-                <div id="filters" class="row g-3 align-items-end mt-2">
-                    <div class="col-sm-6 col-lg-3">
-                        <label for="filter" class="d-block">{{ __('services.labels.status') }}</label>
-                        <select class="form-control bootstrap-table-filter-control-status" id="filter">
-                            <option value="">{{ __('services.filters.all') }}</option>
-                            <option value="review">{{ __('services.labels.under_review') }}</option>
-                            <option value="approved">{{ __('services.labels.approved') }}</option>
-                            <option value="rejected">{{ __('services.labels.rejected') }}</option>
-                            <option value="sold out">{{ __('services.labels.sold_out') }}</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-6 col-lg-3">
-                        <label class="d-block">{{ __('services.labels.category') }}</label>
-                        @if($selectedCategory)
-                            <div class="form-control-plaintext fw-semibold">{{ $selectedCategory->name }}</div>
-                        @else
-                            <div class="form-control-plaintext text-muted">{{ __('services.filters.all_categories') }}</div>
-                        @endif
-                    </div>
-
-                    <div class="col-12 col-lg-6">
-                        <label for="request_number" class="d-block">{{ __('services.labels.search_by_transaction_number') }}</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="request_number" placeholder="{{ __('services.placeholders.transaction_number') }}" autocomplete="off">
-                            <button class="btn btn-outline-primary" type="button" id="requestNumberApply">{{ __('services.buttons.search') }}</button>
-                            <button class="btn btn-outline-secondary" type="button" id="requestNumberReset">{{ __('services.buttons.reset') }}</button>
-                        </div>
-                    </div>
-                </div>
+        <div class="service-requests-summary">
+            <div class="service-requests-meta">
+                <span>
+                    {{ __('services.labels.category') }}:
+                    @if($selectedCategory)
+                        {{ $selectedCategory->name }}
+                    @else
+                        {{ __('services.filters.all_categories') }}
+                    @endif
+                </span>
+                <span>{{ __('services.labels.total_requests') }}: {{ number_format($totalRequests) }}</span>
+                <span>{{ __('services.labels.under_review') }}: {{ number_format((int) ($stats['review'] ?? 0)) }}</span>
             </div>
         </div>
 
         <div class="card service-requests-table">
             <div class="card-body">
-                <div class="service-requests-table__header">
-                    <div>
-                        <h5 class="service-requests-table__title">{{ __('services.labels.service_requests') }}</h5>
-                        <p class="service-requests-table__hint">{{ __('services.messages.table_hint') }}</p>
-                    </div>
-                </div>
                 <div class="table-responsive">
                     <table
                        class="table table-striped table-hover align-middle"
@@ -258,9 +141,6 @@
                        data-export-options='{"fileName": "service-requests-list","ignoreColumn": ["operate"]}'
                        data-export-types='["pdf","json","xml","csv","txt","sql","doc","excel"]'
                        data-mobile-responsive="true"
-                       data-filter-control="true"
-                       data-filter-control-container="#filters"
-                       data-toolbar="#filters"
                        data-query-params="queryParams">
                         <thead class="service-requests-table__head">
                         <tr>
@@ -414,8 +294,6 @@
     // طھظ…ط±ظٹط± ط§ظ„ظپظ„ط§طھط± ظ„ظ„ط³ظٹط±ظپط±
     function queryParams(params) {
         const query = {
-
-            status_filter: $('#filter').val(),
             offset: params.offset,
             limit: params.limit,
             search: params.search,
@@ -424,18 +302,12 @@
             filter: params.filter
         };
 
-        const requestNumberValue = $('#request_number').val();
-        query.request_number = requestNumberValue ? requestNumberValue.trim() : '';
-
         if (CATEGORY_ID !== null && CATEGORY_ID !== undefined && CATEGORY_ID !== '') {
             query.category_id = CATEGORY_ID;
         }
 
         return query;
-
-
     }
-
     // ط£ط¯ظˆط§طھ ظ…ط³ط§ط¹ط¯ط©
     function escapeHtml(s) {
         if (s === null || s === undefined) return '';
@@ -445,45 +317,15 @@
     }
 
     $(document).ready(function() {
-
-        const $table = $('#table_list');
-        const $requestNumber = $('#request_number');
-
-        function refreshTableToFirstPage() {
-            const options = $table.bootstrapTable('getOptions');
-            options.pageNumber = 1;
-            $table.bootstrapTable('refresh');
-        }
-
-
-        // طھط­ط¯ظٹط« ط§ظ„ط¬ط¯ظˆظ„ ط¹ظ†ط¯ طھط؛ظٹظٹط± ط§ظ„ظپظ„ط§طھط±
-        $('#filter').on('change', function() {
-            refreshTableToFirstPage();
-        });
-
-        $('#requestNumberApply').on('click', function () {
-            refreshTableToFirstPage();
-        });
-
-        $('#requestNumberReset').on('click', function () {
-            $requestNumber.val('');
-            refreshTableToFirstPage();
-        });
-
-        $requestNumber.on('keypress', function (event) {
-            if (event.which === 13) {
-                event.preventDefault();
-                refreshTableToFirstPage();
-            }
-        });
-
-        // ط¥ط¸ظ‡ط§ط±/ط¥ط®ظپط§ط، ط³ط¨ط¨ ط§ظ„ط±ظپط¶
         $('#status').on('change', function() {
             $('#rejected_reason_container').toggle($(this).val() === 'rejected');
         });
     });
 </script>
 @endsection
+
+
+
 
 
 
