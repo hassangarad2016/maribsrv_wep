@@ -151,6 +151,10 @@ trait UserCanReviewServiceTrait
 {
     protected function userCanReviewService(User $user, Service $service): bool
     {
+        if ($service->direct_to_user && (int) $service->direct_user_id !== (int) $user->id) {
+            return false;
+        }
+
         if ((int) $service->direct_user_id === (int) $user->id && $service->direct_to_user) {
             return true;
         }
@@ -170,6 +174,6 @@ trait UserCanReviewServiceTrait
             }
         }
 
-        return false;
+        return true;
     }
 }
