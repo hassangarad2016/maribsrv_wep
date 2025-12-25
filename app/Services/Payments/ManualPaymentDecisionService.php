@@ -53,6 +53,10 @@ class ManualPaymentDecisionService
             throw new RuntimeException(trans('manual_payment.decide.unable_to_resolve_transaction'));
         }
 
+        $history = null;
+        $deliveryRequest = null;
+        $recordDeliveryRequest = false;
+
         DB::beginTransaction();
 
         try {
@@ -88,66 +92,13 @@ class ManualPaymentDecisionService
                 ]);
             }
 
-            DB::commit();
-
-            if ($shouldNotify) {
-                $attachmentUrl = null;
-
-                if ($attachmentPath) {
-                    try {
-                        $attachmentUrl = Storage::disk('public')->url($attachmentPath);
-                    } catch (Throwable) {
-                        $attachmentUrl = null;
-                    }
-                }
-
-                $this->sendDecisionNotification(
-                    $manualPaymentRequest,
-                    $transaction,
-                    $decision,
-                    $note,
-                    $attachmentUrl
-                );
-            }
-
-            if ($manualPaymentRequest->store_id !== null) {
-                $this->notifyStoreTeam(
-                    $manualPaymentRequest,
-                    $transaction,
-                    $decision,
-                    $note,
-                    $actorId
-                );
-            }
-
-            $deliveryRequest = null;
-
             if ($decision === ManualPaymentRequest::STATUS_APPROVED
                 && $manualPaymentRequest->payable_type === Order::class
                 && $manualPaymentRequest->payable_id
             ) {
-                $order = Order::query()->find($manualPaymentRequest->payable_id);
-                if ($order) {
-                    $deliveryRequest = DeliveryRequest::recordHandoff($order, 'manual_payment_approved');
-                }
+                $recordDeliveryRequest = true;
             }
-
-            $this->notifyAdministrators(
-                $manualPaymentRequest,
-                $transaction,
-                $decision,
-                $note,
-                $actorId
-            );
-
-            if ($deliveryRequest) {
-                Log::info('delivery_request.handoff_recorded', [
-                    'delivery_request_id' => $deliveryRequest->getKey(),
-                    'order_id' => $deliveryRequest->order_id,
-                ]);
-            }
-
-            return $history;
+            DB::commit();
         } catch (Throwable $throwable) {
             DB::rollBack();
 
@@ -161,6 +112,90 @@ class ManualPaymentDecisionService
 
             throw new RuntimeException(trans('manual_payment.decide.unable_to_process'));
         }
+
+        if ($shouldNotify) {
+            $attachmentUrl = null;
+
+            if ($attachmentPath) {
+                try {
+                    $attachmentUrl = Storage::disk('public')->url($attachmentPath);
+                } catch (Throwable) {
+                    $attachmentUrl = null;
+                }
+            }
+
+            try {
+                $this->sendDecisionNotification(
+                    $manualPaymentRequest,
+                    $transaction,
+                    $decision,
+                    $note,
+                    $attachmentUrl
+                );
+            } catch (Throwable $exception) {
+                Log::warning('Manual payment decision: failed to notify requester', [
+                    'request_id' => $manualPaymentRequest->id,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        if ($manualPaymentRequest->store_id !== null) {
+            try {
+                $this->notifyStoreTeam(
+                    $manualPaymentRequest,
+                    $transaction,
+                    $decision,
+                    $note,
+                    $actorId
+                );
+            } catch (Throwable $exception) {
+                Log::warning('Manual payment decision: failed to notify store team', [
+                    'request_id' => $manualPaymentRequest->id,
+                    'store_id' => $manualPaymentRequest->store_id,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        if ($recordDeliveryRequest) {
+            try {
+                $order = Order::query()->find($manualPaymentRequest->payable_id);
+                if ($order) {
+                    $deliveryRequest = DeliveryRequest::recordHandoff($order, 'manual_payment_approved');
+                }
+            } catch (Throwable $exception) {
+                Log::warning('Manual payment decision: failed to record delivery handoff', [
+                    'request_id' => $manualPaymentRequest->id,
+                    'order_id' => $manualPaymentRequest->payable_id,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        try {
+            $this->notifyAdministrators(
+                $manualPaymentRequest,
+                $transaction,
+                $decision,
+                $note,
+                $actorId
+            );
+        } catch (Throwable $exception) {
+            Log::warning('Manual payment decision: failed to notify administrators', [
+                'request_id' => $manualPaymentRequest->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
+
+        if ($deliveryRequest) {
+            Log::info('delivery_request.handoff_recorded', [
+                'delivery_request_id' => $deliveryRequest->getKey(),
+                'order_id' => $deliveryRequest->order_id,
+            ]);
+        }
+
+        return $history;
     }
 
     private function approveRequest(ManualPaymentRequest $manualPaymentRequest, PaymentTransaction $transaction): void
@@ -322,7 +357,11 @@ class ManualPaymentDecisionService
             'amount' => number_format($manualPaymentRequest->amount, 2) . ($manualPaymentRequest->currency ? ' ' . $manualPaymentRequest->currency : ''),
         ]);
 
-        $deepLink = route('payment-requests.deep-link', $transaction);
+        try {
+            $deepLink = route('payment-requests.deep-link', $transaction);
+        } catch (Throwable) {
+            $deepLink = null;
+        }
 
         $data = [
             'transaction_id' => $transaction->id,
