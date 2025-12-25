@@ -198,7 +198,9 @@
 
         @canany(['wifi-cabin-manage',
                  'currency-rate-list','currency-rate-create','currency-rate-edit','currency-rate-delete',
-                 'metal-rate-list','metal-rate-create','metal-rate-edit','metal-rate-delete','metal-rate-schedule'])
+                 'metal-rate-list','metal-rate-create','metal-rate-edit','metal-rate-delete','metal-rate-schedule',
+                 'seller-verification-field-list','seller-verification-field-create','seller-verification-field-update','seller-verification-field-delete',
+                 'seller-verification-request-list','seller-verification-request-create','seller-verification-request-update','seller-verification-request-delete'])
           <li class="sidebar-item has-sub sidebar-group">
             <a href="#" class="sidebar-link">
               <span class="menu-text">
