@@ -230,6 +230,12 @@
         .service-requests-table .fixed-table-toolbar .columns .btn i {
             font-size: 1rem;
         }
+        .service-requests-table .fixed-table-toolbar .bs-bars {
+            min-width: 180px;
+        }
+        .reports-toolbar-label {
+            white-space: nowrap;
+        }
         .service-card {
             border: 1px solid rgba(15, 23, 42, 0.08);
             border-radius: 1rem;
@@ -614,10 +620,8 @@
                                     <h6 class="filters-title">{{ __('services.labels.report') }}</h6>
                                 </div>
                             </div>
-                            <div id="reportsFilters" class="row g-3 align-items-end">
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="small text-muted">{{ __('services.labels.report_reason') }}</div>
-                                </div>
+                            <div id="reportsFilters" class="d-flex align-items-center gap-2">
+                                <span class="reports-toolbar-label small text-muted">{{ __('services.labels.report_reason') }}</span>
                             </div>
                         </div>
                     </div>
