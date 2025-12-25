@@ -478,5 +478,21 @@
     "wallet.smart.inactive_balance.body": "You have :balance :currency and have not used the wallet for :days days. Open the wallet to get started.",
     "Manual payment approved": "Manual payment approved",
     "Manual payment rejected": "Manual payment rejected",
-    "Reference #:ref - Amount: :amount": "Reference #:ref - Amount: :amount"
+    "Reference #:ref - Amount: :amount": "Reference #:ref - Amount: :amount",
+    "item.notifications.review.title": "We received your listing",
+    "item.notifications.review.body": "Your listing \":item\" is under review. We will notify you once approved.",
+    "item.notifications.approved.title": "Your listing is approved",
+    "item.notifications.approved.body": "Your listing \":item\" is now live and visible to customers.",
+    "item.notifications.rejected.title": "Your listing was rejected",
+    "item.notifications.rejected.body": "Your listing \":item\" was rejected. Reason: :reason",
+    "item.notifications.rejected.body_fallback": "Your listing \":item\" was rejected. You can edit it and resubmit.",
+    "item.notifications.review_received.title": "New review on your listing",
+    "item.notifications.review_received.body": ":buyer rated your listing \":item\" with :rating stars.",
+    "item.notifications.review_received.buyer_fallback": "A customer",
+    "item.notifications.store_new_item.title": "New listing from :store",
+    "item.notifications.active.title": "Your listing is active",
+    "item.notifications.active.body": "Your listing \":item\" is now visible to customers.",
+    "item.notifications.blocked.title": "Your listing was blocked",
+    "item.notifications.blocked.body": "Your listing \":item\" has been blocked. Contact support for details.",
+    "item.notifications.fallback_item_name": "this listing"
 }

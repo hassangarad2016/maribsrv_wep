@@ -849,6 +849,22 @@
     "Wallet Top-up #:id": "شحن المحفظة رقم :id",
     "Search by Transaction Number": "البحث برقم المعاملة",
     "Enter transaction number": "أدخل رقم المعاملة",
-    "Transaction Identifier": "معرّف المعاملة"
+    "Transaction Identifier": "معرّف المعاملة",
+    "item.notifications.review.title": "تم استلام إعلانك",
+    "item.notifications.review.body": "إعلانك \":item\" قيد المراجعة، وسنبلغك فور الموافقة عليه.",
+    "item.notifications.approved.title": "تمت الموافقة على إعلانك",
+    "item.notifications.approved.body": "إعلانك \":item\" أصبح منشورًا الآن ويمكن للعملاء مشاهدته.",
+    "item.notifications.rejected.title": "تم رفض إعلانك",
+    "item.notifications.rejected.body": "تم رفض إعلانك \":item\". السبب: :reason",
+    "item.notifications.rejected.body_fallback": "تم رفض إعلانك \":item\". يمكنك تعديله وإعادة إرساله.",
+    "item.notifications.review_received.title": "تقييم جديد على إعلانك",
+    "item.notifications.review_received.body": ":buyer قيّم إعلانك \":item\" بـ :rating نجوم.",
+    "item.notifications.review_received.buyer_fallback": "أحد العملاء",
+    "item.notifications.store_new_item.title": "إعلان جديد من :store",
+    "item.notifications.active.title": "تم تفعيل إعلانك",
+    "item.notifications.active.body": "إعلانك \":item\" أصبح متاحًا للعملاء.",
+    "item.notifications.blocked.title": "تم إيقاف إعلانك",
+    "item.notifications.blocked.body": "تم إيقاف إعلانك \":item\". تواصل معنا لمعرفة التفاصيل.",
+    "item.notifications.fallback_item_name": "هذا الإعلان"
 }
 

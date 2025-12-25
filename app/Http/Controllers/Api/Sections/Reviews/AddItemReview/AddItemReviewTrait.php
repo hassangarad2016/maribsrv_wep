@@ -178,6 +178,17 @@ trait AddItemReviewTrait
                 'review'    => $request->review ?? '',
             ]);
 
+            try {
+                app(\App\Services\ItemNotificationService::class)->notifyReviewReceived($review);
+            } catch (Throwable $notificationException) {
+                Log::warning('items.review_notification_failed', [
+                    'review_id' => $review->id,
+                    'item_id' => $review->item_id,
+                    'seller_id' => $review->seller_id,
+                    'error' => $notificationException->getMessage(),
+                ]);
+            }
+
             ResponseService::successResponse("Your review has been submitted successfully.", $review);
         } catch (Throwable $th) {
             ResponseService::logErrorResponse($th, 'API Controller -> storeContactUs');

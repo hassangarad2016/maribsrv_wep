@@ -527,6 +527,20 @@ trait AddItemTrait
             $result = new ItemCollection($result);
 
             DB::commit();
+
+            try {
+                app(\App\Services\ItemNotificationService::class)->notifyStatusUpdate(
+                    $item,
+                    (string) $item->status,
+                    $item->rejected_reason
+                );
+            } catch (Throwable $notificationException) {
+                Log::warning('items.notification_failed', [
+                    'item_id' => $item->id,
+                    'user_id' => $item->user_id,
+                    'error' => $notificationException->getMessage(),
+                ]);
+            }
             ResponseService::successResponse("Item Added Successfully", $result);
         } catch (Throwable $th) {
             DB::rollBack();

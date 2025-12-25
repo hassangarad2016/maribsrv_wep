@@ -5,7 +5,6 @@ use App\Models\FeaturedItems;
 
 use App\Models\Item;
 use App\Models\ItemCustomFieldValue;
-use App\Models\UserFcmToken;
 use App\Services\BootstrapTableService;
 use App\Services\DepartmentAdvertiserService;
 use App\Services\DepartmentReportService;
@@ -14,7 +13,6 @@ use App\Services\InterfaceSectionService;
 use App\Policies\SectionDelegatePolicy;
 use App\Services\ImageVariantService;
 
-use App\Services\NotificationService;
 use App\Services\ResponseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -995,21 +993,11 @@ class ItemController extends Controller {
                 ...$request->all(),
                 'rejected_reason' => ($request->status == "rejected") ? $request->rejected_reason : ''
             ]);
-            $user_token = UserFcmToken::where('user_id', $item->user->id)->pluck('fcm_token')->toArray();
-            if (!empty($user_token)) {
-                $notificationResponse = NotificationService::sendFcmNotification(
-                    $user_token,
-                    'About ' . $item->name,
-                    "Your Item is " . ucfirst($request->status),
-                    "item-update",
-                    ['id' => $request->id]
-                );
-
-                if (is_array($notificationResponse) && ($notificationResponse['error'] ?? false)) {
-                    Log::error('ItemController: Failed to send status notification', $notificationResponse);
-                }
-
-            }
+            app(\App\Services\ItemNotificationService::class)->notifyStatusUpdate(
+                $item,
+                (string) $item->status,
+                $item->rejected_reason
+            );
             ResponseService::successResponse('Item Status Updated Successfully');
         } catch (Throwable $th) {
             ResponseService::logErrorResponse($th, 'ItemController ->updateItemApproval');
