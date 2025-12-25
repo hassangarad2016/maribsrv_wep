@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ManualPaymentRequestResource;
 use App\Http\Resources\PaymentTransactionResource;
 use App\Http\Resources\Payments\SubjectResource;
+use App\Models\ManualBank;
 use App\Models\ManualPaymentRequest;
 use App\Models\Order;
 use App\Models\Package;
+use App\Models\PaymentConfiguration;
 use App\Models\PaymentTransaction;
 use App\Models\Service;
 use App\Models\ServiceRequest;
@@ -28,6 +30,7 @@ use App\Support\Payments\PaymentGatewayCurrencyPolicy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -54,7 +57,14 @@ class PaymentController extends Controller
         }
 
         $purpose = strtolower($request->input('purpose', 'service'));
-        $supportedPurposes = ['service', 'order', 'wifi_plan', 'package', 'verification'];
+        $supportedPurposes = [
+            'service',
+            'order',
+            'wifi_plan',
+            'package',
+            'verification',
+            ManualPaymentRequest::PAYABLE_TYPE_WALLET_TOP_UP,
+        ];
 
         if (! in_array($purpose, $supportedPurposes, true)) {
             throw ValidationException::withMessages([
@@ -65,6 +75,10 @@ class PaymentController extends Controller
         try {
             if ($purpose === 'service') {
                 return $this->initiateServicePayment($request, $user->getKey());
+            }
+
+            if ($purpose === ManualPaymentRequest::PAYABLE_TYPE_WALLET_TOP_UP) {
+                return $this->initiateWalletTopUp($request, $user->getKey());
             }
 
             if ($purpose === 'wifi_plan') {
@@ -106,7 +120,14 @@ class PaymentController extends Controller
         }
 
         $purpose = strtolower($request->input('purpose', 'service'));
-        $supportedPurposes = ['service', 'order', 'wifi_plan', 'package', 'verification'];
+        $supportedPurposes = [
+            'service',
+            'order',
+            'wifi_plan',
+            'package',
+            'verification',
+            ManualPaymentRequest::PAYABLE_TYPE_WALLET_TOP_UP,
+        ];
 
         if (! in_array($purpose, $supportedPurposes, true)) {
             throw ValidationException::withMessages([
@@ -128,6 +149,10 @@ class PaymentController extends Controller
 
         if ($purpose === 'verification') {
             return $this->confirmVerificationPayment($request, $user->getKey());
+        }
+
+        if ($purpose === ManualPaymentRequest::PAYABLE_TYPE_WALLET_TOP_UP) {
+            return $this->confirmWalletTopUp($request, $user->getKey());
         }
 
         return $this->confirmOrderPayment($request, $user->getKey());
@@ -540,6 +565,172 @@ class PaymentController extends Controller
         return $this->buildPackageResponse($existing, $package, $statusCode, $availableGateways);
     }
 
+    private function initiateWalletTopUp(Request $request, int $userId): JsonResponse
+    {
+        $validated = $request->validate([
+            'payment_method' => ['nullable', 'string', 'max:191'],
+            'currency' => ['required', 'string', 'size:3'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+        ]);
+
+        $requestUser = $request->user() ?? Auth::user();
+
+        if (! $requestUser) {
+            return response()->json(['message' => __('Unauthenticated.')], 401);
+        }
+
+        $methodInput = $validated['payment_method'] ?? 'manual_bank';
+        if (! is_string($methodInput) || trim($methodInput) === '') {
+            $methodInput = 'manual_bank';
+        }
+
+        $canonicalMethod = $methodInput === 'manual' ? 'manual_bank' : $methodInput;
+        $currency = strtoupper(trim($validated['currency']));
+
+        if ($currency === '') {
+            $currency = $this->walletService->getPrimaryCurrency();
+        }
+
+        if (in_array($canonicalMethod, ['wallet', 'east_yemen_bank'], true)) {
+            $currency = $this->walletService->getPrimaryCurrency();
+        }
+
+        if (! PaymentGatewayCurrencyPolicy::supports($canonicalMethod, $currency)) {
+            throw ValidationException::withMessages([
+                'currency' => __('gateway_currency_unsupported'),
+            ]);
+        }
+
+        $amount = (float) $validated['amount'];
+
+        $idempotencyKey = $this->resolveIdempotencyKey($request, [
+            'purpose' => ManualPaymentRequest::PAYABLE_TYPE_WALLET_TOP_UP,
+            'user' => $userId,
+            'method' => $canonicalMethod,
+            'currency' => $currency,
+            'amount' => $amount,
+        ]);
+
+        return DB::transaction(function () use ($requestUser, $canonicalMethod, $amount, $currency, $idempotencyKey) {
+            $transaction = PaymentTransaction::query()
+                ->where('user_id', $requestUser->getKey())
+                ->where('payment_gateway', $canonicalMethod)
+                ->where('idempotency_key', $idempotencyKey)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $transaction) {
+                $transaction = PaymentTransaction::create([
+                    'user_id' => $requestUser->getKey(),
+                    'amount' => $amount,
+                    'currency' => $currency,
+                    'payment_gateway' => $canonicalMethod,
+                    'payment_status' => 'pending',
+                    'idempotency_key' => $idempotencyKey,
+                    'meta' => [
+                        'wallet' => [
+                            'purpose' => ManualPaymentRequest::PAYABLE_TYPE_WALLET_TOP_UP,
+                        ],
+                    ],
+                ]);
+            } else {
+                $transaction->fill([
+                    'amount' => $amount,
+                    'currency' => $currency,
+                    'payment_gateway' => $canonicalMethod,
+                ]);
+
+                $meta = $transaction->meta ?? [];
+                if (! is_array($meta)) {
+                    $meta = [];
+                }
+
+                $meta = array_replace_recursive($meta, [
+                    'wallet' => [
+                        'purpose' => ManualPaymentRequest::PAYABLE_TYPE_WALLET_TOP_UP,
+                    ],
+                ]);
+
+                $transaction->meta = $meta;
+                $transaction->save();
+            }
+
+            $banks = ManualBank::query()
+                ->active()
+                ->orderBy('display_order')
+                ->orderBy('name')
+                ->get();
+
+            $bankPayload = $banks->map(static fn (ManualBank $bank) => $bank->toArray())->values()->toArray();
+
+            $eastYemenGateway = PaymentConfiguration::query()
+                ->where('payment_method', 'east_yemen_bank')
+                ->first();
+
+            $eastYemenPayload = [
+                'payment_method' => 'east_yemen_bank',
+                'enabled' => false,
+                'status' => false,
+                'display_name' => null,
+                'note' => null,
+                'logo_url' => null,
+                'currency_code' => null,
+            ];
+
+            if ($eastYemenGateway) {
+                $eastYemenPayload = array_merge($eastYemenPayload, [
+                    'enabled' => (bool) $eastYemenGateway->status,
+                    'status' => (bool) $eastYemenGateway->status,
+                    'display_name' => $eastYemenGateway->display_name,
+                    'note' => $eastYemenGateway->note,
+                    'logo_url' => $eastYemenGateway->logo_url,
+                    'currency_code' => $eastYemenGateway->currency_code,
+                ]);
+            }
+
+            $transactionPayload = [
+                'id' => $transaction->getKey(),
+                'status' => $transaction->payment_status,
+                'amount' => (float) $transaction->amount,
+                'currency' => $transaction->currency,
+                'payment_gateway' => $transaction->payment_gateway,
+                'user_id' => $transaction->user_id,
+                'meta' => $transaction->meta,
+            ];
+
+            $intentPayload = [
+                'id' => $transaction->idempotency_key,
+                'status' => $transaction->payment_status,
+                'amount' => (float) $transaction->amount,
+                'currency' => $transaction->currency,
+                'payment_transaction_id' => $transaction->getKey(),
+                'metadata' => [
+                    'purpose' => ManualPaymentRequest::PAYABLE_TYPE_WALLET_TOP_UP,
+                ],
+            ];
+
+            $manualSettings = [
+                'banks' => $bankPayload,
+                'payment_intent' => $intentPayload,
+                'payment_transaction' => $transactionPayload,
+                'east_yemen_bank' => $eastYemenPayload,
+            ];
+
+            return response()->json([
+                'message' => __('Manual payment settings loaded.'),
+                'payment_intent_id' => $transaction->idempotency_key,
+                'payment_transaction_id' => $transaction->getKey(),
+                'payment_intent' => $intentPayload,
+                'payment_transaction' => $transactionPayload,
+                'banks' => $bankPayload,
+                'manual_banks' => $bankPayload,
+                'manual_payment' => $manualSettings,
+                'manual_payment_settings' => $manualSettings,
+                'east_yemen_bank' => $eastYemenPayload,
+            ]);
+        });
+    }
+
     private function initiateVerificationPayment(Request $request, int $userId): JsonResponse
     {
         $validated = $request->validate([
@@ -890,6 +1081,59 @@ class PaymentController extends Controller
 
         return $this->buildPackageResponse($freshTransaction, $package, $statusCode);
     }
+
+    private function confirmWalletTopUp(Request $request, int $userId): JsonResponse
+    {
+        $validated = $request->validate([
+            'payment_method' => ['nullable', 'string', 'max:191'],
+            'intent_id' => ['nullable', 'string', 'max:191'],
+            'payment_intent_id' => ['nullable', 'string', 'max:191'],
+            'transaction_id' => ['nullable', 'integer', 'exists:payment_transactions,id'],
+            'payment_transaction_id' => ['nullable', 'integer', 'exists:payment_transactions,id'],
+        ]);
+
+        $transactionId = $validated['transaction_id'] ?? $validated['payment_transaction_id'] ?? null;
+        $intentId = $validated['intent_id'] ?? $validated['payment_intent_id'] ?? null;
+
+        if (! $transactionId && (! is_string($intentId) || trim($intentId) === '')) {
+            throw ValidationException::withMessages([
+                'transaction_id' => __('A payment transaction id is required.'),
+            ]);
+        }
+
+        $transactionQuery = PaymentTransaction::query()
+            ->where('user_id', $userId);
+
+        if ($transactionId) {
+            $transactionQuery->whereKey($transactionId);
+        } else {
+            $transactionQuery->where('idempotency_key', trim((string) $intentId));
+        }
+
+        $transaction = $transactionQuery->firstOrFail();
+
+        $transactionPayload = PaymentTransactionResource::make($transaction)->resolve();
+        $intentPayload = [
+            'id' => $transaction->idempotency_key,
+            'status' => $transaction->payment_status,
+            'amount' => (float) $transaction->amount,
+            'currency' => $transaction->currency,
+            'payment_transaction_id' => $transaction->getKey(),
+            'metadata' => [
+                'purpose' => ManualPaymentRequest::PAYABLE_TYPE_WALLET_TOP_UP,
+            ],
+        ];
+
+        return response()->json([
+            'message' => __('Payment confirmation received.'),
+            'status' => $transaction->payment_status,
+            'payment_transaction_id' => $transaction->getKey(),
+            'payment_intent_id' => $transaction->idempotency_key,
+            'payment_transaction' => $transactionPayload,
+            'payment_intent' => $intentPayload,
+        ]);
+    }
+
 
 
 
