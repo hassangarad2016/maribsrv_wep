@@ -30,7 +30,7 @@ class ServiceManagerAuthorizationTest extends TestCase
 
         foreach ([
             'service-list',
-            'service-edit',
+            'service-update',
             'service-delete',
             'service-managers-manage',
             'service-requests-list',

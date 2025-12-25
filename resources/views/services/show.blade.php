@@ -19,7 +19,7 @@
                                 <i class="bi bi-arrow-left"></i> {{ __('services.buttons.back_to_services') }}
                             </a>
                         </li>
-                        @can('service-edit')
+                        @can('service-update')
                         <li class="breadcrumb-item">
                             <a href="{{ route('services.edit', $service->id) }}" class="btn btn-primary">
                                 <i class="bi bi-pencil"></i> {{ __('services.buttons.edit') }}

@@ -69,7 +69,7 @@
 
     $servicePermissions = [
         'view' => auth()->user()?->can('service-list') ?? false,
-        'edit' => auth()->user()?->can('service-edit') ?? false,
+        'edit' => auth()->user()?->can('service-update') ?? false,
         'delete' => auth()->user()?->can('service-delete') ?? false,
         'manageRequests' => auth()->user()?->can('service-requests-list') ?? false,
         'requestsCreate' => auth()->user()?->can('service-requests-create') ?? false,

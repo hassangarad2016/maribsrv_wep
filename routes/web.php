@@ -199,7 +199,7 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
     Route::group([
         'prefix' => 'services',
         'as' => 'services.',
-        'middleware' => ['permission:service-list|service-create|service-edit|service-delete|service-managers-manage']
+        'middleware' => ['permission:service-list|service-create|service-update|service-delete|service-managers-manage']
     ], function () {
         Route::get('/', [ServiceController::class, 'index'])->name('index');
         Route::get('/list', [ServiceController::class, 'list'])->name('list');
@@ -397,7 +397,7 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
     Route::group([
         'prefix' => 'wifi',
         'as' => 'wifi.',
-        'middleware' => ['permission:service-list|service-create|service-edit|service-delete'],
+        'middleware' => ['permission:service-list|service-create|service-update|service-delete'],
     ], function () {
         Route::get('networks', [WifiOwnerNetworkController::class, 'index'])->name('networks.index');
         Route::post('networks', [WifiOwnerNetworkController::class, 'store'])->name('networks.store');

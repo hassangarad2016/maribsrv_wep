@@ -822,7 +822,7 @@ public function store(Request $request)
      |=========================================================================*/
     public function edit(Service $service)
     {
-        ResponseService::noPermissionThenRedirect('service-edit');
+        ResponseService::noPermissionThenRedirect('service-update');
 
         $this->ensureServiceAccessible($service);
 
@@ -858,7 +858,7 @@ public function store(Request $request)
  |=========================================================================*/
 public function update(Request $request, Service $service)
 {
-    ResponseService::noPermissionThenSendJson('service-edit');
+    ResponseService::noPermissionThenSendJson('service-update');
     $this->ensureServiceAccessible($service);
 
     $rules = [
