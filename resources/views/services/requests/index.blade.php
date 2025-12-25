@@ -4,7 +4,7 @@
     {{ __('services.titles.requests') }}
 @endsection
 
-@section('page-style')
+@section('css')
 <style>
     .service-requests-page {
         background: linear-gradient(180deg, rgba(13, 110, 253, 0.07), rgba(13, 110, 253, 0.02));
