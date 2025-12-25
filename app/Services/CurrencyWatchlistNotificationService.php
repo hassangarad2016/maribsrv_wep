@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\NotificationFrequency;
 use App\Models\CurrencyRate;
+use App\Models\CurrencyRateChangeLog;
 use App\Models\CurrencyRateQuote;
 use App\Notifications\CurrencyRateUpdatedNotification;
 use Illuminate\Support\Collection;
@@ -114,13 +115,15 @@ class CurrencyWatchlistNotificationService
             return;
         }
 
+        $changeSignals = $this->resolveChangeSignals($quoteCollection, $currencyId);
+
         $quotesByCode = $quoteCollection
             ->filter(static fn (array $quote): bool => !empty($quote['governorate_code']))
             ->keyBy(static fn (array $quote): string => $quote['governorate_code']);
 
         $defaultQuote = $quoteCollection->firstWhere('is_default', true) ?? $quoteCollection->first();
 
-        $preferences->each(function (UserPreference $preference) use ($currency, $quotesByCode, $defaultQuote, $currencyId): void {
+        $preferences->each(function (UserPreference $preference) use ($currency, $quotesByCode, $defaultQuote, $currencyId, $changeSignals): void {
             $user = $preference->user;
 
             if (!$user) {
@@ -154,14 +157,31 @@ class CurrencyWatchlistNotificationService
                 return;
             }
 
-            Notification::send($user, new CurrencyRateUpdatedNotification(
-                currencyId: $currency->getKey(),
-                currencyName: $currency->currency_name,
-                governorateId: $selectedQuote['governorate_id'],
-                governorateName: $selectedQuote['governorate_name'],
-                sellPrice: $selectedQuote['sell_price'],
-                buyPrice: $selectedQuote['buy_price']
-            ));
+            $signal = $changeSignals[$selectedQuote['governorate_id']] ?? null;
+            $notification = $signal
+                ? new CurrencyRateUpdatedNotification(
+                    currencyId: $currency->getKey(),
+                    currencyName: $currency->currency_name,
+                    governorateId: $selectedQuote['governorate_id'],
+                    governorateName: $selectedQuote['governorate_name'],
+                    sellPrice: $selectedQuote['sell_price'],
+                    buyPrice: $selectedQuote['buy_price'],
+                    changePercent: $signal['percent'],
+                    changeDirection: $signal['direction'],
+                    notificationType: 'currency_rate_spike',
+                    titleKey: 'notifications.currency.spike.title',
+                    bodyKey: 'notifications.currency.spike.body'
+                )
+                : new CurrencyRateUpdatedNotification(
+                    currencyId: $currency->getKey(),
+                    currencyName: $currency->currency_name,
+                    governorateId: $selectedQuote['governorate_id'],
+                    governorateName: $selectedQuote['governorate_name'],
+                    sellPrice: $selectedQuote['sell_price'],
+                    buyPrice: $selectedQuote['buy_price']
+                );
+
+            Notification::send($user, $notification);
 
             $this->rememberNotification($frequency, $user->getKey(), $currencyId);
         });
@@ -217,5 +237,127 @@ class CurrencyWatchlistNotificationService
         return sprintf('currency-watchlist:%d:%d', $userId, $currencyId);
     }
 
+    /**
+     * @param Collection<int, array{
+     *     governorate_id: int,
+     *     governorate_code: string|null,
+     *     governorate_name: string|null,
+     *     sell_price: string|null,
+     *     buy_price: string|null,
+     *     is_default: bool
+     * }> $quoteCollection
+     * @return array<int, array{percent: float, direction: string}>
+     */
+    private function resolveChangeSignals(Collection $quoteCollection, int $currencyId): array
+    {
+        $enabled = (bool) config('market-notifications.currency.spike_enabled', false);
+        $threshold = (float) config('market-notifications.currency.spike_percent', 0);
+        $windowMinutes = (int) config('market-notifications.currency.spike_window_minutes', 0);
+
+        if (!$enabled || $threshold <= 0 || $windowMinutes <= 0) {
+            return [];
+        }
+
+        $governorateIds = $quoteCollection
+            ->pluck('governorate_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($governorateIds)) {
+            return [];
+        }
+
+        $since = now()->subMinutes($windowMinutes);
+
+        $logs = CurrencyRateChangeLog::query()
+            ->where('currency_rate_id', $currencyId)
+            ->whereIn('governorate_id', $governorateIds)
+            ->where('change_type', 'updated')
+            ->where('changed_at', '>=', $since)
+            ->orderByDesc('changed_at')
+            ->get()
+            ->groupBy('governorate_id');
+
+        $signals = [];
+
+        foreach ($logs as $governorateId => $entries) {
+            $entry = $entries->first();
+            if (!$entry) {
+                continue;
+            }
+
+            $signal = $this->buildChangeSignal($entry->previous_values, $entry->new_values, $threshold);
+
+            if ($signal !== null) {
+                $signals[(int) $governorateId] = $signal;
+            }
+        }
+
+        return $signals;
+    }
+
+    /**
+     * @param array<string, mixed>|null $previous
+     * @param array<string, mixed>|null $current
+     * @return array{percent: float, direction: string}|null
+     */
+    private function buildChangeSignal(?array $previous, ?array $current, float $threshold): ?array
+    {
+        if (empty($previous) || empty($current)) {
+            return null;
+        }
+
+        $sellChange = $this->calculatePercentChange($previous['sell_price'] ?? null, $current['sell_price'] ?? null);
+        $buyChange = $this->calculatePercentChange($previous['buy_price'] ?? null, $current['buy_price'] ?? null);
+
+        $candidates = [];
+
+        if ($sellChange !== null) {
+            $candidates[] = $sellChange;
+        }
+
+        if ($buyChange !== null) {
+            $candidates[] = $buyChange;
+        }
+
+        if (empty($candidates)) {
+            return null;
+        }
+
+        $selected = null;
+
+        foreach ($candidates as $change) {
+            if ($selected === null || abs($change) > abs($selected)) {
+                $selected = $change;
+            }
+        }
+
+        if ($selected === null || abs($selected) < $threshold) {
+            return null;
+        }
+
+        return [
+            'percent' => round(abs($selected), 2),
+            'direction' => $selected > 0 ? 'up' : ($selected < 0 ? 'down' : 'flat'),
+        ];
+    }
+
+    private function calculatePercentChange(?string $previous, ?string $current): ?float
+    {
+        if ($previous === null || $current === null) {
+            return null;
+        }
+
+        $previousValue = (float) $previous;
+        $currentValue = (float) $current;
+
+        if ($previousValue <= 0) {
+            return null;
+        }
+
+        return (($currentValue - $previousValue) / $previousValue) * 100;
+    }
 
 }

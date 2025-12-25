@@ -16,7 +16,12 @@ class CurrencyRateUpdatedNotification extends Notification
         public readonly int $governorateId,
         public readonly ?string $governorateName,
         public readonly ?string $sellPrice,
-        public readonly ?string $buyPrice
+        public readonly ?string $buyPrice,
+        public readonly ?float $changePercent = null,
+        public readonly ?string $changeDirection = null,
+        public readonly ?string $notificationType = null,
+        public readonly ?string $titleKey = null,
+        public readonly ?string $bodyKey = null
     ) {
     }
 
@@ -27,15 +32,20 @@ class CurrencyRateUpdatedNotification extends Notification
 
     public function toFcm(object $notifiable): array
     {
-        $title = __('notifications.currency.updated.title');
+        $title = __($this->titleKey ?? 'notifications.currency.updated.title');
 
         $governorateLabel = $this->governorateName
             ?: __('notifications.currency.updated.governorate_fallback');
-        $body = __('notifications.currency.updated.body', [
+        $directionLabel = $this->changeDirection
+            ? __('notifications.currency.spike.direction.' . $this->changeDirection)
+            : null;
+        $body = __($this->bodyKey ?? 'notifications.currency.updated.body', [
 
 
             'currency' => $this->currencyName,
             'governorate' => $governorateLabel,
+            'direction' => $directionLabel,
+            'percent' => $this->formatPercent($this->changePercent),
         ]);
 
         $priceSegments = [];
@@ -55,7 +65,7 @@ class CurrencyRateUpdatedNotification extends Notification
         return [
             'title' => $title,
             'body' => $body,
-            'type' => 'currency_rate_updated',
+            'type' => $this->notificationType ?? 'currency_rate_updated',
             'data' => [
                 'entity' => 'currency',
                 'entity_id' => $this->currencyId,
@@ -63,7 +73,20 @@ class CurrencyRateUpdatedNotification extends Notification
                 'governorate_id' => $this->governorateId,
                 'sell_price' => $this->sellPrice,
                 'buy_price' => $this->buyPrice,
+                'change_percent' => $this->changePercent,
+                'change_direction' => $this->changeDirection,
             ],
         ];
+    }
+
+    private function formatPercent(?float $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $formatted = number_format($value, 2, '.', '');
+
+        return rtrim(rtrim($formatted, '0'), '.');
     }
 }

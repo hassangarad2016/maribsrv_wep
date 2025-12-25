@@ -867,8 +867,7 @@
     "item.notifications.blocked.body": "طھظ… ط¥ظٹظ‚ط§ظپ ط¥ط¹ظ„ط§ظ†ظƒ \":item\". طھظˆط§طµظ„ ظ…ط¹ظ†ط§ ظ„ظ…ط¹ط±ظپط© ط§ظ„طھظپط§طµظٹظ„.",
     "item.notifications.fallback_item_name": "ظ‡ط°ط§ ط§ظ„ط¥ط¹ظ„ط§ظ†",
     "service.notifications.review_under_review.title": "تعليقك قيد المراجعة",
-    "service.notifications.review_under_review.body": "تعليقك على \":service\" يخضع للمراجعة. سنبلغك بعد انتهاء المراجعة."
-,
+    "service.notifications.review_under_review.body": "تعليقك على \":service\" يخضع للمراجعة. سنبلغك بعد انتهاء المراجعة.",
     "notifications.currency.created.title": "عملة جديدة",
     "notifications.currency.created.body": "تمت إضافة عملة جديدة: :currency.",
     "notifications.currency.created.default_governorate": "المنطقة الافتراضية: :governorate.",
@@ -885,7 +884,9 @@
     "notifications.metal.updated.governorate_fallback": "المنطقة الافتراضية",
     "notifications.metal.price.sell": "سعر البيع: :value",
     "notifications.metal.price.buy": "سعر الشراء: :value"
-}\n
+}
+
+
 
 
 
