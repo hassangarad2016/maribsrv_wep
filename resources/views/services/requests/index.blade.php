@@ -7,184 +7,94 @@
 @section('page-style')
 <style>
     .service-requests-page {
-        --ink: #0f172a;
-        --muted: #64748b;
-        --brand: #1d4f7a;
-        --brand-strong: #0b1b2b;
-        --accent: #f59e0b;
-        --card-border: rgba(15, 23, 42, 0.08);
-        --card-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-        color: var(--ink);
+        color: #212529;
     }
     .service-requests-page .card {
-        border-radius: 1.25rem;
-        border: 1px solid var(--card-border);
-        box-shadow: var(--card-shadow);
+        border-radius: 1rem;
+        border: 1px solid rgba(15, 23, 42, 0.08);
     }
-
-    .service-requests-hero {
-        position: relative;
-        overflow: hidden;
-        border-radius: 1.5rem;
-        padding: 2rem;
-        margin-bottom: 1.75rem;
-        color: #f8fafc;
-        background: linear-gradient(135deg, #0b1b2b 0%, #153456 45%, #1c4f7f 100%);
-    }
-    .service-requests-hero::before {
-        content: '';
-        position: absolute;
-        top: -120px;
-        right: -120px;
-        width: 260px;
-        height: 260px;
-        background: radial-gradient(circle, rgba(245, 158, 11, 0.35), rgba(245, 158, 11, 0));
-    }
-    .service-requests-hero::after {
-        content: '';
-        position: absolute;
-        bottom: -140px;
-        left: -140px;
-        width: 320px;
-        height: 320px;
-        background: radial-gradient(circle, rgba(56, 189, 248, 0.3), rgba(56, 189, 248, 0));
-    }
-    .service-requests-hero__content {
-        position: relative;
-        z-index: 1;
+    .service-requests-header {
         display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-    .service-requests-hero__title h3 {
-        margin: 0 0 0.45rem;
-        font-size: 1.75rem;
-        font-weight: 700;
-    }
-    .service-requests-hero__title p {
-        margin: 0;
-        color: rgba(248, 250, 252, 0.75);
-        font-size: 1rem;
-    }
-    .service-requests-hero__meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-    }
-
-    .meta-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.4rem 0.85rem;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.16);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    .meta-chip__label {
-        font-size: 0.75rem;
-        letter-spacing: 0.02em;
-        color: rgba(248, 250, 252, 0.75);
-    }
-    .meta-chip__value {
-        font-weight: 600;
-        font-size: 0.95rem;
-        color: #f8fafc;
-    }
-    .meta-chip--light {
-        background: #ffffff;
-        border-color: rgba(15, 23, 42, 0.1);
-    }
-    .meta-chip--light .meta-chip__label {
-        color: var(--muted);
-    }
-    .meta-chip--light .meta-chip__value {
-        color: var(--ink);
-    }
-
-    .service-requests-filters {
-        margin-bottom: 1.5rem;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
-    }
-    .service-requests-filters .card-body {
-        padding: 1.6rem;
-    }
-    .service-requests-filters__header {
-        display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
         gap: 1rem;
-        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
     }
-    .service-requests-filters__title {
+    .service-requests-title {
         margin: 0;
-        font-size: 1.1rem;
+        font-size: 1.15rem;
         font-weight: 700;
     }
-    .service-requests-filters__hint {
+    .service-requests-subtitle {
         margin: 0.25rem 0 0;
-        color: var(--muted);
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+    .service-requests-header__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .service-requests-header__meta .badge {
+        padding: 0.45rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .service-requests-filters {
+        margin-bottom: 1.25rem;
+    }
+    .service-requests-filters .card-body {
+        padding: 1.5rem;
+    }
+    .service-requests-filters__hint {
+        margin: 0.75rem 0 0;
+        color: #6c757d;
         font-size: 0.95rem;
     }
 
     #filters select,
     #filters input {
-        height: 48px;
-        font-size: 1rem;
-        padding: 10px 14px;
-        border-radius: 0.85rem;
-        border: 1px solid rgba(15, 23, 42, 0.12);
+        height: 44px;
+        font-size: 0.95rem;
+        padding: 8px 12px;
+        border-radius: 0.6rem;
+        border: 1px solid rgba(15, 23, 42, 0.15);
         background-color: #ffffff;
     }
     #filters label {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         font-weight: 600;
-        margin-bottom: 8px;
-        color: var(--ink);
+        margin-bottom: 6px;
     }
     #filters .form-control-plaintext {
-        padding: 10px 14px;
+        padding: 8px 12px;
         background: rgba(15, 23, 42, 0.04);
-        border-radius: 0.85rem;
+        border-radius: 0.6rem;
     }
     #filters .input-group {
         gap: 0.5rem;
     }
     #filters .input-group > .btn {
-        height: 48px;
-        border-radius: 0.85rem;
+        height: 44px;
+        border-radius: 0.6rem;
     }
     #table_list { width: 100%; }
 
-    .requests-stats-row { margin-bottom: 1.75rem; }
+    .requests-stats-row { margin-bottom: 1.5rem; }
     .requests-stat-card {
         --stat-color: #0d6efd;
-        --stat-soft: rgba(13, 110, 253, 0.35);
-        --stat-bg-start: rgba(13, 110, 253, 0.16);
-        --stat-bg-end: rgba(13, 110, 253, 0.05);
-        --stat-border: rgba(13, 110, 253, 0.2);
-        border-radius: 1.2rem;
-        padding: 1.35rem 1.4rem;
-        background: linear-gradient(135deg, var(--stat-bg-start), var(--stat-bg-end));
-        border: 1px solid var(--stat-border);
-        box-shadow: 0 18px 38px rgba(15, 23, 42, 0.12);
+        --stat-soft: rgba(13, 110, 253, 0.15);
+        border-radius: 0.95rem;
+        padding: 1.1rem 1.25rem;
+        background: #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 0.85rem;
         position: relative;
-        overflow: hidden;
         min-height: 100%;
-    }
-
-
-    .requests-stat-card::after {
-        content: '';
-        position: absolute;
-        inset: auto 16px -40px auto;
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.22);
     }
     .requests-stat-card > * {
         position: relative;
@@ -200,13 +110,13 @@
         width: 48px;
         height: 48px;
         border-radius: 50%;
-        background-color: rgba(255, 255, 255, 0.65);
+        background-color: var(--stat-soft);
         color: var(--stat-color);
         display: inline-flex;
         align-items: center;
         justify-content: center;
         font-size: 1.6rem;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(15, 23, 42, 0.06);
     }
     .requests-stat-card__figures {
         display: flex;
@@ -240,7 +150,7 @@
     .requests-stat-card__indicator-share {
         padding: 0.15rem 0.65rem;
         border-radius: 999px;
-        background-color: rgba(255, 255, 255, 0.7);
+        background-color: var(--stat-soft);
         color: var(--stat-color);
         font-weight: 600;
         font-size: 0.85rem;
@@ -249,7 +159,7 @@
         width: 100%;
         height: 6px;
         border-radius: 999px;
-        background-color: rgba(255, 255, 255, 0.55);
+        background-color: rgba(15, 23, 42, 0.08);
         overflow: hidden;
     }
     .requests-stat-card__progress-bar {
@@ -261,38 +171,23 @@
     }
     .requests-stat-card--warning {
         --stat-color: #d39e00;
-        --stat-soft: rgba(211, 158, 0, 0.38);
-        --stat-bg-start: rgba(211, 158, 0, 0.2);
-        --stat-bg-end: rgba(211, 158, 0, 0.06);
-        --stat-border: rgba(211, 158, 0, 0.28);
+        --stat-soft: rgba(211, 158, 0, 0.18);
     }
     .requests-stat-card--success {
         --stat-color: #198754;
-        --stat-soft: rgba(25, 135, 84, 0.35);
-        --stat-bg-start: rgba(25, 135, 84, 0.18);
-        --stat-bg-end: rgba(25, 135, 84, 0.06);
-        --stat-border: rgba(25, 135, 84, 0.28);
+        --stat-soft: rgba(25, 135, 84, 0.18);
     }
     .requests-stat-card--danger {
         --stat-color: #dc3545;
-        --stat-soft: rgba(220, 53, 69, 0.35);
-        --stat-bg-start: rgba(220, 53, 69, 0.18);
-        --stat-bg-end: rgba(220, 53, 69, 0.06);
-        --stat-border: rgba(220, 53, 69, 0.28);
+        --stat-soft: rgba(220, 53, 69, 0.18);
     }
     .requests-stat-card--info {
         --stat-color: #0dcaf0;
-        --stat-soft: rgba(13, 202, 240, 0.35);
-        --stat-bg-start: rgba(13, 202, 240, 0.2);
-        --stat-bg-end: rgba(13, 202, 240, 0.06);
-        --stat-border: rgba(13, 202, 240, 0.28);
+        --stat-soft: rgba(13, 202, 240, 0.18);
     }
     .requests-stat-card--primary {
         --stat-color: #0d6efd;
-        --stat-soft: rgba(13, 110, 253, 0.35);
-        --stat-bg-start: rgba(13, 110, 253, 0.16);
-        --stat-bg-end: rgba(13, 110, 253, 0.05);
-        --stat-border: rgba(13, 110, 253, 0.2);
+        --stat-soft: rgba(13, 110, 253, 0.18);
     }
     @media (max-width: 576px) {
         .requests-stat-card {
@@ -344,16 +239,16 @@
     }
     .service-requests-table__hint {
         margin: 0.25rem 0 0;
-        color: var(--muted);
+        color: #6c757d;
         font-size: 0.95rem;
     }
     .service-requests-table .table {
         margin-bottom: 0;
     }
     .service-requests-table .table thead th {
-        background: #0f172a;
-        color: #f8fafc;
-        border-bottom: none;
+        background: #f8f9fa;
+        color: #212529;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
         padding: 1rem;
         font-weight: 600;
     }
@@ -365,13 +260,7 @@
     }
 
     @media (max-width: 768px) {
-        .service-requests-hero {
-            padding: 1.5rem;
-        }
-        .service-requests-hero__title h3 {
-            font-size: 1.5rem;
-        }
-        .service-requests-filters__header,
+        .service-requests-header,
         .service-requests-table__header {
             flex-direction: column;
             align-items: flex-start;
@@ -443,51 +332,34 @@
             ];
         @endphp
 
-        <div class="service-requests-hero">
-            <div class="service-requests-hero__content">
-                <div class="service-requests-hero__title">
-                    <h3>@yield('title')</h3>
-                    <p>{{ __('services.messages.requests_subtitle') }}</p>
-                </div>
-                <div class="service-requests-hero__meta">
-                    <div class="meta-chip">
-                        <span class="meta-chip__label">{{ __('services.labels.category') }}</span>
-                        <span class="meta-chip__value">
+        <div class="card service-requests-filters">
+            <div class="card-body">
+                <div class="service-requests-header">
+                    <div>
+                        <h5 class="service-requests-title">@yield('title')</h5>
+                        <p class="service-requests-subtitle">{{ __('services.messages.requests_subtitle') }}</p>
+                    </div>
+                    <div class="service-requests-header__meta">
+                        <span class="badge bg-light-primary">
+                            {{ __('services.labels.category') }}:
                             @if($selectedCategory)
                                 {{ $selectedCategory->name }}
                             @else
                                 {{ __('services.filters.all_categories') }}
                             @endif
                         </span>
-                    </div>
-                    <div class="meta-chip">
-                        <span class="meta-chip__label">{{ __('services.labels.total_requests') }}</span>
-                        <span class="meta-chip__value">{{ number_format($totalRequests) }}</span>
-                    </div>
-                    <div class="meta-chip">
-                        <span class="meta-chip__label">{{ __('services.labels.under_review') }}</span>
-                        <span class="meta-chip__value">{{ number_format((int) ($stats['review'] ?? 0)) }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card service-requests-filters">
-            <div class="card-body">
-                <div class="service-requests-filters__header">
-                    <div>
-                        <h5 class="service-requests-filters__title">{{ __('services.buttons.filter') }}</h5>
-                        <p class="service-requests-filters__hint">{{ __('services.messages.filters_hint') }}</p>
-                    </div>
-                    <div class="service-requests-filters__meta">
-                        <span class="meta-chip meta-chip--light">
-                            <span class="meta-chip__label">{{ __('services.labels.total_requests') }}</span>
-                            <span class="meta-chip__value">{{ number_format($totalRequests) }}</span>
+                        <span class="badge bg-light-secondary">
+                            {{ __('services.labels.total_requests') }}: {{ number_format($totalRequests) }}
+                        </span>
+                        <span class="badge bg-light-warning">
+                            {{ __('services.labels.under_review') }}: {{ number_format((int) ($stats['review'] ?? 0)) }}
                         </span>
                     </div>
                 </div>
 
-                <div id="filters" class="row g-3 align-items-end">
+                <p class="service-requests-filters__hint">{{ __('services.messages.filters_hint') }}</p>
+
+                <div id="filters" class="row g-3 align-items-end mt-2">
                     <div class="col-sm-6 col-lg-3">
                         <label for="filter" class="d-block">{{ __('services.labels.status') }}</label>
                         <select class="form-control bootstrap-table-filter-control-status" id="filter">
@@ -809,5 +681,6 @@
     });
 </script>
 @endsection
+
 
 
