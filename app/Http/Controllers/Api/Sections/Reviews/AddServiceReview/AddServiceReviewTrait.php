@@ -183,7 +183,7 @@ trait AddServiceReviewTrait
                 'user_id'    => $user->id,
                 'rating'     => (int) $request->rating,
                 'review'     => $request->review !== null ? trim((string) $request->review) : null,
-                'status'     => ServiceReview::STATUS_PENDING,
+                'status'     => ServiceReview::STATUS_APPROVED,
             ])->load('user:id,name,profile');
 
             $this->notifyServiceOwnerAboutReview($service, $review, $user);

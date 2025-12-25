@@ -155,6 +155,8 @@ trait SetItemTotalClickTrait
             $validator = Validator::make($request->all(), [
                 'item_id' => 'required_without:service_id',
                 'service_id' => 'required_without:item_id',
+                'service_uid' => 'nullable|string',
+                'uid' => 'nullable|string',
             ]);
 
             if ($validator->fails()) {
@@ -163,13 +165,24 @@ trait SetItemTotalClickTrait
 
             $itemId = (int) $request->item_id;
             $serviceId = (int) $request->service_id;
+            $serviceUid = trim((string) ($request->service_uid ?? $request->uid ?? ''));
             $recorded = false;
+            $item = null;
+            $service = null;
 
             $department = strtolower((string) ($request->department ?? $request->type ?? ''));
             $forceService = $serviceId > 0 || in_array($department, ['service', 'services'], true);
 
             if ($serviceId > 0) {
                 $service = Service::find($serviceId);
+                if ($service) {
+                    $service->increment('views');
+                    $recorded = true;
+                }
+            }
+
+            if (!$recorded && $serviceUid !== '') {
+                $service = Service::where('service_uid', $serviceUid)->first();
                 if ($service) {
                     $service->increment('views');
                     $recorded = true;
@@ -204,7 +217,20 @@ trait SetItemTotalClickTrait
                 ResponseService::errorResponse(__('The selected item could not be found.'));
             }
 
-            ResponseService::successResponse(null, 'Update Successfully');
+            $payload = null;
+            if ($service) {
+                $payload = [
+                    'service_id' => (int) $service->id,
+                    'views' => (int) $service->views,
+                ];
+            } elseif ($item) {
+                $payload = [
+                    'item_id' => (int) $item->id,
+                    'clicks' => (int) $item->clicks,
+                ];
+            }
+
+            ResponseService::successResponse('Update Successfully', $payload);
         } catch (Throwable $th) {
             ResponseService::logErrorResponse($th, "API Controller -> setItemTotalClick");
             ResponseService::errorResponse();
