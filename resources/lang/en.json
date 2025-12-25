@@ -512,5 +512,15 @@
     "notifications.metal.updated.body": "Updated rates for :metal in :governorate.",
     "notifications.metal.updated.governorate_fallback": "the default region",
     "notifications.metal.price.sell": "Sell: :value",
-    "notifications.metal.price.buy": "Buy: :value"
+    "notifications.metal.price.buy": "Buy: :value",
+    "notifications.currency.spike.title": "Significant move in :currency",
+    "notifications.currency.spike.body": ":currency moved :direction by :percent% in :governorate.",
+    "notifications.currency.spike.direction.up": "up",
+    "notifications.currency.spike.direction.down": "down",
+    "notifications.currency.spike.direction.flat": "with no change",
+    "notifications.metal.spike.title": "Significant move in :metal",
+    "notifications.metal.spike.body": ":metal moved :direction by :percent% in :governorate.",
+    "notifications.metal.spike.direction.up": "up",
+    "notifications.metal.spike.direction.down": "down",
+    "notifications.metal.spike.direction.flat": "with no change"
 }

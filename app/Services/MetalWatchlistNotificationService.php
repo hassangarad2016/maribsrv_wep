@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\NotificationFrequency;
 use App\Models\MetalRate;
+use App\Models\MetalRateChangeLog;
 use App\Models\UserPreference;
 use App\Notifications\MetalRateCreatedNotification;
 use App\Notifications\MetalRateUpdatedNotification;
@@ -105,7 +106,9 @@ class MetalWatchlistNotificationService
             return;
         }
 
-        $preferences->each(function (UserPreference $preference) use ($metal, $defaultQuote, $metalId): void {
+        $changeSignals = $this->resolveChangeSignals($quoteCollection, $metalId);
+
+        $preferences->each(function (UserPreference $preference) use ($metal, $defaultQuote, $metalId, $changeSignals): void {
             $user = $preference->user;
 
             if (!$user) {
@@ -123,14 +126,31 @@ class MetalWatchlistNotificationService
                 return;
             }
 
-            Notification::send($user, new MetalRateUpdatedNotification(
-                metalId: $metal->getKey(),
-                metalName: $metal->display_name,
-                governorateId: $defaultQuote['governorate_id'],
-                governorateName: $defaultQuote['governorate_name'],
-                sellPrice: $defaultQuote['sell_price'],
-                buyPrice: $defaultQuote['buy_price']
-            ));
+            $signal = $changeSignals[$defaultQuote['governorate_id']] ?? null;
+            $notification = $signal
+                ? new MetalRateUpdatedNotification(
+                    metalId: $metal->getKey(),
+                    metalName: $metal->display_name,
+                    governorateId: $defaultQuote['governorate_id'],
+                    governorateName: $defaultQuote['governorate_name'],
+                    sellPrice: $defaultQuote['sell_price'],
+                    buyPrice: $defaultQuote['buy_price'],
+                    changePercent: $signal['percent'],
+                    changeDirection: $signal['direction'],
+                    notificationType: 'metal_rate_spike',
+                    titleKey: 'notifications.metal.spike.title',
+                    bodyKey: 'notifications.metal.spike.body'
+                )
+                : new MetalRateUpdatedNotification(
+                    metalId: $metal->getKey(),
+                    metalName: $metal->display_name,
+                    governorateId: $defaultQuote['governorate_id'],
+                    governorateName: $defaultQuote['governorate_name'],
+                    sellPrice: $defaultQuote['sell_price'],
+                    buyPrice: $defaultQuote['buy_price']
+                );
+
+            Notification::send($user, $notification);
 
             $this->rememberNotification($frequency, $user->getKey(), $metalId);
         });
@@ -262,5 +282,128 @@ class MetalWatchlistNotificationService
     private function makeThrottleKey(int $userId, int $metalId): string
     {
         return sprintf('metal-watchlist:%d:%d', $userId, $metalId);
+    }
+
+    /**
+     * @param Collection<int, array{
+     *     governorate_id: int,
+     *     governorate_code: string|null,
+     *     governorate_name: string|null,
+     *     sell_price: string|null,
+     *     buy_price: string|null,
+     *     is_default: bool
+     * }> $quoteCollection
+     * @return array<int, array{percent: float, direction: string}>
+     */
+    private function resolveChangeSignals(Collection $quoteCollection, int $metalId): array
+    {
+        $enabled = (bool) config('market-notifications.metal.spike_enabled', false);
+        $threshold = (float) config('market-notifications.metal.spike_percent', 0);
+        $windowMinutes = (int) config('market-notifications.metal.spike_window_minutes', 0);
+
+        if (!$enabled || $threshold <= 0 || $windowMinutes <= 0) {
+            return [];
+        }
+
+        $governorateIds = $quoteCollection
+            ->pluck('governorate_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($governorateIds)) {
+            return [];
+        }
+
+        $since = now()->subMinutes($windowMinutes);
+
+        $logs = MetalRateChangeLog::query()
+            ->where('metal_rate_id', $metalId)
+            ->whereIn('governorate_id', $governorateIds)
+            ->where('change_type', 'updated')
+            ->where('changed_at', '>=', $since)
+            ->orderByDesc('changed_at')
+            ->get()
+            ->groupBy('governorate_id');
+
+        $signals = [];
+
+        foreach ($logs as $governorateId => $entries) {
+            $entry = $entries->first();
+            if (!$entry) {
+                continue;
+            }
+
+            $signal = $this->buildChangeSignal($entry->previous_values, $entry->new_values, $threshold);
+
+            if ($signal !== null) {
+                $signals[(int) $governorateId] = $signal;
+            }
+        }
+
+        return $signals;
+    }
+
+    /**
+     * @param array<string, mixed>|null $previous
+     * @param array<string, mixed>|null $current
+     * @return array{percent: float, direction: string}|null
+     */
+    private function buildChangeSignal(?array $previous, ?array $current, float $threshold): ?array
+    {
+        if (empty($previous) || empty($current)) {
+            return null;
+        }
+
+        $sellChange = $this->calculatePercentChange($previous['sell_price'] ?? null, $current['sell_price'] ?? null);
+        $buyChange = $this->calculatePercentChange($previous['buy_price'] ?? null, $current['buy_price'] ?? null);
+
+        $candidates = [];
+
+        if ($sellChange !== null) {
+            $candidates[] = $sellChange;
+        }
+
+        if ($buyChange !== null) {
+            $candidates[] = $buyChange;
+        }
+
+        if (empty($candidates)) {
+            return null;
+        }
+
+        $selected = null;
+
+        foreach ($candidates as $change) {
+            if ($selected === null || abs($change) > abs($selected)) {
+                $selected = $change;
+            }
+        }
+
+        if ($selected === null || abs($selected) < $threshold) {
+            return null;
+        }
+
+        return [
+            'percent' => round(abs($selected), 2),
+            'direction' => $selected > 0 ? 'up' : ($selected < 0 ? 'down' : 'flat'),
+        ];
+    }
+
+    private function calculatePercentChange(?string $previous, ?string $current): ?float
+    {
+        if ($previous === null || $current === null) {
+            return null;
+        }
+
+        $previousValue = (float) $previous;
+        $currentValue = (float) $current;
+
+        if ($previousValue <= 0) {
+            return null;
+        }
+
+        return (($currentValue - $previousValue) / $previousValue) * 100;
     }
 }
