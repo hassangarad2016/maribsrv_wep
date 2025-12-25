@@ -361,7 +361,7 @@ class Item extends Model {
             return;
         }
 
-        $title = __('متجر :store أضاف منتجاً جديداً', ['store' => $store->name]);
+        $title = __('item.notifications.store_new_item.title', ['store' => $store->name]);
         $body = $this->name;
 
         NotificationService::sendFcmNotification(

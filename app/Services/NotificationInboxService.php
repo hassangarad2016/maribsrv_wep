@@ -53,6 +53,8 @@ class NotificationInboxService
         'booking',
         'chat',
         'chat.message',
+        'item',
+        'listing',
         'store',
         'merchant',
     ];

@@ -85,24 +85,7 @@ class Controller extends BaseController {
                     return;
                 }
 
-                $tokens = $this->resolveUserTokens($item->user_id);
-                if ($tokens === []) {
-                    return;
-                }
-
-                $statusSlug = $isActive ? 'active' : 'blocked';
-                $title = $isActive ? 'تم إعادة تفعيل إعلانك' : 'تم حظر إعلانك';
-                $body = $isActive
-                    ? 'تم إعادة تفعيل إعلانك بعد مراجعة البلاغ.'
-                    : 'تم حظر الإعلان أو الخدمة الخاصة بك نتيجة لتلقينا بلاغ معين.';
-
-                NotificationService::sendFcmNotification($tokens, $title, $body, 'item-status', [
-                    'entity'    => 'item-status',
-                    'entity_id' => $item->id . '-' . $statusSlug,
-                    'status'    => $statusSlug,
-                    'item_id'   => $item->id,
-                    'active'    => $isActive,
-                ]);
+                app(\App\Services\ItemNotificationService::class)->notifyVisibilityChange($item, $isActive);
 
                 return;
             }
