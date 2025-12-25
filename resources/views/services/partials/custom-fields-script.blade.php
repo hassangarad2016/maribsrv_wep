@@ -31,8 +31,8 @@
     const $builderIconPreview = $('#cf_icon_preview');
     const $builderIconClear = $('#cf_icon_clear');
     const addFieldLabel = $btnPushField.length ? $btnPushField.html() : '';
-    const updateFieldLabel = '<i class="bi bi-check-circle"></i> {{ __('Update Field') }}';
-    const noIconText = @json(__('No icon selected'));
+    const updateFieldLabel = '<i class="bi bi-check-circle"></i> {{ __('services.buttons.update_field') }}';
+    const noIconText = @json(__('services.messages.no_icon_selected'));
 
     const initialBuilderIconState = () => ({
       file: null,
@@ -365,7 +365,7 @@
           }
           case 'dropdown': {
             html += `<select id="${fieldId}" name="custom_fields[${key}]" class="form-select" ${requiredAttr}>`;
-            html += `<option value="">${escapeHtml('{{ __("Select") }}')}</option>`;
+            html += `<option value="">${escapeHtml('{{ __('services.labels.select_option') }}')}</option>`;
             (row.values || []).forEach(function(opt){
               const optVal = (opt || '').toString();
               const selected = value === optVal ? 'selected' : '';
@@ -395,7 +395,7 @@
           }
           case 'color': {
             html += `<select id="${fieldId}" name="custom_fields[${key}]" class="form-select" ${requiredAttr}>`;
-            html += `<option value="">${escapeHtml('{{ __("Select") }}')}</option>`;
+            html += `<option value="">${escapeHtml('{{ __('services.labels.select_option') }}')}</option>`;
             (row.colors || row.values || []).forEach(function(opt){
               const optVal = (opt || '').toString().toUpperCase().replace('#','');
               const selected = (value || '').toString().toUpperCase().replace('#','') === optVal ? 'selected' : '';
@@ -408,7 +408,7 @@
           case 'fileinput': {
             html += `<input type="file" class="form-control" id="${fieldId}" name="custom_field_files[${key}]" ${requiredAttr}>`;
             if (existingFileUrl) {
-              html += `<div class="form-text"><a href="${escapeHtml(existingFileUrl)}" target="_blank">{{ __('View current file') }}</a></div>`;
+              html += `<div class="form-text"><a href="${escapeHtml(existingFileUrl)}" target="_blank">{{ __('services.buttons.view_current_file') }}</a></div>`;
             }
             break;
           }
@@ -511,7 +511,7 @@
 
       let $clear = $cell.find('.cf-row-icon-clear');
       if (!$clear.length) {
-        $clear = $('<button type="button" class="btn btn-sm btn-outline-danger w-100 mt-1 cf-row-icon-clear">{{ __('Remove Icon') }}</button>');
+        $clear = $('<button type="button" class="btn btn-sm btn-outline-danger w-100 mt-1 cf-row-icon-clear">{{ __('services.buttons.remove_icon') }}</button>');
         $cell.append($clear);
       }
 
@@ -522,7 +522,7 @@
       if (previewUrl) {
         $preview.html(`<img src="${escapeHtml(previewUrl)}" alt="icon" class="img-thumbnail" style="max-width:48px; max-height:48px;">`);
       } else {
-        $preview.html(`<span class="text-muted small">{{ __('No icon') }}</span>`);
+        $preview.html(`<span class="text-muted small">{{ __('services.messages.no_icon') }}</span>`);
       }
 
       if (row.__iconFile && $input.length && typeof DataTransfer !== 'undefined') {
@@ -572,7 +572,7 @@
       $tbody.empty();
 
       if (!rows.length) {
-        $tbody.append(`<tr class="cf-empty"><td colspan="7" class="text-center text-muted">{{ __('No custom fields added yet') }}</td></tr>`);
+        $tbody.append(`<tr class="cf-empty"><td colspan="7" class="text-center text-muted">{{ __('services.messages.no_custom_fields') }}</td></tr>`);
         renderValueInputs();
         return;
       }
@@ -585,8 +585,8 @@
         ensureRowIcon(r);
         const key = ensureRowKey(r);
         const activeBadge = r.active === false
-          ? '<span class="badge bg-secondary">{{ __('Inactive') }}</span>'
-          : '<span class="badge bg-success">{{ __('Active') }}</span>';
+          ? '<span class="badge bg-secondary">{{ __('services.labels.inactive') }}</span>'
+          : '<span class="badge bg-success">{{ __('services.labels.active') }}</span>';
 
         const tr = $(`
           <tr data-i="${i}" data-key="${escapeHtml(key)}">

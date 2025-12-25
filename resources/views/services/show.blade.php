@@ -2,7 +2,7 @@
 @extends('layouts.main')
 
 @section('title')
-    {{ __('Service Details') }}
+    {{ __('services.titles.details') }}
 @endsection
 
 @section('page-title')
@@ -16,13 +16,13 @@
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
                             <a href="{{ route('services.index') }}" class="btn btn-outline-primary">
-                                <i class="bi bi-arrow-left"></i> {{ __('Back to Services') }}
+                                <i class="bi bi-arrow-left"></i> {{ __('services.buttons.back_to_services') }}
                             </a>
                         </li>
                         @can('service-edit')
                         <li class="breadcrumb-item">
                             <a href="{{ route('services.edit', $service->id) }}" class="btn btn-primary">
-                                <i class="bi bi-pencil"></i> {{ __('Edit') }}
+                                <i class="bi bi-pencil"></i> {{ __('services.buttons.edit') }}
                             </a>
                         </li>
                         @endcan
@@ -43,19 +43,19 @@
                 {{-- الصورة والأيقونة --}}
                 <div class="col-md-4">
                     <div class="mb-3">
-                        <label class="form-label d-block">{{ __('Image') }}</label>
+                        <label class="form-label d-block">{{ __('services.labels.image') }}</label>
                         @if($service->image)
                             <img src="{{ asset('storage/' . $service->image) }}" alt="image" class="img-fluid rounded border" style="max-height: 200px">
                         @else
-                            <span class="text-muted">{{ __('No image') }}</span>
+                            <span class="text-muted">{{ __('services.messages.no_image') }}</span>
                         @endif
                     </div>
                     <div>
-                        <label class="form-label d-block">{{ __('Icon') }}</label>
+                        <label class="form-label d-block">{{ __('services.labels.icon') }}</label>
                         @if($service->icon)
                             <img src="{{ asset('storage/' . $service->icon) }}" alt="icon" class="img-thumbnail rounded" style="height: 80px">
                         @else
-                            <span class="text-muted">{{ __('No icon') }}</span>
+                            <span class="text-muted">{{ __('services.messages.no_icon') }}</span>
                         @endif
                     </div>
                 </div>
@@ -67,60 +67,60 @@
                         <div class="col-12">
                             <h5 class="mb-1">{{ $service->title }}</h5>
                             <div class="small text-muted">
-                                {{ __('ID') }}: {{ $service->id }}
+                                {{ __('services.labels.id') }}: {{ $service->id }}
                                 @if(!empty($service->service_uid))
-                                    &nbsp; • &nbsp; {{ __('UID') }}: <code>{{ $service->service_uid }}</code>
+                                    &nbsp; &middot; &nbsp; {{ __('services.labels.uid') }}: <code>{{ $service->service_uid }}</code>
                                 @endif
                             </div>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label d-block">{{ __('Category') }}</label>
-                            <div>{{ optional($service->category)->name }} @if($service->category_id) <span class="text-muted">(ID: {{ $service->category_id }})</span>@endif</div>
+                            <label class="form-label d-block">{{ __('services.labels.category') }}</label>
+                            <div>{{ optional($service->category)->name }} @if($service->category_id) <span class="text-muted">({{ __('services.labels.id') }}: {{ $service->category_id }})</span>@endif</div>
                         </div>
 
 
 
                         <div class="col-md-6">
-                            <label class="form-label d-block">{{ __('Service Owner') }}</label>
+                            <label class="form-label d-block">{{ __('services.labels.service_owner') }}</label>
                             @if($service->owner)
-                                <div>{{ $service->owner->name }} <span class="text-muted">(ID: {{ $service->owner->id }})</span></div>
+                                <div>{{ $service->owner->name }} <span class="text-muted">({{ __('services.labels.id') }}: {{ $service->owner->id }})</span></div>
                                 @if($service->owner->email)
                                     <div class="small text-muted">{{ $service->owner->email }}</div>
                                 @endif
                             @else
-                                <span class="text-muted">{{ __('No owner assigned') }}</span>
+                                <span class="text-muted">{{ __('services.messages.no_owner') }}</span>
                             @endif
                         </div>
 
 
                         <div class="col-md-6">
-                            <label class="form-label d-block">{{ __('Status') }}</label>
+                            <label class="form-label d-block">{{ __('services.labels.status') }}</label>
                             @if($service->status)
-                                <span class="badge bg-success">{{ __('Active') }}</span>
+                                <span class="badge bg-success">{{ __('services.labels.active') }}</span>
                             @else
-                                <span class="badge bg-danger">{{ __('Inactive') }}</span>
+                                <span class="badge bg-danger">{{ __('services.labels.inactive') }}</span>
                             @endif
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label d-block">{{ __('Is Main Service') }}</label>
+                            <label class="form-label d-block">{{ __('services.labels.is_main_service') }}</label>
                             @if($service->is_main)
-                                <span class="badge bg-primary">{{ __('Yes') }}</span>
+                                <span class="badge bg-primary">{{ __('services.labels.yes') }}</span>
                             @else
-                                <span class="badge bg-secondary">{{ __('No') }}</span>
+                                <span class="badge bg-secondary">{{ __('services.labels.no') }}</span>
                             @endif
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label d-block">{{ __('Views') }}</label>
+                            <label class="form-label d-block">{{ __('services.labels.views') }}</label>
                             <div>{{ $service->views ?? 0 }}</div>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label d-block">{{ __('Expiry Date') }}</label>
+                            <label class="form-label d-block">{{ __('services.labels.expiry_date') }}</label>
                             <div>
-                                {{ $service->expiry_date ? \Illuminate\Support\Carbon::parse($service->expiry_date)->format('Y-m-d') : __('No expiry') }}
+                                {{ $service->expiry_date ? \Illuminate\Support\Carbon::parse($service->expiry_date)->format('Y-m-d') : __('services.labels.no_expiry') }}
                             </div>
                         </div>
 
@@ -128,16 +128,16 @@
                         <div class="col-12"><hr class="my-2"></div>
 
                         <div class="col-md-4">
-                            <label class="form-label d-block">{{ __('Is Paid') }}</label>
+                            <label class="form-label d-block">{{ __('services.labels.is_paid') }}</label>
                             @if($service->is_paid)
-                                <span class="badge bg-success">{{ __('Yes') }}</span>
+                                <span class="badge bg-success">{{ __('services.labels.yes') }}</span>
                             @else
-                                <span class="badge bg-secondary">{{ __('No') }}</span>
+                                <span class="badge bg-secondary">{{ __('services.labels.no') }}</span>
                             @endif
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label d-block">{{ __('Price') }}</label>
+                            <label class="form-label d-block">{{ __('services.labels.price') }}</label>
                             <div>
                                 @if($service->is_paid && $service->price !== null)
                                     {{ number_format((float)$service->price, 2) }}
@@ -148,7 +148,7 @@
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label d-block">{{ __('Currency') }}</label>
+                            <label class="form-label d-block">{{ __('services.labels.currency') }}</label>
                             <div>
                                 @if($service->is_paid && $service->currency)
                                     {{ $service->currency }}
@@ -160,7 +160,7 @@
 
                         @if($service->is_paid && $service->price_note)
                         <div class="col-12">
-                            <label class="form-label d-block">{{ __('Price Note') }}</label>
+                            <label class="form-label d-block">{{ __('services.labels.price_note') }}</label>
                             <div class="text-wrap">{{ $service->price_note }}</div>
                         </div>
                         @endif
@@ -169,41 +169,41 @@
                         <div class="col-12"><hr class="my-2"></div>
 
                         <div class="col-md-6">
-                            <label class="form-label d-block">{{ __('Has Custom Fields') }}</label>
+                            <label class="form-label d-block">{{ __('services.labels.has_custom_fields') }}</label>
                             @if($service->has_custom_fields)
-                                <span class="badge bg-info">{{ __('Yes') }}</span>
+                                <span class="badge bg-info">{{ __('services.labels.yes') }}</span>
                             @else
-                                <span class="badge bg-secondary">{{ __('No') }}</span>
+                                <span class="badge bg-secondary">{{ __('services.labels.no') }}</span>
                             @endif
                             <div class="small text-muted mt-1">
-                                {{ __('When enabled, the app uses the category custom fields in the continue/apply flow.') }}
+                                {{ __('services.messages.custom_fields_notice') }}
                             </div>
                         </div>
 
                         {{-- ======= التوجيه للدردشة المباشرة ======= --}}
                         <div class="col-md-6">
-                            <label class="form-label d-block">{{ __('Direct To User') }}</label>
+                            <label class="form-label d-block">{{ __('services.labels.direct_to_user') }}</label>
                             @if($service->direct_to_user)
-                                <span class="badge bg-info">{{ __('Yes') }}</span>
+                                <span class="badge bg-info">{{ __('services.labels.yes') }}</span>
                                 <div class="mt-1">
-                                    <span class="text-muted">{{ __('Advertiser') }}:</span>
+                                    <span class="text-muted">{{ __('services.labels.advertiser') }}:</span>
                                     @if(isset($service->directUser))
-                                        {{ $service->directUser->name }} <span class="text-muted">(ID: {{ $service->direct_user_id }})</span>
+                                        {{ $service->directUser->name }} <span class="text-muted">({{ __('services.labels.id') }}: {{ $service->direct_user_id }})</span>
                                     @elseif($service->direct_user_id)
-                                        <span class="text-muted">ID: {{ $service->direct_user_id }}</span>
+                                        <span class="text-muted">{{ __('services.labels.id') }}: {{ $service->direct_user_id }}</span>
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif
                                 </div>
                             @else
-                                <span class="badge bg-secondary">{{ __('No') }}</span>
+                                <span class="badge bg-secondary">{{ __('services.labels.no') }}</span>
                             @endif
                         </div>
 
                         {{-- ======= النوع (إن استُخدم) ======= --}}
                         @if(!empty($service->service_type))
                         <div class="col-md-6">
-                            <label class="form-label d-block">{{ __('Service Type') }}</label>
+                            <label class="form-label d-block">{{ __('services.labels.service_type') }}</label>
                             <div>{{ $service->service_type }}</div>
                         </div>
                         @endif
@@ -214,13 +214,13 @@
                 {{-- الوصف --}}
                 <div class="col-12">
                     <hr class="my-3">
-                    <label class="form-label d-block">{{ __('Description') }}</label>
+                    <label class="form-label d-block">{{ __('services.labels.description') }}</label>
                     @if(!empty($service->description))
                         <div class="border rounded p-3 bg-light">
                             {!! $service->description !!}
                         </div>
                     @else
-                        <div class="text-muted">{{ __('No description') }}</div>
+                        <div class="text-muted">{{ __('services.messages.no_description') }}</div>
                     @endif
                 </div>
 

@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @section('title')
-    {{ __('طلبات الخدمات') }}
+    {{ __('services.titles.requests') }}
 @endsection
 
 @section('page-style')
@@ -212,30 +212,30 @@
                     <div class="col-12">
                         <div id="filters" class="row g-3 align-items-end mb-4">
                             <div class="col-sm-6 col-lg-3">
-                                <label for="filter" class="d-block">{{__("Status")}}</label>
+                                <label for="filter" class="d-block">{{ __('services.labels.status') }}</label>
                                 <select class="form-control bootstrap-table-filter-control-status" id="filter">
-                                    <option value="">{{__("All")}}</option>
-                                    <option value="review">{{__("Under Review")}}</option>
-                                    <option value="approved">{{__("Approved")}}</option>
-                                    <option value="rejected">{{__("Rejected")}}</option>
-                                    <option value="sold out">{{__("Sold Out")}}</option>
+                                    <option value="">{{ __('services.filters.all') }}</option>
+                                    <option value="review">{{ __('services.labels.under_review') }}</option>
+                                    <option value="approved">{{ __('services.labels.approved') }}</option>
+                                    <option value="rejected">{{ __('services.labels.rejected') }}</option>
+                                    <option value="sold out">{{ __('services.labels.sold_out') }}</option>
                                 </select>
                             </div>
                             <div class="col-sm-6 col-lg-3">
-                                <label class="d-block">{{__("Category")}}</label>
+                                <label class="d-block">{{ __('services.labels.category') }}</label>
                                 @if($selectedCategory)
                                     <div class="form-control-plaintext fw-semibold">{{ $selectedCategory->name }}</div>
                                 @else
-                                    <div class="form-control-plaintext text-muted">{{__("All Categories")}}</div>
+                                    <div class="form-control-plaintext text-muted">{{ __('services.filters.all_categories') }}</div>
                                 @endif
                             </div>
 
                             <div class="col-12 col-lg-6">
-                                <label for="request_number" class="d-block">{{ __('Search by Transaction Number') }}</label>
+                                <label for="request_number" class="d-block">{{ __('services.labels.search_by_transaction_number') }}</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" id="request_number" placeholder="{{ __('Enter transaction number') }}" autocomplete="off">
-                                    <button class="btn btn-outline-primary" type="button" id="requestNumberApply">{{ __('Search') }}</button>
-                                    <button class="btn btn-outline-secondary" type="button" id="requestNumberReset">{{ __('Reset') }}</button>
+                                    <input type="text" class="form-control" id="request_number" placeholder="{{ __('services.placeholders.transaction_number') }}" autocomplete="off">
+                                    <button class="btn btn-outline-primary" type="button" id="requestNumberApply">{{ __('services.buttons.search') }}</button>
+                                    <button class="btn btn-outline-secondary" type="button" id="requestNumberReset">{{ __('services.buttons.reset') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -261,31 +261,31 @@
 
                     $statCards = [
                         [
-                            'label' => __('Total Requests'),
+                            'label' => __('services.labels.total_requests'),
                             'value' => $totalRequests,
                             'icon' => 'bi-clipboard-data',
                             'variant' => 'primary',
                         ],
                         [
-                            'label' => __('Under Review'),
+                            'label' => __('services.labels.under_review'),
                             'value' => (int) ($stats['review'] ?? 0),
                             'icon' => 'bi-hourglass-split',
                             'variant' => 'warning',
                         ],
                         [
-                            'label' => __('Approved'),
+                            'label' => __('services.labels.approved'),
                             'value' => (int) ($stats['approved'] ?? 0),
                             'icon' => 'bi-check-circle',
                             'variant' => 'success',
                         ],
                         [
-                            'label' => __('Rejected'),
+                            'label' => __('services.labels.rejected'),
                             'value' => (int) ($stats['rejected'] ?? 0),
                             'icon' => 'bi-x-circle',
                             'variant' => 'danger',
                         ],
                         [
-                            'label' => __('Sold Out'),
+                            'label' => __('services.labels.sold_out'),
                             'value' => (int) ($stats['sold_out'] ?? 0),
                             'icon' => 'bi-bag-x',
                             'variant' => 'info',
@@ -312,7 +312,7 @@
                                     </div>
                                 </div>
                                 <div class="requests-stat-card__indicator">
-                                    <span>{{ __('Requests') }}</span>
+                                    <span>{{ __('services.labels.requests') }}</span>
                                     <span class="requests-stat-card__indicator-share">{{ $share($card['value']) }}</span>
                                 </div>
                                 <div class="requests-stat-card__progress">
@@ -357,30 +357,30 @@
                            data-query-params="queryParams">
                             <thead class="thead-dark">
                             <tr>
-                                <th data-field="request_number" data-sortable="true" data-sort-name="request_number" data-formatter="requestNumberFormatter">{{ __('Transaction Identifier') }}</th>
-                                <th data-field="id" data-sortable="true" data-visible="false">{{ __('ID') }}</th>
+                                <th data-field="request_number" data-sortable="true" data-sort-name="request_number" data-formatter="requestNumberFormatter">{{ __('services.labels.transaction_identifier') }}</th>
+                                <th data-field="id" data-sortable="true" data-visible="false">{{ __('services.labels.id') }}</th>
                                 
-                                <th data-field="name" data-sortable="true">{{ __('Name') }}</th>
+                                <th data-field="name" data-sortable="true">{{ __('services.labels.name') }}</th>
 
-                                <th data-field="custom_fields" data-sortable="false" data-escape="false" data-formatter="customFieldsFormatter" data-events="fieldsEvents">{{ __('الحقول المُعبأة') }}</th>
+                                <th data-field="custom_fields" data-sortable="false" data-escape="false" data-formatter="customFieldsFormatter" data-events="fieldsEvents">{{ __('services.labels.filled_fields') }}</th>
 
-                                <th data-field="submitted_at" data-sortable="true" data-sort-name="created_at" data-formatter="submissionDateFormatter">{{ __('Submitted At') }}</th>
-                                <th data-field="category.name" data-sortable="true" data-visible="false" data-formatter="serviceTypeFormatter">{{ __('نوع الخدمة') }}</th>
-                                <th data-field="description" data-align="center" data-sortable="true" data-visible="false" data-formatter="descriptionFormatter">{{ __('Description') }}</th>
-                                <th data-field="user.name" data-sort-name="user_name" data-sortable="true" data-visible="false">{{ __('User') }}</th>
-                                <th data-field="status" data-sortable="true" data-filter-control="select" data-escape="false" data-visible="false" data-formatter="itemStatusFormatter">{{ __('Status') }}</th>
+                                <th data-field="submitted_at" data-sortable="true" data-sort-name="created_at" data-formatter="submissionDateFormatter">{{ __('services.labels.submitted_at') }}</th>
+                                <th data-field="category.name" data-sortable="true" data-visible="false" data-formatter="serviceTypeFormatter">{{ __('services.labels.service_type') }}</th>
+                                <th data-field="description" data-align="center" data-sortable="true" data-visible="false" data-formatter="descriptionFormatter">{{ __('services.labels.description') }}</th>
+                                <th data-field="user.name" data-sort-name="user_name" data-sortable="true" data-visible="false">{{ __('services.labels.user') }}</th>
+                                <th data-field="status" data-sortable="true" data-filter-control="select" data-escape="false" data-visible="false" data-formatter="itemStatusFormatter">{{ __('services.labels.status') }}</th>
 
 
-                                <th data-field="rejected_reason" data-sortable="true" data-visible="false">{{ __('Rejected Reason') }}</th>
+                                <th data-field="rejected_reason" data-sortable="true" data-visible="false">{{ __('services.labels.rejected_reason') }}</th>
 
                                 {{-- أخفي تواريخ/معرّفات إضافية فقط للبحث --}}
-                                <th data-field="created_at" data-sortable="true" data-visible="false">{{ __('Created At') }}</th>
-                                <th data-field="updated_at" data-sortable="true" data-visible="false">{{ __('Updated At') }}</th>
-                                <th data-field="user_id" data-sortable="true" data-visible="false">{{ __('User ID') }}</th>
-                                <th data-field="category_id" data-sortable="true" data-visible="false">{{ __('Category ID') }}</th>
+                                <th data-field="created_at" data-sortable="true" data-visible="false">{{ __('services.labels.created_at') }}</th>
+                                <th data-field="updated_at" data-sortable="true" data-visible="false">{{ __('services.labels.updated_at') }}</th>
+                                <th data-field="user_id" data-sortable="true" data-visible="false">{{ __('services.labels.user_id') }}</th>
+                                <th data-field="category_id" data-sortable="true" data-visible="false">{{ __('services.labels.category_id') }}</th>
 
                                 @canany(['service-requests-list','service-requests-update'])
-                                    <th data-field="operate" data-align="center" data-sortable="false" data-events="itemEvents" data-escape="false">{{ __('Action') }}</th>
+                                    <th data-field="operate" data-align="center" data-sortable="false" data-events="itemEvents" data-escape="false">{{ __('services.labels.actions') }}</th>
                                 @endcanany
                             </tr>
                             </thead>
@@ -396,8 +396,8 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="myModalLabel1">{{ __('Service Request Details') }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5 class="modal-title" id="myModalLabel1">{{ __('services.labels.request_details') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('services.buttons.close') }}"></button>
                     </div>
                     <div class="modal-body">
                         <div class="center" id="custom_fields"></div>
@@ -411,8 +411,8 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="myModalLabel1">{{ __('Status') }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5 class="modal-title" id="myModalLabel1">{{ __('services.labels.status') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('services.buttons.close') }}"></button>
                     </div>
                     <div class="modal-body">
                         <form class="edit-form" action="" method="POST" data-success-function="updateApprovalSuccess">
@@ -420,17 +420,17 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <select name="status" class="form-select" id="status" aria-label="status">
-                                        <option value="review">{{__("Under Review")}}</option>
-                                        <option value="approved">{{__("Approve")}}</option>
-                                        <option value="rejected">{{__("Reject")}}</option>
+                                        <option value="review">{{ __('services.labels.under_review') }}</option>
+                                        <option value="approved">{{ __('services.buttons.approve') }}</option>
+                                        <option value="rejected">{{ __('services.buttons.reject') }}</option>
                                     </select>
                                 </div>
                             </div>
                             <div id="rejected_reason_container" class="col-md-12" style="display:none;">
-                                <label for="rejected_reason" class="mandatory form-label">{{ __('Reason') }}</label>
-                                <textarea name="rejected_reason" id="rejected_reason" class="form-control" placeholder="{{ __('Reason') }}"></textarea>
+                                <label for="rejected_reason" class="mandatory form-label">{{ __('services.labels.reason') }}</label>
+                                <textarea name="rejected_reason" id="rejected_reason" class="form-control" placeholder="{{ __('services.labels.reason') }}"></textarea>
                             </div>
-                            <input type="submit" value="{{__("Save")}}" class="btn btn-primary mt-3">
+                            <input type="submit" value="{{ __('services.buttons.save') }}" class="btn btn-primary mt-3">
                         </form>
                     </div>
                 </div>
@@ -462,7 +462,7 @@
     function customFieldsFormatter(value, row) {
         var count = Array.isArray(row.custom_fields) ? row.custom_fields.length : 0;
         return '<button class="btn btn-sm btn-outline-secondary view-fields">'+
-                   '{{ __("View") }}'+
+                   '{{ __('services.buttons.view') }}'+
                '</button> ' +
                '<span class="badge bg-light text-dark ms-1">'+ count +'</span>';
     }
@@ -478,10 +478,10 @@
     // بناء جدول الحقول داخل المودال
     function renderCustomFieldsTable(fields) {
         if (!Array.isArray(fields) || !fields.length) {
-            return '<div class="text-muted">{{ __("No custom fields filled") }}</div>';
+            return '<div class="text-muted">{{ __('services.messages.no_custom_fields_filled') }}</div>';
         }
         var html = '<div class="table-responsive"><table class="table table-sm table-bordered mb-0"><thead><tr>'+
-                   '<th style="width:30%">{{ __("Field") }}</th><th>{{ __("Value") }}</th></tr></thead><tbody>';
+                   '<th style="width:30%">{{ __('services.labels.field') }}</th><th>{{ __('services.labels.value') }}</th></tr></thead><tbody>';
 
         fields.forEach(function(f) {
             var label = f.label || f.name || f.key || '-';
@@ -582,3 +582,4 @@
     });
 </script>
 @endsection
+

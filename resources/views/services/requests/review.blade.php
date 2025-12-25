@@ -7,12 +7,12 @@
 
     $manualPayment = $manualPaymentRequest instanceof ManualPaymentRequest ? $manualPaymentRequest : null;
 
-    $serviceTitle = $service?->title ?? __('Service #:id', ['id' => $serviceRequest->service_id]);
+    $serviceTitle = $service?->title ?? __('services.messages.service_number', ['id' => $serviceRequest->service_id]);
     $statusMap = [
-        'review'   => ['label' => __('Under Review'), 'class' => 'badge bg-warning text-dark'],
-        'approved' => ['label' => __('Approved'), 'class' => 'badge bg-success'],
-        'rejected' => ['label' => __('Rejected'), 'class' => 'badge bg-danger'],
-        'sold out' => ['label' => __('Sold Out'), 'class' => 'badge bg-secondary'],
+        'review'   => ['label' => __('services.labels.under_review'), 'class' => 'badge bg-warning text-dark'],
+        'approved' => ['label' => __('services.labels.approved'), 'class' => 'badge bg-success'],
+        'rejected' => ['label' => __('services.labels.rejected'), 'class' => 'badge bg-danger'],
+        'sold out' => ['label' => __('services.labels.sold_out'), 'class' => 'badge bg-secondary'],
     ];
 
     $statusInfo = $statusMap[$serviceRequest->status] ?? [
@@ -47,9 +47,17 @@
     $isPaidService = $normalizedPaymentStatus === 'paid';
 
     $resolvedPaymentStatusLabel = null;
+    $paymentStatusLabels = [
+        'paid' => __('services.payment_status.paid'),
+        'pending' => __('services.payment_status.pending'),
+        'failed' => __('services.payment_status.failed'),
+        'unpaid' => __('services.payment_status.unpaid'),
+    ];
     if ($isPaidService) {
         $resolvedPaymentStatusLabel = $paymentStatusLabel
-            ?? ($serviceRequest->payment_status ? __($serviceRequest->payment_status) : __('Paid'));
+            ?? ($serviceRequest->payment_status
+                ? ($paymentStatusLabels[$normalizedPaymentStatus] ?? __($serviceRequest->payment_status))
+                : __('services.payment_status.paid'));
     }
 
     $manualPaymentReviewUrl = $manualPayment && $manualPayment->exists
@@ -64,7 +72,7 @@
 @endphp
 
 @section('title')
-    {{ __('Service Request Review') }}
+    {{ __('services.titles.request_review') }}
 @endsection
 
 @section('page-title')
@@ -73,17 +81,17 @@
             <div class="col-12 col-md-6 order-md-1 order-last">
                 <h4>@yield('title')</h4>
                 <p class="text-subtitle text-muted mb-0">
-                    {{ __('Review the submitted service information and respond to the requester.') }}
+                    {{ __('services.messages.review_request_help') }}
                 </p>
             </div>
             <div class="col-12 col-md-6 order-md-2 order-first">
                 <div class="d-flex flex-wrap justify-content-md-end gap-2">
                     <a href="{{ $backToRequestsUrl }}" class="btn btn-outline-primary">
-                        <i class="bi bi-arrow-left"></i> {{ __('Back to Requests') }}
+                        <i class="bi bi-arrow-left"></i> {{ __('services.buttons.back_to_requests') }}
                     </a>
                     @if($isPaidService && $manualPaymentReviewUrl)
                         <a href="{{ $manualPaymentReviewUrl }}" class="btn btn-outline-secondary" target="_blank" rel="noopener">
-                            <i class="fa fa-up-right-from-square me-1"></i>{{ __('Open Payment Review') }}
+                            <i class="fa fa-up-right-from-square me-1"></i>{{ __('services.buttons.open_payment_review') }}
                         </a>
                     @endif
                 </div>
@@ -98,23 +106,23 @@
             <div class="col-12 col-xl-8">
                 <div class="card mb-4">
                     <div class="card-header border-bottom">
-                        <h5 class="card-title mb-0">{{ __('Request Summary') }}</h5>
+                        <h5 class="card-title mb-0">{{ __('services.labels.request_summary') }}</h5>
                     </div>
                     <div class="card-body">
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
                             <div>
                                 <h4 class="mb-1">{{ $serviceTitle }}</h4>
                                 <div class="small text-muted">
-                                    {{ __('Request ID') }}: {{ $serviceRequest->id }}
+                                    {{ __('services.labels.request_id') }}: {{ $serviceRequest->id }}
                                     @if($serviceRequest->service_id)
-                                        &nbsp;•&nbsp; {{ __('Service ID') }}: {{ $serviceRequest->service_id }}
+                                        &nbsp;&middot;&nbsp; {{ __('services.labels.service_id') }}: {{ $serviceRequest->service_id }}
                                     @endif
                                 </div>
                                 @if($category)
                                     <div class="small text-muted mt-1">
-                                        {{ __('Category') }}: {{ $category->name }}
+                                        {{ __('services.labels.category') }}: {{ $category->name }}
                                         @if($category->id)
-                                            <span class="text-muted">(ID: {{ $category->id }})</span>
+                                            <span class="text-muted">({{ __('services.labels.id') }}: {{ $category->id }})</span>
                                         @endif
                                     </div>
                                 @endif
@@ -122,7 +130,7 @@
                             <div class="text-md-end">
                                 <span class="{{ $statusInfo['class'] }}">{{ $statusInfo['label'] }}</span>
                                 @if($serviceRequest->trashed())
-                                    <span class="badge bg-dark ms-1">{{ __('Archived') }}</span>
+                                    <span class="badge bg-dark ms-1">{{ __('services.messages.archived') }}</span>
                                 @endif
                                 @if($isPaidService && $resolvedPaymentStatusLabel)
                                     <div class="mt-3">
@@ -134,21 +142,21 @@
 
                         <div class="row g-3 mt-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold text-muted">{{ __('Created At') }}</label>
-                                <div>{{ optional($serviceRequest->created_at)->format('Y-m-d H:i') ?? '—' }}</div>
+                                <label class="form-label fw-semibold text-muted">{{ __('services.labels.created_at') }}</label>
+                                <div>{{ optional($serviceRequest->created_at)->format('Y-m-d H:i') ?? __('services.labels.not_available') }}</div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold text-muted">{{ __('Last Updated') }}</label>
-                                <div>{{ optional($serviceRequest->updated_at)->format('Y-m-d H:i') ?? '—' }}</div>
+                                <label class="form-label fw-semibold text-muted">{{ __('services.labels.last_updated') }}</label>
+                                <div>{{ optional($serviceRequest->updated_at)->format('Y-m-d H:i') ?? __('services.labels.not_available') }}</div>
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold text-muted">{{ __('Note from Applicant') }}</label>
+                                <label class="form-label fw-semibold text-muted">{{ __('services.labels.note_from_applicant') }}</label>
                                 <div>
                                     @if($serviceRequest->note)
                                         <span class="text-wrap">{!! nl2br(e($serviceRequest->note)) !!}</span>
                                     @else
-                                        <span class="text-muted">—</span>
+                                        <span class="text-muted">{{ __('services.labels.not_available') }}</span>
                                     @endif
                                 </div>
                             </div>
@@ -157,7 +165,7 @@
                         @if($serviceRequest->rejected_reason)
                             <div class="alert alert-danger mt-4 mb-0" role="alert">
                                 <i class="fa fa-circle-info me-2"></i>
-                                {{ __('Rejected Reason') }}: {!! nl2br(e($serviceRequest->rejected_reason)) !!}
+                                {{ __('services.labels.rejected_reason') }}: {!! nl2br(e($serviceRequest->rejected_reason)) !!}
                             </div>
                         @endif
 
@@ -168,7 +176,7 @@
 
                 <div class="card mb-4">
                     <div class="card-header border-bottom">
-                        <h5 class="card-title mb-0">{{ __('Filled Fields') }}</h5>
+                        <h5 class="card-title mb-0">{{ __('services.labels.filled_fields') }}</h5>
                     </div>
                     <div class="card-body">
                         @if(!empty($fieldEntries))
@@ -176,8 +184,8 @@
                                 <table class="table table-sm table-bordered align-middle mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th style="width: 30%">{{ __('Field') }}</th>
-                                            <th>{{ __('Value') }}</th>
+                                            <th style="width: 30%">{{ __('services.labels.field') }}</th>
+                                            <th>{{ __('services.labels.value') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -216,14 +224,14 @@
                                 </table>
                             </div>
                         @else
-                            <div class="text-muted">{{ __('No custom fields were submitted for this request.') }}</div>
+                            <div class="text-muted">{{ __('services.messages.no_custom_fields_submitted') }}</div>
                         @endif
                     </div>
                 </div>
 
                 <div class="card mb-4">
                     <div class="card-header border-bottom">
-                        <h5 class="card-title mb-0">{{ __('Attachments') }}</h5>
+                        <h5 class="card-title mb-0">{{ __('services.labels.attachments') }}</h5>
                     </div>
                     <div class="card-body">
                         @if(!empty($attachmentEntries))
@@ -238,16 +246,16 @@
                                         </div>
                                         @if(!empty($attachment['file_url']))
                                             <a href="{{ $attachment['file_url'] }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">
-                                                <i class="bi bi-download"></i> {{ $attachment['file_name'] ?? __('Download') }}
+                                                <i class="bi bi-download"></i> {{ $attachment['file_name'] ?? __('services.labels.download') }}
                                             </a>
                                         @else
-                                            <span class="badge bg-light text-muted">{{ __('Unavailable') }}</span>
+                                            <span class="badge bg-light text-muted">{{ __('services.labels.unavailable') }}</span>
                                         @endif
                                     </li>
                                 @endforeach
                             </ul>
                         @else
-                            <div class="text-muted">{{ __('No files were uploaded for this request.') }}</div>
+                            <div class="text-muted">{{ __('services.messages.no_files_uploaded') }}</div>
                         @endif
                     </div>
                 </div>
@@ -256,7 +264,7 @@
             <div class="col-12 col-xl-4">
                 <div class="card mb-4">
                     <div class="card-header border-bottom">
-                        <h5 class="card-title mb-0">{{ __('Applicant') }}</h5>
+                        <h5 class="card-title mb-0">{{ __('services.labels.applicant') }}</h5>
                     </div>
                     <div class="card-body">
                         @if($applicant)
@@ -270,31 +278,31 @@
                                 @endif
                                 <div>
                                     <div class="fw-semibold">{{ $applicant->name }}</div>
-                                    <div class="small text-muted">{{ __('User ID') }}: {{ $applicant->id }}</div>
+                                    <div class="small text-muted">{{ __('services.labels.user_id') }}: {{ $applicant->id }}</div>
                                 </div>
                             </div>
                             <dl class="row mb-0">
                                 @if($applicant->email)
-                                    <dt class="col-5 text-muted">{{ __('Email') }}</dt>
+                                    <dt class="col-5 text-muted">{{ __('services.labels.email') }}</dt>
                                     <dd class="col-7">{{ $applicant->email }}</dd>
                                 @endif
                                 @if($applicant->mobile)
-                                    <dt class="col-5 text-muted">{{ __('Mobile') }}</dt>
+                                    <dt class="col-5 text-muted">{{ __('services.labels.mobile') }}</dt>
                                     <dd class="col-7">{{ $applicant->mobile }}</dd>
                                 @endif
-                                <dt class="col-5 text-muted">{{ __('Account Type') }}</dt>
-                                <dd class="col-7">{{ method_exists($applicant, 'getAccountTypeName') ? $applicant->getAccountTypeName() : __('Customer') }}</dd>
-                                <dt class="col-5 text-muted">{{ __('Status') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.account_type') }}</dt>
+                                <dd class="col-7">{{ method_exists($applicant, 'getAccountTypeName') ? $applicant->getAccountTypeName() : __('services.labels.customer') }}</dd>
+                                <dt class="col-5 text-muted">{{ __('services.labels.status') }}</dt>
                                 <dd class="col-7">
                                     @if($applicant->is_verified)
-                                        <span class="badge bg-success">{{ __('Verified') }}</span>
+                                        <span class="badge bg-success">{{ __('services.labels.verified') }}</span>
                                     @else
-                                        <span class="badge bg-secondary">{{ __('Pending Verification') }}</span>
+                                        <span class="badge bg-secondary">{{ __('services.labels.pending_verification') }}</span>
                                     @endif
                                 </dd>
                             </dl>
                         @else
-                            <div class="text-muted">{{ __('The applicant account is no longer available.') }}</div>
+                            <div class="text-muted">{{ __('services.messages.applicant_missing') }}</div>
                         @endif
                     </div>
                 </div>
@@ -302,15 +310,15 @@
                 @can('service-requests-update')
                     <div class="card">
                         <div class="card-header border-bottom">
-                            <h5 class="card-title mb-0">{{ __('Update Status') }}</h5>
+                            <h5 class="card-title mb-0">{{ __('services.labels.update_status') }}</h5>
                         </div>
                         <div class="card-body">
                             <form method="POST" action="{{ route('service.requests.approval', $serviceRequest->id) }}">
                                 @csrf
                                 <div class="mb-3">
-                                    <label for="rejected_reason" class="form-label">{{ __('Internal Note / Rejection Reason') }}</label>
-                                    <textarea name="rejected_reason" id="rejected_reason" class="form-control" rows="3" placeholder="{{ __('Explain the decision when rejecting the request.') }}"></textarea>
-                                    <div class="form-text">{{ __('This note will only be stored when the request is rejected.') }}</div>
+                                    <label for="rejected_reason" class="form-label">{{ __('services.labels.internal_note') }}</label>
+                                    <textarea name="rejected_reason" id="rejected_reason" class="form-control" rows="3" placeholder="{{ __('services.messages.explain_reject') }}"></textarea>
+                                    <div class="form-text">{{ __('services.messages.note_stored_on_reject') }}</div>
                                 </div>
                                 <div class="d-flex gap-2">
                                     <button type="submit"
@@ -318,19 +326,19 @@
                                             value="approved"
                                             class="btn btn-success flex-grow-1"
                                             @if(!$canApprove) disabled @endif>
-                                        <i class="bi bi-check-circle"></i> {{ __('Approve') }}
+                                        <i class="bi bi-check-circle"></i> {{ __('services.buttons.approve') }}
                                     </button>
                                     <button type="submit"
                                             name="status"
                                             value="rejected"
                                             class="btn btn-danger flex-grow-1"
                                             @if(!$canReject) disabled @endif>
-                                        <i class="bi bi-x-circle"></i> {{ __('Reject') }}
+                                        <i class="bi bi-x-circle"></i> {{ __('services.buttons.reject') }}
                                     </button>
                                 </div>
                                 @if(!$canApprove && !$canReject)
                                     <p class="text-muted small mt-3 mb-0">
-                                        <i class="fa fa-circle-info me-1"></i>{{ __('Status changes are disabled for this request.') }}
+                                        <i class="fa fa-circle-info me-1"></i>{{ __('services.messages.status_changes_disabled') }}
                                     </p>
                                 @endif
                             </form>
