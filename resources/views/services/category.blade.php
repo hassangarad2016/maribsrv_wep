@@ -34,7 +34,7 @@
 
 
 @section('title')
-    {{ __('Services Management') }} - {{ $category->name }}
+    {{ __('services.titles.category', ['category' => $category->name]) }}
 @endsection
 
 @section('page-title')
@@ -42,16 +42,16 @@
         <div class="row">
             <div class="col-12 col-md-6 order-md-1 order-last">
                 <h4>@yield('title')</h4>
-                <p class="text-muted mb-0">{{ __('Viewing services in :category category.', ['category' => $category->name]) }}</p>
+                <p class="text-muted mb-0">{{ __('services.messages.viewing_category', ['category' => $category->name]) }}</p>
             </div>
             <div class="col-12 col-md-6 order-md-2 order-first">
                 <div class="float-end d-flex gap-2">
                     <a class="btn btn-outline-secondary" href="{{ route('services.index') }}">
-                        <i class="bi bi-arrow-left"></i> {{ __('Back to categories') }}
+                        <i class="bi bi-arrow-left"></i> {{ __('services.buttons.back_to_categories') }}
                     </a>
                     @can('service-create')
                         <a class="btn btn-primary" href="{{ route('services.create', ['category_id' => $category->id]) }}">
-                            <i class="bi bi-plus-circle"></i> {{ __('Create Service') }}
+                            <i class="bi bi-plus-circle"></i> {{ __('services.buttons.create_service') }}
                         </a>
                     @endcan
                 </div>
@@ -110,7 +110,7 @@
                         <button class="nav-link active" id="services-tab" data-bs-toggle="tab" data-bs-target="#services-pane"
                                 type="button" role="tab" aria-controls="services-pane" aria-selected="true">
                             <i class="bi bi-grid"></i>
-                            <span class="ms-1">{{ __('Services') }}</span>
+                            <span class="ms-1">{{ __('services.tabs.services') }}</span>
                         </button>
                     </li>
 
@@ -118,7 +118,7 @@
                         <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews-pane"
                                 type="button" role="tab" aria-controls="reviews-pane" aria-selected="false">
                             <i class="bi bi-chat-quote"></i>
-                            <span class="ms-1">{{ __('Reviews & Reports') }}</span>
+                            <span class="ms-1">{{ __('services.tabs.reviews_reports') }}</span>
                         </button>
                     </li>
 
@@ -127,7 +127,7 @@
                         <li class="nav-item" role="presentation">
                             <a class="nav-link" href="{{ route('service.requests.index', ['category_id' => $category->id]) }}">
                                 <i class="bi bi-list-check"></i>
-                                <span class="ms-1">{{ __('Service Requests') }}</span>
+                                <span class="ms-1">{{ __('services.tabs.requests') }}</span>
                             </a>
                         </li>
                     @endif
@@ -138,7 +138,7 @@
                     <div class="tab-pane fade show active" id="services-pane" role="tabpanel" aria-labelledby="services-tab">
                         <form id="servicesFilterForm" class="row g-3 mb-4">
                             <div class="col-12 col-sm-6 col-lg-3">
-                                <label class="form-label">{{ __('Category') }}</label>
+                                <label class="form-label">{{ __('services.labels.category') }}</label>
                                 <div class="form-control-plaintext fw-semibold">{{ $category->name }}</div>
                                 <input type="hidden" name="category_id" value="{{ $category->id }}">
                             </div>
@@ -148,20 +148,20 @@
 
 
                             <div class="col-12 col-sm-6 col-lg-2">
-                                <label for="status_filter" class="form-label">{{ __('Status') }}</label>
+                                <label for="status_filter" class="form-label">{{ __('services.labels.status') }}</label>
                                 <select id="status_filter" name="status" class="form-select">
-                                    <option value="">{{ __('All Status') }}</option>
-                                    <option value="1">{{ __('Active') }}</option>
-                                    <option value="0">{{ __('Inactive') }}</option>
+                                    <option value="">{{ __('services.filters.all_status') }}</option>
+                                    <option value="1">{{ __('services.labels.active') }}</option>
+                                    <option value="0">{{ __('services.labels.inactive') }}</option>
                                 </select>
                             </div>
 
                             <div class="col-12 col-sm-6 col-lg-2">
-                                <label for="is_main_filter" class="form-label">{{ __('Is Main') }}</label>
+                                <label for="is_main_filter" class="form-label">{{ __('services.labels.is_main') }}</label>
                                 <select id="is_main_filter" name="is_main" class="form-select">
-                                    <option value="">{{ __('All') }}</option>
-                                    <option value="1">{{ __('Yes') }}</option>
-                                    <option value="0">{{ __('No') }}</option>
+                                    <option value="">{{ __('services.filters.all') }}</option>
+                                    <option value="1">{{ __('services.labels.yes') }}</option>
+                                    <option value="0">{{ __('services.labels.no') }}</option>
                                 </select>
                             </div>
 
@@ -169,22 +169,22 @@
 
 
                             <div class="col-12 col-sm-6 col-lg-2">
-                                <label for="is_paid_filter" class="form-label">{{ __('Is Paid') }}</label>
+                                <label for="is_paid_filter" class="form-label">{{ __('services.labels.is_paid') }}</label>
                                 <select id="is_paid_filter" name="is_paid" class="form-select">
-                                    <option value="">{{ __('All') }}</option>
-                                    <option value="1">{{ __('Yes') }}</option>
-                                    <option value="0">{{ __('No') }}</option>
+                                    <option value="">{{ __('services.filters.all') }}</option>
+                                    <option value="1">{{ __('services.labels.yes') }}</option>
+                                    <option value="0">{{ __('services.labels.no') }}</option>
                                 </select>
                             </div>
 
 
 
                             <div class="col-12 col-sm-6 col-lg-2">
-                                <label for="has_cf_filter" class="form-label">{{ __('Has Custom Fields') }}</label>
+                                <label for="has_cf_filter" class="form-label">{{ __('services.labels.has_custom_fields') }}</label>
                                 <select id="has_cf_filter" name="has_custom_fields" class="form-select">
-                                    <option value="">{{ __('All') }}</option>
-                                    <option value="1">{{ __('Yes') }}</option>
-                                    <option value="0">{{ __('No') }}</option>
+                                    <option value="">{{ __('services.filters.all') }}</option>
+                                    <option value="1">{{ __('services.labels.yes') }}</option>
+                                    <option value="0">{{ __('services.labels.no') }}</option>
                                 </select>
                             </div>
 
@@ -192,11 +192,11 @@
 
 
                             <div class="col-12 col-sm-6 col-lg-2">
-                                <label for="direct_user_filter" class="form-label">{{ __('Direct To User') }}</label>
+                                <label for="direct_user_filter" class="form-label">{{ __('services.labels.direct_to_user') }}</label>
                                 <select id="direct_user_filter" name="direct_to_user" class="form-select">
-                                    <option value="">{{ __('All') }}</option>
-                                    <option value="1">{{ __('Yes') }}</option>
-                                    <option value="0">{{ __('No') }}</option>
+                                    <option value="">{{ __('services.filters.all') }}</option>
+                                    <option value="1">{{ __('services.labels.yes') }}</option>
+                                    <option value="0">{{ __('services.labels.no') }}</option>
                                 </select>
                             </div>
 
@@ -206,7 +206,7 @@
                             <div class="col-12 col-lg-3 ms-auto">
                                 <label class="form-label d-none d-lg-block">&nbsp;</label>
                                 <button type="submit" class="btn btn-secondary w-100">
-                                    <i class="bi bi-funnel"></i> {{ __('Filter') }}
+                                    <i class="bi bi-funnel"></i> {{ __('services.buttons.filter') }}
                                 </button>
                             </div>
                         </form>
@@ -218,8 +218,8 @@
 
                         <div id="servicesEmptyState" class="text-center text-muted py-5 {{ empty($initialServices) ? '' : 'd-none' }}">
                             <i class="bi bi-grid-3x3-gap display-6 d-block mb-3"></i>
-                            <p class="mb-2">{{ __('No data found') }}</p>
-                            <p class="mb-0 small">{{ __('Adjust the filters or create a new service to get started.') }}</p>
+                            <p class="mb-2">{{ __('services.messages.no_data_found') }}</p>
+                            <p class="mb-0 small">{{ __('services.messages.adjust_filters') }}</p>
                         </div>
 
                         <div id="servicesCardsContainer" class="row g-4"></div>
@@ -233,12 +233,12 @@
                     <div class="tab-pane fade" id="reviews-pane" role="tabpanel" aria-labelledby="reviews-tab">
                         <div id="reviewsFilters" class="row g-3 align-items-end mb-3">
                             <div class="col-12 col-md-4 col-lg-3">
-                                <label for="reviews_status_filter" class="form-label">{{ __('Status') }}</label>
+                                <label for="reviews_status_filter" class="form-label">{{ __('services.labels.status') }}</label>
                                 <select id="reviews_status_filter" class="form-select">
-                                    <option value="">{{ __('All') }}</option>
-                                    <option value="pending">{{ __('Pending') }}</option>
-                                    <option value="approved">{{ __('Approved') }}</option>
-                                    <option value="rejected">{{ __('Rejected') }}</option>
+                                    <option value="">{{ __('services.filters.all') }}</option>
+                                    <option value="pending">{{ __('services.labels.pending') }}</option>
+                                    <option value="approved">{{ __('services.labels.approved') }}</option>
+                                    <option value="rejected">{{ __('services.labels.rejected') }}</option>
                                 </select>
                             </div>
                         </div>
@@ -268,19 +268,19 @@
                             >
                                 <thead class="thead-dark">
                                 <tr>
-                                    <th data-field="id" data-sortable="true">{{ __('ID') }}</th>
-                                    <th data-field="service.title" data-sortable="true" data-formatter="reviewServiceFormatter" data-escape="false">{{ __('Service') }}</th>
-                                    <th data-field="user.name" data-sortable="true" data-formatter="reviewUserFormatter" data-escape="false">{{ __('User') }}</th>
-                                    <th data-field="rating" data-sortable="true" data-formatter="reviewRatingFormatter" data-escape="false">{{ __('Rating') }}</th>
-                                    <th data-field="status" data-sortable="true" data-formatter="reviewStatusFormatter" data-escape="false">{{ __('Status') }}</th>
-                                    <th data-field="review" data-formatter="reviewTextFormatter" data-escape="false">{{ __('Review') }}</th>
-                                    <th data-field="created_at" data-sortable="true">{{ __('Created At') }}</th>
+                                    <th data-field="id" data-sortable="true">{{ __('services.labels.id') }}</th>
+                                    <th data-field="service.title" data-sortable="true" data-formatter="reviewServiceFormatter" data-escape="false">{{ __('services.labels.service') }}</th>
+                                    <th data-field="user.name" data-sortable="true" data-formatter="reviewUserFormatter" data-escape="false">{{ __('services.labels.user') }}</th>
+                                    <th data-field="rating" data-sortable="true" data-formatter="reviewRatingFormatter" data-escape="false">{{ __('services.labels.rating') }}</th>
+                                    <th data-field="status" data-sortable="true" data-formatter="reviewStatusFormatter" data-escape="false">{{ __('services.labels.status') }}</th>
+                                    <th data-field="review" data-formatter="reviewTextFormatter" data-escape="false">{{ __('services.labels.review_text') }}</th>
+                                    <th data-field="created_at" data-sortable="true">{{ __('services.labels.created_at') }}</th>
                                 </tr>
                                 </thead>
                             </table>
                         </div>
 
-                        <div id="reviewsTableCaption" class="visually-hidden">{{ __('Service reviews and reports for the current category') }}</div>
+                        <div id="reviewsTableCaption" class="visually-hidden">{{ __('services.messages.service_reviews_caption') }}</div>
                     </div>
                 </div>
 
@@ -299,65 +299,65 @@
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">{{ __('Service insights') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
+                    <h5 class="modal-title">{{ __('services.labels.insights') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('services.buttons.close') }}"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <h6 class="fw-semibold mb-3">{{ __('Details') }}</h6>
+                            <h6 class="fw-semibold mb-3">{{ __('services.labels.details') }}</h6>
                             <dl class="row small mb-0">
-                                <dt class="col-5 text-muted">{{ __('Title') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.title') }}</dt>
                                 <dd class="col-7" id="insightTitle">-</dd>
 
-                                <dt class="col-5 text-muted">{{ __('Category') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.category') }}</dt>
                                 <dd class="col-7" id="insightCategory">-</dd>
 
-                                <dt class="col-5 text-muted">{{ __('Status') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.status') }}</dt>
                                 <dd class="col-7" id="insightStatus">-</dd>
 
-                                <dt class="col-5 text-muted">{{ __('Is Main') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.is_main') }}</dt>
                                 <dd class="col-7" id="insightIsMain">-</dd>
 
-                                <dt class="col-5 text-muted">{{ __('Direct To User') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.direct_to_user') }}</dt>
                                 <dd class="col-7" id="insightDirectUser">-</dd>
 
-                                <dt class="col-5 text-muted">{{ __('Service UID') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.service_uid') }}</dt>
                                 <dd class="col-7" id="insightServiceUid">-</dd>
 
-                                <dt class="col-5 text-muted">{{ __('Created at') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.created_at') }}</dt>
                                 <dd class="col-7" id="insightCreatedAt">-</dd>
 
-                                <dt class="col-5 text-muted">{{ __('Updated at') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.updated_at') }}</dt>
                                 <dd class="col-7" id="insightUpdatedAt">-</dd>
                             </dl>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="fw-semibold mb-3">{{ __('Statistics') }}</h6>
+                            <h6 class="fw-semibold mb-3">{{ __('services.labels.statistics') }}</h6>
                             <dl class="row small mb-0">
-                                <dt class="col-5 text-muted">{{ __('Is Paid') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.is_paid') }}</dt>
                                 <dd class="col-7" id="insightIsPaid">-</dd>
 
-                                <dt class="col-5 text-muted">{{ __('Price') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.price') }}</dt>
                                 <dd class="col-7" id="insightPrice">-</dd>
 
-                                <dt class="col-5 text-muted">{{ __('Views') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.views') }}</dt>
                                 <dd class="col-7" id="insightViews">-</dd>
 
-                                <dt class="col-5 text-muted">{{ __('Requests') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.requests') }}</dt>
                                 <dd class="col-7" id="insightRequests">-</dd>
 
-                                <dt class="col-5 text-muted">{{ __('Last request') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.last_request') }}</dt>
                                 <dd class="col-7" id="insightLastRequest">-</dd>
 
-                                <dt class="col-5 text-muted">{{ __('Last request by') }}</dt>
+                                <dt class="col-5 text-muted">{{ __('services.labels.last_request_by') }}</dt>
                                 <dd class="col-7" id="insightLastRequestUser">-</dd>
                             </dl>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Close') }}</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('services.buttons.close') }}</button>
                 </div>
             </div>
         </div>
@@ -388,44 +388,41 @@
     const PERMISSIONS = @json($servicePermissions);
 
     const LABELS = {
-        yes: "{{ __('Yes') }}",
-        no: "{{ __('No') }}",
-        active: "{{ __('Active') }}",
-        inactive: "{{ __('Inactive') }}",
-        requests: "{{ __('Requests') }}",
-        lastRequest: "{{ __('Last request') }}",
-        lastRequestBy: "{{ __('Last request by') }}",
-        notAvailable: "{{ __('Not available') }}",
-        directUser: "{{ __('Direct To User') }}",
-        category: "{{ __('Category') }}",
-        free: "{{ __('Free') }}",
-        paid: "{{ __('Paid') }}",
-        views: "{{ __('Views') }}",
-        publish: "{{ __('Publish') }}",
-        unpublish: "{{ __('Unpublish') }}",
-        delete: "{{ __('Delete') }}",
-        edit: "{{ __('Edit') }}",
-        show: "{{ __('View') }}",
-        manageManagers: "{{ __('Manage category managers') }}",
-
-        
-        insights: "{{ __('Insights') }}",
-        loading: "{{ __('Loading...') }}",
-        error: "{{ __('Something went wrong') }}",
-        noData: "{{ __('No data found') }}",
-        createdAt: "{{ __('Created at') }}",
-        updatedAt: "{{ __('Updated at') }}",
-        price: "{{ __('Price') }}",
-        pending: "{{ __('Pending') }}",
-        approved: "{{ __('Approved') }}",
-        rejected: "{{ __('Rejected') }}",
-        review: "{{ __('Review') }}",
-        underReview: "{{ __('Under Review') }}",
-        soldOut: "{{ __('Sold Out') }}",
-        report: "{{ __('Report') }}",
-        reportReason: "{{ __('Report reason') }}",
-        userReport: "{{ __('User report') }}",
-
+        yes: "{{ __('services.labels.yes') }}",
+        no: "{{ __('services.labels.no') }}",
+        active: "{{ __('services.labels.active') }}",
+        inactive: "{{ __('services.labels.inactive') }}",
+        requests: "{{ __('services.labels.requests') }}",
+        lastRequest: "{{ __('services.labels.last_request') }}",
+        lastRequestBy: "{{ __('services.labels.last_request_by') }}",
+        notAvailable: "{{ __('services.labels.not_available') }}",
+        directUser: "{{ __('services.labels.direct_to_user') }}",
+        category: "{{ __('services.labels.category') }}",
+        free: "{{ __('services.labels.free') }}",
+        paid: "{{ __('services.labels.paid') }}",
+        views: "{{ __('services.labels.views') }}",
+        publish: "{{ __('services.labels.publish') }}",
+        unpublish: "{{ __('services.labels.unpublish') }}",
+        delete: "{{ __('services.buttons.delete') }}",
+        edit: "{{ __('services.buttons.edit') }}",
+        show: "{{ __('services.buttons.view') }}",
+        manageManagers: "{{ __('services.labels.manage_managers') }}",
+        insights: "{{ __('services.labels.insights') }}",
+        loading: "{{ __('services.messages.loading') }}",
+        error: "{{ __('services.messages.something_wrong') }}",
+        noData: "{{ __('services.messages.no_data_found') }}",
+        createdAt: "{{ __('services.labels.created_at') }}",
+        updatedAt: "{{ __('services.labels.updated_at') }}",
+        price: "{{ __('services.labels.price') }}",
+        pending: "{{ __('services.labels.pending') }}",
+        approved: "{{ __('services.labels.approved') }}",
+        rejected: "{{ __('services.labels.rejected') }}",
+        review: "{{ __('services.labels.review') }}",
+        underReview: "{{ __('services.labels.under_review') }}",
+        soldOut: "{{ __('services.labels.sold_out') }}",
+        report: "{{ __('services.labels.report') }}",
+        reportReason: "{{ __('services.labels.report_reason') }}",
+        userReport: "{{ __('services.labels.user_report') }}",
     };
     const servicesFilterForm = $('#servicesFilterForm');
 

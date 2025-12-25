@@ -2,7 +2,7 @@
 @extends('layouts.main')
 
 @section('title')
-    {{ __('Services Management') }}
+    {{ __('services.titles.management') }}
 @endsection
 
 @section('page-title')
@@ -10,7 +10,7 @@
         <div class="row">
             <div class="col-12 col-md-6 order-md-1 order-last">
                 <h4>@yield('title')</h4>
-                <p class="text-muted mb-0">{{ __('Select a category to manage its services.') }}</p>
+                <p class="text-muted mb-0">{{ __('services.messages.select_category_to_manage') }}</p>
 
 
             </div>
@@ -21,15 +21,15 @@
                         @if($categoriesCount === 1)
                             @php $singleCategory = $categories->first(); @endphp
                             <a class="btn btn-primary" href="{{ route('services.create', ['category_id' => $singleCategory['id']]) }}">
-                                <i class="bi bi-plus-circle"></i> {{ __('Create Service') }}
+                                <i class="bi bi-plus-circle"></i> {{ __('services.buttons.create_service') }}
                             </a>
                         @elseif($categoriesCount > 1)
                             <div class="btn-group">
                                 <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-plus-circle"></i> {{ __('Create Service') }}
+                                    <i class="bi bi-plus-circle"></i> {{ __('services.buttons.create_service') }}
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><h6 class="dropdown-header">{{ __('Select Category') }}</h6></li>
+                                    <li><h6 class="dropdown-header">{{ __('services.labels.select_category') }}</h6></li>
                                     @foreach($categories as $categoryOption)
                                         <li>
                                             <a class="dropdown-item" href="{{ route('services.create', ['category_id' => $categoryOption['id']]) }}">
@@ -79,26 +79,26 @@
 
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title mb-1">{{ $category['name'] }}</h5>
-                            <p class="text-muted small mb-3">{{ __('Manage and review services within this category.') }}</p>
+                            <p class="text-muted small mb-3">{{ __('services.messages.manage_review_category') }}</p>
 
                             <ul class="list-unstyled small mb-4">
                                 <li class="d-flex justify-content-between align-items-center mb-1">
-                                    <span><i class="bi bi-grid me-1"></i>{{ __('Total services') }}</span>
+                                    <span><i class="bi bi-grid me-1"></i>{{ __('services.labels.total_services') }}</span>
                                     <span class="fw-semibold">{{ number_format($category['total_services']) }}</span>
                                 </li>
                                 <li class="d-flex justify-content-between align-items-center mb-1">
-                                    <span><i class="bi bi-check-circle me-1 text-success"></i>{{ __('Active services') }}</span>
+                                    <span><i class="bi bi-check-circle me-1 text-success"></i>{{ __('services.labels.active_services') }}</span>
                                     <span class="fw-semibold text-success">{{ number_format($category['active_services']) }}</span>
                                 </li>
                                 <li class="d-flex justify-content-between align-items-center">
-                                    <span><i class="bi bi-wallet2 me-1 text-warning"></i>{{ __('Paid services') }}</span>
+                                    <span><i class="bi bi-wallet2 me-1 text-warning"></i>{{ __('services.labels.paid_services') }}</span>
                                     <span class="fw-semibold text-warning">{{ number_format($category['paid_services']) }}</span>
                                 </li>
                             </ul>
 
                             <div class="mt-auto">
                                 <button type="button" class="btn btn-outline-primary w-100 js-open-category">
-                                    <i class="bi bi-box-arrow-in-right"></i> {{ __('Enter category') }}
+                                    <i class="bi bi-box-arrow-in-right"></i> {{ __('services.buttons.enter_category') }}
                                 </button>
                             </div>
 
@@ -111,7 +111,7 @@
                     <div class="card border-0 shadow-sm">
                         <div class="card-body text-center text-muted py-5">
                             <i class="bi bi-grid-3x3-gap display-6 d-block mb-3"></i>
-                            <p class="mb-0">{{ __('No categories available for management.') }}</p>
+                            <p class="mb-0">{{ __('services.messages.no_categories') }}</p>
                         </div>
                     </div>
                 </div>
