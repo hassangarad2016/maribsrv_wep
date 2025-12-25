@@ -164,7 +164,7 @@ trait GetMyServiceReviewsTrait
             $user = Auth::user();
 
             $review = ServiceReview::query()
-                ->with('service:id,title')
+                ->with(['service:id,title', 'user:id,name,profile'])
                 ->where('service_id', $request->service_id)
                 ->where('user_id', $user->id)
                 ->first();
@@ -172,15 +172,24 @@ trait GetMyServiceReviewsTrait
             $payload = [];
 
             if ($review) {
+                $userPayload = $review->user ? [
+                    'id' => $review->user->id,
+                    'name' => $review->user->name,
+                    'profile' => $review->user->profile,
+                ] : null;
                 $payload[] = [
                     'id' => $review->id,
                     'service_id' => $review->service_id,
                     'rating' => $review->rating,
+                    'ratings' => $review->rating,
                     'review' => $review->review,
                     'status' => $review->status,
                     'service_title' => $review->service?->title,
                     'created_at' => optional($review->created_at)->toDateTimeString(),
                     'updated_at' => optional($review->updated_at)->toDateTimeString(),
+                    'buyer_id' => $review->user_id,
+                    'buyer' => $userPayload,
+                    'user' => $userPayload,
                 ];
             }
 
