@@ -130,7 +130,7 @@ class SendWalletReminderNotifications extends Command
                         $summary['skipped']++;
                     }
                 }
-            }, 'users.id');
+            }, 'id');
 
         $message = sprintf(
             'Wallet reminders finished: matched %d, sent %d, deduplicated %d, skipped %d',
@@ -190,7 +190,10 @@ class SendWalletReminderNotifications extends Command
     private function buildUserQuery(): Builder
     {
         return User::query()
-            ->select('users.id', 'users.created_at')
+            ->select([
+                DB::raw('users.id as id'),
+                'users.created_at',
+            ])
             ->leftJoin('wallet_accounts', 'wallet_accounts.user_id', '=', 'users.id')
             ->leftJoin('wallet_transactions', 'wallet_transactions.wallet_account_id', '=', 'wallet_accounts.id')
             ->where('users.notification', 1)
