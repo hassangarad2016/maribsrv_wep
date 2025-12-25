@@ -190,10 +190,38 @@ trait AddServiceReviewTrait
 
 
 
-            ResponseService::successResponse('Service review submitted successfully.', $review);
+            ResponseService::successResponse('Service review submitted successfully.', $this->formatServiceReviewPayload($review));
         } catch (Throwable $th) {
             ResponseService::logErrorResponse($th, 'API Controller -> addServiceReview');
             ResponseService::errorResponse();
         }
+    }
+
+    private function formatServiceReviewPayload(ServiceReview $review): array
+    {
+        $user = $review->user;
+        $payload = [
+            'id' => $review->id,
+            'service_id' => $review->service_id,
+            'rating' => (int) $review->rating,
+            'ratings' => (int) $review->rating,
+            'review' => $review->review,
+            'status' => $review->status,
+            'created_at' => optional($review->created_at)->toDateTimeString(),
+            'updated_at' => optional($review->updated_at)->toDateTimeString(),
+            'buyer_id' => $review->user_id,
+        ];
+
+        if ($user) {
+            $userPayload = [
+                'id' => $user->id,
+                'name' => $user->name,
+                'profile' => $user->profile,
+            ];
+            $payload['buyer'] = $userPayload;
+            $payload['user'] = $userPayload;
+        }
+
+        return $payload;
     }
 }
