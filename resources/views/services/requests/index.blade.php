@@ -7,53 +7,50 @@
 @section('page-style')
 <style>
     .service-requests-page {
-        color: #212529;
         background-color: #ffffff;
-    }
-    .service-requests-page .card {
-        border-radius: 1rem;
-        border: 1px solid rgba(15, 23, 42, 0.08);
+        color: #212529;
     }
     .service-requests-summary {
         margin-bottom: 1rem;
-    }
-    .service-requests-meta {
-        margin-top: 0.35rem;
         display: flex;
         flex-wrap: wrap;
-        gap: 0.9rem;
-        color: #6c757d;
+        gap: 1.25rem;
         font-size: 0.95rem;
         font-weight: 600;
+        color: #495057;
     }
-    .service-requests-meta span {
+    .service-requests-summary span {
         display: inline-flex;
         align-items: center;
         gap: 0.35rem;
     }
-    #table_list { width: 100%; }
-
-    .btn-with-label {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.4rem;
-        padding: 0.35rem 0.75rem;
-        line-height: 1.2;
-        width: auto;
-        height: auto;
-        white-space: nowrap;
+    .service-requests-filters {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 1.25rem;
+        background-color: #ffffff;
     }
-    .btn-with-label.btn-icon {
-        width: auto;
-        height: auto;
+    .service-requests-filters .form-label {
+        font-weight: 600;
+        color: #212529;
     }
-    .btn-with-label .btn-label {
-        display: inline-block;
+    .service-requests-filters .form-control,
+    .service-requests-filters .form-select {
+        height: 44px;
+        font-size: 0.95rem;
+        border-radius: 0.6rem;
     }
-
+    .service-requests-filters .filter-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .service-requests-table .card {
+        border-radius: 0.85rem;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+    }
     .service-requests-table .card-body {
-        padding: 1.6rem;
+        padding: 1.25rem;
     }
     .service-requests-table .table {
         margin-bottom: 0;
@@ -62,22 +59,25 @@
         background: #f8f9fa;
         color: #212529;
         border-bottom: 1px solid rgba(15, 23, 42, 0.08);
-        padding: 1rem;
+        padding: 0.85rem 1rem;
         font-weight: 600;
     }
     .service-requests-table .table tbody td {
-        padding: 0.9rem 1rem;
+        padding: 0.85rem 1rem;
     }
     .service-requests-table .table-striped > tbody > tr:nth-of-type(odd) {
         background-color: rgba(15, 23, 42, 0.02);
     }
+    #table_list { width: 100%; }
 
     @media (max-width: 768px) {
-        .service-requests-meta {
-            gap: 0.6rem;
+        .service-requests-summary {
+            gap: 0.75rem;
+        }
+        .service-requests-filters {
+            padding: 0.85rem;
         }
     }
-
 </style>
 @endsection
 
@@ -96,20 +96,45 @@
     <section class="section service-requests-page">
         @php
             $totalRequests = (int) ($stats['total'] ?? 0);
+            $reviewRequests = (int) ($stats['review'] ?? 0);
         @endphp
 
         <div class="service-requests-summary">
-            <div class="service-requests-meta">
-                <span>
-                    {{ __('services.labels.category') }}:
-                    @if($selectedCategory)
-                        {{ $selectedCategory->name }}
-                    @else
-                        {{ __('services.filters.all_categories') }}
-                    @endif
-                </span>
-                <span>{{ __('services.labels.total_requests') }}: {{ number_format($totalRequests) }}</span>
-                <span>{{ __('services.labels.under_review') }}: {{ number_format((int) ($stats['review'] ?? 0)) }}</span>
+            <span>
+                {{ __('services.labels.category') }}:
+                @if($selectedCategory)
+                    {{ $selectedCategory->name }}
+                @else
+                    {{ __('services.filters.all_categories') }}
+                @endif
+            </span>
+            <span>{{ __('services.labels.total_requests') }}: {{ number_format($totalRequests) }}</span>
+            <span>{{ __('services.labels.under_review') }}: {{ number_format($reviewRequests) }}</span>
+        </div>
+
+        <div class="service-requests-filters">
+            <div class="row g-3 align-items-end" id="filters">
+                <div class="col-sm-6 col-lg-3">
+                    <label for="filter" class="form-label">{{ __('services.labels.status') }}</label>
+                    <select class="form-select" id="filter">
+                        <option value="">{{ __('services.filters.all') }}</option>
+                        <option value="review">{{ __('services.labels.under_review') }}</option>
+                        <option value="approved">{{ __('services.labels.approved') }}</option>
+                        <option value="rejected">{{ __('services.labels.rejected') }}</option>
+                        <option value="sold out">{{ __('services.labels.sold_out') }}</option>
+                    </select>
+                </div>
+                <div class="col-sm-6 col-lg-5">
+                    <label for="request_number" class="form-label">{{ __('services.labels.search_by_transaction_number') }}</label>
+                    <input type="text" class="form-control" id="request_number" placeholder="{{ __('services.placeholders.transaction_number') }}" autocomplete="off">
+                </div>
+                <div class="col-sm-6 col-lg-4">
+                    <label class="form-label d-none d-lg-block">&nbsp;</label>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" type="button" id="requestNumberApply">{{ __('services.buttons.search') }}</button>
+                        <button class="btn btn-outline-secondary" type="button" id="requestNumberReset">{{ __('services.buttons.reset') }}</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -142,7 +167,7 @@
                        data-export-types='["pdf","json","xml","csv","txt","sql","doc","excel"]'
                        data-mobile-responsive="true"
                        data-query-params="queryParams">
-                        <thead class="service-requests-table__head">
+                        <thead>
                         <tr>
                             <th data-field="request_number" data-sortable="true" data-sort-name="request_number" data-formatter="requestNumberFormatter">{{ __('services.labels.transaction_identifier') }}</th>
                             <th data-field="id" data-sortable="true" data-visible="false">{{ __('services.labels.id') }}</th>
@@ -156,7 +181,6 @@
                             <th data-field="description" data-align="center" data-sortable="true" data-visible="false" data-formatter="descriptionFormatter">{{ __('services.labels.description') }}</th>
                             <th data-field="user.name" data-sort-name="user_name" data-sortable="true" data-visible="false">{{ __('services.labels.user') }}</th>
                             <th data-field="status" data-sortable="true" data-filter-control="select" data-escape="false" data-visible="false" data-formatter="itemStatusFormatter">{{ __('services.labels.status') }}</th>
-
 
                             <th data-field="rejected_reason" data-sortable="true" data-visible="false">{{ __('services.labels.rejected_reason') }}</th>
 
@@ -174,6 +198,7 @@
                 </div>
             </div>
         </div>
+
         <div id="editModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -188,7 +213,6 @@
             </div>
         </div>
 
-        {{-- ظ…ظˆط¯ط§ظ„ طھط؛ظٹظٹط± ط§ظ„ط­ط§ظ„ط© --}}
         <div id="editStatusModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -294,6 +318,8 @@
     // طھظ…ط±ظٹط± ط§ظ„ظپظ„ط§طھط± ظ„ظ„ط³ظٹط±ظپط±
     function queryParams(params) {
         const query = {
+            status_filter: $('#filter').val(),
+            request_number: ($('#request_number').val() || '').trim(),
             offset: params.offset,
             limit: params.limit,
             search: params.search,
@@ -317,12 +343,40 @@
     }
 
     $(document).ready(function() {
+        const $table = $('#table_list');
+        const $requestNumber = $('#request_number');
+
+        function refreshTableToFirstPage() {
+            const options = $table.bootstrapTable('getOptions');
+            options.pageNumber = 1;
+            $table.bootstrapTable('refresh');
+        }
+
+        $('#filter').on('change', refreshTableToFirstPage);
+
+        $('#requestNumberApply').on('click', function () {
+            refreshTableToFirstPage();
+        });
+
+        $('#requestNumberReset').on('click', function () {
+            $requestNumber.val('');
+            refreshTableToFirstPage();
+        });
+
+        $requestNumber.on('keypress', function (event) {
+            if (event.which === 13) {
+                event.preventDefault();
+                refreshTableToFirstPage();
+            }
+        });
+
         $('#status').on('change', function() {
             $('#rejected_reason_container').toggle($(this).val() === 'rejected');
         });
     });
 </script>
 @endsection
+
 
 
 
