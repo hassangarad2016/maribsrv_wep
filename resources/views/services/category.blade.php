@@ -361,13 +361,6 @@
             </div>
 
             <div class="service-requests-metrics">
-                <div class="metric-card category">
-                    <span class="metric-icon"><i class="bi bi-folder2-open"></i></span>
-                    <div>
-                        <div class="metric-label">{{ __('services.labels.category') }}</div>
-                        <div class="metric-value text-truncate" title="{{ $category->name }}">{{ $category->name }}</div>
-                    </div>
-                </div>
                 <div class="metric-card">
                     <span class="metric-icon"><i class="bi bi-grid-3x3-gap"></i></span>
                     <div>
