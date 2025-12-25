@@ -602,7 +602,23 @@ class PaymentRequestTableQuery
             . " ELSE {$defaultGatewayNameSelect}"
             . ' END';
 
-        $paymentResolvedPayableTypeExpression = "LOWER(COALESCE(NULLIF(pt.payable_type, ''), NULLIF(mpr.payable_type, '')))";
+        $paymentPayableTypeCandidates = [
+            "NULLIF(pt.payable_type, '')",
+            "NULLIF(mpr.payable_type, '')",
+        ];
+
+        if ($supportsPaymentTransactionMeta) {
+            $paymentPayableTypeCandidates[] = "NULLIF(JSON_UNQUOTE(JSON_EXTRACT(pt.meta, '$.wallet.purpose')), '')";
+            $paymentPayableTypeCandidates[] = "NULLIF(JSON_UNQUOTE(JSON_EXTRACT(pt.meta, '$.purpose')), '')";
+        }
+
+        if ($supportsManualMeta) {
+            $paymentPayableTypeCandidates[] = "NULLIF(JSON_UNQUOTE(JSON_EXTRACT(mpr.meta, '$.wallet.purpose')), '')";
+            $paymentPayableTypeCandidates[] = "NULLIF(JSON_UNQUOTE(JSON_EXTRACT(mpr.meta, '$.purpose')), '')";
+        }
+
+        $paymentResolvedPayableTypeSelect = 'COALESCE(' . implode(', ', $paymentPayableTypeCandidates) . ')';
+        $paymentResolvedPayableTypeExpression = 'LOWER(' . $paymentResolvedPayableTypeSelect . ')';
         $paymentResolvedPayableIdExpression = 'COALESCE(pt.payable_id, mpr.payable_id)';
         $paymentTransactionStatusSource = "LOWER(COALESCE(NULLIF(pt.payment_status, ''), NULLIF(mpr.status, ''), 'pending'))";
 
@@ -621,14 +637,14 @@ class PaymentRequestTableQuery
             ->selectRaw('pt.amount')
             ->selectRaw("COALESCE(NULLIF(pt.currency, ''), '') as currency")
             ->selectRaw(
-                "COALESCE(NULLIF(pt.payable_type, ''), NULLIF(mpr.payable_type, '')) as payable_type"
+                $paymentResolvedPayableTypeSelect . ' as payable_type'
             )
             ->selectRaw('COALESCE(pt.payable_id, mpr.payable_id) as payable_id')
             ->selectRaw(self::gatewayExpression('pt') . ' as gateway_key')
             ->selectRaw(self::channelExpression('pt') . ' as channel')
             ->selectRaw($gatewayNameSelect . ' as gateway_name')
             ->selectRaw($paymentGatewayLabelSelect . ' as gateway_label')
-            ->selectRaw(self::categoryExpression('pt') . ' as category')
+            ->selectRaw(self::categoryExpressionFromPayableType($paymentResolvedPayableTypeExpression) . ' as category')
             ->selectRaw("{$paymentTransactionStatusSource} as status")
             ->selectRaw(
                 self::statusExpression($paymentTransactionStatusSource) . ' as status_group'
@@ -1028,13 +1044,18 @@ class PaymentRequestTableQuery
 
     private static function categoryExpression(string $alias): string
     {
+        return self::categoryExpressionFromPayableType("LOWER({$alias}.payable_type)");
+    }
+
+    private static function categoryExpressionFromPayableType(string $payableTypeExpression): string
+    {
         return "CASE
-            WHEN LOWER({$alias}.payable_type) LIKE '%wallet%' THEN 'top_ups'
-            WHEN LOWER({$alias}.payable_type) LIKE '%top_up%' THEN 'top_ups'
-            WHEN LOWER({$alias}.payable_type) LIKE '%package%' THEN 'packages'
-            WHEN LOWER({$alias}.payable_type) LIKE '%userpurchasedpackage%' THEN 'packages'
-            WHEN LOWER({$alias}.payable_type) LIKE '%order%' THEN 'orders'
-            WHEN LOWER({$alias}.payable_type) LIKE '%cart%' THEN 'orders'
+            WHEN {$payableTypeExpression} LIKE '%wallet%' THEN 'top_ups'
+            WHEN {$payableTypeExpression} LIKE '%top_up%' THEN 'top_ups'
+            WHEN {$payableTypeExpression} LIKE '%package%' THEN 'packages'
+            WHEN {$payableTypeExpression} LIKE '%userpurchasedpackage%' THEN 'packages'
+            WHEN {$payableTypeExpression} LIKE '%order%' THEN 'orders'
+            WHEN {$payableTypeExpression} LIKE '%cart%' THEN 'orders'
             ELSE 'orders'
         END";
     }
