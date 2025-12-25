@@ -148,8 +148,10 @@ window.staffEvents = {
         $('#edit_role').val(row.roles[0].id);
         $('#edit_name').val(row.name);
         $('#edit_email').val(row.email);
-        const serviceIds = Array.isArray(row.managed_service_ids) ? row.managed_service_ids : [];
-        $('#edit_service_ids').val(serviceIds).trigger('change');
+        const categoryIds = Array.isArray(row.managed_category_ids)
+            ? row.managed_category_ids
+            : (Array.isArray(row.managed_service_ids) ? row.managed_service_ids : []);
+        $('#edit_category_ids').val(categoryIds).trigger('change');
     }
 }
 window.verificationfeildEvents = {
