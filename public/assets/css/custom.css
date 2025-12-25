@@ -320,6 +320,175 @@ img.mfp-img {
 .dragHandle {
     cursor: move;
 }
+
+/* Admin shell layout + sidebar grouping */
+:root {
+    --shell-bg: #121417;
+    --shell-panel: #1b1f24;
+    --shell-surface: #171a1f;
+    --shell-border: rgba(255, 255, 255, 0.08);
+    --shell-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+[data-bs-theme="light"] {
+    --shell-bg: #f4f6fa;
+    --shell-panel: #ffffff;
+    --shell-surface: #ffffff;
+    --shell-border: rgba(15, 23, 42, 0.08);
+    --shell-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+body.admin-shell {
+    background: var(--shell-bg);
+}
+
+body.admin-shell #app {
+    min-height: 100vh;
+}
+
+body.admin-shell #sidebar .sidebar-wrapper {
+    background: var(--shell-panel);
+    border-right: 1px solid var(--shell-border);
+}
+
+body.rtl.admin-shell #sidebar .sidebar-wrapper {
+    border-right: 0;
+    border-left: 1px solid var(--shell-border);
+}
+
+body.admin-shell header .navbar {
+    background: var(--shell-panel);
+    border-bottom: 1px solid var(--shell-border);
+}
+
+body.admin-shell .footer {
+    background: var(--shell-panel);
+    border-top: 1px solid var(--shell-border);
+}
+
+body.admin-shell #main {
+    background: var(--shell-bg);
+    min-height: 100vh;
+}
+
+body.admin-shell #main #main-content {
+    background: var(--shell-surface);
+    border-radius: 16px;
+    margin: 1rem;
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--shell-shadow);
+}
+
+body.admin-shell .wrapper {
+    margin-left: 300px;
+    padding: 0 2rem 1.5rem;
+}
+
+body.rtl.admin-shell .wrapper {
+    margin-left: 0;
+    margin-right: 300px;
+}
+
+@media screen and (max-width: 1199px) {
+    body.admin-shell .wrapper {
+        margin-left: 0;
+        margin-right: 0;
+        padding: 0 1rem 1.5rem;
+    }
+
+    body.admin-shell #main #main-content {
+        margin: 1rem;
+    }
+}
+
+body.admin-shell .sidebar-wrapper .menu {
+    padding: 0.75rem;
+}
+
+body.admin-shell .sidebar-wrapper .menu .sidebar-item {
+    margin-top: 0.35rem;
+}
+
+body.admin-shell .sidebar-wrapper .menu .sidebar-item.sidebar-group > .sidebar-link {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--shell-border);
+    border-radius: 12px;
+    font-weight: 700;
+    padding: 0.85rem 1rem;
+}
+
+[data-bs-theme="light"] body.admin-shell .sidebar-wrapper .menu .sidebar-item.sidebar-group > .sidebar-link {
+    background: #f6f8fb;
+}
+
+body.admin-shell .sidebar-wrapper .menu .sidebar-item.has-sub > .sidebar-link {
+    padding-right: 2.5rem;
+    position: relative;
+}
+
+body.rtl.admin-shell .sidebar-wrapper .menu .sidebar-item.has-sub > .sidebar-link {
+    padding-right: 1rem;
+    padding-left: 2.5rem;
+}
+
+body.rtl.admin-shell .sidebar-wrapper .menu .sidebar-item.has-sub > .sidebar-link:after {
+    right: auto;
+    left: 1rem;
+}
+
+body.admin-shell .sidebar-wrapper .menu .sidebar-link > .menu-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: 0;
+}
+
+body.admin-shell .sidebar-wrapper .menu .sidebar-link > .menu-text .menu-item {
+    margin: 0;
+}
+
+body.admin-shell .sidebar-wrapper .menu .submenu {
+    padding: 0.35rem 0 0.5rem;
+}
+
+body.admin-shell .sidebar-wrapper .menu .submenu .submenu-item > a {
+    align-items: center;
+    border-radius: 10px;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    padding: 0.55rem 0.9rem;
+}
+
+body.admin-shell .sidebar-wrapper .menu .submenu .submenu-item > a .menu-text {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.65rem;
+    margin: 0;
+}
+
+body.admin-shell .sidebar-wrapper .menu .submenu .submenu-item > a .menu-text .menu-item {
+    margin: 0;
+}
+
+.menu-badge {
+    align-items: center;
+    background: var(--bs-primary);
+    border-radius: 999px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    color: #fff;
+    display: inline-flex;
+    font-size: 0.7rem;
+    font-weight: 700;
+    height: 1.45rem;
+    justify-content: center;
+    min-width: 1.45rem;
+    padding: 0 0.45rem;
+}
+
+[data-bs-theme="light"] .menu-badge {
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+}
 .myDragClass {
     background-color: #f1f1f1;
     opacity: 0.8;

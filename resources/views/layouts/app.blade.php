@@ -85,7 +85,7 @@
 
     @yield('css')
 </head>
-<body class="{{ $isRTL ? 'rtl' : 'ltr' }}">
+<body class="{{ $isRTL ? 'rtl' : 'ltr' }} admin-shell">
 <div id="app">
     @include('layouts.sidebar')
     <div id="main" class="layout-navbar">

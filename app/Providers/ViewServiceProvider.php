@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Providers;
+use App\Models\DeliveryRequest;
+use App\Models\ManualPaymentRequest;
+use App\Models\VerificationRequest;
 use App\Models\WalletWithdrawalRequest;
 
 use App\Services\CachingService;
@@ -50,9 +53,40 @@ class ViewServiceProvider extends ServiceProvider {
                     ->count();
             }
 
+            $badgeCounts = [
+                'wallet_withdrawals' => $pendingCount,
+                'manual_payments' => 0,
+                'verification_requests' => 0,
+                'delivery_requests' => 0,
+            ];
+
+            if ($user && $user->canAny(['manual-payments-list', 'manual-payments-review'])) {
+                $badgeCounts['manual_payments'] = ManualPaymentRequest::query()
+                    ->whereIn('status', ManualPaymentRequest::OPEN_STATUSES)
+                    ->count();
+            }
+
+            if ($user && $user->canAny([
+                'seller-verification-request-list',
+                'seller-verification-request-create',
+                'seller-verification-request-update',
+                'seller-verification-request-delete',
+            ])) {
+                $badgeCounts['verification_requests'] = VerificationRequest::query()
+                    ->whereIn('status', ['pending', 'resubmitted'])
+                    ->count();
+            }
+
+            if ($user && $user->can('manual-payments-review')) {
+                $badgeCounts['delivery_requests'] = DeliveryRequest::query()
+                    ->where('status', DeliveryRequest::STATUS_PENDING)
+                    ->count();
+            }
+
             $view->with([
                 'company_logo' => $settings ?? '',
                 'pendingWalletWithdrawalCount' => $pendingCount,
+                'sidebarBadgeCounts' => $badgeCounts,
             ]);
         
         
