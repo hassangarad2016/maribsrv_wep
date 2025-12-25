@@ -196,7 +196,7 @@
           </li>
         @endcanany
 
-        @canany(['wifi-cabin-manage',
+                @canany(['wifi-cabin-manage',
                  'currency-rate-list','currency-rate-create','currency-rate-edit','currency-rate-delete',
                  'metal-rate-list','metal-rate-create','metal-rate-edit','metal-rate-delete','metal-rate-schedule',
                  'seller-verification-field-list','seller-verification-field-create','seller-verification-field-update','seller-verification-field-delete',
@@ -241,14 +241,28 @@
                   </a>
                 </li>
               @endcanany
+
+              @canany(['seller-verification-field-list','seller-verification-field-create','seller-verification-field-update','seller-verification-field-delete',
+                       'seller-verification-request-list','seller-verification-request-create','seller-verification-request-update','seller-verification-request-delete'])
+                @php($badgeCount = $badgeFor('verification_requests'))
+                <li class="submenu-item">
+                  <a href="{{ route('seller-verification.dashboard') }}">
+                    <span class="menu-text">
+                      <i class="bi bi-shield-lock"></i>
+                      <span class="menu-item">&#x062A;&#x0648;&#x062B;&#x064A;&#x0642; &#x0627;&#x0644;&#x062D;&#x0633;&#x0627;&#x0628;&#x0627;&#x062A;</span>
+                    </span>
+                    @if($badgeCount > 0)
+                      <span class="menu-badge">{{ $badgeCount }}</span>
+                    @endif
+                  </a>
+                </li>
+              @endcanany
             </ul>
           </li>
         @endcanany
 
 
-        @canany(['seller-verification-field-list','seller-verification-field-create','seller-verification-field-update','seller-verification-field-delete',
-                 'seller-verification-request-list','seller-verification-request-create','seller-verification-request-update','seller-verification-request-delete',
-                 'seller-review-list','seller-review-update','seller-review-delete',
+        @canany(['seller-review-list','seller-review-update','seller-review-delete',
                  'seller-store-settings-manage'])
           <li class="sidebar-item has-sub sidebar-group">
             <a href="#" class="sidebar-link">
@@ -258,22 +272,6 @@
               </span>
             </a>
             <ul class="submenu">
-              @canany(['seller-verification-field-list','seller-verification-field-create','seller-verification-field-update','seller-verification-field-delete',
-                       'seller-verification-request-list','seller-verification-request-create','seller-verification-request-update','seller-verification-request-delete'])
-                @php($badgeCount = $badgeFor('verification_requests'))
-                <li class="submenu-item">
-                  <a href="{{ route('seller-verification.dashboard') }}">
-                    <span class="menu-text">
-                      <i class="bi bi-shield-lock"></i>
-                      <span class="menu-item">{{ __('ЯщелЯаЯв Ящъэгчб') }}</span>
-                    </span>
-                    @if($badgeCount > 0)
-                      <span class="menu-badge">{{ $badgeCount }}</span>
-                    @endif
-                  </a>
-                </li>
-              @endcanany
-
               @canany(['seller-review-list','seller-review-update','seller-review-delete'])
                 <li class="submenu-item">
                   <a href="{{ route('seller-review.index') }}">
@@ -317,8 +315,7 @@
             </ul>
           </li>
         @endcanany
-
-        @if(auth()->check() && auth()->user()->account_type === \App\Models\User::ACCOUNT_TYPE_SELLER)
+@if(auth()->check() && auth()->user()->account_type === \App\Models\User::ACCOUNT_TYPE_SELLER)
           <li class="sidebar-item has-sub sidebar-group">
             <a href="#" class="sidebar-link">
               <span class="menu-text">
@@ -960,3 +957,5 @@
     </div>
   </div>
 </div>
+
+
