@@ -154,6 +154,9 @@ trait NormalizeWithdrawalMethodFieldsTrait
         $normalized = [];
 
         foreach ($fields as $field) {
+            if ($this->isWithdrawalLocationField($field)) {
+                continue;
+            }
             $fieldKey = (string) ($field['key'] ?? '');
 
             if ($fieldKey === '') {
@@ -192,5 +195,38 @@ trait NormalizeWithdrawalMethodFieldsTrait
         }
 
         return $normalized;
+    }
+
+    private function isWithdrawalLocationField(array $field): bool
+    {
+        $key = Str::lower((string) ($field['key'] ?? ''));
+        $label = Str::lower((string) ($field['label'] ?? ''));
+        $type = Str::lower((string) ($field['type'] ?? $field['input_type'] ?? ''));
+
+        $hints = [
+            'location',
+            'geo',
+            'lat',
+            'lng',
+            'longitude',
+            'latitude',
+            'map',
+            'موقع',
+            'خريطة',
+            'الخريطة',
+        ];
+
+        foreach ($hints as $hint) {
+            if ($hint === '') {
+                continue;
+            }
+            if (str_contains($key, $hint) ||
+                str_contains($label, $hint) ||
+                str_contains($type, $hint)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
