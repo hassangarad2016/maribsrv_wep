@@ -291,20 +291,96 @@ class WalletService
         $balanceBefore = $transaction->type === 'credit'
             ? round($balance - $amount, 2)
             : round($balance + $amount, 2);
-        $direction = $transaction->type === 'credit' ? __('credited') : __('debited');
+        $rawMeta = $transaction->meta;
+        if (!is_array($rawMeta)) {
+            $rawMeta = [];
+        }
 
-        $title = __('Wallet updated');
-        $body = sprintf(
-            '%s %s %s. %s %s %s.',
-            __('Your wallet was'),
-            $direction,
-            number_format($amount, 2) . ' ' . $currency,
-            __('New balance:'),
-            number_format($balance, 2),
-            $currency
-        );
+        $reason = (string) data_get($rawMeta, 'reason', '');
+        $context = (string) data_get($rawMeta, 'context', '');
+        $transferDirection = (string) data_get($rawMeta, 'direction', '');
+        $counterpartyName = trim((string) data_get($rawMeta, 'counterparty.name', ''));
 
-        $meta = $this->sanitizeMetadataForNotification($transaction->meta ?? []);
+        $reference = null;
+        $referenceCandidates = [
+            data_get($rawMeta, 'operation_reference'),
+            data_get($rawMeta, 'transfer_reference'),
+            data_get($rawMeta, 'reference'),
+            data_get($rawMeta, 'wallet_reference'),
+            data_get($rawMeta, 'withdrawal_request_reference'),
+            data_get($rawMeta, 'manual.transfer_reference'),
+            data_get($rawMeta, 'manual.metadata.transfer_reference'),
+            data_get($rawMeta, 'metadata.transfer_reference'),
+            data_get($rawMeta, 'metadata.reference'),
+            data_get($rawMeta, 'transfer.transfer_reference'),
+            data_get($rawMeta, 'transfer.reference'),
+            data_get($rawMeta, 'transfer_details.transfer_reference'),
+            data_get($rawMeta, 'transfer_details.reference'),
+        ];
+
+        foreach ($referenceCandidates as $candidate) {
+            if (is_scalar($candidate)) {
+                $candidate = trim((string) $candidate);
+                if ($candidate !== '') {
+                    $reference = $candidate;
+                    break;
+                }
+            }
+        }
+
+        $amountFormatted = number_format($amount, 2) . ' ' . $currency;
+        $balanceFormatted = number_format($balance, 2) . ' ' . $currency;
+        $referenceText = $reference ? "رقم المرجع: {$reference}." : '';
+        $balanceText = "رصيدك بعد العملية: {$balanceFormatted}.";
+        $orderId = data_get($rawMeta, 'order_id');
+        $orderText = $orderId ? "رقم الطلب: {$orderId}." : '';
+
+        $title = 'تحديث في المحفظة';
+        $mainText = "تم تحديث رصيد محفظتك بمبلغ {$amountFormatted}.";
+
+        if ($context === 'wallet_withdrawal_request') {
+            $title = 'طلب سحب من المحفظة';
+            $mainText = "تم خصم {$amountFormatted} لتجهيز طلب السحب.";
+        } elseif ($context === 'wallet_withdrawal_request_reversal') {
+            $title = 'إلغاء طلب سحب';
+            $mainText = "تم إعادة {$amountFormatted} إلى محفظتك بعد رفض طلب السحب.";
+        } elseif ($reason === 'admin_manual_credit') {
+            $title = 'إيداع من الإدارة';
+            $mainText = "تم إيداع {$amountFormatted} في محفظتك من الإدارة.";
+        } elseif ($reason === ManualPaymentRequest::PAYABLE_TYPE_WALLET_TOP_UP || $reason === 'wallet_top_up' || $transaction->manual_payment_request_id) {
+            $title = 'شحن المحفظة';
+            $mainText = "تم شحن محفظتك بمبلغ {$amountFormatted}.";
+        } elseif ($reason === 'wallet_transfer' || $context === 'wallet_transfer') {
+            if ($transferDirection === 'incoming' || $transaction->type === 'credit') {
+                $title = 'تحويل وارد للمحفظة';
+                $mainText = $counterpartyName !== ''
+                    ? "تم استلام تحويل بقيمة {$amountFormatted} من {$counterpartyName}."
+                    : "تم استلام تحويل بقيمة {$amountFormatted}.";
+            } else {
+                $title = 'تحويل صادر من المحفظة';
+                $mainText = $counterpartyName !== ''
+                    ? "تم تحويل {$amountFormatted} إلى {$counterpartyName}."
+                    : "تم تحويل {$amountFormatted}.";
+            }
+        } elseif (in_array($reason, ['refund', 'wallet_refund'], true)) {
+            $title = 'استرجاع للمحفظة';
+            $mainText = "تم إرجاع {$amountFormatted} إلى محفظتك.";
+        } elseif ($transaction->type === 'debit') {
+            $title = 'خصم من المحفظة';
+            $mainText = "تم خصم {$amountFormatted} من محفظتك.";
+        } else {
+            $title = 'إضافة إلى المحفظة';
+            $mainText = "تم إضافة {$amountFormatted} إلى محفظتك.";
+        }
+
+        $body = trim(implode(' ', array_filter([
+            $mainText,
+            $orderText,
+            $referenceText,
+            $balanceText,
+        ])));
+
+        $meta = $this->sanitizeMetadataForNotification($rawMeta);
 
         $data = [
 
@@ -318,6 +394,12 @@ class WalletService
                 'balance' => $balance,
                 'balance_before' => $balanceBefore,
                 'currency' => $currency,
+                'reason' => $reason,
+                'context' => $context,
+                'direction' => $transferDirection,
+                'counterparty_name' => $counterpartyName !== '' ? $counterpartyName : null,
+                'reference' => $reference,
+                'order_id' => $orderId,
                 'deeplink' => config('services.mobile.wallet_deeplink', 'maribsrv://wallet'),
                 'idempotency_key' => $transaction->idempotency_key,
                 'created_at' => optional($transaction->created_at)->toIso8601String(),
