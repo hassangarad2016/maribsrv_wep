@@ -12,6 +12,8 @@ return [
     ],
     'tabs' => [
         'services' => 'الخدمات',
+        'reviews' => 'المراجعات',
+        'reports' => 'البلاغات',
         'reviews_reports' => 'المراجعات والبلاغات',
         'requests' => 'طلبات الخدمات',
     ],

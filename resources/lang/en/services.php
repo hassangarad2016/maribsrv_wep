@@ -12,6 +12,8 @@ return [
     ],
     'tabs' => [
         'services' => 'Services',
+        'reviews' => 'Reviews',
+        'reports' => 'Reports',
         'reviews_reports' => 'Reviews & Reports',
         'requests' => 'Service Requests',
     ],

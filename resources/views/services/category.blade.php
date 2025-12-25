@@ -398,7 +398,14 @@
                         <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews-pane"
                                 type="button" role="tab" aria-controls="reviews-pane" aria-selected="false">
                             <i class="bi bi-chat-quote"></i>
-                            <span class="ms-1">{{ __('services.tabs.reviews_reports') }}</span>
+                            <span class="ms-1">{{ __('services.tabs.reviews') }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports-pane"
+                                type="button" role="tab" aria-controls="reports-pane" aria-selected="false">
+                            <i class="bi bi-flag"></i>
+                            <span class="ms-1">{{ __('services.tabs.reports') }}</span>
                         </button>
                     </li>
                 @endif
@@ -550,7 +557,7 @@
                     <div class="card service-requests-table mt-3">
                         <div class="card-header">
                             <div>
-                                <h6 class="table-title">{{ __('services.tabs.reviews_reports') }}</h6>
+                                <h6 class="table-title">{{ __('services.tabs.reviews') }}</h6>
                                 <p class="table-hint">{{ __('services.messages.service_reviews_caption') }}</p>
                             </div>
                         </div>
@@ -595,6 +602,74 @@
                             </div>
 
                             <div id="reviewsTableCaption" class="visually-hidden">{{ __('services.messages.service_reviews_caption') }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="reports-pane" role="tabpanel" aria-labelledby="reports-tab">
+                    <div class="card service-requests-filters">
+                        <div class="card-body">
+                            <div class="filters-header">
+                                <div>
+                                    <h6 class="filters-title">{{ __('services.labels.report') }}</h6>
+                                </div>
+                            </div>
+                            <div id="reportsFilters" class="row g-3 align-items-end">
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="small text-muted">{{ __('services.labels.report_reason') }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card service-requests-table mt-3">
+                        <div class="card-header">
+                            <div>
+                                <h6 class="table-title">{{ __('services.tabs.reports') }}</h6>
+                                <p class="table-hint">{{ __('services.messages.service_reviews_caption') }}</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table
+                                    class="table table-striped table-hover align-middle"
+                                    aria-describedby="reportsTableCaption"
+                                    id="reportsTable"
+                                    data-toggle="table"
+                                    data-url="{{ route('services.category.reviews', $category) }}"
+                                    data-side-pagination="server"
+                                    data-pagination="true"
+                                    data-page-list="[5, 10, 20, 50, 100, 200]"
+                                    data-search="true"
+                                    data-show-columns="true"
+                                    data-show-refresh="true"
+                                    data-trim-on-search="false"
+                                    data-escape="true"
+                                    data-responsive="true"
+                                    data-sort-name="id"
+                                    data-sort-order="desc"
+                                    data-pagination-successively-size="3"
+                                    data-mobile-responsive="true"
+                                    data-query-params="categoryReportsQueryParams"
+                                    data-toolbar="#reportsFilters"
+                                    data-icons="serviceReviewsTableIcons"
+                                    data-icons-prefix="bi"
+                                >
+                                    <thead>
+                                    <tr>
+                                        <th data-field="id" data-sortable="true">{{ __('services.labels.id') }}</th>
+                                        <th data-field="service.title" data-sortable="true" data-formatter="reviewServiceFormatter" data-escape="false">{{ __('services.labels.service') }}</th>
+                                        <th data-field="user.name" data-sortable="true" data-formatter="reviewUserFormatter" data-escape="false">{{ __('services.labels.user') }}</th>
+                                        <th data-field="rating" data-sortable="true" data-formatter="reviewRatingFormatter" data-escape="false">{{ __('services.labels.rating') }}</th>
+                                        <th data-field="status" data-sortable="true" data-formatter="reviewStatusFormatter" data-escape="false">{{ __('services.labels.status') }}</th>
+                                        <th data-field="review" data-formatter="reviewTextFormatter" data-escape="false">{{ __('services.labels.report_reason') }}</th>
+                                        <th data-field="created_at" data-sortable="true">{{ __('services.labels.created_at') }}</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+
+                            <div id="reportsTableCaption" class="visually-hidden">{{ __('services.messages.service_reviews_caption') }}</div>
                         </div>
                     </div>
                 </div>
@@ -1258,6 +1333,7 @@
         const query = {
             ...params,
             category_id: CATEGORY_ID,
+            type: 'review',
         };
 
         const status = $('#reviews_status_filter').val();
@@ -1268,7 +1344,16 @@
         return query;
     }
 
+    function categoryReportsQueryParams(params = {}) {
+        return {
+            ...params,
+            category_id: CATEGORY_ID,
+            type: 'report',
+        };
+    }
+
     window.categoryReviewsQueryParams = categoryReviewsQueryParams;
+    window.categoryReportsQueryParams = categoryReportsQueryParams;
 
     window.deleteService = deleteService;
     window.reviewServiceFormatter = reviewServiceFormatter;

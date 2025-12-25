@@ -313,9 +313,16 @@ class ServiceController extends Controller
                 ];
             });
 
-            $combined = $reviewRows->concat($reportRows)
-                ->sortByDesc('created_at')
-                ->values();
+            $typeFilter = strtolower((string) $request->input('type', ''));
+            if (in_array($typeFilter, ['reviews', 'review'], true)) {
+                $combined = $reviewRows->values();
+            } elseif (in_array($typeFilter, ['reports', 'report'], true)) {
+                $combined = $reportRows->values();
+            } else {
+                $combined = $reviewRows->concat($reportRows)
+                    ->sortByDesc('created_at')
+                    ->values();
+            }
 
             $total = $combined->count();
 
