@@ -1561,7 +1561,10 @@ class ItemController extends Controller {
     private function canExecuteNodeBinary(string $binary): bool
     {
         if (str_contains($binary, DIRECTORY_SEPARATOR)) {
-            if (! is_file($binary) || ! is_executable($binary)) {
+            if (! is_file($binary)) {
+                return false;
+            }
+            if (PHP_OS_FAMILY !== 'Windows' && ! is_executable($binary)) {
                 return false;
             }
         }
