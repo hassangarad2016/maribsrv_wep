@@ -352,7 +352,7 @@
 
 
     <div class="row">
-        <div class="col-12 col-xl-7 mb-4 mb-xl-0">
+        <div class="col-12 mb-4">
             <div class="card order-overview-card">
                 <div class="card-header">
                     <h4 class="card-title">معلومات الطلب</h4>
@@ -862,8 +862,13 @@
                 </div>
             </div>
         </div>
+    </div>
+
+
+
+    <div class="row mt-4">
         <!-- تحديث حالة الطلب -->
-        <div class="col-12 col-xl-5 mt-4 mt-xl-0">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">تحديث حالة الطلب</h4>
@@ -948,6 +953,8 @@
                 </div>
             </div>
         </div>
+
+ 
     </div>
 
 

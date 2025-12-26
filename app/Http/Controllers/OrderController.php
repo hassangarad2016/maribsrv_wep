@@ -670,6 +670,7 @@ class OrderController extends Controller
                     $normalizedKeyValue = (string) $normalizedKey;
                     $isColorKey = Str::contains($normalizedKeyValue, ['color', 'colour', 'لون']);
                     $isSizeKey = Str::contains($normalizedKeyValue, ['size', 'مقاس', 'المقاس']);
+                    $isAttrKey = Str::startsWith($normalizedKeyValue, ['attr', 'attribute']);
 
                     if (is_array($value)) {
                         $value = collect($value)
@@ -709,8 +710,9 @@ class OrderController extends Controller
 
                     if ($isColorKey) {
                         $label = 'اللون';
-                    } elseif ($isSizeKey) {
+                    } elseif ($isSizeKey || $isAttrKey) {
                         $label = 'المقاس';
+                        $isSizeKey = true;
                     }
 
                     $displayValue = $value;
