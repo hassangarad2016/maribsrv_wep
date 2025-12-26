@@ -643,6 +643,9 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
 
             Route::get('/products/create', [ItemController::class, 'createShein'])->name('products.create');
             Route::post('/products', [ItemController::class, 'storeShein'])->name('products.store');
+            Route::post('/products/import', [ItemController::class, 'importSheinProduct'])
+                ->name('products.import')
+                ->middleware('permission:shein-products-create');
             Route::get('/products/{id}/edit', [ItemController::class, 'editShein'])->name('products.edit');
             Route::post('/products/{id}', [ItemController::class, 'updateShein'])->name('products.update');
 
@@ -712,6 +715,9 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
 
         Route::get('/publish', [ItemController::class, 'computerPublish'])->name('item.computer.publish');
         Route::get('/products', [ItemController::class, 'computerProducts'])->name('item.computer.products');
+        Route::get('/products/data', [ItemController::class, 'computerProductsData'])
+            ->name('item.computer.products.data')
+            ->middleware('permission:computer-ads-list|computer-ads-update|computer-ads-delete');
         Route::get('/orders', [OrderController::class, 'indexComputer'])->name('item.computer.orders');
         Route::get('/custom-orders', [RequestDeviceController::class, 'index'])->name('item.computer.custom-orders.index');
         Route::get('/custom-orders/{id}', [RequestDeviceController::class, 'show'])->name('item.computer.custom-orders.show');

@@ -1,52 +1,331 @@
 @extends('layouts.main')
 
 @section('title')
-    {{ __('إعلانات الكمبيوتر') }}
+    {{ __('Computer Products') }}
 @endsection
 
-@section('page-style')
+@section('css')
 <style>
+    .service-requests-page {
+        background: linear-gradient(180deg, rgba(13, 110, 253, 0.07), rgba(13, 110, 253, 0.02));
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        border-radius: 1.25rem;
+        color: #212529;
+        padding: 1.25rem;
+    }
+    .service-requests-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .service-requests-hero {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .service-requests-title {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .service-requests-subtitle {
+        margin: 0.35rem 0 0;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .service-requests-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.75rem;
+    }
+    .metric-card {
+        background: #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 0.9rem;
+        padding: 0.85rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+        min-height: 76px;
+    }
+    .metric-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #0d6efd;
+        background: rgba(13, 110, 253, 0.12);
+    }
+    .metric-card.category .metric-icon {
+        color: #198754;
+        background: rgba(25, 135, 84, 0.12);
+    }
+    .metric-card.review .metric-icon {
+        color: #b58100;
+        background: rgba(255, 193, 7, 0.18);
+    }
+    .metric-label {
+        font-size: 0.78rem;
+        color: #6c757d;
+        font-weight: 600;
+    }
+    .metric-value {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #212529;
+    }
+    .metric-value.text-truncate {
+        max-width: 180px;
+    }
+    .service-requests-filters {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 1rem;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+    }
+    .service-requests-filters .card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+        padding: 1.1rem;
+    }
+    .filters-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+    .filters-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .filters-hint {
+        margin: 0.2rem 0 0;
+        font-size: 0.82rem;
+        color: #6c757d;
+    }
+    .filters-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .status-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .status-tab {
+        border: 1px solid rgba(15, 23, 42, 0.15);
+        background: #ffffff;
+        color: #495057;
+        border-radius: 0.75rem;
+        padding: 0.4rem 0.9rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .status-tab:hover {
+        border-color: #0d6efd;
+        color: #0d6efd;
+    }
+    .status-tab.active {
+        background: #0d6efd;
+        color: #ffffff;
+        border-color: #0d6efd;
+        box-shadow: 0 10px 18px rgba(13, 110, 253, 0.2);
+    }
+    .status-tab.active:hover {
+        color: #ffffff;
+    }
+    .search-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-inline-start: auto;
+    }
+    .search-group .input-group {
+        min-width: 240px;
+        max-width: 320px;
+    }
+    .search-group .input-group-text {
+        background: #f8f9fa;
+        border-radius: 0.75rem 0 0 0.75rem;
+        border-color: rgba(15, 23, 42, 0.12);
+    }
+    .search-group .form-control {
+        height: 38px;
+        font-size: 0.9rem;
+        border-radius: 0 0.75rem 0.75rem 0;
+        border-color: rgba(15, 23, 42, 0.12);
+    }
+    .search-group .btn {
+        height: 38px;
+        padding: 0 0.9rem;
+        font-size: 0.85rem;
+        border-radius: 0.75rem;
+    }
+    .search-group .form-select {
+        min-width: 220px;
+        max-width: 280px;
+        height: 38px;
+        font-size: 0.9rem;
+        border-radius: 0.75rem;
+        border-color: rgba(15, 23, 42, 0.12);
+    }
+    .search-group .select2-container {
+        min-width: 220px;
+        max-width: 280px;
+    }
+    .search-group .select2-container--bootstrap-5 .select2-selection--single {
+        height: 38px;
+        border-radius: 0.75rem;
+        border-color: rgba(15, 23, 42, 0.12);
+    }
+    .search-group .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+        line-height: 36px;
+        padding-inline-start: 0.75rem;
+    }
+    .search-group .select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+    .service-requests-table {
+        border-radius: 1rem;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        margin-bottom: 0;
+        overflow: hidden;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+    }
+    .service-requests-table .card-header {
+        background: #f8f9fb;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        padding: 0.9rem 1.1rem;
+    }
+    .service-requests-table .card-body {
+        padding: 1.15rem;
+    }
+    .table-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .table-hint {
+        margin: 0.2rem 0 0;
+        font-size: 0.82rem;
+        color: #6c757d;
+    }
+    .service-requests-table .table {
+        margin-bottom: 0;
+    }
+    .service-requests-table .table thead th {
+        background: #f8f9fa;
+        color: #212529;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        padding: 0.85rem 1rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .service-requests-table .table tbody td {
+        padding: 0.85rem 1rem;
+    }
+    .service-requests-table .table thead th,
+    .service-requests-table .table tbody td {
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+    .service-requests-table .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    .service-requests-table .table tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.04);
+    }
+    .service-requests-table .table-striped > tbody > tr:nth-of-type(odd) {
+        background-color: rgba(15, 23, 42, 0.02);
+    }
+    .service-requests-table .fixed-table-toolbar {
+        margin-bottom: 0.75rem;
+    }
+    .service-requests-table .fixed-table-toolbar .columns {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.15rem;
+        background: #4b5563;
+        border-radius: 0.75rem;
+        padding: 0.25rem;
+        box-shadow: 0 10px 18px rgba(15, 23, 42, 0.18);
+    }
+    .service-requests-table .fixed-table-toolbar .columns .btn,
+    .service-requests-table .fixed-table-toolbar .columns .btn-group > .btn {
+        background: transparent;
+        border: 0;
+        color: #ffffff;
+        width: 36px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: none;
+    }
+    .service-requests-table .fixed-table-toolbar .columns .btn:hover,
+    .service-requests-table .fixed-table-toolbar .columns .btn-group > .btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+    .service-requests-table .fixed-table-toolbar .columns .dropdown-toggle::after {
+        display: none;
+    }
+    .service-requests-table .fixed-table-toolbar .columns .btn i {
+        font-size: 1rem;
+    }
+    .service-requests-table .table-square-thumb {
+        width: 56px;
+        height: 56px;
+        object-fit: cover;
+        border-radius: 0.6rem;
+    }
+    #table_list { width: 100%; }
 
-    .card-body {
-        overflow-x: hidden;
-    }
-    
-    /* Reset default Select2 width */
-    .select2-container {
-        width: 100% !important;
-    }
-    
-    /* Target category filter specifically with highest specificity */
-    #filters .col-md-8 .select2-container,
-    #filters .col-md-8 .select2-container.select2-container--default,
-    #filters .col-md-8 .select2-container.select2-container--open,
-    #category_filter + .select2-container {
-        width: 100% !important;
-        min-width: 400px !important;
-    }
-    
-    /* Force width on dropdown */
-    .select2-dropdown,
-    .select2-dropdown.select2-dropdown--below,
-    .select2-dropdown.select2-dropdown--above {
-        width: auto !important;
-        min-width: 400px !important;
-    }
-    
-    /* Custom class for our dropdown */
-    .category-filter-dropdown {
-        width: 100% !important;
-        min-width: 400px !important;
-    }
-    
-    /* Force width on selection container */
-    .select2-container .select2-selection {
-        width: 100% !important;
-        min-width: 400px !important;
+    @media (min-width: 992px) {
+        .service-requests-hero {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .service-requests-metrics {
+            max-width: 720px;
+        }
     }
 
-    #table_list {
-        width: 100%;
+    @media (max-width: 768px) {
+        .service-requests-page {
+            padding: 1rem;
+        }
+        .search-group {
+            width: 100%;
+            margin-inline-start: 0;
+        }
+        .search-group .input-group {
+            flex: 1;
+            min-width: 0;
+            max-width: none;
+        }
+        .search-group .form-select,
+        .search-group .select2-container {
+            width: 100%;
+            max-width: none;
+        }
+        .metric-value.text-truncate {
+            max-width: 140px;
+        }
     }
 </style>
 @endsection
@@ -63,71 +342,138 @@
 @endsection
 
 @section('content')
-    <section class="section">
-        <div class="card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-12">
-                        <div id="filters" class="row mb-3">
-                            <div class="col-md-4">
-                                <label for="filter">{{__("Status")}}</label>
-                                <select class="form-control bootstrap-table-filter-control-status" id="filter">
-                                    <option value="">{{__("All")}}</option>
-                                    <option value="review">{{__("Under Review")}}</option>
-                                    <option value="approved">{{__("Approved")}}</option>
-                                    <option value="rejected">{{__("Rejected")}}</option>
-                                    <option value="sold out">{{__("Sold Out")}}</option>
-                                </select>
-                            </div>
-                            <div class="col-md-8">
-                                <label for="category_filter">{{__("Category")}}</label>
-                                <select class="form-control select2" id="category_filter" name="category_filter">
-                                    <option value="">{{__("All Categories")}}</option>
-                                    @foreach($categories as $category)
-                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
+    <section class="section service-requests-page">
+        @php
+            $totalItems = (int) ($stats['total'] ?? 0);
+            $reviewItems = (int) ($stats['review'] ?? 0);
+            $selectedCategoryName = $selectedCategory ? $selectedCategory->name : __('All Categories');
+        @endphp
+        <div class="service-requests-shell">
+            <div class="service-requests-hero">
+                <div>
+                    <h5 class="service-requests-title">@yield('title')</h5>
+                    <p class="service-requests-subtitle">{{ __('Track computer products, approvals, and inventory status.') }}</p>
+                </div>
+                <div class="service-requests-metrics">
+                    <div class="metric-card category">
+                        <span class="metric-icon"><i class="bi bi-folder2-open"></i></span>
+                        <div>
+                            <div class="metric-label">{{ __('Category') }}</div>
+                            <div class="metric-value text-truncate" title="{{ $selectedCategoryName }}">
+                                {{ $selectedCategoryName }}
                             </div>
                         </div>
                     </div>
+                    <div class="metric-card">
+                        <span class="metric-icon"><i class="bi bi-collection"></i></span>
+                        <div>
+                            <div class="metric-label">{{ __('Total products') }}</div>
+                            <div class="metric-value">{{ number_format($totalItems) }}</div>
+                        </div>
+                    </div>
+                    <div class="metric-card review">
+                        <span class="metric-icon"><i class="bi bi-hourglass-split"></i></span>
+                        <div>
+                            <div class="metric-label">{{ __('Under Review') }}</div>
+                            <div class="metric-value">{{ number_format($reviewItems) }}</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="row">
+            </div>
 
+            <div class="card service-requests-filters">
+                <div class="card-body">
+                    <div class="filters-header">
+                        <div>
+                            <h6 class="filters-title">{{ __('Filter') }}</h6>
+                            <p class="filters-hint">{{ __('Narrow down by status or category before exporting data.') }}</p>
+                        </div>
+                    </div>
+                    <div class="filters-row">
+                        <div class="status-tabs" role="tablist">
+                            <button type="button" class="status-tab active" data-status="">{{ __('All') }}</button>
+                            <button type="button" class="status-tab" data-status="review">{{ __('Under Review') }}</button>
+                            <button type="button" class="status-tab" data-status="approved">{{ __('Approved') }}</button>
+                            <button type="button" class="status-tab" data-status="rejected">{{ __('Rejected') }}</button>
+                        </div>
+                        <input type="hidden" id="status_filter" value="">
+                        <div class="search-group">
+                            <select class="form-select" id="category_filter" name="category_filter">
+                                <option value="">{{ __('All Categories') }}</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ $category->id == 5 ? 'selected' : '' }}>{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control" id="item_search" placeholder="{{ __('Search by name or ID') }}" autocomplete="off">
+                            </div>
+                            <button class="btn btn-primary" type="button" id="filtersApply">{{ __('Search') }}</button>
+                            <button class="btn btn-outline-secondary" type="button" id="filtersReset">{{ __('Reset') }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                         <div class ="table-responsive">
-                        <table class="table-borderless table-striped" aria-describedby="mydesc" id="table_list"
-                               data-toggle="table" data-url="{{ route('item.show',1) }}" data-click-to-select="true"
-                                data-side-pagination="server" data-pagination="true"
-                               data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
-                               data-show-columns="true" data-show-refresh="true" data-fixed-columns="true"
-                               data-fixed-number="1" data-fixed-right-number="1" data-trim-on-search="false"
-                               data-escape="true"
-                               data-responsive="true" data-sort-name="id" data-sort-order="desc"
-                               data-pagination-successively-size="3" data-table="items" data-status-column="deleted_at"
-                               data-show-export="true" data-export-options='{"fileName": "item-list","ignoreColumn": ["operate"]}' data-export-types="['pdf','json', 'xml', 'csv', 'txt', 'sql', 'doc', 'excel']"
-                               data-mobile-responsive="true" data-filter-control="true" data-filter-control-container="#filters" data-toolbar="#filters">
-                            <thead class="thead-dark">
+            <div class="card service-requests-table">
+                <div class="card-header">
+                    <div>
+                        <h6 class="table-title">{{ __('Computer product list') }}</h6>
+                        <p class="table-hint">{{ __('Use the toolbar to export, refresh, or customize columns.') }}</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table
+                           class="table table-striped table-hover align-middle"
+                           aria-describedby="computerProductsTableCaption"
+                           id="table_list"
+                           data-toggle="table"
+                           data-url="{{ route('item.computer.products.data') }}"
+                           data-click-to-select="true"
+                           data-side-pagination="server"
+                           data-pagination="true"
+                           data-page-list="[5, 10, 20, 50, 100, 200]"
+                           data-search="false"
+                           data-show-columns="true"
+                           data-show-refresh="true"
+                           data-trim-on-search="false"
+                           data-escape="true"
+                           data-responsive="true"
+                           data-sort-name="id"
+                           data-sort-order="desc"
+                           data-pagination-successively-size="3"
+                           data-table="items"
+                           data-status-column="deleted_at"
+                           data-show-export="true"
+                           data-export-options='{"fileName": "computer-item-list","ignoreColumn": ["operate"]}'
+                           data-export-types='["pdf","json","xml","csv","txt","sql","doc","excel"]'
+                           data-icons="serviceRequestsTableIcons"
+                           data-icons-prefix="bi"
+                           data-mobile-responsive="true"
+                           data-query-params="queryParams">
+                            <thead>
                             <tr>
                                 <th scope="col" data-field="id" data-sortable="true">{{ __('ID') }}</th>
-                                <th scope="col" data-field="name" data-sortable="true">{{ __('Name') }}</th>
-                                <th scope="col" data-field="description" data-align="center" data-sortable="true" data-formatter="descriptionFormatter">{{ __('Description') }}</th>
+                                <th scope="col" data-field="name" data-sortable="true" data-formatter="nameFormatter">{{ __('Name') }}</th>
+                                <th scope="col" data-field="description" data-align="center" data-sortable="true" data-formatter="descriptionFormatter" data-visible="false">{{ __('Description') }}</th>
                                 <th scope="col" data-field="user.name" data-sort-name="user_name" data-sortable="true">{{ __('User') }}</th>
                                 <th scope="col" data-field="price" data-sortable="true">{{ __('Price') }}</th>
                                 <th scope="col" data-field="currency" data-sortable="true">{{ __('Currency') }}</th>
                                 <th scope="col" data-field="image" data-sortable="false" data-escape="false" data-formatter="imageFormatter">{{ __('Image') }}</th>
-                                <th scope="col" data-field="gallery_images" data-sortable="false" data-formatter="galleryImageFormatter" data-escape="false">{{ __('Other Images') }}</th>
+                                <th scope="col" data-field="gallery_images" data-sortable="false" data-formatter="galleryImageFormatter" data-escape="false" data-visible="false">{{ __('Other Images') }}</th>
                                 <th scope="col" data-field="latitude" data-sortable="true" data-visible="false">{{ __('Latitude') }}</th>
                                 <th scope="col" data-field="longitude" data-sortable="true" data-visible="false">{{ __('Longitude') }}</th>
                                 <th scope="col" data-field="address" data-sortable="true" data-visible="false">{{ __('Address') }}</th>
                                 <th scope="col" data-field="contact" data-sortable="true" data-visible="false">{{ __('Contact') }}</th>
-                                <th scope="col" data-field="country" data-sortable="true" data-visible="true">{{ __('Country') }}</th>
-                                <th scope="col" data-field="state" data-sortable="true" data-visible="true">{{ __('State') }}</th>
-                                <th scope="col" data-field="city" data-sortable="true" data-visible="true">{{ __('City') }}</th>
-                                <th scope="col" data-field="status" data-sortable="true" data-filter-control="select" data-filter-data="" data-escape="false" data-formatter="itemStatusFormatter">{{ __('Status') }}</th>
+                                <th scope="col" data-field="country" data-sortable="true" data-visible="false">{{ __('Country') }}</th>
+                                <th scope="col" data-field="state" data-sortable="true" data-visible="false">{{ __('State') }}</th>
+                                <th scope="col" data-field="city" data-sortable="true" data-visible="false">{{ __('City') }}</th>
+                                <th scope="col" data-field="status" data-sortable="true" data-filter-control="select" data-filter-data="" data-escape="false" data-formatter="itemStatusFormatter" data-visible="false">{{ __('Status') }}</th>
                                 @can('computer-ads-update')
-                                    <th scope="col" data-field="active_status" data-sortable="true" data-sort-name="deleted_at" data-visible="true" data-escape="false" data-formatter="statusSwitchFormatter">{{ __('Active') }}</th>
+                                    <th scope="col" data-field="active_status" data-sortable="true" data-sort-name="deleted_at" data-visible="false" data-escape="false" data-formatter="statusSwitchFormatter">{{ __('Active') }}</th>
                                 @endcan
-                                <th scope="col" data-field="rejected_reason" data-sortable="true" data-visible="true">{{ __('Rejected Reason') }}</th>
+                                <th scope="col" data-field="rejected_reason" data-sortable="true" data-visible="false">{{ __('Rejected Reason') }}</th>
                                 <th scope="col" data-field="created_at" data-sortable="true" data-visible="false">{{ __('Created At') }}</th>
                                 <th scope="col" data-field="updated_at" data-sortable="true" data-visible="false">{{ __('Updated At') }}</th>
                                 <th scope="col" data-field="user_id" data-sortable="true" data-visible="false">{{ __('User ID') }}</th>
@@ -140,7 +486,8 @@
                             </tr>
                             </thead>
                         </table>
-                        </div>
+                    </div>
+                    <div id="computerProductsTableCaption" class="visually-hidden">{{ __('Use the toolbar to export, refresh, or customize columns.') }}</div>
                 </div>
             </div>
         </div>
@@ -173,18 +520,17 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <select name="status" class="form-select" id="status" aria-label="status">
-                                        <option value="review">{{__("Under Review")}}</option>
-                                        <option value="approved">{{__("Approve")}}</option>
-                                        <option value="rejected">{{__("Reject")}}</option>
+                                        <option value="review">{{ __('Under Review') }}</option>
+                                        <option value="approved">{{ __('Approve') }}</option>
+                                        <option value="rejected">{{ __('Reject') }}</option>
                                     </select>
                                 </div>
                             </div>
                             <div id="rejected_reason_container" class="col-md-12" style="display: none;">
                                 <label for="rejected_reason" class="mandatory form-label">{{ __('Reason') }}</label>
                                 <textarea name="rejected_reason" id="rejected_reason" class="form-control" placeholder={{ __('Reason') }}></textarea>
-                                {{-- <input type="text" name="rejected_reason" id="rejected_reason" class="form-control"> --}}
                             </div>
-                            <input type="submit" value="{{__("Save")}}" class="btn btn-primary mt-3">
+                            <input type="submit" value="{{ __('Save') }}" class="btn btn-primary mt-3">
                         </form>
                     </div>
                 </div>
@@ -193,116 +539,227 @@
         </div>
     </section>
 @endsection
+
 @section('script')
     <script>
+        window.serviceRequestsTableIcons = {
+            refresh: 'bi-arrow-clockwise',
+            columns: 'bi-list-ul',
+            export: 'bi-download'
+        };
+
         function updateApprovalSuccess() {
             $('#editStatusModal').modal('hide');
         }
 
-        function forceSelect2Width() {
-            // Force the width of all Select2 elements
-            $('.select2-container').css('width', '100%');
-            
-            // Specifically target category filter
-            var $categorySelect = $('#category_filter');
-            var $categoryContainer = $categorySelect.next('.select2-container');
-            
-            $categoryContainer.css({
-                'width': '100%',
-                'min-width': '400px'
-            });
-            
-            $categoryContainer.find('.select2-selection').css({
-                'width': '100%',
-                'min-width': '400px'
+        const CATEGORY_ROOT_ID = 5;
+
+        function itemEvents() {
+            return {
+                'click .editdata': function (e, value, row, index) {
+                    var html = '';
+                    $.each(row.custom_fields, function (key, val) {
+                        html += '<div class="form-group">';
+                        html += '<label>' + val.name + '</label>';
+                        if (val.type === 'textarea') {
+                            html += '<textarea class="form-control" readonly>' + (val.value ? val.value.value : '') + '</textarea>';
+                        } else if (val.type === 'fileinput') {
+                            if (val.value && val.value.value) {
+                                html += '<div><img src="' + val.value.value + '" class="img-thumbnail" style="max-width:200px"></div>';
+                            } else {
+                                html += '<div>No Image</div>';
+                            }
+                        } else {
+                            html += '<input type="text" class="form-control" value="' + (val.value ? val.value.value : '') + '" readonly>';
+                        }
+                        html += '</div>';
+                    });
+                    $('#custom_fields').html(html);
+                },
+                'click .edit-status': function (e, value, row, index) {
+                    window.location.href = row.edit_url;
+                },
+                'click .edit-item': function (e, value, row, index) {
+                    window.location.href = value;
+                }
+            };
+        }
+
+        function itemStatusFormatter(value, row) {
+            let status = '';
+            if (value === 'review') {
+                status = '<span class="badge bg-warning">' + '{{ __('Under Review') }}' + '</span>';
+            } else if (value === 'approved') {
+                status = '<span class="badge bg-success">' + '{{ __('Approved') }}' + '</span>';
+            } else if (value === 'rejected') {
+                status = '<span class="badge bg-danger">' + '{{ __('Rejected') }}' + '</span>';
+            } else if (value === 'sold out') {
+                status = '<span class="badge bg-secondary">' + '{{ __('Sold Out') }}' + '</span>';
+            }
+            return status;
+        }
+
+        function statusSwitchFormatter(value, row) {
+            let checked = value ? 'checked' : '';
+            return '<div class="form-check form-switch"><input class="form-check-input" type="checkbox" ' + checked + ' disabled></div>';
+        }
+
+        function escapeHtml(s) {
+            if (s === null || s === undefined) {
+                return '';
+            }
+            return String(s).replace(/[&<>"'`=\/]/g, function (c) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;',
+                    '/': '&#x2F;',
+                    '`': '&#x60;',
+                    '=': '&#x3D;'
+                }[c];
             });
         }
 
+        function nameFormatter(value) {
+            if (!value) {
+                return '<span class="text-muted">-</span>';
+            }
+            const raw = String(value);
+            const safe = escapeHtml(raw);
+            const max = 12;
+            if (raw.length <= max) {
+                return '<span title="' + safe + '">' + safe + '</span>';
+            }
+            const truncated = escapeHtml(raw.slice(0, max)) + '...';
+            return '<span class="text-nowrap" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-trigger="hover focus" title="' + safe + '">' + truncated + '</span>';
+        }
 
-                function computerQueryParams(params) {
-            params = params || {};
+        function imageFormatter(value, row) {
+            if (value) {
+                return '<img src="' + value + '" class="img-thumbnail table-square-thumb" alt="image">';
+            }
+            return '';
+        }
 
-            params.section = 'computer';
-            params.category_root = 5;
+        function galleryImageFormatter(value, row) {
+            if (value && value.length > 0) {
+                let html = '<div class="d-flex flex-wrap">';
+                for (let i = 0; i < value.length; i++) {
+                    html += '<img src="' + value[i].image + '" class="img-thumbnail table-square-thumb me-1 mb-1" alt="gallery">';
+                }
+                html += '</div>';
+                return html;
+            }
+            return '';
+        }
 
-            var selectedCategory = $('#category_filter').val();
+        function queryParams(params) {
+            const query = {
+                section: 'computer',
+                category_root: CATEGORY_ROOT_ID,
+                offset: params.offset,
+                limit: params.limit,
+                search: params.search,
+                sort: params.sort,
+                order: params.order,
+                filter: params.filter
+            };
+
+            const status = ($('#status_filter').val() || '').trim();
+            if (status) {
+                query.status = status;
+            }
+
+            const selectedCategory = $('#category_filter').val();
             if (selectedCategory) {
-                params.category_id = selectedCategory;
+                query.category_id = selectedCategory;
             } else {
-                delete params.category_id;
+                query.category_id = CATEGORY_ROOT_ID;
             }
 
-            var statusFilter = $('#filter').val();
-            if (statusFilter) {
-                params.status = statusFilter;
-            } else {
-                delete params.status;
+            const searchTerm = ($('#item_search').val() || '').trim();
+            if (searchTerm) {
+                query.search = searchTerm;
             }
 
-            return params;
+            return query;
         }
-
-
-
-
-
 
         $(document).ready(function() {
-            // Initialize Select2 with explicit width
-            $('#category_filter').select2({
-                placeholder: "{{__("Search Categories")}}",
+            const $table = $('#table_list');
+            const $searchInput = $('#item_search');
+            const $statusFilter = $('#status_filter');
+            const $categoryFilter = $('#category_filter');
+
+            $categoryFilter.select2({
+                theme: 'bootstrap-5',
+                placeholder: "{{ __('All Categories') }}",
                 allowClear: true,
-                width: '100%',
-                dropdownCssClass: 'category-filter-dropdown'
+                width: 'style'
             });
 
-            // Force width immediately after initialization
-            forceSelect2Width();
-            
-            // Force width again after a short delay
-            setTimeout(forceSelect2Width, 100);
-            
-            // Force width periodically to handle any dynamic changes
-            setInterval(forceSelect2Width, 500);
-            
-            // Force width when dropdown opens
-            $('#category_filter').on('select2:open', function() {
-                forceSelect2Width();
-                $('.select2-dropdown').css({
-                    'width': '100%',
-                    'min-width': '400px'
-                });
-            });
+            $categoryFilter.val(String(CATEGORY_ROOT_ID)).trigger('change');
 
-
-
-            var $table = $('#table_list');
-
-            $table.bootstrapTable({
-                queryParams: computerQueryParams
-            });
-
-            function refreshComputerTable() {
-                $table.bootstrapTable('refresh', {
-                    query: {
-                        section: 'computer',
-                        category_root: 5
+            function initTooltips() {
+                if (typeof bootstrap === 'undefined') {
+                    return;
+                }
+                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+                    const existing = bootstrap.Tooltip.getInstance(el);
+                    if (existing) {
+                        existing.dispose();
                     }
+                    new bootstrap.Tooltip(el);
                 });
             }
 
+            function refreshTableToFirstPage() {
+                const options = $table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                $table.bootstrapTable('refresh');
+            }
 
-
-
-            $('#category_filter').on('change', function() {
-                refreshComputerTable();
-                forceSelect2Width();
+            $('.status-tab').on('click', function () {
+                $('.status-tab').removeClass('active');
+                $(this).addClass('active');
+                $statusFilter.val($(this).data('status'));
+                refreshTableToFirstPage();
             });
 
-            $('#filter').on('change', function() {
-                refreshComputerTable();
+            $('#filtersApply').on('click', function () {
+                refreshTableToFirstPage();
             });
 
+            $('#filtersReset').on('click', function () {
+                $searchInput.val('');
+                $categoryFilter.val(String(CATEGORY_ROOT_ID)).trigger('change');
+                $statusFilter.val('');
+                $('.status-tab').removeClass('active');
+                $('.status-tab[data-status=""]').addClass('active');
+                refreshTableToFirstPage();
+            });
+
+            $searchInput.on('keypress', function (event) {
+                if (event.which === 13) {
+                    event.preventDefault();
+                    refreshTableToFirstPage();
+                }
+            });
+
+            $categoryFilter.on('change', function () {
+                refreshTableToFirstPage();
+            });
+
+            $('#status').on('change', function() {
+                $('#rejected_reason_container').toggle($(this).val() === 'rejected');
+            });
+
+            $table.on('post-body.bs.table', function () {
+                initTooltips();
+            });
+            initTooltips();
         });
     </script>
 @endsection

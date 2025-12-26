@@ -160,10 +160,14 @@
 
                             <div class="form-group mb-3">
                                 <label for="product_link" class="form-label mandatory">{{ __('Product Link') }}</label>
-                                <input type="url" id="product_link" name="product_link" class="form-control @error('product_link') is-invalid @enderror" value="{{ old('product_link') }}" required maxlength="2048">
+                                <div class="input-group">
+                                    <input type="url" id="product_link" name="product_link" class="form-control @error('product_link') is-invalid @enderror" value="{{ old('product_link') }}" required maxlength="2048">
+                                    <button type="button" class="btn btn-outline-primary" id="shein_import_btn">{{ __('Fetch Shein Data') }}</button>
+                                </div>
                                 @error('product_link')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                                <small id="shein_import_status" class="form-text text-muted"></small>
                             </div>
                         </div>
 

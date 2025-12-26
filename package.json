@@ -18,6 +18,7 @@
     },
     "dependencies": {
         "highcharts": "^11.0.1",
+        "playwright-core": "^1.49.1",
         "vue": "^3.3.4"
     }
 }

@@ -16,9 +16,11 @@ use App\Services\ImageVariantService;
 use App\Services\ResponseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use App\Support\ColorFieldParser;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Http\UploadedFile;
 
 use App\Models\Category;
 use App\Models\CustomField;
@@ -30,6 +32,7 @@ use Carbon\Carbon;
 
 use Illuminate\Support\Collection;
 use App\Support\VariantKeyGenerator;
+use Symfony\Component\Process\Process;
 
 class ItemController extends Controller {
 
@@ -232,8 +235,10 @@ class ItemController extends Controller {
                 'price' => 'required|numeric',
                 'currency' => 'required|string|max:10',
                 'category_id' => 'required|exists:categories,id',
-                'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'image' => ['required_without:imported_images', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
                 'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'imported_images' => ['required_without:image', 'array'],
+                'imported_images.*' => ['nullable', 'url', 'max:2048'],
                 'video_link' => ['nullable', 'url', 'max:2048'],
                 'delivery_size' => ['nullable', 'numeric', 'min:0.01'],
                 'discount_type' => ['nullable', 'string', 'in:none,percentage,fixed'],
@@ -300,6 +305,50 @@ class ItemController extends Controller {
 
         }
     
+    }
+
+    public function importSheinProduct(Request $request)
+    {
+        ResponseService::noPermissionThenSendJson('shein-products-create');
+
+        $request->validate([
+            'url' => ['required', 'url', 'max:2048'],
+        ]);
+
+        $scriptPath = base_path('scripts/shein_importer.js');
+
+        if (! file_exists($scriptPath)) {
+            ResponseService::errorResponse('Shein importer script not found.', null, 500);
+        }
+
+        $process = new Process(['node', $scriptPath, $request->input('url')], base_path());
+        $process->setTimeout(120);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            $errorOutput = trim((string) $process->getErrorOutput());
+            if ($errorOutput === '') {
+                $errorOutput = trim((string) $process->getOutput());
+            }
+            $errorOutput = $errorOutput !== '' ? substr($errorOutput, 0, 1000) : null;
+
+            ResponseService::errorResponse('Unable to fetch Shein data.', [
+                'details' => $errorOutput,
+            ], 422);
+        }
+
+        $raw = trim((string) $process->getOutput());
+        $payload = json_decode($raw, true);
+
+        if (! is_array($payload) || empty($payload['ok'])) {
+            ResponseService::errorResponse('Invalid importer response.', [
+                'details' => $raw !== '' ? substr($raw, 0, 1000) : null,
+            ], 422);
+        }
+
+        $data = $payload['data'] ?? [];
+
+        ResponseService::successResponse('Success', $data);
     }
 
 
@@ -1126,6 +1175,7 @@ class ItemController extends Controller {
      
         $categoryPool = $this->getCategoryPool();
         $categoryIds = $this->collectSectionCategoryIds($categoryPool, 5, true);
+        $selectedCategory = $categoryPool->firstWhere('id', 5);
 
         $categories = $categoryPool
             ->filter(static fn ($category) => in_array($category->id, $categoryIds, true))
@@ -1136,7 +1186,36 @@ class ItemController extends Controller {
             })
             ->values();
 
-        return view('items.computer', compact('categories'));
+        $statsQuery = Item::withTrashed()->whereIn('category_id', $categoryIds);
+        $stats = [
+            'total' => (clone $statsQuery)->count(),
+            'review' => (clone $statsQuery)->where('status', 'review')->count(),
+        ];
+
+        return view('items.computer', compact('categories', 'stats', 'selectedCategory'));
+    }
+
+    public function computerProductsData(Request $request)
+    {
+        if (! $request->filled('section')) {
+            $request->merge([
+                'section' => DepartmentReportService::DEPARTMENT_COMPUTER,
+            ]);
+        }
+
+        if (! $request->has('category_root') || ! is_numeric($request->input('category_root'))) {
+            $request->merge([
+                'category_root' => 5,
+            ]);
+        }
+
+        if (! $request->filled('category_id') && (int) $request->input('category_root') === 5) {
+            $request->merge([
+                'category_id' => 5,
+            ]);
+        }
+
+        return $this->show($request);
     }
 
     public function computerCreate(Request $request)
@@ -1226,9 +1305,31 @@ class ItemController extends Controller {
         }
 
 
+        [$importedFiles, $importedTempPaths] = $this->downloadImportedImageFiles($request);
+
+        $mainImageFile = $request->file('image');
+        $importedGallery = [];
+
+        if ($mainImageFile) {
+            $importedGallery = $importedFiles;
+        } else {
+            if ($importedFiles !== []) {
+                $mainImageFile = array_shift($importedFiles);
+                $importedGallery = $importedFiles;
+            }
+        }
+
+        if (! $mainImageFile) {
+            ResponseService::validationErrors([
+                'image' => [__('Unable to process the imported images. Please add a main image manually.')],
+            ]);
+        }
+
         try {
-            $variants = ImageVariantService::storeWithVariants($request->file('image'), 'items');
+            $variants = ImageVariantService::storeWithVariants($mainImageFile, 'items');
         } catch (Throwable $exception) {
+            $this->cleanupTemporaryFiles($importedTempPaths);
+
             ResponseService::validationErrors([
                 'image' => [__('Unable to process the uploaded image. Please try again with a different file.')],
             ]);
@@ -1273,21 +1374,39 @@ class ItemController extends Controller {
             $itemData = array_merge($itemData, $context['additional_attributes']);
         }
 
-        $item = Item::create($itemData);
+        $item = null;
 
-        $this->attachGalleryImages($item, $request);
-        $this->storeCustomFieldValues($item, $request);
+        try {
+            $item = Item::create($itemData);
+
+            $this->attachGalleryImages($item, $request, $importedGallery);
+            $this->storeCustomFieldValues($item, $request);
+        } finally {
+            $this->cleanupTemporaryFiles($importedTempPaths);
+        }
 
         return $item;
     }
 
-    private function attachGalleryImages(Item $item, Request $request): void
+    private function attachGalleryImages(Item $item, Request $request, array $importedImages = []): void
     {
-        if (! $request->hasFile('gallery_images')) {
+        $files = [];
+        if ($request->hasFile('gallery_images')) {
+            $files = $request->file('gallery_images');
+            if (! is_array($files)) {
+                $files = [$files];
+            }
+        }
+
+        if (! empty($importedImages)) {
+            $files = array_merge($files, $importedImages);
+        }
+
+        if ($files === []) {
             return;
         }
 
-        foreach ($request->file('gallery_images') as $image) {
+        foreach ($files as $image) {
             if (empty($image)) {
                 continue;
             }
@@ -1305,6 +1424,102 @@ class ItemController extends Controller {
                 'thumbnail_url' => $galleryVariants['thumbnail'],
                 'detail_image_url' => $galleryVariants['detail'],
             ]);
+        }
+    }
+
+    private function downloadImportedImageFiles(Request $request): array
+    {
+        $urls = $request->input('imported_images', []);
+        if (! is_array($urls)) {
+            return [[], []];
+        }
+
+        $urls = collect($urls)
+            ->filter(static fn ($value) => is_string($value))
+            ->map(static fn ($value) => trim($value))
+            ->filter(static fn ($value) => $value !== '')
+            ->unique()
+            ->take(20)
+            ->values()
+            ->all();
+
+        if ($urls === []) {
+            return [[], []];
+        }
+
+        $downloaded = [];
+        $tempPaths = [];
+
+        foreach ($urls as $url) {
+            if (! preg_match('~^https?://~i', $url)) {
+                continue;
+            }
+
+            $tempPath = tempnam(sys_get_temp_dir(), 'shein_');
+            if ($tempPath === false) {
+                continue;
+            }
+
+            try {
+                $response = Http::timeout(25)
+                    ->retry(1, 200)
+                    ->withOptions(['sink' => $tempPath])
+                    ->get($url);
+            } catch (Throwable $exception) {
+                @unlink($tempPath);
+                continue;
+            }
+
+            if (! $response->successful()) {
+                @unlink($tempPath);
+                continue;
+            }
+
+            $contentType = $response->header('Content-Type');
+            $extension = $this->guessImageExtension($url, $contentType);
+            $filename = 'imported.' . $extension;
+
+            $downloaded[] = new UploadedFile($tempPath, $filename, $contentType ?: null, null, true);
+            $tempPaths[] = $tempPath;
+        }
+
+        return [$downloaded, $tempPaths];
+    }
+
+    private function guessImageExtension(string $url, ?string $contentType): string
+    {
+        $map = [
+            'image/jpeg' => 'jpg',
+            'image/jpg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            'image/avif' => 'avif',
+        ];
+
+        if ($contentType) {
+            $normalized = strtolower(trim(explode(';', $contentType)[0] ?? $contentType));
+            if (isset($map[$normalized])) {
+                return $map[$normalized];
+            }
+        }
+
+        $path = parse_url($url, PHP_URL_PATH);
+        $extension = strtolower((string) pathinfo((string) $path, PATHINFO_EXTENSION));
+
+        if (in_array($extension, ['jpeg', 'jpg', 'png', 'gif', 'webp', 'avif'], true)) {
+            return $extension === 'jpeg' ? 'jpg' : $extension;
+        }
+
+        return 'jpg';
+    }
+
+    private function cleanupTemporaryFiles(array $paths): void
+    {
+        foreach ($paths as $path) {
+            if ($path && is_file($path)) {
+                @unlink($path);
+            }
         }
     }
 
