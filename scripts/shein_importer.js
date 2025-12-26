@@ -362,6 +362,9 @@ const run = async () => {
     executablePath,
     args: [
       "--disable-blink-features=AutomationControlled",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--no-zygote",
       "--no-sandbox",
       "--disable-setuid-sandbox",
     ],
