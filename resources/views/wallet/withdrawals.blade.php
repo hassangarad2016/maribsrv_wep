@@ -145,10 +145,14 @@
     }
     .status-tabs {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         gap: 0.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+        -webkit-overflow-scrolling: touch;
     }
     .status-tab {
+        flex: 0 0 auto;
         border: 1px solid rgba(15, 23, 42, 0.15);
         background: #ffffff;
         color: #495057;
@@ -158,6 +162,7 @@
         font-weight: 600;
         cursor: pointer;
         transition: all 0.2s ease;
+        white-space: nowrap;
     }
     .status-tab:hover {
         border-color: #0d6efd;
