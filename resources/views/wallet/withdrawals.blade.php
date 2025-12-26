@@ -229,6 +229,25 @@
         font-weight: 600;
         white-space: nowrap;
     }
+    .wallet-withdrawals-table .table {
+        table-layout: fixed;
+    }
+    .wallet-withdrawals-table .table th,
+    .wallet-withdrawals-table .table td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .wallet-withdrawals-table .table th[data-field="operate"],
+    .wallet-withdrawals-table .table td:last-child {
+        min-width: 220px;
+    }
+    .withdrawal-actions {
+        display: inline-flex;
+        flex-wrap: nowrap;
+        gap: 0.35rem;
+        align-items: center;
+    }
     .wallet-withdrawals-table .table tbody td {
         padding: 0.85rem 1rem;
     }
@@ -548,15 +567,17 @@
     }
 
     function withdrawalRequestFormatter(value, row) {
-        const reference = row.wallet_reference ? `<div class="text-muted small mt-1">Ref: ${escapeHtml(row.wallet_reference)}</div>` : '';
         const label = value ? `#${escapeHtml(value)}` : '-';
-        return `<span class="badge bg-primary text-white fw-semibold px-3 py-2">${label}</span>${reference}`;
+        const reference = row.wallet_reference ? `Ref: ${escapeHtml(row.wallet_reference)}` : '';
+        const title = reference ? ` title="${reference}"` : '';
+        return `<span class="badge bg-primary text-white fw-semibold px-3 py-2"${title}>${label}</span>`;
     }
 
     function userFormatter(value, row) {
         const name = row.user && row.user.name ? row.user.name : '-';
         const email = row.user && row.user.email ? row.user.email : '';
-        return `<div class="fw-semibold">${escapeHtml(name)}</div>${email ? `<div class="text-muted small">${escapeHtml(email)}</div>` : ''}`;
+        const title = email && email !== '-' ? ` title="${escapeHtml(email)}"` : '';
+        return `<span class="fw-semibold"${title}>${escapeHtml(name)}</span>`;
     }
 
     function amountFormatter(value) {

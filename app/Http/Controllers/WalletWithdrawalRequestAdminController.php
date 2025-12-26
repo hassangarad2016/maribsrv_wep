@@ -213,7 +213,7 @@ class WalletWithdrawalRequestAdminController extends Controller
                 $methodLabel = $methodLabels[$row->preferred_method]['name']
                     ?? Str::headline(str_replace('_', ' ', (string) $row->preferred_method));
 
-                $operate = '<button type="button" class="btn btn-sm btn-outline-primary preview-withdrawal" data-request-id="'
+                $operate = '<div class="withdrawal-actions"><button type="button" class="btn btn-sm btn-outline-primary preview-withdrawal" data-request-id="'
                     . $row->getKey()
                     . '"><i class="bi bi-eye"></i></button>';
 
@@ -221,18 +221,19 @@ class WalletWithdrawalRequestAdminController extends Controller
                     $approveRoute = route('wallet.withdrawals.approve', $row);
                     $rejectRoute = route('wallet.withdrawals.reject', $row);
 
-                    $operate .= '<form method="POST" action="' . $approveRoute . '" class="d-inline-block ms-1">'
+                    $operate .= '<form method="POST" action="' . $approveRoute . '" class="d-inline-block">'
                         . '<input type="hidden" name="_token" value="' . $csrfToken . '">'
                         . '<button type="submit" class="btn btn-sm btn-success">' . __('Approve') . '</button>'
                         . '</form>';
 
-                    $operate .= '<form method="POST" action="' . $rejectRoute . '" class="d-inline-block ms-1">'
+                    $operate .= '<form method="POST" action="' . $rejectRoute . '" class="d-inline-block">'
                         . '<input type="hidden" name="_token" value="' . $csrfToken . '">'
                         . '<button type="submit" class="btn btn-sm btn-danger">' . __('Reject') . '</button>'
                         . '</form>';
                 } else {
-                    $operate .= '<span class="badge bg-light text-muted ms-2">' . __('Processed') . '</span>';
+                    $operate .= '<span class="badge bg-light text-muted">' . __('Processed') . '</span>';
                 }
+                $operate .= '</div>';
 
                 $dataRows[] = [
                     'id' => $row->getKey(),
@@ -248,7 +249,7 @@ class WalletWithdrawalRequestAdminController extends Controller
                     'created_human' => optional($row->created_at)->format('Y-m-d H:i'),
                     'user' => [
                         'name' => $user?->name ?? '-',
-                        'email' => $user?->email ?? '-',
+                        'email' => $user?->email,
                     ],
                     'operate' => $operate,
                 ];
