@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Support\ColorFieldParser;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 
 use App\Models\Category;
 use App\Models\CustomField;
@@ -334,6 +335,27 @@ class ItemController extends Controller {
             'SHEIN_BROWSER_PROFILE' => env('SHEIN_BROWSER_PROFILE'),
             'SHEIN_HEADLESS' => env('SHEIN_HEADLESS'),
         ];
+        $defaultHome = storage_path('app/shein-home');
+        $homeEnv = env('SHEIN_HOME');
+        if ($homeEnv === null || $homeEnv === '') {
+            $homeEnv = $defaultHome;
+        }
+        if (! is_dir($homeEnv)) {
+            File::ensureDirectoryExists($homeEnv);
+        }
+        $scriptEnv['HOME'] = $homeEnv;
+
+        if (PHP_OS_FAMILY !== 'Windows') {
+            $runtimeEnv = env('SHEIN_RUNTIME_DIR');
+            if ($runtimeEnv === null || $runtimeEnv === '') {
+                $runtimeEnv = storage_path('app/shein-runtime');
+            }
+            if (! is_dir($runtimeEnv)) {
+                File::ensureDirectoryExists($runtimeEnv);
+                @chmod($runtimeEnv, 0700);
+            }
+            $scriptEnv['XDG_RUNTIME_DIR'] = $runtimeEnv;
+        }
         $displayEnv = env('SHEIN_DISPLAY');
         if ($displayEnv !== null && $displayEnv !== '') {
             $scriptEnv['DISPLAY'] = $displayEnv;
