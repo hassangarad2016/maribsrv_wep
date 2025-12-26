@@ -8,6 +8,251 @@
     {{ __('Wallet Withdrawal Requests') }}
 @endsection
 
+@section('css')
+<style>
+    .wallet-withdrawals-page {
+        background: linear-gradient(180deg, rgba(13, 110, 253, 0.07), rgba(13, 110, 253, 0.02));
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        border-radius: 1.25rem;
+        color: #212529;
+        padding: 1.25rem;
+    }
+    .wallet-withdrawals-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .wallet-withdrawals-hero {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .wallet-withdrawals-title {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .wallet-withdrawals-subtitle {
+        margin: 0.35rem 0 0;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .wallet-withdrawals-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.75rem;
+    }
+    .metric-card {
+        background: #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 0.9rem;
+        padding: 0.85rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+        min-height: 76px;
+    }
+    .metric-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #0d6efd;
+        background: rgba(13, 110, 253, 0.12);
+    }
+    .metric-card.approved .metric-icon {
+        color: #198754;
+        background: rgba(25, 135, 84, 0.12);
+    }
+    .metric-card.rejected .metric-icon {
+        color: #dc3545;
+        background: rgba(220, 53, 69, 0.12);
+    }
+    .metric-card.pending .metric-icon {
+        color: #b58100;
+        background: rgba(255, 193, 7, 0.18);
+    }
+    .metric-card.total .metric-icon {
+        color: #0dcaf0;
+        background: rgba(13, 202, 240, 0.18);
+    }
+    .metric-label {
+        font-size: 0.78rem;
+        color: #6c757d;
+        font-weight: 600;
+    }
+    .metric-value {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #212529;
+    }
+    .metric-sub {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    .wallet-withdrawals-filters {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 1rem;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+    }
+    .wallet-withdrawals-filters .card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+        padding: 1.1rem;
+    }
+    .filters-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+    .filters-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .filters-hint {
+        margin: 0.2rem 0 0;
+        font-size: 0.82rem;
+        color: #6c757d;
+    }
+    .filters-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 0.75rem;
+    }
+    .filters-row .form-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #6c757d;
+    }
+    .filters-row .form-select {
+        min-width: 180px;
+        border-radius: 0.75rem;
+        border-color: rgba(15, 23, 42, 0.12);
+    }
+    .filters-row .btn {
+        border-radius: 0.75rem;
+    }
+    .status-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .status-tab {
+        border: 1px solid rgba(15, 23, 42, 0.15);
+        background: #ffffff;
+        color: #495057;
+        border-radius: 0.75rem;
+        padding: 0.4rem 0.9rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .status-tab:hover {
+        border-color: #0d6efd;
+        color: #0d6efd;
+    }
+    .status-tab.active {
+        background: #0d6efd;
+        color: #ffffff;
+        border-color: #0d6efd;
+        box-shadow: 0 10px 18px rgba(13, 110, 253, 0.2);
+    }
+    .status-tab.active:hover {
+        color: #ffffff;
+    }
+    .withdrawals-quick-actions {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 0.9rem;
+        background: #f8f9fb;
+        padding: 0.85rem 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+    .withdrawals-quick-actions .badge {
+        border-radius: 0.75rem;
+    }
+    .wallet-withdrawals-table {
+        border-radius: 1rem;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        margin-bottom: 0;
+        overflow: hidden;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+    }
+    .wallet-withdrawals-table .card-header {
+        background: #f8f9fb;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        padding: 0.9rem 1.1rem;
+    }
+    .wallet-withdrawals-table .card-body {
+        padding: 1.15rem;
+    }
+    .table-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .table-hint {
+        margin: 0.2rem 0 0;
+        font-size: 0.82rem;
+        color: #6c757d;
+    }
+    .wallet-withdrawals-table .table thead th {
+        background: #f8f9fa;
+        color: #212529;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        padding: 0.85rem 1rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .wallet-withdrawals-table .table tbody td {
+        padding: 0.85rem 1rem;
+    }
+    .wallet-withdrawals-table .table tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.04);
+    }
+    .wallet-withdrawals-table .table-striped > tbody > tr:nth-of-type(odd) {
+        background-color: rgba(15, 23, 42, 0.02);
+    }
+
+    @media (min-width: 992px) {
+        .wallet-withdrawals-hero {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .wallet-withdrawals-metrics {
+            max-width: 720px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .wallet-withdrawals-page {
+            padding: 1rem;
+        }
+        .filters-row .form-select {
+            min-width: 0;
+            width: 100%;
+        }
+    }
+</style>
+@endsection
+
 @section('page-title')
     <div class="page-title">
         <div class="row align-items-center g-2">
@@ -28,122 +273,121 @@
 @endsection
 
 @section('content')
-    <section class="section">
-        <div class="row g-3">
-            <div class="col-12">
-                <div class="row g-3 mb-3">
+    <section class="section wallet-withdrawals-page">
+        @php
+            $statusIcons = [
+                \App\Models\WalletWithdrawalRequest::STATUS_PENDING => 'bi bi-hourglass-split',
+                \App\Models\WalletWithdrawalRequest::STATUS_APPROVED => 'bi bi-check-circle',
+                \App\Models\WalletWithdrawalRequest::STATUS_REJECTED => 'bi bi-x-circle',
+            ];
+            $statusMetricClass = [
+                \App\Models\WalletWithdrawalRequest::STATUS_PENDING => 'pending',
+                \App\Models\WalletWithdrawalRequest::STATUS_APPROVED => 'approved',
+                \App\Models\WalletWithdrawalRequest::STATUS_REJECTED => 'rejected',
+            ];
+        @endphp
+        <div class="wallet-withdrawals-shell">
+            <div class="wallet-withdrawals-hero">
+                <div>
+                    <h5 class="wallet-withdrawals-title">@yield('title')</h5>
+                    <p class="wallet-withdrawals-subtitle">{{ __('Review and manage wallet withdrawal requests from users.') }}</p>
+                </div>
+                <div class="wallet-withdrawals-metrics">
                     @foreach($statusSummaries as $summary)
-                        <div class="col-xl-3 col-md-6">
-                            <div class="card shadow-sm border-0 h-100">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between mb-3">
-                                        <span class="badge rounded-pill {{ match($summary['status']) {
-                                            \App\Models\WalletWithdrawalRequest::STATUS_APPROVED => 'bg-success-subtle text-success',
-                                            \App\Models\WalletWithdrawalRequest::STATUS_REJECTED => 'bg-danger-subtle text-danger',
-                                            default => 'bg-warning-subtle text-warning'
-                                        } }} fs-6">
-                                            <i class="{{ match($summary['status']) {
-                                                \App\Models\WalletWithdrawalRequest::STATUS_APPROVED => 'bi bi-check-circle',
-                                                \App\Models\WalletWithdrawalRequest::STATUS_REJECTED => 'bi bi-x-circle',
-                                                default => 'bi bi-hourglass-split'
-                                            } }}"></i>
-                                        </span>
-                                        <span class="badge bg-secondary-subtle text-secondary">
-                                            {{ number_format($summary['amount'], 2) }} {{ $currency }}
-                                        </span>
-                                    </div>
-                                    <p class="text-muted small mb-1">{{ $summary['label'] }}</p>
-                                    <h4 class="fw-bold mb-0">{{ number_format($summary['count']) }}</h4>
-                                </div>
+                        @php
+                            $statusKey = $summary['status'];
+                            $icon = $statusIcons[$statusKey] ?? 'bi bi-cash-stack';
+                            $metricClass = $statusMetricClass[$statusKey] ?? 'pending';
+                        @endphp
+                        <div class="metric-card {{ $metricClass }}">
+                            <span class="metric-icon"><i class="{{ $icon }}"></i></span>
+                            <div>
+                                <div class="metric-label">{{ $summary['label'] }}</div>
+                                <div class="metric-value">{{ number_format($summary['count']) }}</div>
+                                <div class="metric-sub">{{ number_format($summary['amount'], 2) }} {{ $currency }}</div>
                             </div>
                         </div>
                     @endforeach
-                    <div class="col-xl-3 col-md-6">
-                        <div class="card shadow-sm border-0 h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center justify-content-between mb-3">
-                                    <span class="badge rounded-pill bg-info-subtle text-info fs-6">
-                                        <i class="bi bi-graph-up"></i>
-                                    </span>
-                                    <span class="badge bg-info-subtle text-info">{{ __('Total Volume') }}</span>
-                                </div>
-                                <p class="text-muted small mb-1">{{ __('Total withdrawal amount processed') }}</p>
-                                <h4 class="fw-bold mb-0">{{ number_format($totalWithdrawalAmount, 2) }} {{ $currency }}</h4>
-                            </div>
+                    <div class="metric-card total">
+                        <span class="metric-icon"><i class="bi bi-graph-up"></i></span>
+                        <div>
+                            <div class="metric-label">{{ __('Total Volume') }}</div>
+                            <div class="metric-value">{{ number_format($totalWithdrawalAmount, 2) }} {{ $currency }}</div>
+                            <div class="metric-sub">{{ __('Total withdrawal amount processed') }}</div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="card shadow-sm border-0 mb-3">
-                    <div class="card-header bg-white border-0">
-                        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
-                            <div>
-                                <h5 class="card-title mb-1">{{ __('Withdrawal Overview') }}</h5>
-                                <p class="text-muted small mb-0">{{ __('Review and manage wallet withdrawal requests from users.') }}</p>
-                            </div>
-                            <form method="get" class="row g-2 align-items-end">
-                                <div class="col-sm-6 col-lg-auto">
-                                    <label for="status" class="form-label small mb-1">{{ __('Status') }}</label>
-                                    <select id="status" name="status" class="form-select" onchange="this.form.submit()">
-                                        <option value="">{{ __('All statuses') }}</option>
-                                        @foreach($statusOptions as $value => $label)
-                                            <option value="{{ $value }}" @selected($filters['status'] === $value)>{{ $label }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-sm-6 col-lg-auto">
-                                    <label for="method" class="form-label small mb-1">{{ __('Withdrawal Method') }}</label>
-                                    <select id="method" name="method" class="form-select" onchange="this.form.submit()">
-                                        <option value="">{{ __('All methods') }}</option>
-                                        @foreach($methodOptions as $value => $option)
-                                            <option value="{{ $value }}" @selected($filters['method'] === $value)>{{ $option['name'] }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-lg-auto">
-                                    <a href="{{ route('wallet.withdrawals.index') }}" class="btn btn-outline-secondary w-100">
-                                        <i class="bi bi-arrow-repeat me-1"></i>{{ __('Reset') }}
-                                    </a>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="border rounded-3 p-3 mt-3 bg-light-subtle">
-                            <div class="d-flex flex-column flex-lg-row align-items-center justify-content-between gap-3">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="badge bg-primary text-white">
-                                        <i class="bi bi-lightning-charge"></i>
-                                    </span>
-                                    <div>
-                                        <p class="fw-semibold mb-0">{{ __('Quick Decision Bar') }}</p>
-                                        <p class="text-muted small mb-0">{{ __('Approve or reject pending withdrawals directly from this toolbar.') }}</p>
-                                    </div>
-                                </div>
-                                <div class="btn-group" role="group" aria-label="{{ __('Quick Decision Bar') }}">
-                                    <a href="{{ request()->fullUrlWithQuery(['status' => \App\Models\WalletWithdrawalRequest::STATUS_PENDING]) }}" class="btn btn-warning d-flex align-items-center gap-2">
-                                        <i class="bi bi-hourglass-split"></i>
-                                        <span>{{ __('View Pending') }}</span>
-                                    </a>
-                                    <a href="{{ request()->fullUrlWithQuery(['status' => \App\Models\WalletWithdrawalRequest::STATUS_APPROVED]) }}" class="btn btn-success d-flex align-items-center gap-2">
-                                        <i class="bi bi-check-circle"></i>
-                                        <span>{{ __('View Approved') }}</span>
-                                    </a>
-                                    <a href="{{ request()->fullUrlWithQuery(['status' => \App\Models\WalletWithdrawalRequest::STATUS_REJECTED]) }}" class="btn btn-danger d-flex align-items-center gap-2">
-                                        <i class="bi bi-x-circle"></i>
-                                        <span>{{ __('View Rejected') }}</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
 
-            <div class="col-12">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-0">
+            <div class="card wallet-withdrawals-filters">
+                <div class="card-body">
+                    <div class="filters-header">
+                        <div>
+                            <h6 class="filters-title">{{ __('Withdrawal Overview') }}</h6>
+                            <p class="filters-hint">{{ __('Approve or reject pending withdrawals directly from this toolbar.') }}</p>
+                        </div>
+                    </div>
+                    <form method="get" id="withdrawalsFilterForm" class="filters-row">
+                        <div class="status-tabs" role="tablist">
+                            <button type="button" class="status-tab {{ $filters['status'] === '' ? 'active' : '' }}" data-status="">{{ __('All statuses') }}</button>
+                            <button type="button" class="status-tab {{ $filters['status'] === \App\Models\WalletWithdrawalRequest::STATUS_PENDING ? 'active' : '' }}" data-status="{{ \App\Models\WalletWithdrawalRequest::STATUS_PENDING }}">{{ $statusOptions[\App\Models\WalletWithdrawalRequest::STATUS_PENDING] ?? __('Pending') }}</button>
+                            <button type="button" class="status-tab {{ $filters['status'] === \App\Models\WalletWithdrawalRequest::STATUS_APPROVED ? 'active' : '' }}" data-status="{{ \App\Models\WalletWithdrawalRequest::STATUS_APPROVED }}">{{ $statusOptions[\App\Models\WalletWithdrawalRequest::STATUS_APPROVED] ?? __('Approved') }}</button>
+                            <button type="button" class="status-tab {{ $filters['status'] === \App\Models\WalletWithdrawalRequest::STATUS_REJECTED ? 'active' : '' }}" data-status="{{ \App\Models\WalletWithdrawalRequest::STATUS_REJECTED }}">{{ $statusOptions[\App\Models\WalletWithdrawalRequest::STATUS_REJECTED] ?? __('Rejected') }}</button>
+                        </div>
+                        <input type="hidden" name="status" id="status_filter" value="{{ $filters['status'] }}">
+                        <div>
+                            <label for="method" class="form-label mb-1">{{ __('Withdrawal Method') }}</label>
+                            <select id="method" name="method" class="form-select" onchange="this.form.submit()">
+                                <option value="">{{ __('All methods') }}</option>
+                                @foreach($methodOptions as $value => $option)
+                                    <option value="{{ $value }}" @selected($filters['method'] === $value)>{{ $option['name'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <a href="{{ route('wallet.withdrawals.index') }}" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-arrow-repeat me-1"></i>{{ __('Reset') }}
+                            </a>
+                        </div>
+                    </form>
+                    <div class="withdrawals-quick-actions">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary text-white">
+                                <i class="bi bi-lightning-charge"></i>
+                            </span>
+                            <div>
+                                <p class="fw-semibold mb-0">{{ __('Quick Decision Bar') }}</p>
+                                <p class="text-muted small mb-0">{{ __('Approve or reject pending withdrawals directly from this toolbar.') }}</p>
+                            </div>
+                        </div>
+                        <div class="btn-group" role="group" aria-label="{{ __('Quick Decision Bar') }}">
+                            <a href="{{ request()->fullUrlWithQuery(['status' => \App\Models\WalletWithdrawalRequest::STATUS_PENDING]) }}" class="btn btn-warning d-flex align-items-center gap-2">
+                                <i class="bi bi-hourglass-split"></i>
+                                <span>{{ __('View Pending') }}</span>
+                            </a>
+                            <a href="{{ request()->fullUrlWithQuery(['status' => \App\Models\WalletWithdrawalRequest::STATUS_APPROVED]) }}" class="btn btn-success d-flex align-items-center gap-2">
+                                <i class="bi bi-check-circle"></i>
+                                <span>{{ __('View Approved') }}</span>
+                            </a>
+                            <a href="{{ request()->fullUrlWithQuery(['status' => \App\Models\WalletWithdrawalRequest::STATUS_REJECTED]) }}" class="btn btn-danger d-flex align-items-center gap-2">
+                                <i class="bi bi-x-circle"></i>
+                                <span>{{ __('View Rejected') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card wallet-withdrawals-table">
+                <div class="card-header">
+                    <div>
+                        <h6 class="table-title">{{ __('Withdrawal Requests') }}</h6>
+                        <p class="table-hint">{{ __('Review and manage wallet withdrawal requests from users.') }}</p>
+                    </div>
+                </div>
+                <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
+                            <table class="table table-striped table-hover align-middle mb-0">
                                 <thead class="table-light">
                                 <tr>
                                     <th class="py-3">{{ __('Request') }}</th>
@@ -198,12 +442,11 @@
                                         </td>
                                         <td class="py-4">
                                             <span class="badge bg-info-subtle text-info">{{ $methodLabel }}</span>
-                                            @if($withdrawal->wallet_reference)
-                                                <div class="text-muted small mt-1 d-flex align-items-center gap-2">
-                                                    <i class="bi bi-link-45deg"></i>
-                                                    <span>{{ $withdrawal->wallet_reference }}</span>
-                                                </div>
-                                                
+                                                @if($withdrawal->wallet_reference)
+                                                    <div class="text-muted small mt-1 d-flex align-items-center gap-2">
+                                                        <i class="bi bi-link-45deg"></i>
+                                                        <span>{{ $withdrawal->wallet_reference }}</span>
+                                                    </div>
                                                 @endif
                                         </td>
                                         <td class="py-4">
@@ -355,14 +598,32 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                    @if($withdrawals->hasPages())
-                        <div class="card-footer bg-white border-0">
-                            {{ $withdrawals->links() }}
-                        </div>
-                    @endif
                 </div>
+                @if($withdrawals->hasPages())
+                    <div class="card-footer bg-white border-0">
+                        {{ $withdrawals->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </section>
+@endsection
+
+@section('script')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('withdrawalsFilterForm');
+        const statusInput = document.getElementById('status_filter');
+        const tabs = document.querySelectorAll('.status-tab');
+
+        tabs.forEach((tab) => {
+            tab.addEventListener('click', () => {
+                tabs.forEach((item) => item.classList.remove('active'));
+                tab.classList.add('active');
+                statusInput.value = tab.dataset.status || '';
+                form.submit();
+            });
+        });
+    });
+</script>
 @endsection
