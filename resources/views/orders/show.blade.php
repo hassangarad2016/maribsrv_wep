@@ -273,6 +273,26 @@
                 </a>
             @endif
 
+            @if($manualPaymentLocked)
+                <span class="btn btn-outline-success disabled" aria-disabled="true" title="لا يمكن إضافة الطلب إلى مجموعة أثناء مراجعة الدفع" data-testid="add-to-payment-group-button">
+                    <i class="fa fa-layer-group"></i> إضافة إلى مجموعة الدفع
+                </span>
+            @else
+                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addOrderToGroupModal" data-testid="add-to-payment-group-button">
+                    <i class="fa fa-layer-group"></i> إضافة إلى مجموعة الدفع
+                </button>
+            @endif
+
+            @if($manualPaymentLocked)
+                <span class="btn btn-outline-warning disabled" aria-disabled="true" title="لا يمكن إرسال إشعار فوري أثناء مراجعة الدفع" data-testid="instant-notification-button">
+                    <i class="fa fa-bell"></i> إرسال إشعار فوري
+                </span>
+            @else
+                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#instantNotificationModal" data-testid="instant-notification-button">
+                    <i class="fa fa-bell"></i> إرسال إشعار فوري
+                </button>
+            @endif
+
             <a href="{{ $reserveToggleUrl }}" class="btn btn-outline-secondary">
                 <i class="bi {{ $showReserve ? 'bi-eye-slash' : 'bi-eye' }}"></i>
                 {{ $showReserve ? 'إخفاء الحالات المحجوزة' : 'عرض الحالات المحجوزة' }}
@@ -328,44 +348,6 @@
             </div>
         </div>
     </div>
-    </div>
-
-
-    <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <ul class="nav nav-pills" id="orderActionsTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <a class="nav-link active" id="orderActionsPaymentsTab" data-bs-toggle="tab" href="#orderActionsPayments" role="tab" aria-controls="orderActionsPayments" aria-selected="true">الدفع اليدوي</a>
-                        </li>
-
-                    </ul>
-                    <div class="tab-content mt-3" id="orderActionsTabsContent">
-                        <div class="tab-pane fade show active" id="orderActionsPayments" role="tabpanel" aria-labelledby="orderActionsPaymentsTab">
-                            <div class="d-flex flex-wrap align-items-center gap-2">
-                                @if($manualPaymentLocked)
-                                    <span class="btn btn-outline-success disabled" aria-disabled="true" title="لا يمكن إضافة الطلب إلى مجموعة أثناء مراجعة الدفع" data-testid="add-to-payment-group-button">
-                                        <i class="fa fa-layer-group"></i> إضافة إلى مجموعة الدفع</span>
-                                @else
-                                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addOrderToGroupModal" data-testid="add-to-payment-group-button">
-                                        <i class="fa fa-layer-group"></i> إضافة إلى مجموعة الدفع</button>
-                                @endif
-
-                                @if($manualPaymentLocked)
-                                    <span class="btn btn-outline-warning disabled" aria-disabled="true" title="لا يمكن إرسال إشعار فوري أثناء مراجعة الدفع" data-testid="instant-notification-button">
-                                        <i class="fa fa-bell"></i> إرسال إشعار فوري</span>
-                                @else
-                                    <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#instantNotificationModal" data-testid="instant-notification-button">
-                                        <i class="fa fa-bell"></i> إرسال إشعار فوري</button>
-                                @endif
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
 
