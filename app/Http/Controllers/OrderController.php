@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 use App\Events\OrderNoteUpdated;
@@ -38,7 +38,7 @@ class OrderController extends Controller
 
 
     /**
-     * إنشاء مثيل جديد للمتحكم
+     * ط¥ظ†ط´ط§ط، ظ…ط«ظٹظ„ ط¬ط¯ظٹط¯ ظ„ظ„ظ…طھط­ظƒظ…
      */
 
 
@@ -48,11 +48,11 @@ class OrderController extends Controller
     )
 
     {
-        // لا حاجة لـ middleware هنا، سيتم فحص الصلاحيات في كل دالة
+        // ظ„ط§ ط­ط§ط¬ط© ظ„ظ€ middleware ظ‡ظ†ط§طŒ ط³ظٹطھظ… ظپط­طµ ط§ظ„طµظ„ط§ط­ظٹط§طھ ظپظٹ ظƒظ„ ط¯ط§ظ„ط©
     }
 
     /**
-     * عرض قائمة الطلبات
+     * ط¹ط±ط¶ ظ‚ط§ط¦ظ…ط© ط§ظ„ط·ظ„ط¨ط§طھ
      *
      * @return \Illuminate\Http\Response
      */
@@ -119,18 +119,18 @@ class OrderController extends Controller
             $query->where('user_id', $request->user_id);
         }
 
-        // تطبيق التصفية حسب حالة الطلب
+        // طھط·ط¨ظٹظ‚ ط§ظ„طھطµظپظٹط© ط­ط³ط¨ ط­ط§ظ„ط© ط§ظ„ط·ظ„ط¨
         if ($request->filled('order_status')) {
             $query->where('order_status', $request->order_status);
         }
 
-        // تطبيق التصفية حسب حالة الدفع
+        // طھط·ط¨ظٹظ‚ ط§ظ„طھطµظپظٹط© ط­ط³ط¨ ط­ط§ظ„ط© ط§ظ„ط¯ظپط¹
         if ($request->filled('payment_status')) {
             $query->where('payment_status', $request->payment_status);
 
         }
 
-        // تطبيق التصفية حسب التاريخ
+        // طھط·ط¨ظٹظ‚ ط§ظ„طھطµظپظٹط© ط­ط³ط¨ ط§ظ„طھط§ط±ظٹط®
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
@@ -139,15 +139,15 @@ class OrderController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        // تطبيق البحث
+        // طھط·ط¨ظٹظ‚ ط§ظ„ط¨ط­ط«
         if ($request->filled('search')) {
             $query->search($request->search);
         }
 
-        // ترتيب النتائج
+        // طھط±طھظٹط¨ ط§ظ„ظ†طھط§ط¦ط¬
         $query->orderBy('created_at', 'desc');
 
-        // تقسيم النتائج
+        // طھظ‚ط³ظٹظ… ط§ظ„ظ†طھط§ط¦ط¬
         $orders = $query->paginate(15);
 
    
@@ -179,7 +179,7 @@ class OrderController extends Controller
     public function indexShein(Request $request)
     {
         ResponseService::noAnyPermissionThenRedirect(['shein-orders-list']);
-        // إعداد الاستعلام مع تحميل العلاقات وتصفية حسب الفئة الأم رقم 4
+        // ط¥ط¹ط¯ط§ط¯ ط§ظ„ط§ط³طھط¹ظ„ط§ظ… ظ…ط¹ طھط­ظ…ظٹظ„ ط§ظ„ط¹ظ„ط§ظ‚ط§طھ ظˆطھطµظپظٹط© ط­ط³ط¨ ط§ظ„ظپط¦ط© ط§ظ„ط£ظ… ط±ظ‚ظ… 4
         $department = DepartmentReportService::DEPARTMENT_SHEIN;
         $categoryIds = $this->departmentReportService->resolveCategoryIds($department);
 
@@ -242,23 +242,23 @@ class OrderController extends Controller
             $query->where('user_id', $request->user_id);
         }
 
-        // تطبيق التصفية حسب التاجر
+        // طھط·ط¨ظٹظ‚ ط§ظ„طھطµظپظٹط© ط­ط³ط¨ ط§ظ„طھط§ط¬ط±
         if ($request->filled('seller_id')) {
             $query->where('seller_id', $request->seller_id);
         }
 
-        // تطبيق التصفية حسب حالة الطلب
+        // طھط·ط¨ظٹظ‚ ط§ظ„طھطµظپظٹط© ط­ط³ط¨ ط­ط§ظ„ط© ط§ظ„ط·ظ„ط¨
         if ($request->filled('order_status')) {
             $query->where('order_status', $request->order_status);
         }
 
-        // تطبيق التصفية حسب حالة الدفع
+        // طھط·ط¨ظٹظ‚ ط§ظ„طھطµظپظٹط© ط­ط³ط¨ ط­ط§ظ„ط© ط§ظ„ط¯ظپط¹
         if ($request->filled('payment_status')) {
             $query->where('payment_status', $request->payment_status);
 
         }
 
-        // تطبيق التصفية حسب التاريخ
+        // طھط·ط¨ظٹظ‚ ط§ظ„طھطµظپظٹط© ط­ط³ط¨ ط§ظ„طھط§ط±ظٹط®
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
@@ -267,21 +267,21 @@ class OrderController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        // تطبيق البحث
+        // طھط·ط¨ظٹظ‚ ط§ظ„ط¨ط­ط«
         if ($request->filled('search')) {
             $query->search($request->search);
         }
 
-        // ترتيب النتائج
+        // طھط±طھظٹط¨ ط§ظ„ظ†طھط§ط¦ط¬
         $query->orderBy('created_at', 'desc');
 
-        // تقسيم النتائج
+        // طھظ‚ط³ظٹظ… ط§ظ„ظ†طھط§ط¦ط¬
         $orders = $query->paginate(15);
 
-        // الحصول على حالات الطلبات
+        // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ط­ط§ظ„ط§طھ ط§ظ„ط·ظ„ط¨ط§طھ
         $orderStatuses = $this->allowedOrderStatuses();
 
-        // الحصول على قائمة المستخدمين للفلتر (العملاء)
+        // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ظ‚ط§ط¦ظ…ط© ط§ظ„ظ…ط³طھط®ط¯ظ…ظٹظ† ظ„ظ„ظپظ„طھط± (ط§ظ„ط¹ظ…ظ„ط§ط،)
         $users = User::customers()->orWhereNull('account_type')->orderBy('name')->get();
         
 
@@ -412,7 +412,7 @@ class OrderController extends Controller
     
 
     /**
-     * عرض نموذج إنشاء طلب جديد
+     * ط¹ط±ط¶ ظ†ظ…ظˆط°ط¬ ط¥ظ†ط´ط§ط، ط·ظ„ط¨ ط¬ط¯ظٹط¯
      *
      * @return \Illuminate\Http\Response
      */
@@ -420,13 +420,13 @@ class OrderController extends Controller
     {
         ResponseService::noAnyPermissionThenRedirect(['orders-create']);
         
-        // الحصول على قائمة المستخدمين (العملاء)
+        // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ظ‚ط§ط¦ظ…ط© ط§ظ„ظ…ط³طھط®ط¯ظ…ظٹظ† (ط§ظ„ط¹ظ…ظ„ط§ط،)
         $users = User::customers()->orWhereNull('account_type')->orderBy('name')->get();
         
-        // الحصول على قائمة التجار
+        // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ظ‚ط§ط¦ظ…ط© ط§ظ„طھط¬ط§ط±
         $sellers = User::sellers()->orderBy('name')->get();
 
-        // الحصول على حالات الطلبات
+        // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ط­ط§ظ„ط§طھ ط§ظ„ط·ظ„ط¨ط§طھ
         $orderStatuses = $this->allowedOrderStatuses();
 
         $paymentMethods = $this->allowedPaymentMethods();
@@ -434,7 +434,7 @@ class OrderController extends Controller
         return view('orders.create', compact('users', 'sellers', 'orderStatuses', 'paymentMethods'));    }
 
     /**
-     * تخزين طلب جديد
+     * طھط®ط²ظٹظ† ط·ظ„ط¨ ط¬ط¯ظٹط¯
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -443,7 +443,7 @@ class OrderController extends Controller
     {
         ResponseService::noAnyPermissionThenRedirect(['orders-create']);
         
-        // التحقق من البيانات
+        // ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ط§ظ„ط¨ظٹط§ظ†ط§طھ
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'seller_id' => 'nullable|exists:users,id',
@@ -475,19 +475,19 @@ class OrderController extends Controller
 
 
         try {
-            // بدء المعاملة
+            // ط¨ط¯ط، ط§ظ„ظ…ط¹ط§ظ…ظ„ط©
             DB::beginTransaction();
 
-            // حساب المبالغ
+            // ط­ط³ط§ط¨ ط§ظ„ظ…ط¨ط§ظ„ط؛
             $totalAmount = 0;
             foreach ($request->items as $item) {
                 $totalAmount += $item['price'] * $item['quantity'];
             }
 
-            $taxAmount = $totalAmount * 0.15; // 15% ضريبة
+            $taxAmount = $totalAmount * 0.15; // 15% ط¶ط±ظٹط¨ط©
             $finalAmount = $totalAmount + $taxAmount;
 
-            // إنشاء الطلب
+            // ط¥ظ†ط´ط§ط، ط§ظ„ط·ظ„ط¨
             $order = Order::create([
                 'user_id' => $request->user_id,
                 'seller_id' => $request->seller_id,
@@ -518,13 +518,13 @@ class OrderController extends Controller
             }
 
             
-            // إضافة عناصر الطلب
+            // ط¥ط¶ط§ظپط© ط¹ظ†ط§طµط± ط§ظ„ط·ظ„ط¨
             foreach ($request->items as $itemData) {
                 $item = $items->get($itemData['item_id']);
 
                 if (! $item instanceof Item) {
                     throw ValidationException::withMessages([
-                        'items' => __('لم يتم العثور على أحد العناصر المحددة.'),
+                        'items' => __('ظ„ظ… ظٹطھظ… ط§ظ„ط¹ط«ظˆط± ط¹ظ„ظ‰ ط£ط­ط¯ ط§ظ„ط¹ظ†ط§طµط± ط§ظ„ظ…ط­ط¯ط¯ط©.'),
                     ]);
                 }
                 
@@ -541,38 +541,38 @@ class OrderController extends Controller
                 ]);
             }
 
-            // إضافة سجل الطلب
+            // ط¥ط¶ط§ظپط© ط³ط¬ظ„ ط§ظ„ط·ظ„ط¨
             OrderHistory::create([
                 'order_id' => $order->id,
                 'user_id' => Auth::id(),
                 'status_to' => Order::STATUS_PROCESSING,
-                'comment' => 'تم إنشاء الطلب',
+                'comment' => 'طھظ… ط¥ظ†ط´ط§ط، ط§ظ„ط·ظ„ط¨',
             ]);
 
-            // تأكيد المعاملة
+            // طھط£ظƒظٹط¯ ط§ظ„ظ…ط¹ط§ظ…ظ„ط©
             DB::commit();
 
             return redirect()->route('orders.show', $order->id)
-                ->with('success', 'تم إنشاء الطلب بنجاح');
+                ->with('success', 'طھظ… ط¥ظ†ط´ط§ط، ط§ظ„ط·ظ„ط¨ ط¨ظ†ط¬ط§ط­');
         } catch (\Exception $e) {
-            // التراجع عن المعاملة في حالة حدوث خطأ
+            // ط§ظ„طھط±ط§ط¬ط¹ ط¹ظ† ط§ظ„ظ…ط¹ط§ظ…ظ„ط© ظپظٹ ط­ط§ظ„ط© ط­ط¯ظˆط« ط®ط·ط£
             DB::rollBack();
             
             return redirect()->back()
-                ->with('error', 'حدث خطأ أثناء إنشاء الطلب: ' . $e->getMessage())
+                ->with('error', 'ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط¥ظ†ط´ط§ط، ط§ظ„ط·ظ„ط¨: ' . $e->getMessage())
                 ->withInput();
         }
     }
 
     /**
-     * عرض تفاصيل الطلب
+     * ط¹ط±ط¶ طھظپط§طµظٹظ„ ط§ظ„ط·ظ„ط¨
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
-        // الحصول على الطلب مع العلاقات
+        // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ط§ظ„ط·ظ„ط¨ ظ…ط¹ ط§ظ„ط¹ظ„ط§ظ‚ط§طھ
         $order = Order::with([
             'user' => static fn ($query) => $query->withTrashed(),
             'seller' => static fn ($query) => $query->withTrashed(),
@@ -585,7 +585,7 @@ class OrderController extends Controller
         
         ->findOrFail($id);
 
-        // الحصول على حالات الطلبات
+        // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ط­ط§ظ„ط§طھ ط§ظ„ط·ظ„ط¨ط§طھ
         $orderStatuses = $this->allowedOrderStatuses();
         $paymentStatusOptions = Order::paymentStatusLabels();
 
@@ -666,6 +666,11 @@ class OrderController extends Controller
 
             $optionsDisplay = collect($options)
                 ->map(static function ($value, $key) {
+                    $normalizedKey = Str::of((string) $key)->lower()->replace(['_', '-', ' '], '');
+                    $normalizedKeyValue = (string) $normalizedKey;
+                    $isColorKey = Str::contains($normalizedKeyValue, ['color', 'colour', 'لون']);
+                    $isSizeKey = Str::contains($normalizedKeyValue, ['size', 'مقاس', 'المقاس']);
+
                     if (is_array($value)) {
                         $value = collect($value)
                             ->map(static fn ($item) => is_scalar($item) ? trim((string) $item) : null)
@@ -685,14 +690,41 @@ class OrderController extends Controller
                         return null;
                     }
 
+                    $colorValue = null;
+                    if (is_string($value)) {
+                        $colorCandidate = trim($value);
+                        if (preg_match('/^#?[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/', $colorCandidate) === 1) {
+                            $colorValue = '#' . ltrim($colorCandidate, '#');
+                        }
+                    }
+
+                    if (! $isColorKey && $colorValue) {
+                        $isColorKey = true;
+                    }
+
                     $label = Str::of((string) $key)
                         ->replace('_', ' ')
                         ->squish()
                         ->title();
 
+                    if ($isColorKey) {
+                        $label = 'اللون';
+                    } elseif ($isSizeKey) {
+                        $label = 'المقاس';
+                    }
+
+                    $displayValue = $value;
+                    if ($isColorKey && $colorValue) {
+                        $displayValue = null;
+                    }
+
                     return [
                         'label' => (string) $label,
-                        'value' => $value,
+                        'value' => $displayValue,
+                        'raw_value' => $value,
+                        'is_color' => $isColorKey,
+                        'color_value' => $colorValue,
+                        'is_size' => $isSizeKey,
                     ];
                 })
                 ->filter()
@@ -712,12 +744,12 @@ class OrderController extends Controller
             if (is_array($advertiserSource)) {
                 $labelOverrides = [
                     'name' => 'الاسم',
-                    'contact_number' => 'رقم الاتصال',
-                    'message_number' => 'رقم الواتساب',
+                    'contact_number' => 'رقم التواصل',
+                    'message_number' => 'رقم الرسائل',
                     'location' => 'الموقع',
                     'notes' => 'ملاحظات',
-                    'reference' => 'المرجع',
-                    'id' => 'المعرّف',
+                    'reference' => 'مرجع',
+                    'id' => 'معرف الإعلان',
                 ];
 
                 foreach ($advertiserSource as $field => $value) {
@@ -876,14 +908,14 @@ class OrderController extends Controller
     }
 
     /**
-     * عرض نموذج تعديل الطلب
+     * ط¹ط±ط¶ ظ†ظ…ظˆط°ط¬ طھط¹ط¯ظٹظ„ ط§ظ„ط·ظ„ط¨
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
-        // الحصول على الطلب مع العلاقات
+        // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ط§ظ„ط·ظ„ط¨ ظ…ط¹ ط§ظ„ط¹ظ„ط§ظ‚ط§طھ
         $order = Order::with([
                 'user' => static fn ($query) => $query->withTrashed(),
                 'items',
@@ -903,10 +935,10 @@ class OrderController extends Controller
         $latestManualPaymentRequest = $manualPaymentRequests->first();
 
 
-        // الحصول على قائمة المستخدمين
+        // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ظ‚ط§ط¦ظ…ط© ط§ظ„ظ…ط³طھط®ط¯ظ…ظٹظ†
         $users = User::orderBy('name')->get();
 
-        // الحصول على حالات الطلبات
+        // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ط­ط§ظ„ط§طھ ط§ظ„ط·ظ„ط¨ط§طھ
         $orderStatuses = $this->allowedOrderStatuses($order, true);
 
         $paymentStatusOptions = Order::paymentStatusLabels();
@@ -929,7 +961,7 @@ class OrderController extends Controller
     }
 
     /**
-     * تحديث الطلب
+     * طھط­ط¯ظٹط« ط§ظ„ط·ظ„ط¨
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
@@ -939,7 +971,7 @@ class OrderController extends Controller
     {
         ResponseService::noAnyPermissionThenRedirect(['orders-update']);
         
-        // التحقق من البيانات
+        // ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† ط§ظ„ط¨ظٹط§ظ†ط§طھ
         $request->validate([
             'order_status' => ['required', 'string', Rule::in(Order::statusValues())],
             'shipping_address' => 'nullable|string',
@@ -957,10 +989,10 @@ class OrderController extends Controller
         ]);
 
         try {
-            // بدء المعاملة
+            // ط¨ط¯ط، ط§ظ„ظ…ط¹ط§ظ…ظ„ط©
             DB::beginTransaction();
 
-            // الحصول على الطلب
+            // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ط§ظ„ط·ظ„ط¨
             $order = Order::findOrFail($id);
 
 
@@ -979,7 +1011,7 @@ class OrderController extends Controller
 
                 $reviewUrl = route('payment-requests.review', $pendingManualPaymentRequest->getKey());
                 $message = sprintf(
-                    'لا يمكن تعديل حالة الطلب لوجود طلب دفع يدوي #%d قيد المراجعة. يرجى إتمام المراجعة عبر %s.',
+                    'ظ„ط§ ظٹظ…ظƒظ† طھط¹ط¯ظٹظ„ ط­ط§ظ„ط© ط§ظ„ط·ظ„ط¨ ظ„ظˆط¬ظˆط¯ ط·ظ„ط¨ ط¯ظپط¹ ظٹط¯ظˆظٹ #%d ظ‚ظٹط¯ ط§ظ„ظ…ط±ط§ط¬ط¹ط©. ظٹط±ط¬ظ‰ ط¥طھظ…ط§ظ… ط§ظ„ظ…ط±ط§ط¬ط¹ط© ط¹ط¨ط± %s.',
                     $pendingManualPaymentRequest->getKey(),
                     $reviewUrl
                 );
@@ -994,12 +1026,12 @@ class OrderController extends Controller
                 DB::rollBack();
 
                 return redirect()->back()
-                    ->with('error', 'لا يمكن تعديل حالة الطلب قبل تأكيد الدفع بنجاح.')
+                    ->with('error', 'ظ„ط§ ظٹظ…ظƒظ† طھط¹ط¯ظٹظ„ ط­ط§ظ„ط© ط§ظ„ط·ظ„ط¨ ظ‚ط¨ظ„ طھط£ظƒظٹط¯ ط§ظ„ط¯ظپط¹ ط¨ظ†ط¬ط§ط­.')
                     ->withInput();
             }
 
             
-            // حفظ الحالة السابقة
+            // ط­ظپط¸ ط§ظ„ط­ط§ظ„ط© ط§ظ„ط³ط§ط¨ظ‚ط©
             $previousStatus = $order->order_status;
 
 
@@ -1007,12 +1039,12 @@ class OrderController extends Controller
                 DB::rollBack();
 
                 return redirect()->back()
-                    ->with('error', 'لا يمكن تحديث حالة الطلب قبل إتمام الدفع بنجاح.')
+                    ->with('error', 'ظ„ط§ ظٹظ…ظƒظ† طھط­ط¯ظٹط« ط­ط§ظ„ط© ط§ظ„ط·ظ„ط¨ ظ‚ط¨ظ„ ط¥طھظ…ط§ظ… ط§ظ„ط¯ظپط¹ ط¨ظ†ط¬ط§ط­.')
                     ->withInput();
             }
 
             
-            // تحديث بيانات الطلب
+            // طھط­ط¯ظٹط« ط¨ظٹط§ظ†ط§طھ ط§ظ„ط·ظ„ط¨
             $trackingAttributes = $this->prepareTrackingAttributes($request);
 
             $order->fill(array_merge([
@@ -1032,7 +1064,7 @@ class OrderController extends Controller
 
 
             
-            // إضافة سجل للطلب إذا تغيرت الحالة
+            // ط¥ط¶ط§ظپط© ط³ط¬ظ„ ظ„ظ„ط·ظ„ط¨ ط¥ط°ط§ طھط؛ظٹط±طھ ط§ظ„ط­ط§ظ„ط©
             if ($previousStatus !== $request->order_status) {
                 OrderHistory::create([
                     'order_id' => $order->id,
@@ -1043,7 +1075,7 @@ class OrderController extends Controller
                     'notify_customer' => $request->has('notify_customer'),
                 ]);
 
-                // إذا كانت الحالة "مكتمل"، نقوم بتحديث تاريخ الإكمال
+                // ط¥ط°ط§ ظƒط§ظ†طھ ط§ظ„ط­ط§ظ„ط© "ظ…ظƒطھظ…ظ„"طŒ ظ†ظ‚ظˆظ… ط¨طھط­ط¯ظٹط« طھط§ط±ظٹط® ط§ظ„ط¥ظƒظ…ط§ظ„
                 if ($request->order_status === 'delivered') {
                     $order->update(['completed_at' => now()]);
                 }
@@ -1068,17 +1100,17 @@ class OrderController extends Controller
 
             }
 
-            // تأكيد المعاملة
+            // طھط£ظƒظٹط¯ ط§ظ„ظ…ط¹ط§ظ…ظ„ط©
             DB::commit();
 
             return redirect()->route('orders.show', $order->id)
-                ->with('success', 'تم تحديث الطلب بنجاح');
+                ->with('success', 'طھظ… طھط­ط¯ظٹط« ط§ظ„ط·ظ„ط¨ ط¨ظ†ط¬ط§ط­');
         } catch (\Exception $e) {
-            // التراجع عن المعاملة في حالة حدوث خطأ
+            // ط§ظ„طھط±ط§ط¬ط¹ ط¹ظ† ط§ظ„ظ…ط¹ط§ظ…ظ„ط© ظپظٹ ط­ط§ظ„ط© ط­ط¯ظˆط« ط®ط·ط£
             DB::rollBack();
             
             return redirect()->back()
-                ->with('error', 'حدث خطأ أثناء تحديث الطلب: ' . $e->getMessage())
+                ->with('error', 'ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، طھط­ط¯ظٹط« ط§ظ„ط·ظ„ط¨: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -1087,7 +1119,7 @@ class OrderController extends Controller
 
 
     /**
-     * الحصول على حالات الطلب المسموح بها.
+     * ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ط­ط§ظ„ط§طھ ط§ظ„ط·ظ„ط¨ ط§ظ„ظ…ط³ظ…ظˆط­ ط¨ظ‡ط§.
      *
      * @return \Illuminate\Support\Collection<int, \App\Models\OrderStatus>
      */
@@ -1192,7 +1224,7 @@ class OrderController extends Controller
 
 
     /**
-     * حذف الطلب
+     * ط­ط°ظپ ط§ظ„ط·ظ„ط¨
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -1202,17 +1234,17 @@ class OrderController extends Controller
         ResponseService::noAnyPermissionThenRedirect(['orders-delete']);
         
         try {
-            // الحصول على الطلب
+            // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ط§ظ„ط·ظ„ط¨
             $order = Order::findOrFail($id);
             
-            // حذف الطلب (سيتم حذف العناصر والسجل تلقائيًا بسبب onDelete('cascade'))
+            // ط­ط°ظپ ط§ظ„ط·ظ„ط¨ (ط³ظٹطھظ… ط­ط°ظپ ط§ظ„ط¹ظ†ط§طµط± ظˆط§ظ„ط³ط¬ظ„ طھظ„ظ‚ط§ط¦ظٹظ‹ط§ ط¨ط³ط¨ط¨ onDelete('cascade'))
             $order->delete();
 
             return redirect()->route('orders.index')
-                ->with('success', 'تم حذف الطلب بنجاح');
+                ->with('success', 'طھظ… ط­ط°ظپ ط§ظ„ط·ظ„ط¨ ط¨ظ†ط¬ط§ط­');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'حدث خطأ أثناء حذف الطلب: ' . $e->getMessage());
+                ->with('error', 'ط­ط¯ط« ط®ط·ط£ ط£ط«ظ†ط§ط، ط­ط°ظپ ط§ظ„ط·ظ„ط¨: ' . $e->getMessage());
         }
     }
 
@@ -1245,10 +1277,10 @@ class OrderController extends Controller
     private function deliveryPaymentTimingLabels(): array
     {
         return [
-            'pay_now' => 'الدفع الآن',
-            'now' => 'الدفع الآن',
-            'pay_on_delivery' => 'الدفع عند التسليم',
-            'on_delivery' => 'الدفع عند التسليم',
+            'pay_now' => 'ط§ظ„ط¯ظپط¹ ط§ظ„ط¢ظ†',
+            'now' => 'ط§ظ„ط¯ظپط¹ ط§ظ„ط¢ظ†',
+            'pay_on_delivery' => 'ط§ظ„ط¯ظپط¹ ط¹ظ†ط¯ ط§ظ„طھط³ظ„ظٹظ…',
+            'on_delivery' => 'ط§ظ„ط¯ظپط¹ ط¹ظ†ط¯ ط§ظ„طھط³ظ„ظٹظ…',
         ];
     }
 
@@ -1258,13 +1290,13 @@ class OrderController extends Controller
     private function deliveryPaymentStatusLabels(): array
     {
         return [
-            'pending' => 'قيد الدفع',
-            'paid' => 'مدفوع',
-            'waived' => 'معفى',
-            'due_on_delivery' => 'مستحق عند التسليم',
-            'due_now' => 'مستحق الآن',
-            'partial' => 'مدفوع جزئياً',
-            'failed' => 'فشل الدفع',
+            'pending' => 'ظ‚ظٹط¯ ط§ظ„ط¯ظپط¹',
+            'paid' => 'ظ…ط¯ظپظˆط¹',
+            'waived' => 'ظ…ط¹ظپظ‰',
+            'due_on_delivery' => 'ظ…ط³طھط­ظ‚ ط¹ظ†ط¯ ط§ظ„طھط³ظ„ظٹظ…',
+            'due_now' => 'ظ…ط³طھط­ظ‚ ط§ظ„ط¢ظ†',
+            'partial' => 'ظ…ط¯ظپظˆط¹ ط¬ط²ط¦ظٹط§ظ‹',
+            'failed' => 'ظپط´ظ„ ط§ظ„ط¯ظپط¹',
         ];
     }
 
@@ -1301,7 +1333,7 @@ class OrderController extends Controller
 
             if ($mismatch !== null) {
                 throw ValidationException::withMessages([
-                    'department' => __('القسم المحدد لا يتطابق مع عناصر السلة.'),
+                    'department' => __('ط§ظ„ظ‚ط³ظ… ط§ظ„ظ…ط­ط¯ط¯ ظ„ط§ ظٹطھط·ط§ط¨ظ‚ ظ…ط¹ ط¹ظ†ط§طµط± ط§ظ„ط³ظ„ط©.'),
                 ]);
             }
 
@@ -1310,7 +1342,7 @@ class OrderController extends Controller
 
         if ($resolvedDepartments->count() > 1) {
             throw ValidationException::withMessages([
-                'items' => __('لا يمكن إتمام الطلب بسبب اختلاف الأقسام داخل السلة.'),
+                'items' => __('ظ„ط§ ظٹظ…ظƒظ† ط¥طھظ…ط§ظ… ط§ظ„ط·ظ„ط¨ ط¨ط³ط¨ط¨ ط§ط®طھظ„ط§ظپ ط§ظ„ط£ظ‚ط³ط§ظ… ط¯ط§ط®ظ„ ط§ظ„ط³ظ„ط©.'),
             ]);
         }
 
@@ -1425,3 +1457,9 @@ class OrderController extends Controller
         return $columns;
     }
 }
+
+
+
+
+
+
