@@ -1,4 +1,4 @@
-@extends('layouts.main')
+﻿@extends('layouts.main')
 
 
 @php
@@ -7,7 +7,7 @@
 
 
 
-@section('title', 'تفاصيل الطلب #' . $order->order_number)
+@section('title', 'طھظپط§طµظٹظ„ ط§ظ„ط·ظ„ط¨ #' . $order->order_number)
 
 @section('content')
 <div class="container-fluid order-details-page">
@@ -15,10 +15,10 @@
         $deliverySummary = $order->delivery_payment_summary ?? [];
         $paymentSummary = $order->payment_summary ?? [];
         $manualPaymentStatusLabels = [
-            ManualPaymentRequest::STATUS_PENDING => 'قيد المراجعة',
-            ManualPaymentRequest::STATUS_UNDER_REVIEW => 'قيد المراجعة',
-            ManualPaymentRequest::STATUS_APPROVED => 'مدفوع (يدوي)',
-            ManualPaymentRequest::STATUS_REJECTED => 'مرفوض',
+            ManualPaymentRequest::STATUS_PENDING => 'ظ‚ظٹط¯ ط§ظ„ظ…ط±ط§ط¬ط¹ط©',
+            ManualPaymentRequest::STATUS_UNDER_REVIEW => 'ظ‚ظٹط¯ ط§ظ„ظ…ط±ط§ط¬ط¹ط©',
+            ManualPaymentRequest::STATUS_APPROVED => 'ظ…ط¯ظپظˆط¹ (ظٹط¯ظˆظٹ)',
+            ManualPaymentRequest::STATUS_REJECTED => 'ظ…ط±ظپظˆط¶',
         ];
         $manualPaymentStatusBadgeClasses = [
             ManualPaymentRequest::STATUS_PENDING => 'bg-warning text-dark',
@@ -61,7 +61,7 @@
         if (is_array($shippingAddressData)) {
             $shippingAddressDisplay = collect($shippingAddressData)
                 ->filter(static fn ($value) => is_string($value) && trim($value) !== '')
-                ->implode('، ');
+                ->implode('طŒ ');
         }
 
         $coordinateSources = array_values(array_filter([
@@ -130,8 +130,8 @@
 
         $addressCopyParts = collect([
             $shippingAddressDisplay,
-            $coordinateDisplay ? 'الإحداثيات: ' . $coordinateDisplay : null,
-            $mapUrl ? 'الخريطة: ' . $mapUrl : null,
+            $coordinateDisplay ? 'ط§ظ„ط¥ط­ط¯ط§ط«ظٹط§طھ: ' . $coordinateDisplay : null,
+            $mapUrl ? 'ط§ظ„ط®ط±ظٹط·ط©: ' . $mapUrl : null,
         ])
             ->filter(static fn ($value) => is_string($value) && trim($value) !== '')
             ->unique()
@@ -162,7 +162,7 @@
             ])
                 ->filter(static fn ($value) => is_string($value) && trim($value) !== '')
                 ->unique()
-                ->implode('، ');
+                ->implode('طŒ ');
 
             if ($snapshotDisplay !== '') {
                 $shippingAddressDisplay = $snapshotDisplay;
@@ -213,10 +213,10 @@
         $heroManualStatus = $latestManualPaymentRequest?->status;
         $heroPaymentLabels = \App\Models\Order::paymentStatusLabels();
         if ($heroManualStatus !== null) {
-            $heroPaymentStatusLabel = $manualPaymentStatusLabels[$heroManualStatus] ?? '��� ����';
+            $heroPaymentStatusLabel = $manualPaymentStatusLabels[$heroManualStatus] ?? 'غير محدد';
             $heroPaymentStatusClass = $manualPaymentStatusBadgeClasses[$heroManualStatus] ?? 'bg-secondary';
         } else {
-            $heroPaymentStatusLabel = $heroPaymentLabels[$order->payment_status] ?? ($order->payment_status ?: '��� ����');
+            $heroPaymentStatusLabel = $heroPaymentLabels[$order->payment_status] ?? ($order->payment_status ?: 'غير محدد');
             $heroPaymentStatusClass = match ($order->payment_status) {
                 'paid', 'success', 'succeed', 'completed', 'captured' => 'bg-success',
                 'pending' => 'bg-warning text-dark',
@@ -237,8 +237,8 @@
 
         <div class="order-details-hero">
         <div class="order-details-info">
-            <div class="order-details-kicker">��� ����� #{{ $order->order_number }}</div>
-            <h2 class="order-details-title">������ �����</h2>
+            <div class="order-details-kicker">رقم الطلب #{{ $order->order_number }}</div>
+            <h2 class="order-details-title">تفاصيل الطلب</h2>
             <div class="order-details-meta">
                 <span class="badge d-inline-flex align-items-center gap-1" style="background-color: {{ $heroStatusColor }}">
                     @if($heroStatusIcon)
@@ -260,27 +260,27 @@
 
             @if ($canDownloadInvoice)
                 <a href="{{ route('orders.invoice.pdf', $order->id) }}" target="_blank" class="btn btn-outline-primary" data-testid="invoice-button">
-                    <i class="fa fa-file-invoice"></i> ����� ��������
+                    <i class="fa fa-file-invoice"></i> تحميل الفاتورة
                 </a>
             @else
                 <button type="button" class="btn btn-outline-primary disabled" data-testid="invoice-button" title="{{ __('orders.invoice.balance_outstanding') }}" disabled>
-                    <i class="fa fa-file-invoice"></i> ����� ��������
+                    <i class="fa fa-file-invoice"></i> تحميل الفاتورة
                 </button>
             @endif
 
             @if ($hasDepositReceipts)
                 <a href="{{ route('orders.deposit-receipts', $order->id) }}" target="_blank" class="btn btn-outline-info" data-testid="deposit-receipt-button">
-                    <i class="fa fa-receipt"></i> ����� �����
+                    <i class="fa fa-receipt"></i> إيصال الدفع
                 </a>
             @endif
 
             <a href="{{ $reserveToggleUrl }}" class="btn btn-outline-secondary">
                 <i class="bi {{ $showReserve ? 'bi-shield-minus' : 'bi-shield-plus' }}"></i>
-                {{ $showReserve ? '����� ������� ��������' : '��� ������� ��������' }}
+                {{ $showReserve ? 'إخفاء الحالات المحجوزة' : 'عرض الحالات المحجوزة' }}
             </a>
 
             <a href="{{ route('orders.edit', $order->id) }}" class="btn btn-primary">
-                <i class="fa fa-edit"></i> ����� �����
+                <i class="fa fa-edit"></i> تعديل الطلب
             </a>
         </div>
     </div>
@@ -288,7 +288,7 @@
     <div class="order-metrics">
         <div class="order-metric-card">
             <div>
-                <div class="order-metric-label">������ �����</div>
+                <div class="order-metric-label">إجمالي الطلب</div>
                 <div class="order-metric-value">{{ number_format($order->final_amount, 2) }} {{ $currencyCode }}</div>
             </div>
             <div class="order-metric-icon">
@@ -297,7 +297,7 @@
         </div>
         <div class="order-metric-card">
             <div>
-                <div class="order-metric-label">��� �������</div>
+                <div class="order-metric-label">عدد العناصر</div>
                 <div class="order-metric-value">{{ $heroItemsCount }}</div>
             </div>
             <div class="order-metric-icon">
@@ -306,7 +306,7 @@
         </div>
         <div class="order-metric-card">
             <div>
-                <div class="order-metric-label">������</div>
+                <div class="order-metric-label">العميل</div>
                 <div class="order-metric-value">{{ $heroCustomerName }}</div>
                 @if(optional($order->user)->mobile)
                     <div class="order-metric-sub">{{ $order->user->mobile }}</div>
@@ -318,7 +318,7 @@
         </div>
         <div class="order-metric-card">
             <div>
-                <div class="order-metric-label">������</div>
+                <div class="order-metric-label">التاجر</div>
                 <div class="order-metric-value">{{ $heroSellerName }}</div>
                 @if(optional($order->seller)->mobile)
                     <div class="order-metric-sub">{{ $order->seller->mobile }}</div>
@@ -339,7 +339,7 @@
                     <ul class="nav nav-pills" id="orderActionsTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <a class="nav-link active" id="orderActionsPaymentsTab" data-bs-toggle="tab" href="#orderActionsPayments" role="tab" aria-controls="orderActionsPayments" aria-selected="true">
-                                المدفوعات والإشعارات
+                                ط§ظ„ظ…ط¯ظپظˆط¹ط§طھ ظˆط§ظ„ط¥ط´ط¹ط§ط±ط§طھ
                             </a>
                         </li>
 
@@ -348,22 +348,22 @@
                         <div class="tab-pane fade show active" id="orderActionsPayments" role="tabpanel" aria-labelledby="orderActionsPaymentsTab">
                             <div class="d-flex flex-wrap align-items-center gap-2">
                                 @if($manualPaymentLocked)
-                                    <span class="btn btn-outline-success disabled" aria-disabled="true" title="لا يمكن إضافة الطلب إلى مجموعة أثناء مراجعة الدفع" data-testid="add-to-payment-group-button">
-                                        <i class="fa fa-layer-group"></i> إضافة الطلب إلى مجموعة
+                                    <span class="btn btn-outline-success disabled" aria-disabled="true" title="ظ„ط§ ظٹظ…ظƒظ† ط¥ط¶ط§ظپط© ط§ظ„ط·ظ„ط¨ ط¥ظ„ظ‰ ظ…ط¬ظ…ظˆط¹ط© ط£ط«ظ†ط§ط، ظ…ط±ط§ط¬ط¹ط© ط§ظ„ط¯ظپط¹" data-testid="add-to-payment-group-button">
+                                        <i class="fa fa-layer-group"></i> ط¥ط¶ط§ظپط© ط§ظ„ط·ظ„ط¨ ط¥ظ„ظ‰ ظ…ط¬ظ…ظˆط¹ط©
                                     </span>
                                 @else
                                     <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addOrderToGroupModal" data-testid="add-to-payment-group-button">
-                                        <i class="fa fa-layer-group"></i> إضافة الطلب إلى مجموعة
+                                        <i class="fa fa-layer-group"></i> ط¥ط¶ط§ظپط© ط§ظ„ط·ظ„ط¨ ط¥ظ„ظ‰ ظ…ط¬ظ…ظˆط¹ط©
                                     </button>
                                 @endif
 
                                 @if($manualPaymentLocked)
-                                    <span class="btn btn-outline-warning disabled" aria-disabled="true" title="لا يمكن إرسال إشعار فوري أثناء مراجعة الدفع" data-testid="instant-notification-button">
-                                        <i class="fa fa-bell"></i> إرسال إشعار فوري
+                                    <span class="btn btn-outline-warning disabled" aria-disabled="true" title="ظ„ط§ ظٹظ…ظƒظ† ط¥ط±ط³ط§ظ„ ط¥ط´ط¹ط§ط± ظپظˆط±ظٹ ط£ط«ظ†ط§ط، ظ…ط±ط§ط¬ط¹ط© ط§ظ„ط¯ظپط¹" data-testid="instant-notification-button">
+                                        <i class="fa fa-bell"></i> ط¥ط±ط³ط§ظ„ ط¥ط´ط¹ط§ط± ظپظˆط±ظٹ
                                     </span>
                                 @else
                                     <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#instantNotificationModal" data-testid="instant-notification-button">
-                                        <i class="fa fa-bell"></i> إرسال إشعار فوري
+                                        <i class="fa fa-bell"></i> ط¥ط±ط³ط§ظ„ ط¥ط´ط¹ط§ط± ظپظˆط±ظٹ
                                     </button>
                                 @endif
                             </div>
@@ -380,7 +380,7 @@
         <div class="col-12 col-xl-7 mb-4 mb-xl-0">
             <div class="card order-overview-card">
                 <div class="card-header">
-                    <h4 class="card-title">معلومات الطلب</h4>
+                    <h4 class="card-title">ظ…ط¹ظ„ظˆظ…ط§طھ ط§ظ„ط·ظ„ط¨</h4>
                 </div>
                 <div class="card-body">
                     @php
@@ -411,7 +411,7 @@
 
                         $statusBadgeTitle = $statusTimelineMessage ?? '';
                         if ($isReserveStatus) {
-                            $statusBadgeTitle = trim('مرحلة احتياطية' . ($statusBadgeTitle !== '' ? ' - ' . $statusBadgeTitle : ''));
+                            $statusBadgeTitle = trim('ظ…ط±ط­ظ„ط© ط§ط­طھظٹط§ط·ظٹط©' . ($statusBadgeTitle !== '' ? ' - ' . $statusBadgeTitle : ''));
                         }
 
 
@@ -428,10 +428,10 @@
                         $deliveryStatusValue = $order->delivery_payment_status ?? ($deliverySummary['status'] ?? null);
                         $timingLabel = $timingValue
                             ? ($deliveryPaymentTimingLabels[$timingValue] ?? \Illuminate\Support\Str::of($timingValue)->replace('_', ' ')->headline())
-                            : 'غير محدد';
+                            : 'ط؛ظٹط± ظ…ط­ط¯ط¯';
                         $deliveryStatusLabel = $deliveryStatusValue
                             ? ($deliveryPaymentStatusLabels[$deliveryStatusValue] ?? \Illuminate\Support\Str::of($deliveryStatusValue)->replace('_', ' ')->headline())
-                            : 'غير محدد';
+                            : 'ط؛ظٹط± ظ…ط­ط¯ط¯';
                         $deliveryStatusClass = match ($deliveryStatusValue) {
                             'paid' => 'bg-success',
                             'pending' => 'bg-warning',
@@ -446,21 +446,21 @@
 
 
                         $addressLabels = [
-                            'label' => 'العنوان',
-                            'phone' => 'رقم الهاتف',
-                            'street' => 'الشارع',
-                            'building' => 'المبنى',
-                            'apartment' => 'الشقة',
-                            'city' => 'المدينة',
-                            'area' => 'المنطقة',
-                            'instructions' => 'ملاحظات التوصيل',
+                            'label' => 'ط§ظ„ط¹ظ†ظˆط§ظ†',
+                            'phone' => 'ط±ظ‚ظ… ط§ظ„ظ‡ط§طھظپ',
+                            'street' => 'ط§ظ„ط´ط§ط±ط¹',
+                            'building' => 'ط§ظ„ظ…ط¨ظ†ظ‰',
+                            'apartment' => 'ط§ظ„ط´ظ‚ط©',
+                            'city' => 'ط§ظ„ظ…ط¯ظٹظ†ط©',
+                            'area' => 'ط§ظ„ظ…ظ†ط·ظ‚ط©',
+                            'instructions' => 'ظ…ظ„ط§ط­ط¸ط§طھ ط§ظ„طھظˆطµظٹظ„',
                         ];
 
                         $cartMetrics = is_array(data_get($cartSnapshot, 'metrics')) ? $cartSnapshot['metrics'] : [];
                         $metricLabels = [
-                            'cart_value' => 'قيمة السلة',
-                            'items_count' => 'عدد العناصر',
-                            'weight_total' => 'الوزن الإجمالي (كجم)',
+                            'cart_value' => 'ظ‚ظٹظ…ط© ط§ظ„ط³ظ„ط©',
+                            'items_count' => 'ط¹ط¯ط¯ ط§ظ„ط¹ظ†ط§طµط±',
+                            'weight_total' => 'ط§ظ„ظˆط²ظ† ط§ظ„ط¥ط¬ظ…ط§ظ„ظٹ (ظƒط¬ظ…)',
                         ];
 
 
@@ -476,20 +476,20 @@
 
                         $deliverySizeValue = $order->delivery_size;
                         $deliverySizeLabel = match ($deliverySizeValue) {
-                            null, '' => 'غير محدد',
-                            'small' => 'صغير',
-                            'medium' => 'متوسط',
-                            'large' => 'كبير',
+                            null, '' => 'ط؛ظٹط± ظ…ط­ط¯ط¯',
+                            'small' => 'طµط؛ظٹط±',
+                            'medium' => 'ظ…طھظˆط³ط·',
+                            'large' => 'ظƒط¨ظٹط±',
                             default => $deliverySizeValue,
                         };
-                        $deliveryDistanceDisplay = $order->delivery_distance ? number_format($order->delivery_distance, 2) . ' كم' : 'غير محددة';
-                        $deliveryPriceDisplay = $order->delivery_price ? number_format($order->delivery_price, 2) . ' ريال' : 'غير محدد';
-                        $completedAtDisplay = $order->completed_at ? $order->completed_at->format('Y-m-d H:i') : 'غير مكتمل';
+                        $deliveryDistanceDisplay = $order->delivery_distance ? number_format($order->delivery_distance, 2) . ' ظƒظ…' : 'ط؛ظٹط± ظ…ط­ط¯ط¯ط©';
+                        $deliveryPriceDisplay = $order->delivery_price ? number_format($order->delivery_price, 2) . ' ط±ظٹط§ظ„' : 'ط؛ظٹط± ظ…ط­ط¯ط¯';
+                        $completedAtDisplay = $order->completed_at ? $order->completed_at->format('Y-m-d H:i') : 'ط؛ظٹط± ظ…ظƒطھظ…ظ„';
 
                         $latestManualPaymentRequest = $latestManualPaymentRequest ?? $order->manualPaymentRequests->first();
                         $manualPaymentStatus = $latestManualPaymentRequest?->status;
                         $manualPaymentStatusLabel = $manualPaymentStatus
-                            ? ($manualPaymentStatusLabels[$manualPaymentStatus] ?? 'غير محدد')
+                            ? ($manualPaymentStatusLabels[$manualPaymentStatus] ?? 'ط؛ظٹط± ظ…ط­ط¯ط¯')
                             : null;
                         $manualPaymentBadgeClass = $manualPaymentStatus
                             ? ($manualPaymentStatusBadgeClasses[$manualPaymentStatus] ?? 'bg-secondary')
@@ -501,15 +501,15 @@
                             $paymentStatusLabel = $manualPaymentStatusLabel;
                             $paymentStatusBadgeClass = $manualPaymentBadgeClass ?? 'bg-secondary';
                         } else {
-                            $paymentStatusLabel = 'غير محدد';
+                            $paymentStatusLabel = 'ط؛ظٹط± ظ…ط­ط¯ط¯';
                             $paymentStatusBadgeClass = 'bg-secondary';
                             if ($paymentStatusValue === 'pending') {
-                                $paymentStatusLabel = 'قيد الانتظار';
+                                $paymentStatusLabel = 'ظ‚ظٹط¯ ط§ظ„ط§ظ†طھط¸ط§ط±';
                             } elseif ($paymentStatusValue === 'paid') {
-                                $paymentStatusLabel = 'مدفوع';
+                                $paymentStatusLabel = 'ظ…ط¯ظپظˆط¹';
                                 $paymentStatusBadgeClass = 'bg-success';
                             } elseif ($paymentStatusValue === 'refunded') {
-                                $paymentStatusLabel = 'مسترجع';
+                                $paymentStatusLabel = 'ظ…ط³طھط±ط¬ط¹';
                                 $paymentStatusBadgeClass = 'bg-warning';
                             } elseif (! empty($paymentStatusValue)) {
                                 $paymentStatusLabel = $paymentStatusValue;
@@ -526,18 +526,18 @@
 
                     <div class="order-summary-grid">
                         <section class="order-summary-block">
-                            <h6 class="order-summary-heading">البيانات الأساسية</h6>
+                            <h6 class="order-summary-heading">ط§ظ„ط¨ظٹط§ظ†ط§طھ ط§ظ„ط£ط³ط§ط³ظٹط©</h6>
                             <ul class="order-summary-list">
                                 <li>
-                                    <span class="order-summary-label">رقم الطلب</span>
+                                    <span class="order-summary-label">ط±ظ‚ظ… ط§ظ„ط·ظ„ط¨</span>
                                     <span class="order-summary-value">{{ $order->order_number }}</span>
                                 </li>
                                 <li>
-                                    <span class="order-summary-label">تاريخ الطلب</span>
+                                    <span class="order-summary-label">طھط§ط±ظٹط® ط§ظ„ط·ظ„ط¨</span>
                                     <span class="order-summary-value">{{ $order->created_at->format('Y-m-d H:i') }}</span>
                                 </li>
                                 <li>
-                                    <span class="order-summary-label">حالة الطلب</span>
+                                    <span class="order-summary-label">ط­ط§ظ„ط© ط§ظ„ط·ظ„ط¨</span>
                                     <span class="order-summary-value">
                                         <span class="badge d-inline-flex align-items-center gap-1" style="background-color: {{ $statusColor }}" @if($statusBadgeTitle !== '') title="{{ $statusBadgeTitle }}" @endif>
                                             @if($statusIconClass)
@@ -545,24 +545,24 @@
                                             @endif
                                             <span>{{ $statusLabel }}</span>
                                             @if($isReserveStatus)
-                                                <span class="ms-1 small fw-semibold">احتياطي</span>
+                                                <span class="ms-1 small fw-semibold">ط§ط­طھظٹط§ط·ظٹ</span>
 
                                             @endif
                                         </span>
                                     </span>
                                 </li>
                                 <li>
-                                    <span class="order-summary-label">الفئات</span>
+                                    <span class="order-summary-label">ط§ظ„ظپط¦ط§طھ</span>
                                     <span class="order-summary-value">
                                         @forelse($categoryBadges as $categoryName)
                                             <span class="badge badge-info me-1 text-white">{{ $categoryName }}</span>
                                         @empty
-                                            <span class="text-muted">غير متوفر</span>
+                                            <span class="text-muted">ط؛ظٹط± ظ…طھظˆظپط±</span>
                                         @endforelse
                                     </span>
                                 </li>
                                 <li>
-                                    <span class="order-summary-label">سياسة التسعير</span>
+                                    <span class="order-summary-label">ط³ظٹط§ط³ط© ط§ظ„طھط³ط¹ظٹط±</span>
                                     <span class="order-summary-value">
                                         @if($policyCode)
                                             {{ $policyCode }}
@@ -572,27 +572,27 @@
 
                                             @endif
                                             @if(data_get($policyData, 'version'))
-                                                <span class="badge badge-light">الإصدار {{ data_get($policyData, 'version') }}</span>
+                                                <span class="badge badge-light">ط§ظ„ط¥طµط¯ط§ط± {{ data_get($policyData, 'version') }}</span>
                                             @endif
                                         @elseif($policyId)
-                                            سياسة #{{ $policyId }}
+                                            ط³ظٹط§ط³ط© #{{ $policyId }}
                                         @else
-                                            <span class="text-muted">غير متوفر</span>
+                                            <span class="text-muted">ط؛ظٹط± ظ…طھظˆظپط±</span>
                                         @endif
                                     </span>
                                 </li>
                                 <li>
-                                    <span class="order-summary-label">تاريخ الإكمال</span>
+                                    <span class="order-summary-label">طھط§ط±ظٹط® ط§ظ„ط¥ظƒظ…ط§ظ„</span>
                                     <span class="order-summary-value">{{ $completedAtDisplay }}</span>
                                 </li>
                             </ul>
                         </section>
 
                         <section class="order-summary-block">
-                            <h6 class="order-summary-heading">معلومات الدفع والتوصيل</h6>
+                            <h6 class="order-summary-heading">ظ…ط¹ظ„ظˆظ…ط§طھ ط§ظ„ط¯ظپط¹ ظˆط§ظ„طھظˆطµظٹظ„</h6>
                             <ul class="order-summary-list">
                                 <li>
-                                    <span class="order-summary-label">حالة الدفع</span>
+                                    <span class="order-summary-label">ط­ط§ظ„ط© ط§ظ„ط¯ظپط¹</span>
                                     <span class="order-summary-value">
                                         <span class="badge {{ $paymentStatusBadgeClass }}">{{ $paymentStatusLabel }}</span>
 
@@ -601,129 +601,129 @@
                                     </span>
                                 </li>
                                 <li>
-                                    <span class="order-summary-label">طريقة الدفع</span>
-                                    <span class="order-summary-value">{{ $order->resolved_payment_gateway_label ?? 'غير محدد' }}</span>
+                                    <span class="order-summary-label">ط·ط±ظٹظ‚ط© ط§ظ„ط¯ظپط¹</span>
+                                    <span class="order-summary-value">{{ $order->resolved_payment_gateway_label ?? 'ط؛ظٹط± ظ…ط­ط¯ط¯' }}</span>
                                 </li>
                                 <li>
-                                    <span class="order-summary-label">توقيت دفع التوصيل</span>
+                                    <span class="order-summary-label">طھظˆظ‚ظٹطھ ط¯ظپط¹ ط§ظ„طھظˆطµظٹظ„</span>
                                     <span class="order-summary-value">{{ $timingLabel }}</span>
                                 </li>
                                 <li>
-                                    <span class="order-summary-label">حالة دفع التوصيل</span>
+                                    <span class="order-summary-label">ط­ط§ظ„ط© ط¯ظپط¹ ط§ظ„طھظˆطµظٹظ„</span>
                                     <span class="order-summary-value">
                                         <span class="badge {{ $deliveryStatusValue ? $deliveryStatusClass : 'bg-secondary' }}">{{ $deliveryStatusLabel }}</span>
                                     </span>
                                 </li>
                                 <li>
-                                    <span class="order-summary-label">المستحق إلكترونياً</span>
+                                    <span class="order-summary-label">ط§ظ„ظ…ط³طھط­ظ‚ ط¥ظ„ظƒطھط±ظˆظ†ظٹط§ظ‹</span>
                                     <span class="order-summary-value">
                                         @if(! is_null($onlinePayable))
-                                            {{ number_format($onlinePayable, 2) }} ريال
+                                            {{ number_format($onlinePayable, 2) }} ط±ظٹط§ظ„
                                         @else
-                                            <span class="text-muted">غير متوفر</span>
+                                            <span class="text-muted">ط؛ظٹط± ظ…طھظˆظپط±</span>
                                         @endif
                                     </span>
                                 </li>
                                 <li>
-                                    <span class="order-summary-label">المستحق عند التسليم</span>
+                                    <span class="order-summary-label">ط§ظ„ظ…ط³طھط­ظ‚ ط¹ظ†ط¯ ط§ظ„طھط³ظ„ظٹظ…</span>
                                     <span class="order-summary-value">
                                         @if(! is_null($codDue))
-                                            {{ number_format($codDue, 2) }} ريال
+                                            {{ number_format($codDue, 2) }} ط±ظٹط§ظ„
                                         @else
-                                            <span class="text-muted">غير متوفر</span>
+                                            <span class="text-muted">ط؛ظٹط± ظ…طھظˆظپط±</span>
                                         @endif
                                     </span>
                                 </li>
                                 <li>
-                                    <span class="order-summary-label">حجم الطلب</span>
+                                    <span class="order-summary-label">ط­ط¬ظ… ط§ظ„ط·ظ„ط¨</span>
                                     <span class="order-summary-value">{{ $deliverySizeLabel }}</span>
                                 </li>
                                 <li>
-                                    <span class="order-summary-label">مسافة التوصيل</span>
+                                    <span class="order-summary-label">ظ…ط³ط§ظپط© ط§ظ„طھظˆطµظٹظ„</span>
                                     <span class="order-summary-value">{{ $deliveryDistanceDisplay }}</span>
                                 </li>
                                 <li>
-                                    <span class="order-summary-label">سعر التوصيل</span>
+                                    <span class="order-summary-label">ط³ط¹ط± ط§ظ„طھظˆطµظٹظ„</span>
                                     <span class="order-summary-value">{{ $deliveryPriceDisplay }}</span>
                                 </li>
                             </ul>
                         </section>
 
                         <section class="order-summary-block order-summary-block--wide">
-                            <h6 class="order-summary-heading">الأطراف</h6>
+                            <h6 class="order-summary-heading">ط§ظ„ط£ط·ط±ط§ظپ</h6>
                             <div class="order-summary-parties">
                                 <div class="order-party">
-                                    <div class="order-party-title">العميل</div>
+                                    <div class="order-party-title">ط§ظ„ط¹ظ…ظٹظ„</div>
                                     @if($order->user)
                                         <ul class="order-summary-list">
                                             <li>
-                                                <span class="order-summary-label">الاسم</span>
+                                                <span class="order-summary-label">ط§ظ„ط§ط³ظ…</span>
                                                 <span class="order-summary-value">
                                                     <a href="{{ route('customer.show', $order->user_id) }}">{{ $order->user->name }}</a>
                                                 </span>
                                             </li>
                                             <li>
-                                                <span class="order-summary-label">رقم الهاتف</span>
+                                                <span class="order-summary-label">ط±ظ‚ظ… ط§ظ„ظ‡ط§طھظپ</span>
                                                 <span class="order-summary-value">
                                                     @if($order->user->mobile)
                                                         <a href="tel:{{ $order->user->mobile }}">{{ $order->user->mobile }}</a>
                                                     @else
-                                                        <span class="text-muted">غير متوفر</span>
+                                                        <span class="text-muted">ط؛ظٹط± ظ…طھظˆظپط±</span>
                                                     @endif
                                                 </span>
                                             </li>
                                             <li>
-                                                <span class="order-summary-label">البريد الإلكتروني</span>
+                                                <span class="order-summary-label">ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ</span>
                                                 <span class="order-summary-value">
                                                     @if($order->user->email)
                                                         <a href="mailto:{{ $order->user->email }}">{{ $order->user->email }}</a>
                                                     @else
-                                                        <span class="text-muted">غير متوفر</span>
+                                                        <span class="text-muted">ط؛ظٹط± ظ…طھظˆظپط±</span>
                                                     @endif
                                                 </span>
                                             </li>
                                         </ul>
                                     @else
-                                        <p class="text-muted mb-0">معلومات العميل غير متوفرة</p>
+                                        <p class="text-muted mb-0">ظ…ط¹ظ„ظˆظ…ط§طھ ط§ظ„ط¹ظ…ظٹظ„ ط؛ظٹط± ظ…طھظˆظپط±ط©</p>
                                     @endif
                                 </div>
                                 <div class="order-party">
-                                    <div class="order-party-title">التاجر</div>
+                                    <div class="order-party-title">ط§ظ„طھط§ط¬ط±</div>
                                     @if($order->seller)
                                         <ul class="order-summary-list">
                                             <li>
-                                                <span class="order-summary-label">الاسم</span>
+                                                <span class="order-summary-label">ط§ظ„ط§ط³ظ…</span>
                                                 <span class="order-summary-value">
                                                     <a href="{{ route('customer.show', $order->seller_id) }}">{{ $order->seller->name }}</a>
                                                 </span>
                                             </li>
                                             <li>
-                                                <span class="order-summary-label">رقم الهاتف</span>
+                                                <span class="order-summary-label">ط±ظ‚ظ… ط§ظ„ظ‡ط§طھظپ</span>
                                                 <span class="order-summary-value">
                                                     @if($order->seller->mobile)
                                                         <a href="tel:{{ $order->seller->mobile }}">{{ $order->seller->mobile }}</a>
                                                     @else
-                                                        <span class="text-muted">غير متوفر</span>
+                                                        <span class="text-muted">ط؛ظٹط± ظ…طھظˆظپط±</span>
                                                     @endif
                                                 </span>
                                             </li>
                                             <li>
-                                                <span class="order-summary-label">البريد الإلكتروني</span>
+                                                <span class="order-summary-label">ط§ظ„ط¨ط±ظٹط¯ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ</span>
                                                 <span class="order-summary-value">
                                                     @if($order->seller->email)
                                                         <a href="mailto:{{ $order->seller->email }}">{{ $order->seller->email }}</a>
                                                     @else
-                                                        <span class="text-muted">غير متوفر</span>
+                                                        <span class="text-muted">ط؛ظٹط± ظ…طھظˆظپط±</span>
                                                     @endif
                                                 </span>
                                             </li>
                                             <li>
-                                                <span class="order-summary-label">العنوان</span>
-                                                <span class="order-summary-value">{{ $order->seller->address ?? 'غير متوفر' }}</span>
+                                                <span class="order-summary-label">ط§ظ„ط¹ظ†ظˆط§ظ†</span>
+                                                <span class="order-summary-value">{{ $order->seller->address ?? 'ط؛ظٹط± ظ…طھظˆظپط±' }}</span>
                                             </li>
                                         </ul>
                                     @else
-                                        <p class="text-muted mb-0">معلومات التاجر غير متوفرة</p>
+                                        <p class="text-muted mb-0">ظ…ط¹ظ„ظˆظ…ط§طھ ط§ظ„طھط§ط¬ط± ط؛ظٹط± ظ…طھظˆظپط±ط©</p>
                                     @endif
                                 </div>
                             </div>
@@ -731,13 +731,13 @@
 
 
                         <section class="order-summary-block order-summary-block--wide">
-                            <h6 class="order-summary-heading">عنوان الشحن والتتبع</h6>
+                            <h6 class="order-summary-heading">ط¹ظ†ظˆط§ظ† ط§ظ„ط´ط­ظ† ظˆط§ظ„طھطھط¨ط¹</h6>
                             <div class="order-address">
-                                <div class="order-address-text">{{ $shippingAddressDisplay ?: 'غير متوفر' }}</div>
+                                <div class="order-address-text">{{ $shippingAddressDisplay ?: 'ط؛ظٹط± ظ…طھظˆظپط±' }}</div>
                                 <div class="order-address-actions">
                                     @php
                                         $availabilityBadgeClass = $hasCoordinates ? 'bg-success' : ($googleMapsUrl ? 'bg-info' : 'bg-secondary');
-                                        $availabilityBadgeLabel = $hasCoordinates ? 'الإحداثيات متوفرة' : ($googleMapsUrl ? 'رابط موقع متوفر' : 'الإحداثيات غير متوفرة');
+                                        $availabilityBadgeLabel = $hasCoordinates ? 'ط§ظ„ط¥ط­ط¯ط§ط«ظٹط§طھ ظ…طھظˆظپط±ط©' : ($googleMapsUrl ? 'ط±ط§ط¨ط· ظ…ظˆظ‚ط¹ ظ…طھظˆظپط±' : 'ط§ظ„ط¥ط­ط¯ط§ط«ظٹط§طھ ط؛ظٹط± ظ…طھظˆظپط±ط©');
                                     @endphp
                                     <span class="badge {{ $availabilityBadgeClass }}">{{ $availabilityBadgeLabel }}</span>
                                     @if($coordinateDisplay)
@@ -746,24 +746,24 @@
                                     @if($hasCoordinates && $googleMapsUrl)
                                         <a href="{{ $googleMapsUrl }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
                                             <i class="bi bi-geo-alt"></i>
-                                            خرائط جوجل
+                                            ط®ط±ط§ط¦ط· ط¬ظˆط¬ظ„
                                         </a>
                                     @elseif(!$hasCoordinates && $googleMapsUrl)
                                         <a href="{{ $googleMapsUrl }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
                                             <i class="bi bi-geo-alt"></i>
-                                            فتح الخريطة
+                                            ظپطھط­ ط§ظ„ط®ط±ظٹط·ط©
                                         </a>
                                     @endif
                                     @if($hasCoordinates && $appleMapsUrl)
                                         <a href="{{ $appleMapsUrl }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
                                             <i class="bi bi-compass"></i>
-                                            خرائط أبل
+                                            ط®ط±ط§ط¦ط· ط£ط¨ظ„
                                         </a>
                                     @endif
                                     @if($addressCopyText !== '')
                                         <button type="button" class="btn btn-outline-secondary btn-sm copy-address-btn" data-address-copy="{{ e($addressCopyText) }}">
                                             <i class="bi bi-clipboard"></i>
-                                            نسخ العنوان
+                                            ظ†ط³ط® ط§ظ„ط¹ظ†ظˆط§ظ†
                                         </button>
                                     @endif
                                 </div>
@@ -772,29 +772,29 @@
             
 
                             @if(! $hasCoordinates && ! $googleMapsUrl)
-                                <div class="text-muted small mt-2">لا تتوفر بيانات موقع دقيقة لهذا العنوان.</div>
+                                <div class="text-muted small mt-2">ظ„ط§ طھطھظˆظپط± ط¨ظٹط§ظ†ط§طھ ظ…ظˆظ‚ط¹ ط¯ظ‚ظٹظ‚ط© ظ„ظ‡ط°ط§ ط§ظ„ط¹ظ†ظˆط§ظ†.</div>
                             @endif
 
                             <ul class="order-summary-list order-summary-list--compact mt-3">
                                 <li>
-                                    <span class="order-summary-label">رابط التتبع</span>
+                                    <span class="order-summary-label">ط±ط§ط¨ط· ط§ظ„طھطھط¨ط¹</span>
                                     <span class="order-summary-value">
                                         @if($trackingUrl)
-                                            <a href="{{ $trackingUrl }}" target="_blank" rel="noopener">فتح رابط التتبع</a>
+                                            <a href="{{ $trackingUrl }}" target="_blank" rel="noopener">ظپطھط­ ط±ط§ط¨ط· ط§ظ„طھطھط¨ط¹</a>
                                         @else
-                                            <span class="text-muted">غير متوفر</span>
+                                            <span class="text-muted">ط؛ظٹط± ظ…طھظˆظپط±</span>
                                         @endif
                                     </span>
                                 </li>
                                 @if($trackingCarrier)
                                     <li>
-                                        <span class="order-summary-label">شركة الشحن</span>
+                                        <span class="order-summary-label">ط´ط±ظƒط© ط§ظ„ط´ط­ظ†</span>
                                         <span class="order-summary-value">{{ $trackingCarrier }}</span>
                                     </li>
                                 @endif
                                 @if($trackingNumber)
                                     <li>
-                                        <span class="order-summary-label">رقم التتبع</span>
+                                        <span class="order-summary-label">ط±ظ‚ظ… ط§ظ„طھطھط¨ط¹</span>
                                         <span class="order-summary-value"><code>{{ $trackingNumber }}</code></span>
                                     </li>
                                 @endif
@@ -802,14 +802,14 @@
 
                             @if($trackingProof !== [])
                                 <div class="order-tracking-proof mt-3">
-                                    <h6 class="order-summary-subheading">إثبات التسليم</h6>
+                                    <h6 class="order-summary-subheading">ط¥ط«ط¨ط§طھ ط§ظ„طھط³ظ„ظٹظ…</h6>
                                     <ul class="order-summary-list order-summary-list--compact mb-0">
                                         @if($trackingImagePath)
                                             <li>
-                                                <span class="order-summary-label">الصورة</span>
+                                                <span class="order-summary-label">ط§ظ„طµظˆط±ط©</span>
                                                 <span class="order-summary-value">
                                                     @if($trackingImageUrl)
-                                                        <a href="{{ $trackingImageUrl }}" target="_blank" rel="noopener">عرض</a>
+                                                        <a href="{{ $trackingImageUrl }}" target="_blank" rel="noopener">ط¹ط±ط¶</a>
                                                     @else
                                                         <code>{{ $trackingImagePath }}</code>
                                                     @endif
@@ -818,10 +818,10 @@
                                         @endif
                                         @if($trackingSignaturePath)
                                             <li>
-                                                <span class="order-summary-label">التوقيع</span>
+                                                <span class="order-summary-label">ط§ظ„طھظˆظ‚ظٹط¹</span>
                                                 <span class="order-summary-value">
                                                     @if($trackingSignatureUrl)
-                                                        <a href="{{ $trackingSignatureUrl }}" target="_blank" rel="noopener">عرض</a>
+                                                        <a href="{{ $trackingSignatureUrl }}" target="_blank" rel="noopener">ط¹ط±ط¶</a>
                                                     @else
                                                         <code>{{ $trackingSignaturePath }}</code>
                                                     @endif
@@ -830,7 +830,7 @@
                                         @endif
                                         @if($trackingOtpCode)
                                             <li>
-                                                <span class="order-summary-label">رمز OTP</span>
+                                                <span class="order-summary-label">ط±ظ…ط² OTP</span>
                                                 <span class="order-summary-value"><code>{{ $trackingOtpCode }}</code></span>
                                             </li>
                                         @endif
@@ -840,7 +840,7 @@
 
                             @if($addressSnapshot !== [])
                                 <div class="order-address-snapshot mt-3">
-                                    <h6 class="order-summary-subheading">بيانات العنوان المحفوظة</h6>
+                                    <h6 class="order-summary-subheading">ط¨ظٹط§ظ†ط§طھ ط§ظ„ط¹ظ†ظˆط§ظ† ط§ظ„ظ…ط­ظپظˆط¸ط©</h6>
                                     <div class="order-address-grid">
                                         @foreach($addressSnapshot as $key => $value)
                                             <div class="order-address-field">
@@ -849,7 +849,7 @@
                                                     @if(is_array($value))
                                                         <code dir="ltr">{{ json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</code>
                                                     @else
-                                                        {{ ($value !== null && $value !== '') ? $value : '—' }}
+                                                        {{ ($value !== null && $value !== '') ? $value : 'â€”' }}
                                                     @endif
                                                 </div>
                                             </div>
@@ -861,7 +861,7 @@
 
 
                         <section class="order-summary-block">
-                            <h6 class="order-summary-heading">مؤشرات السلة</h6>
+                            <h6 class="order-summary-heading">ظ…ط¤ط´ط±ط§طھ ط§ظ„ط³ظ„ط©</h6>
                             @if($cartMetrics !== [])
                                 <ul class="order-summary-list mb-0">
                                     @foreach($cartMetrics as $metricKey => $metricValue)
@@ -873,7 +873,7 @@
                                                 @if(is_array($metricValue))
                                                     <code dir="ltr">{{ json_encode($metricValue, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</code>
                                                 @else
-                                                    {{ ($metricValue !== null && $metricValue !== '') ? $metricValue : '—' }}
+                                                    {{ ($metricValue !== null && $metricValue !== '') ? $metricValue : 'â€”' }}
 
 
                                                 @endif
@@ -881,13 +881,13 @@
                                         </li>
                                     @endforeach
                             @else
-                                <p class="text-muted mb-0">لا توجد بيانات إحصائية متاحة.</p>
+                                <p class="text-muted mb-0">ظ„ط§ طھظˆط¬ط¯ ط¨ظٹط§ظ†ط§طھ ط¥ط­طµط§ط¦ظٹط© ظ…طھط§ط­ط©.</p>
                             @endif
                         </section>
 
                         @if($orderNotes !== '')
                             <section class="order-summary-block order-summary-block--wide">
-                                <h6 class="order-summary-heading">ملاحظات الطلب</h6>
+                                <h6 class="order-summary-heading">ظ…ظ„ط§ط­ط¸ط§طھ ط§ظ„ط·ظ„ط¨</h6>
                                 <p class="order-notes-text mb-0">{{ $orderNotes }}</p>
                             </section>
 
@@ -896,14 +896,14 @@
                     </div>
 
                     <div class="order-items-section mt-4">
-                        <h5 class="order-section-heading">عناصر الطلب</h5>
+                        <h5 class="order-section-heading">ط¹ظ†ط§طµط± ط§ظ„ط·ظ„ط¨</h5>
                         <div class="order-items-grid">
                             @forelse($orderItemsDisplayData as $item)
                                 <article class="order-item-card">
                                     <div class="order-item-header">
-                                        <img src="{{ $item['thumbnail_url'] }}" alt="صورة المنتج" class="order-item-thumb">
+                                        <img src="{{ $item['thumbnail_url'] }}" alt="طµظˆط±ط© ط§ظ„ظ…ظ†طھط¬" class="order-item-thumb">
                                         <div class="order-item-header-body">
-                                            <div class="order-item-title">{{ $item['name'] ?? 'منتج بدون اسم' }}</div>
+                                            <div class="order-item-title">{{ $item['name'] ?? 'ظ…ظ†طھط¬ ط¨ط¯ظˆظ† ط§ط³ظ…' }}</div>
                                             @if(! empty($item['variant_label']))
                                                 <div class="order-item-variant text-muted small">{{ $item['variant_label'] }}</div>
                                             @endif
@@ -912,7 +912,7 @@
                                             @if($item['product_url'])
                                                 <a href="{{ $item['product_url'] }}" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener">
                                                     <i class="bi bi-box-arrow-up-right"></i>
-                                                    عرض المنتج
+                                                    ط¹ط±ط¶ ط§ظ„ظ…ظ†طھط¬
                                                 </a>
                                             @endif
                                         </div>
@@ -921,31 +921,31 @@
                                     <div class="order-item-meta">
                                         @if(! empty($item['item_id']))
                                             <div>
-                                                <span class="order-summary-label">معرّف المنتج</span>
+                                                <span class="order-summary-label">ظ…ط¹ط±ظ‘ظپ ط§ظ„ظ…ظ†طھط¬</span>
                                                 <span class="order-summary-value">{{ $item['item_id'] }}</span>
                                             </div>
                                         @endif
                                         @if(! empty($item['variant_id']))
                                             <div>
-                                                <span class="order-summary-label">المعرف الفرعي</span>
+                                                <span class="order-summary-label">ط§ظ„ظ…ط¹ط±ظپ ط§ظ„ظپط±ط¹ظٹ</span>
                                                 <span class="order-summary-value">{{ $item['variant_id'] }}</span>
                                             </div>
                                         @endif
                                         <div>
-                                            <span class="order-summary-label">السعر</span>
+                                            <span class="order-summary-label">ط§ظ„ط³ط¹ط±</span>
                                             <span class="order-summary-value">{{ number_format($item['price'], 2) }}</span>
                                         </div>
                                         <div>
-                                            <span class="order-summary-label">الكمية</span>
+                                            <span class="order-summary-label">ط§ظ„ظƒظ…ظٹط©</span>
                                             <span class="order-summary-value">{{ rtrim(rtrim(number_format($item['quantity'], 3, '.', ''), '0'), '.') }}</span>
                                         </div>
                                         <div>
-                                            <span class="order-summary-label">المجموع الفرعي</span>
+                                            <span class="order-summary-label">ط§ظ„ظ…ط¬ظ…ظˆط¹ ط§ظ„ظپط±ط¹ظٹ</span>
                                             <span class="order-summary-value">{{ number_format($item['subtotal'], 2) }}</span>
                                         </div>
                                         @if(! empty($item['currency']))
                                             <div>
-                                                <span class="order-summary-label">العملة</span>
+                                                <span class="order-summary-label">ط§ظ„ط¹ظ…ظ„ط©</span>
                                                 <span class="order-summary-value">{{ $item['currency'] }}</span>
                                             </div>
                                         @endif
@@ -953,7 +953,7 @@
 
                                     <div class="order-item-details">
                                         <div class="order-item-section">
-                                            <h6 class="order-summary-subheading">خيارات المقاس/اللون</h6>
+                                            <h6 class="order-summary-subheading">ط®ظٹط§ط±ط§طھ ط§ظ„ظ…ظ‚ط§ط³/ط§ظ„ظ„ظˆظ†</h6>
                                             @if($item['has_options'])
                                                 <ul class="order-summary-list order-summary-list--compact mb-0">
                                                     @foreach($item['options'] as $option)
@@ -964,13 +964,13 @@
                                                     @endforeach
                                                 </ul>
                                             @else
-                                                <p class="text-muted small mb-0">لا توجد خيارات متاحة</p>
-                                            @endif {{-- نهاية شرط خيارات المقاس/اللون --}}
+                                                <p class="text-muted small mb-0">ظ„ط§ طھظˆط¬ط¯ ط®ظٹط§ط±ط§طھ ظ…طھط§ط­ط©</p>
+                                            @endif {{-- ظ†ظ‡ط§ظٹط© ط´ط±ط· ط®ظٹط§ط±ط§طھ ط§ظ„ظ…ظ‚ط§ط³/ط§ظ„ظ„ظˆظ† --}}
 
                                         </div>
 
                                         <div class="order-item-section">
-                                            <h6 class="order-summary-subheading">البيانات الإعلانية</h6>
+                                            <h6 class="order-summary-subheading">ط§ظ„ط¨ظٹط§ظ†ط§طھ ط§ظ„ط¥ط¹ظ„ط§ظ†ظٹط©</h6>
                                             @if($item['has_advertiser'])
                                                 <ul class="order-summary-list order-summary-list--compact mb-0">
                                                     @foreach($item['advertiser'] as $field)
@@ -981,14 +981,14 @@
                                                     @endforeach
                                                 </ul>
                                             @else
-                                                <span class="text-muted">غير متوفر</span>
+                                                <span class="text-muted">ط؛ظٹط± ظ…طھظˆظپط±</span>
                                             @endif
                                         </div>
                                     </div>
                                 </article>
                             @empty
                                 <div class="order-empty-state">
-                                    <p class="text-muted mb-0">لا توجد عناصر</p>
+                                    <p class="text-muted mb-0">ظ„ط§ طھظˆط¬ط¯ ط¹ظ†ط§طµط±</p>
                                 </div>
                             @endforelse
                              
@@ -996,19 +996,19 @@
   
                         <div class="order-items-summary mt-4">
                             <div>
-                                <span class="order-summary-label">المجموع</span>
+                                <span class="order-summary-label">ط§ظ„ظ…ط¬ظ…ظˆط¹</span>
                                 <span class="order-summary-value">{{ number_format($order->total_amount, 2) }}</span>
                             </div>
                             <div>
-                                <span class="order-summary-label">الضريبة (15%)</span>
+                                <span class="order-summary-label">ط§ظ„ط¶ط±ظٹط¨ط© (15%)</span>
                                 <span class="order-summary-value">{{ number_format($order->tax_amount, 2) }}</span>
                             </div>
                             <div>
-                                <span class="order-summary-label">الخصم</span>
+                                <span class="order-summary-label">ط§ظ„ط®طµظ…</span>
                                 <span class="order-summary-value">{{ number_format($order->discount_amount, 2) }}</span>
                             </div>
                             <div>
-                                <span class="order-summary-label">المجموع النهائي</span>
+                                <span class="order-summary-label">ط§ظ„ظ…ط¬ظ…ظˆط¹ ط§ظ„ظ†ظ‡ط§ط¦ظٹ</span>
                                 <span class="order-summary-value">{{ number_format($order->final_amount, 2) }}</span>
                             </div>
                         </div>
@@ -1020,11 +1020,11 @@
             </div>
         </div>
 
-        <!-- سجل الطلب -->
+        <!-- ط³ط¬ظ„ ط§ظ„ط·ظ„ط¨ -->
         <div class="col-12 col-xl-5">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">سجل الطلب</h4>
+                    <h4 class="card-title">ط³ط¬ظ„ ط§ظ„ط·ظ„ط¨</h4>
                 </div>
                 <div class="card-body">
                     @php
@@ -1133,10 +1133,10 @@
 
                     </div>
                     <hr>
-                    <h5 class="mt-4 mb-3">مبالغ الدفع حسب التوقيت</h5>
+                    <h5 class="mt-4 mb-3">ظ…ط¨ط§ظ„ط؛ ط§ظ„ط¯ظپط¹ ط­ط³ط¨ ط§ظ„طھظˆظ‚ظٹطھ</h5>
                     @php
                         $formatAmount = function ($value) {
-                            return $value !== null ? number_format((float) $value, 2) . ' ريال' : '—';
+                            return $value !== null ? number_format((float) $value, 2) . ' ط±ظٹط§ظ„' : 'â€”';
                         };
 
                         $onlineTotal = $deliverySummary['online_payable'] ?? data_get($paymentSummary, 'online_total');
@@ -1152,49 +1152,49 @@
                         <table class="table table-bordered table-striped">
                             <thead>
                                 <tr>
-                                    <th>البند</th>
-                                    <th>المستحق الآن</th>
-                                    <th>المستحق عند التسليم</th>
+                                    <th>ط§ظ„ط¨ظ†ط¯</th>
+                                    <th>ط§ظ„ظ…ط³طھط­ظ‚ ط§ظ„ط¢ظ†</th>
+                                    <th>ط§ظ„ظ…ط³طھط­ظ‚ ط¹ظ†ط¯ ط§ظ„طھط³ظ„ظٹظ…</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>إجمالي الدفع الإلكتروني</td>
+                                    <td>ط¥ط¬ظ…ط§ظ„ظٹ ط§ظ„ط¯ظپط¹ ط§ظ„ط¥ظ„ظƒطھط±ظˆظ†ظٹ</td>
                                     <td>{{ $formatAmount($onlineTotal) }}</td>
-                                    <td>—</td>
+                                    <td>â€”</td>
                                 </tr>
                                 <tr>
-                                    <td>السلع (إلكترونياً)</td>
+                                    <td>ط§ظ„ط³ظ„ط¹ (ط¥ظ„ظƒطھط±ظˆظ†ظٹط§ظ‹)</td>
                                     <td>{{ $formatAmount($onlineGoodsPayable) }}</td>
-                                    <td>—</td>
+                                    <td>â€”</td>
                                 </tr>
                                 <tr>
-                                    <td>التوصيل (إلكترونياً)</td>
+                                    <td>ط§ظ„طھظˆطµظٹظ„ (ط¥ظ„ظƒطھط±ظˆظ†ظٹط§ظ‹)</td>
                                     <td>{{ $formatAmount($onlineDeliveryPayable) }}</td>
-                                    <td>—</td>
+                                    <td>â€”</td>
                                 </tr>
                                 <tr>
-                                    <td>المبلغ الإجمالي عند التسليم</td>
-                                    <td>—</td>
+                                    <td>ط§ظ„ظ…ط¨ظ„ط؛ ط§ظ„ط¥ط¬ظ…ط§ظ„ظٹ ط¹ظ†ط¯ ط§ظ„طھط³ظ„ظٹظ…</td>
+                                    <td>â€”</td>
                                     <td>{{ $formatAmount($codDueAmount) }}</td>
                                 </tr>
                                 <tr>
-                                    <td>رسوم الدفع عند التسليم</td>
-                                    <td>—</td>
+                                    <td>ط±ط³ظˆظ… ط§ظ„ط¯ظپط¹ ط¹ظ†ط¯ ط§ظ„طھط³ظ„ظٹظ…</td>
+                                    <td>â€”</td>
                                     <td>{{ $formatAmount($codFeeAmount) }}</td>
                                 </tr>
                                 <tr>
-                                    <td>الرصيد المتبقي إلكترونياً</td>
+                                    <td>ط§ظ„ط±طµظٹط¯ ط§ظ„ظ…طھط¨ظ‚ظٹ ط¥ظ„ظƒطھط±ظˆظ†ظٹط§ظ‹</td>
                                     <td>{{ $formatAmount($onlineOutstanding) }}</td>
-                                    <td>—</td>
+                                    <td>â€”</td>
                                 </tr>
                                 <tr>
-                                    <td>الرصيد المتبقي عند التسليم</td>
-                                    <td>—</td>
+                                    <td>ط§ظ„ط±طµظٹط¯ ط§ظ„ظ…طھط¨ظ‚ظٹ ط¹ظ†ط¯ ط§ظ„طھط³ظ„ظٹظ…</td>
+                                    <td>â€”</td>
                                     <td>{{ $formatAmount($codOutstanding) }}</td>
                                 </tr>
                                 <tr>
-                                    <td>الرصيد الإجمالي المتبقي</td>
+                                    <td>ط§ظ„ط±طµظٹط¯ ط§ظ„ط¥ط¬ظ…ط§ظ„ظٹ ط§ظ„ظ…طھط¨ظ‚ظٹ</td>
                                     <td colspan="2">{{ $formatAmount($remainingBalance) }}</td>
                                 </tr>
                             </tbody>
@@ -1202,16 +1202,16 @@
                     </div>
 
                     <hr>
-                    <h5 class="mt-4 mb-3">سجل الحالة</h5>
+                    <h5 class="mt-4 mb-3">ط³ط¬ظ„ ط§ظ„ط­ط§ظ„ط©</h5>
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>الحالة</th>
-                                    <th>المستخدم</th>
-                                    <th>التاريخ</th>
-                                    <th>التفاصيل</th>
+                                    <th>ط§ظ„ط­ط§ظ„ط©</th>
+                                    <th>ط§ظ„ظ…ط³طھط®ط¯ظ…</th>
+                                    <th>ط§ظ„طھط§ط±ظٹط®</th>
+                                    <th>ط§ظ„طھظپط§طµظٹظ„</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1220,11 +1220,11 @@
                                         $statusValue = $entry['status'] ?? null;
                                         $statusLabelEntry = $statusValue
                                             ? ($statusLabels[$statusValue] ?? \Illuminate\Support\Str::of($statusValue)->replace('_', ' ')->headline())
-                                            : 'غير محدد';
+                                            : 'ط؛ظٹط± ظ…ط­ط¯ط¯';
                                         $userId = $entry['user_id'] ?? null;
                                         $userName = $userId !== null
                                             ? ($statusHistoryUsers[$userId]->name ?? ('#' . $userId))
-                                            : 'غير معروف';
+                                            : 'ط؛ظٹط± ظ…ط¹ط±ظˆظپ';
                                         $recordedAt = $entry['recorded_at'] ?? null;
                                         $recordedAtFormatted = $recordedAt ? optional(\Illuminate\Support\Carbon::make($recordedAt))->format('Y-m-d H:i') : null;
                                         $displayMessage = $entry['display'] ?? null;
@@ -1238,14 +1238,14 @@
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $statusLabelEntry }}</td>
                                         <td>{{ $userName }}</td>
-                                        <td>{{ $recordedAtFormatted ?? 'غير محدد' }}</td>
+                                        <td>{{ $recordedAtFormatted ?? 'ط؛ظٹط± ظ…ط­ط¯ط¯' }}</td>
                                         <td>
                                             <div class="d-flex align-items-start">
                                                 @if($iconClass)
                                                     <span class="text-secondary me-2"><i class="{{ $iconClass }}"></i></span>
                                                 @endif
                                                 <div>
-                                                    {{ $displayMessage ?? $manualComment ?? '—' }}
+                                                    {{ $displayMessage ?? $manualComment ?? 'â€”' }}
                                                     @if($manualComment && $displayMessage && $manualComment !== $displayMessage)
                                                         <div class="small text-muted mt-1">{{ $manualComment }}</div>
                                                     @endif
@@ -1256,7 +1256,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center text-muted">لا توجد سجلات حالة متوفرة.</td>
+                                        <td colspan="5" class="text-center text-muted">ظ„ط§ طھظˆط¬ط¯ ط³ط¬ظ„ط§طھ ط­ط§ظ„ط© ظ…طھظˆظپط±ط©.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -1272,11 +1272,11 @@
 
 
     <div class="row mt-4">
-        <!-- تحديث حالة الطلب -->
+        <!-- طھط­ط¯ظٹط« ط­ط§ظ„ط© ط§ظ„ط·ظ„ط¨ -->
         <div class="col-12">
 >
                 <div class="card-header">
-                    <h4 class="card-title">تحديث حالة الطلب</h4>
+                    <h4 class="card-title">طھط­ط¯ظٹط« ط­ط§ظ„ط© ط§ظ„ط·ظ„ط¨</h4>
                 </div>
                 <div class="card-body">
                     @php
@@ -1289,9 +1289,9 @@
                         $orderStatusLockMessage = null;
 
                         if (! $order->hasSuccessfulPayment()) {
-                            $orderStatusLockMessage = 'لا يمكن تعديل حالة الطلب قبل تأكيد الدفع بنجاح.';
+                            $orderStatusLockMessage = 'ظ„ط§ ظٹظ…ظƒظ† طھط¹ط¯ظٹظ„ ط­ط§ظ„ط© ط§ظ„ط·ظ„ط¨ ظ‚ط¨ظ„ طھط£ظƒظٹط¯ ط§ظ„ط¯ظپط¹ ط¨ظ†ط¬ط§ط­.';
                         } elseif ($orderStatusLocked) {
-                            $orderStatusLockMessage = 'لا يمكن تعديل حالة الطلب حتى يتم اعتماد الدفعة من خلال فريق المدفوعات.';
+                            $orderStatusLockMessage = 'ظ„ط§ ظٹظ…ظƒظ† طھط¹ط¯ظٹظ„ ط­ط§ظ„ط© ط§ظ„ط·ظ„ط¨ ط­طھظ‰ ظٹطھظ… ط§ط¹طھظ…ط§ط¯ ط§ظ„ط¯ظپط¹ط© ظ…ظ† ط®ظ„ط§ظ„ ظپط±ظٹظ‚ ط§ظ„ظ…ط¯ظپظˆط¹ط§طھ.';
                         }
 
                     @endphp
@@ -1301,7 +1301,7 @@
                         @csrf
                         @method('PUT')
                         <div class="form-group">
-                            <label for="order_status">حالة الطلب</label>
+                            <label for="order_status">ط­ط§ظ„ط© ط§ظ„ط·ظ„ط¨</label>
                             <select class="form-control" id="order_status" name="order_status" required>
                                 @foreach($orderStatuses as $status)
                                     <option value="{{ $status->code }}" {{ $order->order_status == $status->code ? 'selected' : '' }}
@@ -1314,39 +1314,39 @@
 
                         </div>
                         <div class="form-group">
-                            <label class="form-label">حالة الدفع</label>
+                            <label class="form-label">ط­ط§ظ„ط© ط§ظ„ط¯ظپط¹</label>
                             <div class="form-control-plaintext border rounded bg-light px-3 py-2">
-                                {{ $paymentStatusLabel ?? '—' }}
+                                {{ $paymentStatusLabel ?? 'â€”' }}
                             </div>
-                            <small class="text-muted d-block mt-2">يتم تحديث حالة الدفع حصراً من خلال واجهة طلبات الدفع.</small>
+                            <small class="text-muted d-block mt-2">ظٹطھظ… طھط­ط¯ظٹط« ط­ط§ظ„ط© ط§ظ„ط¯ظپط¹ ط­طµط±ط§ظ‹ ظ…ظ† ط®ظ„ط§ظ„ ظˆط§ط¬ظ‡ط© ط·ظ„ط¨ط§طھ ط§ظ„ط¯ظپط¹.</small>
                                 
                         </div>
                         <div class="form-group">
-                            <label for="comment">ملاحظات التحديث</label>
+                            <label for="comment">ظ…ظ„ط§ط­ط¸ط§طھ ط§ظ„طھط­ط¯ظٹط«</label>
                             <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
                         </div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="notify_customer" name="notify_customer" value="1">
                             <label class="form-check-label" for="notify_customer">
-                                إشعار العميل بالتحديث
+                                ط¥ط´ط¹ط§ط± ط§ظ„ط¹ظ…ظٹظ„ ط¨ط§ظ„طھط­ط¯ظٹط«
                             </label>
                         </div>
-                        <button type="submit" class="btn btn-primary">تحديث الحالة</button>
+                        <button type="submit" class="btn btn-primary">طھط­ط¯ظٹط« ط§ظ„ط­ط§ظ„ط©</button>
                     </form>
 
                     @else
                         <div class="form-group">
-                            <label class="form-label">حالة الطلب</label>
+                            <label class="form-label">ط­ط§ظ„ط© ط§ظ„ط·ظ„ط¨</label>
                             <div class="form-control-plaintext border rounded bg-light px-3 py-2">
-                                {{ $statusLabel ?? '—' }}
+                                {{ $statusLabel ?? 'â€”' }}
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">حالة الدفع</label>
+                            <label class="form-label">ط­ط§ظ„ط© ط§ظ„ط¯ظپط¹</label>
                             <div class="form-control-plaintext border rounded bg-light px-3 py-2">
-                                {{ $paymentStatusLabel ?? '—' }}
+                                {{ $paymentStatusLabel ?? 'â€”' }}
                             </div>
-                            <small class="text-muted d-block mt-2">يتم تحديث حالة الدفع حصراً من خلال واجهة طلبات الدفع.</small>
+                            <small class="text-muted d-block mt-2">ظٹطھظ… طھط­ط¯ظٹط« ط­ط§ظ„ط© ط§ظ„ط¯ظپط¹ ط­طµط±ط§ظ‹ ظ…ظ† ط®ظ„ط§ظ„ ظˆط§ط¬ظ‡ط© ط·ظ„ط¨ط§طھ ط§ظ„ط¯ظپط¹.</small>
                         </div>
                         @if($orderStatusLockMessage)
                             <div class="alert alert-info mb-0">
@@ -1371,14 +1371,14 @@
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addOrderToGroupModalLabel">إضافة الطلب إلى مجموعة</h5>
+                    <h5 class="modal-title" id="addOrderToGroupModalLabel">ط¥ط¶ط§ظپط© ط§ظ„ط·ظ„ط¨ ط¥ظ„ظ‰ ظ…ط¬ظ…ظˆط¹ط©</h5>
                     <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-4">
-                        <h6 class="mb-3">المجموعات المتاحة</h6>
+                        <h6 class="mb-3">ط§ظ„ظ…ط¬ظ…ظˆط¹ط§طھ ط§ظ„ظ…طھط§ط­ط©</h6>
                         @forelse ($availablePaymentGroups as $group)
                             <form action="{{ route('orders.payment-groups.orders.store', $group) }}" method="POST" class="border rounded p-3 mb-3" data-testid="add-order-to-group-form-{{ $group->id }}">
                                 @csrf
@@ -1390,34 +1390,34 @@
                                             <p class="mb-2 text-muted small">{{ $group->note }}</p>
                                         @endif
                                         <div class="d-flex flex-wrap gap-3 text-muted small">
-                                            <span><i class="fa fa-list-ol"></i> {{ number_format($group->orders_count) }} طلب</span>
+                                            <span><i class="fa fa-list-ol"></i> {{ number_format($group->orders_count) }} ط·ظ„ط¨</span>
                                             @if ($group->created_at)
                                                 <span><i class="fa fa-calendar"></i> {{ $group->created_at->format('Y-m-d') }}</span>
                                             @endif
                                         </div>
                                     </div>
                                     <button type="submit" class="btn btn-outline-success">
-                                        <i class="fa fa-plus"></i> إضافة إلى هذه المجموعة
+                                        <i class="fa fa-plus"></i> ط¥ط¶ط§ظپط© ط¥ظ„ظ‰ ظ‡ط°ظ‡ ط§ظ„ظ…ط¬ظ…ظˆط¹ط©
                                     </button>
                                 </div>
                             </form>
                         @empty
-                            <p class="text-muted mb-0">لا توجد مجموعات متاحة حالياً لهذا الطلب. يمكنك إنشاء مجموعة جديدة باستخدام النموذج أدناه.</p>
+                            <p class="text-muted mb-0">ظ„ط§ طھظˆط¬ط¯ ظ…ط¬ظ…ظˆط¹ط§طھ ظ…طھط§ط­ط© ط­ط§ظ„ظٹط§ظ‹ ظ„ظ‡ط°ط§ ط§ظ„ط·ظ„ط¨. ظٹظ…ظƒظ†ظƒ ط¥ظ†ط´ط§ط، ظ…ط¬ظ…ظˆط¹ط© ط¬ط¯ظٹط¯ط© ط¨ط§ط³طھط®ط¯ط§ظ… ط§ظ„ظ†ظ…ظˆط°ط¬ ط£ط¯ظ†ط§ظ‡.</p>
                         @endforelse
                     </div>
                     <div>
-                        <h6 class="mb-3">إنشاء مجموعة جديدة</h6>
+                        <h6 class="mb-3">ط¥ظ†ط´ط§ط، ظ…ط¬ظ…ظˆط¹ط© ط¬ط¯ظٹط¯ط©</h6>
                         <form action="{{ route('orders.payment-groups.store', $order) }}" method="POST" data-testid="create-payment-group-form">
                             @csrf
                             <div class="form-group">
-                                <label for="payment_group_name">اسم المجموعة</label>
+                                <label for="payment_group_name">ط§ط³ظ… ط§ظ„ظ…ط¬ظ…ظˆط¹ط©</label>
                                 <input type="text" id="payment_group_name" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" maxlength="190" required>
                                 @error('name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="form-group mb-0">
-                                <label for="payment_group_note">ملاحظة (اختياري)</label>
+                                <label for="payment_group_note">ظ…ظ„ط§ط­ط¸ط© (ط§ط®طھظٹط§ط±ظٹ)</label>
                                 <textarea id="payment_group_note" name="note" rows="3" class="form-control @error('note') is-invalid @enderror" maxlength="1000">{{ old('note') }}</textarea>
                                 @error('note')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -1425,16 +1425,16 @@
                             </div>
                             <div class="mt-3 d-flex justify-content-end align-items-center gap-2">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fa fa-layer-group"></i> إنشاء المجموعة وإضافة الطلب
+                                    <i class="fa fa-layer-group"></i> ط¥ظ†ط´ط§ط، ط§ظ„ظ…ط¬ظ…ظˆط¹ط© ظˆط¥ط¶ط§ظپط© ط§ظ„ط·ظ„ط¨
                                 </button>
                             </div>
-                            <p class="small text-muted mb-0 mt-2">سيتم إضافة هذا الطلب تلقائياً إلى المجموعة الجديدة بعد إنشائها.</p>
+                            <p class="small text-muted mb-0 mt-2">ط³ظٹطھظ… ط¥ط¶ط§ظپط© ظ‡ط°ط§ ط§ظ„ط·ظ„ط¨ طھظ„ظ‚ط§ط¦ظٹط§ظ‹ ط¥ظ„ظ‰ ط§ظ„ظ…ط¬ظ…ظˆط¹ط© ط§ظ„ط¬ط¯ظٹط¯ط© ط¨ط¹ط¯ ط¥ظ†ط´ط§ط¦ظ‡ط§.</p>
                         </form>
 
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ط¥ط؛ظ„ط§ظ‚</button>
                 </div>
             
             </div>
@@ -1446,7 +1446,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="instantNotificationModalLabel">إرسال إشعار فوري للعميل</h5>
+                    <h5 class="modal-title" id="instantNotificationModalLabel">ط¥ط±ط³ط§ظ„ ط¥ط´ط¹ط§ط± ظپظˆط±ظٹ ظ„ظ„ط¹ظ…ظٹظ„</h5>
                     <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -1455,17 +1455,17 @@
                     @csrf
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="instant_notification_title" class="form-label">عنوان الإشعار (اختياري)</label>
-                            <input type="text" class="form-control" id="instant_notification_title" name="title" maxlength="190" placeholder="عنوان موجز للإشعار">
+                            <label for="instant_notification_title" class="form-label">ط¹ظ†ظˆط§ظ† ط§ظ„ط¥ط´ط¹ط§ط± (ط§ط®طھظٹط§ط±ظٹ)</label>
+                            <input type="text" class="form-control" id="instant_notification_title" name="title" maxlength="190" placeholder="ط¹ظ†ظˆط§ظ† ظ…ظˆط¬ط² ظ„ظ„ط¥ط´ط¹ط§ط±">
                         </div>
                         <div class="form-group mb-0">
-                            <label for="instant_notification_message" class="form-label">نص الإشعار</label>
-                            <textarea class="form-control" id="instant_notification_message" name="message" rows="4" required placeholder="اكتب الرسالة التي سيتم إرسالها للعميل"></textarea>
+                            <label for="instant_notification_message" class="form-label">ظ†طµ ط§ظ„ط¥ط´ط¹ط§ط±</label>
+                            <textarea class="form-control" id="instant_notification_message" name="message" rows="4" required placeholder="ط§ظƒطھط¨ ط§ظ„ط±ط³ط§ظ„ط© ط§ظ„طھظٹ ط³ظٹطھظ… ط¥ط±ط³ط§ظ„ظ‡ط§ ظ„ظ„ط¹ظ…ظٹظ„"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                        <button type="submit" class="btn btn-warning">إرسال الإشعار</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ط¥ظ„ط؛ط§ط،</button>
+                        <button type="submit" class="btn btn-warning">ط¥ط±ط³ط§ظ„ ط§ظ„ط¥ط´ط¹ط§ط±</button>
                     </div>
                 </form>
             </div>
@@ -1480,20 +1480,20 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">تأكيد الحذف</h5>
+                    <h5 class="modal-title" id="deleteModalLabel">طھط£ظƒظٹط¯ ط§ظ„ط­ط°ظپ</h5>
                     <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    هل أنت متأكد من حذف الطلب رقم <strong>{{ $order->order_number }}</strong>؟
+                    ظ‡ظ„ ط£ظ†طھ ظ…طھط£ظƒط¯ ظ…ظ† ط­ط°ظپ ط§ظ„ط·ظ„ط¨ ط±ظ‚ظ… <strong>{{ $order->order_number }}</strong>طں
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ط¥ظ„ط؛ط§ط،</button>
                     <form action="{{ route('orders.destroy', $order->id) }}" method="POST" style="display: inline;">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-danger">حذف</button>
+                        <button type="submit" class="btn btn-danger">ط­ط°ظپ</button>
                     </form>
                 </div>
             </div>
@@ -1544,8 +1544,8 @@
             };
 
             const notify = function (success) {
-                const successMessage = 'تم نسخ العنوان بنجاح';
-                const errorMessage = 'تعذر نسخ العنوان، يرجى النسخ يدويًا';
+                const successMessage = 'طھظ… ظ†ط³ط® ط§ظ„ط¹ظ†ظˆط§ظ† ط¨ظ†ط¬ط§ط­';
+                const errorMessage = 'طھط¹ط°ط± ظ†ط³ط® ط§ظ„ط¹ظ†ظˆط§ظ†طŒ ظٹط±ط¬ظ‰ ط§ظ„ظ†ط³ط® ظٹط¯ظˆظٹظ‹ط§';
 
                 if (success && typeof window.showSuccessToast === 'function') {
                     window.showSuccessToast(successMessage);
