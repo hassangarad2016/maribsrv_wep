@@ -16,6 +16,7 @@ use App\Services\NotificationService;
 use App\Services\PaymentFulfillmentService;
 use App\Services\ResponseService;
 use App\Services\WalletService;
+use App\Support\ManualPayments\TransferDetailsResolver;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
