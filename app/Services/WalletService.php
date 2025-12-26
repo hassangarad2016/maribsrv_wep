@@ -328,9 +328,10 @@ class WalletService
             }
         }
 
-        $amountFormatted = number_format($amount, 2) . ' ' . $currency;
-        $balanceFormatted = number_format($balance, 2) . ' ' . $currency;
-        $referenceText = $reference ? "رقم المرجع: {$reference}." : '';
+        $currencyLabel = $this->formatCurrencyLabel($currency);
+        $amountFormatted = number_format($amount, 2) . ' ' . $currencyLabel;
+        $balanceFormatted = number_format($balance, 2) . ' ' . $currencyLabel;
+        $referenceText = $this->formatReferenceText($reference);
         $balanceText = "رصيدك بعد العملية: {$balanceFormatted}.";
         $orderId = data_get($rawMeta, 'order_id');
         $orderText = $orderId ? "رقم الطلب: {$orderId}." : '';
@@ -414,6 +415,44 @@ class WalletService
 
         return $data;
 
+    }
+
+    private function formatCurrencyLabel(string $currency): string
+    {
+        $normalized = strtoupper(trim($currency));
+        $map = [
+            'YER' => 'ريال يمني',
+            'SAR' => 'ريال سعودي',
+            'USD' => 'دولار أمريكي',
+            'AED' => 'درهم إماراتي',
+        ];
+
+        return $map[$normalized] ?? $normalized;
+    }
+
+    private function formatReferenceText(?string $reference): string
+    {
+        $reference = trim((string) $reference);
+        if ($reference === '') {
+            return '';
+        }
+
+        $cleanReference = $this->normalizeReferenceForNotification($reference);
+        if ($cleanReference === '') {
+            return '';
+        }
+
+        return "رقم المرجع: {$cleanReference}.";
+    }
+
+    private function normalizeReferenceForNotification(string $reference): string
+    {
+        if (str_contains($reference, 'wallet:')) {
+            $parts = array_values(array_filter(explode(':', $reference)));
+            return $parts !== [] ? end($parts) : $reference;
+        }
+
+        return $reference;
     }
 
     protected function sendWalletNotification(User $user, WalletTransaction $transaction): void
