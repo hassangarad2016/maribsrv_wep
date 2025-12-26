@@ -238,6 +238,11 @@
     .service-requests-table .table tbody td {
         padding: 0.85rem 1rem;
     }
+    .service-requests-table .table thead th,
+    .service-requests-table .table tbody td {
+        white-space: nowrap;
+        vertical-align: middle;
+    }
     .service-requests-table .table tbody tr {
         transition: background-color 0.2s ease;
     }
@@ -280,6 +285,12 @@
     }
     .service-requests-table .fixed-table-toolbar .columns .btn i {
         font-size: 1rem;
+    }
+    .service-requests-table .table-square-thumb {
+        width: 56px;
+        height: 56px;
+        object-fit: cover;
+        border-radius: 0.6rem;
     }
     #table_list { width: 100%; }
 
@@ -595,7 +606,7 @@
 
         function imageFormatter(value, row) {
             if (value) {
-                return '<img src="' + value + '" class="img-thumbnail" style="max-width:100px">';
+                return '<img src="' + value + '" class="img-thumbnail table-square-thumb" alt="image">';
             }
             return '';
         }
@@ -604,7 +615,7 @@
             if (value && value.length > 0) {
                 let html = '<div class="d-flex flex-wrap">';
                 for (let i = 0; i < value.length; i++) {
-                    html += '<img src="' + value[i].image + '" class="img-thumbnail me-1 mb-1" style="max-width:50px; max-height:50px;">';
+                    html += '<img src="' + value[i].image + '" class="img-thumbnail table-square-thumb me-1 mb-1" alt="gallery">';
                 }
                 html += '</div>';
                 return html;
