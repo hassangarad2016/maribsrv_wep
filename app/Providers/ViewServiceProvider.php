@@ -99,7 +99,7 @@ class ViewServiceProvider extends ServiceProvider {
             ];
 
             if ($user && $user->canAny($servicePermissions)) {
-                $serviceCategoryIds = [2, 8, 174, 175, 176, 114, 181, 180, 177];
+                $serviceCategoryIds = [2, 4, 5, 8, 114, 174, 175, 176, 177, 180, 181];
                 $categoryQuery = Category::query()
                     ->whereIn('id', $serviceCategoryIds)
                     ->orderBy('name')

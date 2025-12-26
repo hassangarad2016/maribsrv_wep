@@ -20,7 +20,7 @@ class StaffController extends Controller {
         ResponseService::noAnyPermissionThenRedirect(['staff-list', 'staff-create', 'staff-update', 'staff-delete']);
         $roles = Role::where('custom_role', 1)->get();
         $serviceCategories = Category::query()
-            ->whereIn('id', [2, 8, 174, 175, 176, 114, 181, 180, 177])
+            ->whereIn('id', [2, 4, 5, 8, 114, 174, 175, 176, 177, 180, 181])
             ->orderBy('name')
             ->get(['id', 'name']);
         return view('staff.index', compact('roles', 'serviceCategories'));
@@ -30,7 +30,7 @@ class StaffController extends Controller {
         ResponseService::noPermissionThenRedirect('staff-create');
         $roles = Role::where('custom_role', 1)->get();
         $serviceCategories = Category::query()
-            ->whereIn('id', [2, 8, 174, 175, 176, 114, 181, 180, 177])
+            ->whereIn('id', [2, 4, 5, 8, 114, 174, 175, 176, 177, 180, 181])
             ->orderBy('name')
             ->get(['id', 'name']);
         return view('staff.create', compact('roles', 'serviceCategories'));

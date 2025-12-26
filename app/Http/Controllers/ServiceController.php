@@ -56,7 +56,7 @@ class ServiceController extends Controller
      | ثوابت
      |=========================================================================*/
     /** فئات الخدمات المسموح بها لواجهة الإنشاء / التعديل */
-    private const SERVICE_CATEGORY_IDS = [2, 8, 174, 175, 176, 114, 181, 180, 177];
+    private const SERVICE_CATEGORY_IDS = [2, 4, 5, 8, 114, 174, 175, 176, 177, 180, 181];
 
     /** مجلد رفع أيقونات الحقول المخصصة */
     private const SERVICE_FIELD_ICON_DIR = 'service_field_icons';
