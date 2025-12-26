@@ -29,6 +29,44 @@ class RouteServiceProvider extends ServiceProvider {
         }
 
         if ($user) {
+            $hasSheinAccess = $user->canAny([
+                'shein-products-list',
+                'shein-products-create',
+                'shein-products-update',
+                'shein-products-delete',
+                'shein-orders-list',
+                'shein-orders-create',
+                'shein-orders-update',
+                'shein-orders-delete',
+                'shein-requests-list',
+                'shein-requests-create',
+                'shein-requests-update',
+                'shein-requests-delete',
+            ]);
+
+            if ($hasSheinAccess) {
+                return route('item.shein.index');
+            }
+
+            $hasComputerAccess = $user->canAny([
+                'computer-ads-list',
+                'computer-ads-create',
+                'computer-ads-update',
+                'computer-ads-delete',
+                'computer-orders-list',
+                'computer-orders-create',
+                'computer-orders-update',
+                'computer-orders-delete',
+                'computer-requests-list',
+                'computer-requests-create',
+                'computer-requests-update',
+                'computer-requests-delete',
+            ]);
+
+            if ($hasComputerAccess) {
+                return route('item.computer');
+            }
+
             $hasServiceAccess = $user->canAny([
                 'service-list',
                 'service-requests-list',
