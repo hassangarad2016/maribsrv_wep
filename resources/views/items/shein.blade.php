@@ -1,13 +1,164 @@
 @extends('layouts.main')
 
 @section('page-title')
-    {{ __('Shein Items') }}
+    <div class="page-title">
+        <div class="row">
+            <div class="col-12 col-md-6 order-md-1 order-last">
+                <h4>{{ __('Shein Items') }}</h4>
+            </div>
+            <div class="col-12 col-md-6 order-md-2 order-first"></div>
+        </div>
+    </div>
 @endsection
 
 @section('page-style')
 <style>
-
-    .card-body {
+    .shein-products-page {
+        background: linear-gradient(180deg, rgba(13, 110, 253, 0.07), rgba(13, 110, 253, 0.02));
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        border-radius: 1.25rem;
+        color: #212529;
+        padding: 1.25rem;
+    }
+    .shein-products-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .shein-products-hero {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .shein-products-title {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .shein-products-subtitle {
+        margin: 0.35rem 0 0;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .shein-products-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .shein-products-filters {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 1rem;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+    }
+    .shein-products-filters .card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+        padding: 1.1rem;
+    }
+    .filters-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+    .filters-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .filters-hint {
+        margin: 0.2rem 0 0;
+        font-size: 0.82rem;
+        color: #6c757d;
+    }
+    .shein-products-table {
+        border-radius: 1rem;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        margin-bottom: 0;
+        overflow: hidden;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+    }
+    .shein-products-table .card-header {
+        background: #f8f9fb;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        padding: 0.9rem 1.1rem;
+    }
+    .shein-products-table .card-body {
+        padding: 1.15rem;
+    }
+    .table-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .table-hint {
+        margin: 0.2rem 0 0;
+        font-size: 0.82rem;
+        color: #6c757d;
+    }
+    .shein-products-table .table {
+        margin-bottom: 0;
+    }
+    .shein-products-table .table thead th {
+        background: #f8f9fa;
+        color: #212529;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        padding: 0.85rem 1rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .shein-products-table .table tbody td {
+        padding: 0.85rem 1rem;
+    }
+    .shein-products-table .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    .shein-products-table .table tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.04);
+    }
+    .shein-products-table .table-striped > tbody > tr:nth-of-type(odd) {
+        background-color: rgba(15, 23, 42, 0.02);
+    }
+    .shein-products-table .fixed-table-toolbar {
+        margin-bottom: 0.75rem;
+    }
+    .shein-products-table .fixed-table-toolbar .columns {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.15rem;
+        background: #4b5563;
+        border-radius: 0.75rem;
+        padding: 0.25rem;
+        box-shadow: 0 10px 18px rgba(15, 23, 42, 0.18);
+    }
+    .shein-products-table .fixed-table-toolbar .columns .btn,
+    .shein-products-table .fixed-table-toolbar .columns .btn-group > .btn {
+        background: transparent;
+        border: 0;
+        color: #ffffff;
+        width: 36px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: none;
+    }
+    .shein-products-table .fixed-table-toolbar .columns .btn:hover,
+    .shein-products-table .fixed-table-toolbar .columns .btn-group > .btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+    .shein-products-table .fixed-table-toolbar .columns .dropdown-toggle::after {
+        display: none;
+    }
+    .shein-products-table .fixed-table-toolbar .columns .btn i {
+        font-size: 1rem;
+    }
+    .shein-products-page .card-body {
         overflow-x: hidden;
     }
     
@@ -17,9 +168,9 @@
     }
     
     /* Target category filter specifically with highest specificity */
-    #filters .col-md-8 .select2-container,
-    #filters .col-md-8 .select2-container.select2-container--default,
-    #filters .col-md-8 .select2-container.select2-container--open,
+    #filters .col-lg-8 .select2-container,
+    #filters .col-lg-8 .select2-container.select2-container--default,
+    #filters .col-lg-8 .select2-container.select2-container--open,
     #category_filter + .select2-container {
         width: 100% !important;
         min-width: 400px !important;
@@ -48,71 +199,91 @@
     #table_list {
         width: 100%;
     }
+
+    @media (min-width: 992px) {
+        .shein-products-hero {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .shein-products-page {
+            padding: 1rem;
+        }
+        .select2-container .select2-selection,
+        #category_filter + .select2-container {
+            min-width: 0 !important;
+        }
+        .select2-dropdown,
+        .select2-dropdown.select2-dropdown--below,
+        .select2-dropdown.select2-dropdown--above {
+            min-width: 0 !important;
+        }
+    }
 </style>
 @endsection
 
-@section('page-header')
-    <div class="page-title">
-        <div class="row">
-            <div class="col-12 col-md-6 order-md-1 order-last">
-                <h4>{{ __('Shein Items') }}</h4>
-            </div>
-            <div class="col-12 col-md-6 order-md-2 order-first">
-                @can('shein-products-create')
-                    <div class="float-end">
-                        <a href="{{ route('item.shein.create') }}" class="btn btn-primary">
+@section('content')
+    <section class="section shein-products-page">
+        <div class="shein-products-shell">
+            <div class="shein-products-hero">
+                <div>
+                    <h5 class="shein-products-title">{{ __('Shein Items') }}</h5>
+                    <p class="shein-products-subtitle">{{ __('Track Shein products, approvals, and inventory status.') }}</p>
+                </div>
+                <div class="shein-products-actions">
+                    @can('shein-products-create')
+                        <a href="{{ route('item.shein.products.create') }}" class="btn btn-primary">
                             <i class="bi bi-plus-circle"></i> {{ __('Add New Item') }}
                         </a>
-                    </div>
-                @endcan
+                    @endcan
+                </div>
             </div>
-        </div>
-    </div>
-@endsection
 
-@section('content')
-    <section class="section">
-        <div class="card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-12">
-                        <div id="filters" class="row mb-3">
-                            <div class="col-md-4">
-                                <label for="filter">{{__("Status")}}</label>
-                                <select class="form-control bootstrap-table-filter-control-status" id="filter">
-                                    <option value="">{{__("All")}}</option>
-                                    <option value="review">{{__("Under Review")}}</option>
-                                    <option value="approved">{{__("Approved")}}</option>
-                                    <option value="rejected">{{__("Rejected")}}</option>
-                                    <option value="sold out">{{__("Sold Out")}}</option>
-                                </select>
-                            </div>
-                            <div class="col-md-8">
-                                <label for="category_filter">{{__("Category")}}</label>
-                                <select class="form-control select2" id="category_filter" name="category_filter">
-                                    <option value="">{{__("All Categories")}}</option>
-                                    @foreach($categories as $category)
-                                        <option value="{{ $category->id }}" {{ $category->id == 4 ? 'selected' : '' }}>{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+            <div class="card shein-products-filters">
+                <div class="card-body">
+                    <div class="filters-header">
+                        <div>
+                            <h6 class="filters-title">{{ __('Filter') }}</h6>
+                            <p class="filters-hint">{{ __('Narrow down by status or category before exporting data.') }}</p>
+                        </div>
+                    </div>
+                    <div id="filters" class="row g-3 align-items-end">
+                        <div class="col-12 col-lg-4">
+                            <label for="filter" class="form-label">{{__("Status")}}</label>
+                            <select class="form-control bootstrap-table-filter-control-status" id="filter">
+                                <option value="">{{__("All")}}</option>
+                                <option value="review">{{__("Under Review")}}</option>
+                                <option value="approved">{{__("Approved")}}</option>
+                                <option value="rejected">{{__("Rejected")}}</option>
+                                <option value="sold out">{{__("Sold Out")}}</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-lg-8">
+                            <label for="category_filter" class="form-label">{{__("Category")}}</label>
+                            <select class="form-control select2" id="category_filter" name="category_filter">
+                                <option value="">{{__("All Categories")}}</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ $category->id == 4 ? 'selected' : '' }}>{{ $category->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-12 mb-3">
-                        @can('shein-products-create')
-                            <div class="float-end">
-                                <a href="{{ route('item.shein.products.create') }}" class="btn btn-primary">
-                                    <i class="bi bi-plus-circle"></i> {{ __('Add New Item') }}
-                                </a>
-                            </div>
-                        @endcan
+            </div>
+
+            <div class="card shein-products-table">
+                <div class="card-header">
+                    <div>
+                        <h6 class="table-title">{{ __('Shein product list') }}</h6>
+                        <p class="table-hint">{{ __('Use the toolbar to export, refresh, or customize columns.') }}</p>
                     </div>
                 </div>
-                <div class="row">
-                    <div class ="table-responsive">
-                        <table class="table-borderless table-striped" aria-describedby="mydesc" id="table_list"
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle" aria-describedby="mydesc" id="table_list"
                                data-toggle="table" data-url="{{ route('item.shein.products.data') }}" data-click-to-select="true"
                                data-side-pagination="server" data-pagination="true"
                                data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
@@ -157,7 +328,7 @@
                             </tr>
                             </thead>
                         </table>
-                        </div>
+                    </div>
                 </div>
             </div>
         </div>
