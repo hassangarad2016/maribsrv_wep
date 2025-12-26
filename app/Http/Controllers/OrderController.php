@@ -641,7 +641,33 @@ class OrderController extends Controller
             return asset(ltrim($value, '/'));
         };
 
-        $orderItemsDisplayData = $order->items->map(function (OrderItem $orderItem) use ($cartItemsSnapshot, $normalizeImageUrl) {
+        $normalizeExternalUrl = static function ($value): ?string {
+            if ($value === null) {
+                return null;
+            }
+
+            if (! is_scalar($value)) {
+                return null;
+            }
+
+            $value = trim((string) $value);
+
+            if ($value === '') {
+                return null;
+            }
+
+            if (Str::startsWith($value, ['http://', 'https://'])) {
+                return $value;
+            }
+
+            if (Str::startsWith($value, '//')) {
+                return 'https:' . $value;
+            }
+
+            return Str::contains($value, '.') ? 'https://' . ltrim($value, '/') : null;
+        };
+
+        $orderItemsDisplayData = $order->items->map(function (OrderItem $orderItem) use ($cartItemsSnapshot, $normalizeImageUrl, $normalizeExternalUrl) {
             $itemSnapshot = is_array($orderItem->item_snapshot) ? $orderItem->item_snapshot : [];
             $pricingSnapshot = is_array($orderItem->pricing_snapshot) ? $orderItem->pricing_snapshot : [];
 
@@ -821,6 +847,13 @@ class OrderController extends Controller
                 }
             }
 
+            $reviewUrl = data_get($itemSnapshot, 'review_link')
+                ?? data_get($itemSnapshot, 'review_url')
+                ?? data_get($cartSnapshotItem, 'review_link')
+                ?? data_get($cartSnapshotItem, 'review_url')
+                ?? $orderItem->item?->review_link;
+            $reviewUrl = $normalizeExternalUrl($reviewUrl);
+
             $variantLabel = data_get($itemSnapshot, 'variant_name')
                 ?? data_get($cartSnapshotItem, 'variant_name');
 
@@ -838,6 +871,7 @@ class OrderController extends Controller
                 'has_advertiser' => ! empty($advertiserFields),
                 'thumbnail_url' => $thumbnailUrl,
                 'product_url' => $productUrl,
+                'review_url' => $reviewUrl,
                 'variant_label' => $variantLabel,
                 'currency' => $orderItem->currency ?? data_get($pricingSnapshot, 'currency') ?? data_get($cartSnapshotItem, 'currency'),
 

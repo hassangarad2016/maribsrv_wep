@@ -713,11 +713,17 @@
                                                 <div class="order-item-variant text-muted small">{{ $item['variant_label'] }}</div>
                                             @endif
                                         </div>
-                                        <div class="order-item-actions">
+                                        <div class="order-item-actions d-flex flex-column gap-2">
                                             @if($item['product_url'])
                                                 <a href="{{ $item['product_url'] }}" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener">
                                                     <i class="bi bi-box-arrow-up-right"></i>
                                                     عرض المنتج
+                                                </a>
+                                            @endif
+                                            @if(! empty($item['review_url']))
+                                                <a href="{{ $item['review_url'] }}" class="btn btn-outline-secondary btn-sm" target="_blank" rel="noopener">
+                                                    <i class="bi bi-link-45deg"></i>
+                                                    التوجيه الى شي ان
                                                 </a>
                                             @endif
                                         </div>
