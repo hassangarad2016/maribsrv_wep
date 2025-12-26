@@ -40,7 +40,7 @@
     }
     .wallet-withdrawals-metrics {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 0.75rem;
     }
     .metric-card {
@@ -242,7 +242,7 @@
             justify-content: space-between;
         }
         .wallet-withdrawals-metrics {
-            max-width: 720px;
+            max-width: none;
         }
     }
 
