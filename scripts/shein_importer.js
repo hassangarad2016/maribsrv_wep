@@ -9,7 +9,10 @@ if (!targetUrl || !/^https?:\/\//i.test(targetUrl)) {
 }
 
 const resolveLaunchOptions = () => {
-  const options = { headless: true };
+  const options = {
+    headless: true,
+    args: ["--disable-blink-features=AutomationControlled"],
+  };
   const executablePath = process.env.SHEIN_BROWSER_EXECUTABLE;
   const channel = process.env.SHEIN_BROWSER_CHANNEL || "msedge";
 
@@ -343,11 +346,48 @@ const run = async () => {
     locale: "ar",
     viewport: { width: 1280, height: 720 },
   });
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, "webdriver", {
+      get: () => undefined,
+    });
+    Object.defineProperty(navigator, "languages", {
+      get: () => ["ar", "en-US", "en"],
+    });
+    Object.defineProperty(navigator, "language", {
+      get: () => "ar",
+    });
+    Object.defineProperty(navigator, "platform", {
+      get: () => "Win32",
+    });
+    Object.defineProperty(navigator, "plugins", {
+      get: () => [1, 2, 3, 4, 5],
+    });
+    window.chrome = window.chrome || { runtime: {} };
+    const originalQuery = navigator.permissions.query.bind(navigator.permissions);
+    navigator.permissions.query = (parameters) => {
+      if (parameters && parameters.name === "notifications") {
+        return Promise.resolve({ state: Notification.permission });
+      }
+      return originalQuery(parameters);
+    };
+  });
   const page = await context.newPage();
   page.setDefaultTimeout(45000);
 
   await page.goto(targetUrl, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(2000);
+  const currentUrl = page.url();
+  if (/\/risk\/challenge/i.test(currentUrl)) {
+    await browser.close();
+    process.stderr.write(
+      JSON.stringify(
+        { ok: false, error: "risk_challenge", url: currentUrl },
+        null,
+        2
+      )
+    );
+    process.exit(2);
+  }
   await page.evaluate(() => {
     window.scrollTo(0, document.body.scrollHeight);
   });

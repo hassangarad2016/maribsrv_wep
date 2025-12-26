@@ -207,7 +207,8 @@
 @endsection
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid service-requests-page">
+    <div class="service-requests-shell">
 
 
     @php
@@ -228,6 +229,13 @@
         ];
 
     @endphp
+
+        <div class="service-requests-hero">
+            <div>
+                <h5 class="service-requests-title">@yield('title')</h5>
+                <p class="service-requests-subtitle">{{ __('Manage Shein orders and review payment status.') }}</p>
+            </div>
+        </div>
 
     <div class="row">
         <div class="col-md-12">
@@ -741,7 +749,7 @@
 </div>
 @endsection
 
-@section('scripts')
+@section('script')
 <script>
     $(function () {
         // تفعيل Select2 للقوائم المنسدلة
