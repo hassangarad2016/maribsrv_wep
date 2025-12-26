@@ -164,6 +164,17 @@
                                     <input type="url" id="product_link" name="product_link" class="form-control @error('product_link') is-invalid @enderror" value="{{ old('product_link') }}" required maxlength="2048">
                                     <button type="button" class="btn btn-outline-primary" id="shein_import_btn" data-import-url="{{ route('item.shein.products.import') }}">{{ __('Fetch Shein Data') }}</button>
                                 </div>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#shein_import_paste">{{ __('Paste Shein JSON') }}</button>
+                                </div>
+                                <div class="collapse mt-2" id="shein_import_paste">
+                                    <textarea id="shein_import_json" class="form-control" rows="4" placeholder="Paste JSON from local importer"></textarea>
+                                    <div class="mt-2 d-flex gap-2">
+                                        <button type="button" class="btn btn-sm btn-primary" id="shein_apply_json">{{ __('Apply Data') }}</button>
+                                        <button type="button" class="btn btn-sm btn-light-secondary" id="shein_clear_json">{{ __('Clear') }}</button>
+                                    </div>
+                                    <small class="form-text text-muted">Run locally: <code>node scripts/shein_importer.js "URL"</code> and paste output here.</small>
+                                </div>
                                 @error('product_link')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -653,6 +664,9 @@
             const importInputs = document.getElementById('imported_images_inputs');
             const productLinkInput = document.getElementById('product_link');
             const imageInput = document.getElementById('image');
+            const importJsonInput = document.getElementById('shein_import_json');
+            const importJsonApply = document.getElementById('shein_apply_json');
+            const importJsonClear = document.getElementById('shein_clear_json');
             const importedState = { images: [] };
             const importButtonLabel = importButton ? importButton.textContent : 'Fetch Shein Data';
             const importedSeed = @json(old('imported_images', []));
@@ -715,6 +729,27 @@
             };
 
             const escapeAttribute = (value) => escapeHtml(value);
+
+            const parseImportPayload = (raw) => {
+                if (!raw) {
+                    return null;
+                }
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        if (parsed.data) {
+                            return parsed.data;
+                        }
+                        if (parsed.ok && parsed.data) {
+                            return parsed.data;
+                        }
+                        return parsed;
+                    }
+                } catch (error) {
+                    return null;
+                }
+                return null;
+            };
 
             const appendHiddenInput = (container, name, value) => {
                 if (!container) {
@@ -1119,6 +1154,33 @@
                 imageInput.addEventListener('change', updateImageRequirement);
             }
 
+            if (importJsonApply) {
+                importJsonApply.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const raw = importJsonInput ? importJsonInput.value.trim() : '';
+                    if (!raw) {
+                        setImportStatus('Paste JSON first.', true);
+                        return;
+                    }
+                    const data = parseImportPayload(raw);
+                    if (!data) {
+                        setImportStatus('Invalid JSON payload.', true);
+                        return;
+                    }
+                    applyImportData(data);
+                    setImportStatus('Shein data loaded.', false);
+                });
+            }
+
+            if (importJsonClear) {
+                importJsonClear.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    if (importJsonInput) {
+                        importJsonInput.value = '';
+                    }
+                });
+            }
+
             const findPropertyByName = (properties, needle) => {
                 const lowered = needle.toLowerCase();
                 return properties.find((property) => normalizeText(property.name).toLowerCase().includes(lowered));
@@ -1459,6 +1521,9 @@
             const imageInput = document.getElementById('image');
             const preview = document.getElementById('imported_images_preview');
             const inputs = document.getElementById('imported_images_inputs');
+            const jsonInput = document.getElementById('shein_import_json');
+            const jsonApply = document.getElementById('shein_apply_json');
+            const jsonClear = document.getElementById('shein_clear_json');
             const state = { images: [] };
 
             const ensureStatus = () => {
@@ -1500,6 +1565,27 @@
                 const text = normalizeText(value).replace(/,/g, '');
                 const match = text.match(/-?\d+(\.\d+)?/);
                 return match ? match[0] : '';
+            };
+
+            const parsePayload = (raw) => {
+                if (!raw) {
+                    return null;
+                }
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        if (parsed.data) {
+                            return parsed.data;
+                        }
+                        if (parsed.ok && parsed.data) {
+                            return parsed.data;
+                        }
+                        return parsed;
+                    }
+                } catch (error) {
+                    return null;
+                }
+                return null;
             };
 
             const updateImageRequirement = () => {
@@ -1588,6 +1674,39 @@
             button.setAttribute('data-label', button.textContent || 'Fetch Shein Data');
             button.dataset.sheinImportBound = '1';
             setStatus('Ready to import.', false);
+
+            if (jsonApply && jsonApply.dataset.sheinJsonBound !== '1') {
+                jsonApply.dataset.sheinJsonBound = '1';
+                jsonApply.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const raw = jsonInput ? jsonInput.value.trim() : '';
+                    if (!raw) {
+                        setStatus('Paste JSON first.', true);
+                        return;
+                    }
+                    const payload = parsePayload(raw);
+                    if (!payload) {
+                        setStatus('Invalid JSON payload.', true);
+                        return;
+                    }
+                    if (window.__sheinApplyImport) {
+                        window.__sheinApplyImport(payload);
+                    } else {
+                        applyFallback(payload);
+                    }
+                    setStatus('Shein data loaded.', false);
+                });
+            }
+
+            if (jsonClear && jsonClear.dataset.sheinJsonBound !== '1') {
+                jsonClear.dataset.sheinJsonBound = '1';
+                jsonClear.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    if (jsonInput) {
+                        jsonInput.value = '';
+                    }
+                });
+            }
 
             button.addEventListener('click', async (event) => {
                 event.preventDefault();
