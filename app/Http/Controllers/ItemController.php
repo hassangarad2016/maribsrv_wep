@@ -321,7 +321,19 @@ class ItemController extends Controller {
             ResponseService::errorResponse('Shein importer script not found.', null, 500);
         }
 
-        $process = new Process(['node', $scriptPath, $request->input('url')], base_path());
+        $processEnv = [];
+        $scriptEnv = [
+            'SHEIN_BROWSER_EXECUTABLE' => env('SHEIN_BROWSER_EXECUTABLE'),
+            'SHEIN_BROWSER_PROFILE' => env('SHEIN_BROWSER_PROFILE'),
+            'SHEIN_HEADLESS' => env('SHEIN_HEADLESS'),
+        ];
+        foreach ($scriptEnv as $key => $value) {
+            if ($value !== null && $value !== '') {
+                $processEnv[$key] = (string) $value;
+            }
+        }
+
+        $process = new Process(['node', $scriptPath, $request->input('url')], base_path(), array_merge($_ENV, $processEnv));
         $process->setTimeout(120);
         $process->run();
 
@@ -330,10 +342,20 @@ class ItemController extends Controller {
             if ($errorOutput === '') {
                 $errorOutput = trim((string) $process->getOutput());
             }
-            $errorOutput = $errorOutput !== '' ? substr($errorOutput, 0, 1000) : null;
 
-            ResponseService::errorResponse('Unable to fetch Shein data.', [
-                'details' => $errorOutput,
+            $errorPayload = $errorOutput !== '' ? json_decode($errorOutput, true) : null;
+            $message = 'Unable to fetch Shein data.';
+            if (is_array($errorPayload) && ($errorPayload['error'] ?? '') === 'risk_challenge') {
+                $message = 'Shein requires a captcha check. Please run a one-time browser session and retry.';
+            }
+            if (is_array($errorPayload) && ($errorPayload['error'] ?? '') === 'browser_not_found') {
+                $message = 'Browser executable not found. Configure SHEIN_BROWSER_EXECUTABLE.';
+            }
+
+            $details = $errorOutput !== '' ? substr($errorOutput, 0, 1000) : null;
+
+            ResponseService::errorResponse($message, [
+                'details' => $details,
             ], 422);
         }
 
