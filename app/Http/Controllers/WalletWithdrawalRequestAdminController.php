@@ -245,6 +245,7 @@ class WalletWithdrawalRequestAdminController extends Controller
                     'notes' => $row->notes,
                     'review_notes' => $row->review_notes,
                     'wallet_reference' => $row->wallet_reference,
+                    'meta' => is_array($row->meta) ? $row->meta : null,
                     'created_at' => optional($row->created_at)->toDateTimeString(),
                     'created_human' => optional($row->created_at)->format('Y-m-d H:i'),
                     'user' => [

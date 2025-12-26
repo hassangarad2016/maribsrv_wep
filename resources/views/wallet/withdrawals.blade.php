@@ -514,6 +514,12 @@
                             <dt class="col-sm-4 text-muted">{{ __('Method') }}</dt>
                             <dd class="col-sm-8" id="withdrawalPreviewMethod">-</dd>
 
+                            <dt class="col-sm-4 text-muted">{{ __('رقم الحساب') }}</dt>
+                            <dd class="col-sm-8" id="withdrawalPreviewAccountNumber">-</dd>
+
+                            <dt class="col-sm-4 text-muted">{{ __('رقم الهاتف') }}</dt>
+                            <dd class="col-sm-8" id="withdrawalPreviewPhoneNumber">-</dd>
+
                             <dt class="col-sm-4 text-muted">{{ __('User') }}</dt>
                             <dd class="col-sm-8">
                                 <div id="withdrawalPreviewUser">-</div>
@@ -638,6 +644,9 @@
             approved: 'bg-success',
             rejected: 'bg-danger'
         }[row.status] || 'bg-secondary';
+        const meta = row.meta || {};
+        const accountNumber = meta.account_number || '-';
+        const phoneNumber = meta.contact_number || meta.phone || '-';
 
         $('#withdrawalPreviewId').text(row.id ?? '-');
         $('#withdrawalPreviewStatus')
@@ -645,6 +654,8 @@
             .text(row.status_label || row.status || '-');
         $('#withdrawalPreviewAmount').text(`${row.amount ?? 0} ${WALLET_CURRENCY}`);
         $('#withdrawalPreviewMethod').text(row.method_label || row.preferred_method || '-');
+        $('#withdrawalPreviewAccountNumber').text(accountNumber);
+        $('#withdrawalPreviewPhoneNumber').text(phoneNumber);
         $('#withdrawalPreviewUser').text(row.user && row.user.name ? row.user.name : '-');
         $('#withdrawalPreviewEmail').text(row.user && row.user.email ? row.user.email : '');
         $('#withdrawalPreviewReference').text(row.wallet_reference || '-');
