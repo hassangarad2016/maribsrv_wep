@@ -1392,7 +1392,11 @@
                 })
                     .done((response) => {
                         if (response && response.error) {
-                            const message = response.message || 'Failed to fetch Shein data.';
+                            let message = response.message || 'Failed to fetch Shein data.';
+                            const details = response.data && response.data.details ? response.data.details : response.details;
+                            if (details) {
+                                message = `${message} (${details})`;
+                            }
                             setImportStatus(message, true);
                             return;
                         }
@@ -1400,9 +1404,13 @@
                         applyImportData(payload);
                     })
                     .fail((xhr) => {
-                        const message =
+                        let message =
                             (xhr.responseJSON && xhr.responseJSON.message) ||
                             'Failed to fetch Shein data.';
+                        const details = xhr.responseJSON && (xhr.responseJSON.details || (xhr.responseJSON.data && xhr.responseJSON.data.details));
+                        if (details) {
+                            message = `${message} (${details})`;
+                        }
                         setImportStatus(message, true);
                     })
                     .always(() => {
@@ -1611,7 +1619,12 @@
                     });
                     const payload = await response.json();
                     if (payload && payload.error) {
-                        setStatus(payload.message || 'Failed to fetch Shein data.', true);
+                        let message = payload.message || 'Failed to fetch Shein data.';
+                        const details = payload.details || (payload.data && payload.data.details);
+                        if (details) {
+                            message = `${message} (${details})`;
+                        }
+                        setStatus(message, true);
                     } else {
                         const data = payload && payload.data ? payload.data : payload;
                         if (window.__sheinApplyImport) {

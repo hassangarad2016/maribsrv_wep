@@ -250,7 +250,7 @@
 @endsection
 
 @section('content')
-<div class="container-fluid service-requests-page">
+<section class="section service-requests-page">
     <div class="service-requests-shell">
 
 

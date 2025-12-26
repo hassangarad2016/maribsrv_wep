@@ -345,14 +345,20 @@ class ItemController extends Controller {
 
             $errorPayload = $errorOutput !== '' ? json_decode($errorOutput, true) : null;
             $message = 'Unable to fetch Shein data.';
-            if (is_array($errorPayload) && ($errorPayload['error'] ?? '') === 'risk_challenge') {
+            $detailsText = $errorOutput !== '' ? $errorOutput : null;
+
+            $errorCode = is_array($errorPayload) ? ($errorPayload['error'] ?? '') : '';
+            if ($errorCode === 'risk_challenge' || str_contains($errorOutput, 'risk_challenge')) {
                 $message = 'Shein requires a captcha check. Please run a one-time browser session and retry.';
-            }
-            if (is_array($errorPayload) && ($errorPayload['error'] ?? '') === 'browser_not_found') {
+            } elseif ($errorCode === 'browser_not_found' || str_contains($errorOutput, 'browser_not_found')) {
                 $message = 'Browser executable not found. Configure SHEIN_BROWSER_EXECUTABLE.';
+            } elseif (str_contains($errorOutput, 'Cannot find module')) {
+                $message = 'Node dependencies missing. Please run npm install in marib-server.';
+            } elseif (str_contains($errorOutput, 'puppeteer')) {
+                $message = 'Browser automation failed. Check Puppeteer dependencies on the server.';
             }
 
-            $details = $errorOutput !== '' ? substr($errorOutput, 0, 1000) : null;
+            $details = $detailsText !== '' && $detailsText !== null ? substr($detailsText, 0, 1000) : null;
 
             ResponseService::errorResponse($message, [
                 'details' => $details,
