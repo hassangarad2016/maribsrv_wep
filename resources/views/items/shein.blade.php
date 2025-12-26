@@ -455,8 +455,8 @@
                             <thead>
                             <tr>
                                 <th scope="col" data-field="id" data-sortable="true">{{ __('ID') }}</th>
-                                <th scope="col" data-field="name" data-sortable="true">{{ __('Name') }}</th>
-                                <th scope="col" data-field="description" data-align="center" data-sortable="true" data-formatter="descriptionFormatter">{{ __('Description') }}</th>
+                                <th scope="col" data-field="name" data-sortable="true" data-formatter="nameFormatter">{{ __('Name') }}</th>
+                                <th scope="col" data-field="description" data-align="center" data-sortable="true" data-formatter="descriptionFormatter" data-visible="false">{{ __('Description') }}</th>
                                 <th scope="col" data-field="user.name" data-sort-name="user_name" data-sortable="true">{{ __('User') }}</th>
                                 <th scope="col" data-field="price" data-sortable="true">{{ __('Price') }}</th>
                                 <th scope="col" data-field="currency" data-sortable="true">{{ __('Currency') }}</th>
@@ -604,6 +604,38 @@
             return '<div class="form-check form-switch"><input class="form-check-input" type="checkbox" ' + checked + ' disabled></div>';
         }
 
+        function escapeHtml(s) {
+            if (s === null || s === undefined) {
+                return '';
+            }
+            return String(s).replace(/[&<>"'`=\/]/g, function (c) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;',
+                    '/': '&#x2F;',
+                    '`': '&#x60;',
+                    '=': '&#x3D;'
+                }[c];
+            });
+        }
+
+        function nameFormatter(value) {
+            if (!value) {
+                return '<span class="text-muted">-</span>';
+            }
+            const raw = String(value);
+            const safe = escapeHtml(raw);
+            const max = 12;
+            if (raw.length <= max) {
+                return '<span title="' + safe + '">' + safe + '</span>';
+            }
+            const truncated = escapeHtml(raw.slice(0, max)) + '...';
+            return '<span class="text-nowrap" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-trigger="hover focus" title="' + safe + '">' + truncated + '</span>';
+        }
+
         function imageFormatter(value, row) {
             if (value) {
                 return '<img src="' + value + '" class="img-thumbnail table-square-thumb" alt="image">';
@@ -670,6 +702,19 @@
 
             $categoryFilter.val(String(CATEGORY_ROOT_ID)).trigger('change');
 
+            function initTooltips() {
+                if (typeof bootstrap === 'undefined') {
+                    return;
+                }
+                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+                    const existing = bootstrap.Tooltip.getInstance(el);
+                    if (existing) {
+                        existing.dispose();
+                    }
+                    new bootstrap.Tooltip(el);
+                });
+            }
+
             function refreshTableToFirstPage() {
                 const options = $table.bootstrapTable('getOptions');
                 options.pageNumber = 1;
@@ -710,6 +755,11 @@
             $('#status').on('change', function() {
                 $('#rejected_reason_container').toggle($(this).val() === 'rejected');
             });
+
+            $table.on('post-body.bs.table', function () {
+                initTooltips();
+            });
+            initTooltips();
         });
     </script>
 @endsection
