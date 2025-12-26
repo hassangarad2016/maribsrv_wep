@@ -517,7 +517,20 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                        <table class="table table-striped table-hover align-middle shein-orders-table">
+                                <table
+                                    class="table table-striped table-hover align-middle shein-orders-table"
+                                    id="sheinOrdersTable"
+                                    data-toggle="table"
+                                    data-search="false"
+                                    data-pagination="false"
+                                    data-show-columns="true"
+                                    data-show-refresh="true"
+                                    data-show-export="true"
+                                    data-export-options='{"fileName": "shein-orders"}'
+                                    data-export-types='["csv","excel","txt"]'
+                                    data-icons="sheinOrdersTableIcons"
+                                    data-icons-prefix="bi"
+                                    data-mobile-responsive="true">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -810,12 +823,17 @@
             </div>
         </div>
     </div>
-</div>
-</div>
+</section>
 @endsection
 
 @section('script')
 <script>
+    window.sheinOrdersTableIcons = {
+        refresh: 'bi-arrow-clockwise',
+        columns: 'bi-list-ul',
+        export: 'bi-download'
+    };
+
     $(function () {
         // تفعيل Select2 للقوائم المنسدلة
         $('.select2').select2();

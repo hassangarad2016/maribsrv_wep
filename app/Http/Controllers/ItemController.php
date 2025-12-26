@@ -333,7 +333,8 @@ class ItemController extends Controller {
             }
         }
 
-        $process = new Process(['node', $scriptPath, $request->input('url')], base_path(), array_merge($_ENV, $processEnv));
+        $nodeBinary = env('SHEIN_NODE_BINARY', 'node');
+        $process = new Process([$nodeBinary, $scriptPath, $request->input('url')], base_path(), array_merge($_ENV, $processEnv));
         $process->setTimeout(120);
         $process->run();
 
