@@ -438,26 +438,6 @@
                         $codDue = $deliverySummary['cod_due'] ?? null;
 
 
-                        $addressLabels = [
-                            'label' => 'العنوان',
-                            'phone' => 'رقم الهاتف',
-                            'street' => 'الشارع',
-                            'building' => 'المبنى',
-                            'apartment' => 'الشقة',
-                            'city' => 'المدينة',
-                            'area' => 'المنطقة',
-                            'instructions' => 'ملاحظات التوصيل',
-                        ];
-
-                        $cartMetrics = is_array(data_get($cartSnapshot, 'metrics')) ? $cartSnapshot['metrics'] : [];
-                        $metricLabels = [
-                            'cart_value' => 'قيمة السلة',
-                            'items_count' => 'عدد العناصر',
-                            'weight_total' => 'الوزن الإجمالي (كجم)',
-                        ];
-
-
-
                         $trackingCarrier = $trackingDetails['carrier_name'] ?? null;
                         $trackingNumber = $trackingDetails['tracking_number'] ?? null;
                         $trackingUrl = $trackingDetails['tracking_url'] ?? null;
@@ -643,87 +623,6 @@
                         </section>
 
                         <section class="order-summary-block order-summary-block--wide">
-                            <h6 class="order-summary-heading">الأطراف</h6>
-                            <div class="order-summary-parties">
-                                <div class="order-party">
-                                    <div class="order-party-title">العميل</div>
-                                    @if($order->user)
-                                        <ul class="order-summary-list">
-                                            <li>
-                                                <span class="order-summary-label">الاسم</span>
-                                                <span class="order-summary-value">
-                                                    <a href="{{ route('customer.show', $order->user_id) }}">{{ $order->user->name }}</a>
-                                                </span>
-                                            </li>
-                                            <li>
-                                                <span class="order-summary-label">رقم الهاتف</span>
-                                                <span class="order-summary-value">
-                                                    @if($order->user->mobile)
-                                                        <a href="tel:{{ $order->user->mobile }}">{{ $order->user->mobile }}</a>
-                                                    @else
-                                                        <span class="text-muted">غير متوفر</span>
-                                                    @endif
-                                                </span>
-                                            </li>
-                                            <li>
-                                                <span class="order-summary-label">البريد الإلكتروني</span>
-                                                <span class="order-summary-value">
-                                                    @if($order->user->email)
-                                                        <a href="mailto:{{ $order->user->email }}">{{ $order->user->email }}</a>
-                                                    @else
-                                                        <span class="text-muted">غير متوفر</span>
-                                                    @endif
-                                                </span>
-                                            </li>
-                                        </ul>
-                                    @else
-                                        <p class="text-muted mb-0">معلومات العميل غير متوفرة</p>
-                                    @endif
-                                </div>
-                                <div class="order-party">
-                                    <div class="order-party-title">التاجر</div>
-                                    @if($order->seller)
-                                        <ul class="order-summary-list">
-                                            <li>
-                                                <span class="order-summary-label">الاسم</span>
-                                                <span class="order-summary-value">
-                                                    <a href="{{ route('customer.show', $order->seller_id) }}">{{ $order->seller->name }}</a>
-                                                </span>
-                                            </li>
-                                            <li>
-                                                <span class="order-summary-label">رقم الهاتف</span>
-                                                <span class="order-summary-value">
-                                                    @if($order->seller->mobile)
-                                                        <a href="tel:{{ $order->seller->mobile }}">{{ $order->seller->mobile }}</a>
-                                                    @else
-                                                        <span class="text-muted">غير متوفر</span>
-                                                    @endif
-                                                </span>
-                                            </li>
-                                            <li>
-                                                <span class="order-summary-label">البريد الإلكتروني</span>
-                                                <span class="order-summary-value">
-                                                    @if($order->seller->email)
-                                                        <a href="mailto:{{ $order->seller->email }}">{{ $order->seller->email }}</a>
-                                                    @else
-                                                        <span class="text-muted">غير متوفر</span>
-                                                    @endif
-                                                </span>
-                                            </li>
-                                            <li>
-                                                <span class="order-summary-label">العنوان</span>
-                                                <span class="order-summary-value">{{ $order->seller->address ?? 'غير متوفر' }}</span>
-                                            </li>
-                                        </ul>
-                                    @else
-                                        <p class="text-muted mb-0">معلومات التاجر غير متوفرة</p>
-                                    @endif
-                                </div>
-                            </div>
-                        </section>
-
-
-                        <section class="order-summary-block order-summary-block--wide">
                             <h6 class="order-summary-heading">عنوان الشحن والتتبع</h6>
                             <div class="order-address">
                                 <div class="order-address-text">{{ $shippingAddressDisplay ?: 'غير متوفر' }}</div>
@@ -831,51 +730,6 @@
                                 </div>
                             @endif
 
-                            @if($addressSnapshot !== [])
-                                <div class="order-address-snapshot mt-3">
-                                    <h6 class="order-summary-subheading">بيانات العنوان المحفوظة</h6>
-                                    <div class="order-address-grid">
-                                        @foreach($addressSnapshot as $key => $value)
-                                            <div class="order-address-field">
-                                                <div class="order-summary-label">{{ $addressLabels[$key] ?? \Illuminate\Support\Str::of($key)->replace('_', ' ')->headline() }}</div>
-                                                <div class="order-summary-value">
-                                                    @if(is_array($value))
-                                                        <code dir="ltr">{{ json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</code>
-                                                    @else
-                                                        {{ ($value !== null && $value !== '') ? $value : '—' }}
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-                        </section>
-
-
-                        <section class="order-summary-block">
-                            <h6 class="order-summary-heading">مؤشرات السلة</h6>
-                            @if($cartMetrics !== [])
-                                <ul class="order-summary-list mb-0">
-                                    @foreach($cartMetrics as $metricKey => $metricValue)
-
-
-                                        <li>
-                                            <span class="order-summary-label">{{ $metricLabels[$metricKey] ?? \Illuminate\Support\Str::of($metricKey)->replace('_', ' ')->headline() }}</span>
-                                            <span class="order-summary-value">
-                                                @if(is_array($metricValue))
-                                                    <code dir="ltr">{{ json_encode($metricValue, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</code>
-                                                @else
-                                                    {{ ($metricValue !== null && $metricValue !== '') ? $metricValue : '—' }}
-
-
-                                                @endif
-                                            </span>
-                                        </li>
-                                    @endforeach
-                            @else
-                                <p class="text-muted mb-0">لا توجد بيانات إحصائية متاحة.</p>
-                            @endif
                         </section>
 
                         @if($orderNotes !== '')
@@ -1023,7 +877,10 @@
                                 <span class="order-summary-value">{{ number_format($order->final_amount, 2) }}</span>
                             </div>
                         </div>
-                    </div><div class="col-12 col-xl-5"><div class="col-12 col-xl-5">
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-5">
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">سجل الطلب</h4>
@@ -1276,7 +1133,7 @@
     <div class="row mt-4">
         <!-- تحديث حالة الطلب -->
         <div class="col-12">
->
+            <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">تحديث حالة الطلب</h4>
                 </div>
