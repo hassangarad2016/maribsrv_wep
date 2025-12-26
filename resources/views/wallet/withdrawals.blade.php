@@ -39,11 +39,15 @@
         color: #6c757d;
     }
     .wallet-withdrawals-metrics {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        display: flex;
+        flex-wrap: nowrap;
         gap: 0.75rem;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+        -webkit-overflow-scrolling: touch;
     }
     .metric-card {
+        flex: 0 0 220px;
         background: #ffffff;
         border: 1px solid rgba(15, 23, 42, 0.08);
         border-radius: 0.9rem;
@@ -237,12 +241,8 @@
 
     @media (min-width: 992px) {
         .wallet-withdrawals-hero {
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .wallet-withdrawals-metrics {
-            max-width: none;
+            flex-direction: column;
+            align-items: stretch;
         }
     }
 
