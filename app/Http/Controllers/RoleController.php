@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\BootstrapTableService;
 use App\Services\ResponseService;
 use Auth;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -87,6 +88,7 @@ class RoleController extends Controller {
         ResponseService::noPermissionThenRedirect('role-create');
         $permission = Permission::get();
         $groupedPermissions = [];
+        $serviceCategories = $this->serviceCategories();
 
         foreach ($permission as $key => $val) {
             $subArr = substr($val->name, 0, strrpos($val->name, "-"));
@@ -97,14 +99,16 @@ class RoleController extends Controller {
         }
 
         $groupedPermissions = (object)$groupedPermissions;
-        return view('roles.create', compact('groupedPermissions'));
+        return view('roles.create', compact('groupedPermissions', 'serviceCategories'));
     }
 
     public function store(Request $request) {
         ResponseService::noPermissionThenRedirect('role-create');
         $validator = Validator::make($request->all(), [
             'name'       => 'required|unique:roles,name',
-            'permission' => 'required|array'
+            'permission' => 'required|array',
+            'category_ids' => 'nullable|array',
+            'category_ids.*' => 'integer|exists:categories,id',
         ]);
         if ($validator->fails()) {
             ResponseService::validationError($validator->errors()->first());
@@ -117,6 +121,7 @@ class RoleController extends Controller {
             DB::beginTransaction();
             $role = Role::create(['name' => $request->input('name'), 'custom_role' => 1]);
             $role->syncPermissions($request->input('permission'));
+            $this->syncRoleCategories($role, $request->input('category_ids', []));
             DB::commit();
             ResponseService::successResponse(trans('Role created Successfully'));
         } catch (Throwable $e) {
@@ -143,6 +148,8 @@ class RoleController extends Controller {
         $permission = Permission::get();
         $rolePermissions = DB::table("role_has_permissions")->where("role_has_permissions.role_id", $id)->pluck('role_has_permissions.permission_id', 'role_has_permissions.permission_id')->all();
         $groupedPermissions = [];
+        $serviceCategories = $this->serviceCategories();
+        $roleCategoryIds = $this->getRoleCategoryIds($role->id);
         foreach ($permission as $key => $val) {
             $subArr = substr($val->name, 0, strrpos($val->name, "-"));
             $groupedPermissions[$subArr][] = (object)array(
@@ -152,13 +159,18 @@ class RoleController extends Controller {
         }
 
         $groupedPermissions = (object)$groupedPermissions;
-        return view('roles.edit', compact('role', 'groupedPermissions', 'rolePermissions'));
+        return view('roles.edit', compact('role', 'groupedPermissions', 'rolePermissions', 'serviceCategories', 'roleCategoryIds'));
     }
 
 
     public function update(Request $request, $id) {
         ResponseService::noPermissionThenRedirect('role-edit');
-        $validator = Validator::make($request->all(), ['name' => 'required', 'permission' => 'required']);
+        $validator = Validator::make($request->all(), [
+            'name'       => 'required',
+            'permission' => 'required',
+            'category_ids' => 'nullable|array',
+            'category_ids.*' => 'integer|exists:categories,id',
+        ]);
         if ($validator->fails()) {
             ResponseService::validationError($validator->errors()->first());
         }
@@ -172,6 +184,7 @@ class RoleController extends Controller {
             $role->save();
 
             $role->syncPermissions($request->input('permission'));
+            $this->syncRoleCategories($role, $request->input('category_ids', []));
             DB::commit();
             ResponseService::successResponse('Data Updated Successfully');
         } catch (Throwable $th) {
@@ -196,5 +209,50 @@ class RoleController extends Controller {
             ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();
         }
+    }
+
+    private function serviceCategories()
+    {
+        return Category::query()
+            ->whereIn('id', [2, 4, 5, 8, 114, 174, 175, 176, 177, 180, 181])
+            ->orderBy('name')
+            ->get(['id', 'name']);
+    }
+
+    private function getRoleCategoryIds(int $roleId): array
+    {
+        return DB::table('role_categories')
+            ->where('role_id', $roleId)
+            ->pluck('category_id')
+            ->filter()
+            ->map(static fn ($id) => (int) $id)
+            ->values()
+            ->all();
+    }
+
+    private function syncRoleCategories(Role $role, array $categoryIds): void
+    {
+        $ids = collect($categoryIds)
+            ->filter()
+            ->map(static fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        DB::table('role_categories')->where('role_id', $role->id)->delete();
+
+        if (empty($ids)) {
+            return;
+        }
+
+        $now = now();
+        $rows = array_map(static fn ($categoryId) => [
+            'role_id' => $role->id,
+            'category_id' => $categoryId,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ], $ids);
+
+        DB::table('role_categories')->insert($rows);
     }
 }
