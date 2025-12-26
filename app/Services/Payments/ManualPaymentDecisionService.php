@@ -349,14 +349,19 @@ class ManualPaymentDecisionService
             return;
         }
 
-        $title = $status === ManualPaymentRequest::STATUS_APPROVED
-            ? trans('Manual payment approved')
-            : trans('Manual payment rejected');
+        $noteKey = $status === ManualPaymentRequest::STATUS_REJECTED
+            ? 'manual_payment.notification.detail.rejection_reason'
+            : 'manual_payment.notification.detail.note';
 
-        $body = trans('Reference #:ref - Amount: :amount', [
-            'ref' => $manualPaymentRequest->reference ?? $manualPaymentRequest->id,
-            'amount' => number_format($manualPaymentRequest->amount, 2) . ($manualPaymentRequest->currency ? ' ' . $manualPaymentRequest->currency : ''),
-        ]);
+        $details = $this->buildManualPaymentDetails($manualPaymentRequest, $transaction, $note, $noteKey);
+
+        $title = $status === ManualPaymentRequest::STATUS_APPROVED
+            ? __('manual_payment.notification.user.approved.title')
+            : __('manual_payment.notification.user.rejected.title');
+
+        $body = $status === ManualPaymentRequest::STATUS_APPROVED
+            ? __('manual_payment.notification.user.approved.body', ['details' => $details])
+            : __('manual_payment.notification.user.rejected.body', ['details' => $details]);
 
         try {
             $deepLink = route('payment-requests.deep-link', $transaction);

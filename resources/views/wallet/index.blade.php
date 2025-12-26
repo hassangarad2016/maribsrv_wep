@@ -128,14 +128,17 @@
     }
     .search-group {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         align-items: center;
         gap: 0.5rem;
         margin-inline-start: auto;
+        width: 100%;
+        overflow-x: auto;
     }
     .search-group .input-group {
-        min-width: 240px;
-        max-width: 360px;
+        min-width: 280px;
+        max-width: none;
+        flex: 1 1 auto;
     }
     .search-group .input-group-text {
         background: #f8f9fa;
@@ -153,6 +156,12 @@
         padding: 0 0.9rem;
         font-size: 0.85rem;
         border-radius: 0.75rem;
+        white-space: nowrap;
+    }
+    .wallet-balance-badge {
+        background: rgba(13, 110, 253, 0.12);
+        color: #0f172a;
+        border: 1px solid rgba(13, 110, 253, 0.2);
     }
     .wallet-accounts-table {
         border-radius: 1rem;
@@ -207,9 +216,8 @@
             margin-inline-start: 0;
         }
         .search-group .input-group {
-            flex: 1;
-            min-width: 0;
-            max-width: none;
+            flex: 1 1 auto;
+            min-width: 240px;
         }
     }
 </style>
@@ -338,7 +346,7 @@
                                         </div>
                                     </td>
                                     <td class="text-center py-4">
-                                        <span class="badge bg-warning-subtle text-dark fw-semibold px-3 py-2">
+                                        <span class="badge wallet-balance-badge fw-semibold px-3 py-2">
                                             <i class="bi bi-coin"></i>
                                             {{ number_format((float) $account->balance, 2) }} {{ $currency }}
                                         </span>
