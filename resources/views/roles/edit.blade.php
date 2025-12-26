@@ -26,20 +26,6 @@
                                     {!! Form::text('name', null, ['placeholder' => __('Name'), 'class' => 'form-control']) !!}
                                 </div>
                             </div>
-                            <div class="col-xs-12 col-sm-12 col-md-12">
-                                <div class="form-group">
-                                    <label>{{ __('services.labels.services') }}</label>
-                                    <select name="category_ids[]" class="form-control" multiple>
-                                        @forelse ($serviceCategories as $category)
-                                            <option value="{{ $category->id }}" {{ in_array($category->id, $roleCategoryIds, true) ? 'selected' : '' }}>
-                                                {{ $category->name }}
-                                            </option>
-                                        @empty
-                                            <option value="" disabled>{{ __('services.messages.no_data_found') }}</option>
-                                        @endforelse
-                                    </select>
-                                </div>
-                            </div>
                             <div id="permission-list"></div>
                             <div class="permission-tree ms-5 my-3">
                                 <ul>

@@ -6,7 +6,6 @@ use App\Models\Category;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 
 class ServiceAuthorizationService
 {
@@ -72,7 +71,9 @@ class ServiceAuthorizationService
             return false;
         }
 
-        return in_array((int) $categoryModel->id, $this->getManagedCategoryIds($user), true);
+        return $user->managedCategories()
+            ->where('categories.id', $categoryModel->id)
+            ->exists();
     }
 
     public function ensureUserCanManageCategory(User $user, Category $category): void
@@ -237,34 +238,8 @@ class ServiceAuthorizationService
 
     public function getManagedCategoryIds(User $user): array
     {
-        $userCategoryIds = $user->managedCategories()
+        return $user->managedCategories()
             ->pluck('categories.id')
-            ->filter()
-            ->map(static fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->all();
-
-        $roleCategoryIds = $this->getRoleCategoryIds($user);
-
-        return collect(array_merge($userCategoryIds, $roleCategoryIds))
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-    }
-
-    private function getRoleCategoryIds(User $user): array
-    {
-        $roleIds = $user->roles()->pluck('roles.id')->filter()->all();
-
-        if (empty($roleIds)) {
-            return [];
-        }
-
-        return DB::table('role_categories')
-            ->whereIn('role_id', $roleIds)
-            ->pluck('category_id')
             ->filter()
             ->map(static fn ($id) => (int) $id)
             ->unique()
