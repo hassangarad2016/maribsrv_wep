@@ -239,14 +239,22 @@
 
     <div class="row">
         <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
+            <div class="card border-0 bg-transparent">
+                <div class="card-header d-none">
                     <h4 class="card-title">إدارة طلبات شي ان</h4>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     <!-- فلاتر البحث -->
-                    <div class="row mb-4">
-                        <div class="col-md-12">
+                    <div class="card service-requests-filters mb-4">
+                        <div class="card-body">
+                            <div class="filters-header">
+                                <div>
+                                    <h6 class="filters-title">{{ __('Filters') }}</h6>
+                                    <p class="filters-hint">{{ __('Use filters to narrow down Shein orders.') }}</p>
+                                </div>
+                            </div>
+                            <div class="row mb-0">
+                                <div class="col-md-12">
                             <button class="btn btn-outline-primary shein-filters-toggle" type="button"
                                 data-bs-toggle="offcanvas" data-bs-target="#sheinFiltersOffcanvas"
                                 aria-controls="sheinFiltersOffcanvas" data-filters-toggle>
@@ -374,8 +382,8 @@
                             </div>
                         </div>
                     </div>
-
-
+                </div>
+            </div>
 
                     @php
                         $sheinPaymentGroups = collect($paymentGroups ?? [])

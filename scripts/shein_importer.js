@@ -1,4 +1,7 @@
-const { chromium } = require("playwright-core");
+const { chromium } = require("playwright-extra");
+const stealthPlugin = require("playwright-extra-plugin-stealth")();
+
+chromium.use(stealthPlugin);
 
 const targetUrl = process.argv[2];
 if (!targetUrl || !/^https?:\/\//i.test(targetUrl)) {
