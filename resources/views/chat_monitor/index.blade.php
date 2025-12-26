@@ -296,16 +296,6 @@
             </div>
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="stat-card">
-                    <div class="stat-icon bg-warning text-dark"><i class="bi bi-people"></i></div>
-                    <div>
-                        <p class="text-muted mb-1">{{ __('وكلاء متاحون') }}</p>
-                        <h2>{{ number_format($assignableAgents->count()) }}</h2>
-                        <small>{{ __('وكلاء يملكون صلاحية مراقبة المحادثات') }}</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-sm-6 col-xl-3">
-                <div class="stat-card">
                     <div class="stat-icon bg-info"><i class="bi bi-graph-up"></i></div>
                     <div>
                         <p class="text-muted mb-1">{{ __('متوسط الرسائل لكل محادثة') }}</p>
@@ -384,14 +374,10 @@
                                 $departmentLabel = $conversation['department']
                                     ? ($availableDepartments[$conversation['department']] ?? ($conversation['department'] === 'general' ? __('قسم عام') : $conversation['department']))
                                     : __('قسم عام');
-                                $assignedName = optional($conversation['assigned_agent'])->name;
-                                $assignedId = $conversation['assigned_to'];
                             @endphp
                             <button type="button" class="conversation-tile"
                                     data-conversation-id="{{ $conversation['item_offer_id'] }}"
                                     data-conversation-key="{{ $conversation['conversation_id'] }}"
-                                    data-assigned-name="{{ $assignedName }}"
-                                    data-assigned-id="{{ $assignedId }}"
                                     data-department-label="{{ $departmentLabel }}"
                                     data-created-at="{{ $conversation['created_at'] }}">
                                 <div class="tile-title">
@@ -405,10 +391,6 @@
                                 </div>
                                 <div class="tile-meta">
                                     <span><i class="bi bi-diagram-3 me-1"></i>{{ $departmentLabel }}</span>
-                                    <span>
-                                        <i class="bi bi-person-workspace me-1"></i>
-                                        {{ $assignedName ?? __('غير معيّن') }}
-                                    </span>
                                     <span class="text-muted">
                                         <i class="bi bi-clock-history me-1"></i>
                                         {{ optional($conversation['created_at']) ? \Carbon\Carbon::parse($conversation['created_at'])->diffForHumans() : '' }}
@@ -445,15 +427,6 @@
                                     <div class="text-muted small" id="chatConversationMeta"></div>
                                 </div>
                             </div>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-outline-secondary btn-sm" id="reassignConversationBtn"
-                                        data-bs-toggle="modal" data-bs-target="#assignConversationModal" disabled>
-                                    <i class="bi bi-person-plus me-1"></i>{{ __('تعيين لوكيل آخر') }}
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" id="markCompleteBtn" disabled>
-                                    <i class="bi bi-check2-circle me-1"></i>{{ __('إغلاق المحادثة') }}
-                                </button>
-                            </div>
                         </div>
                         <div class="reader-messages" id="chatMessages"></div>
                         <div class="reader-composer">
@@ -473,43 +446,12 @@
             </div>
         </div>
     </section>
-
-    <div class="modal fade" id="assignConversationModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ __('تعيين المحادثة لوكيل') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="assignConversationForm" method="POST" action="#">
-                    @csrf
-                    <div class="modal-body">
-                        <input type="hidden" id="assignConversationId" name="conversation_id">
-                        <div class="mb-3">
-                            <label class="form-label" for="assignAgentSelect">{{ __('الوكيل المسؤول') }}</label>
-                            <select class="form-select" id="assignAgentSelect" name="assigned_to">
-                                <option value="">{{ __('غير معيّن') }}</option>
-                                @foreach($assignableAgents as $agent)
-                                    <option value="{{ $agent->id }}">{{ $agent->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">{{ __('إلغاء') }}</button>
-                        <button type="submit" class="btn btn-primary">{{ __('حفظ التعيين') }}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 @endsection
 @section('script')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const conversationTiles = document.querySelectorAll('.conversation-tile');
             const viewRouteTemplate = @json(route('chat-monitor.view-conversation', ['id' => '__ID__']));
-            const assignRouteTemplate = @json(route('chat-monitor.assign', ['conversation' => '__ID__']));
             const chatEmptyState = document.getElementById('chatEmptyState');
             const chatLoadingState = document.getElementById('chatLoadingState');
             const chatContent = document.getElementById('chatContent');
@@ -517,10 +459,6 @@
             const chatPartnerName = document.getElementById('chatPartnerName');
             const chatConversationMeta = document.getElementById('chatConversationMeta');
             const chatPartnerAvatar = document.getElementById('chatPartnerAvatar');
-            const reassignBtn = document.getElementById('reassignConversationBtn');
-            const assignConversationIdInput = document.getElementById('assignConversationId');
-            const assignForm = document.getElementById('assignConversationForm');
-            const assignSelect = document.getElementById('assignAgentSelect');
             const refreshButton = document.getElementById('refreshConversations');
             const currentUserId = {{ auth()->id() ?? 'null' }};
             let activeTile = null;
@@ -567,12 +505,6 @@
                     chatMessages.appendChild(createMessageBubble(message, users));
                 });
                 chatMessages.scrollTop = chatMessages.scrollHeight;
-
-                if (tile) {
-                    reassignBtn.disabled = false;
-                    assignSelect.value = tile.dataset.assignedId || '';
-                    reassignBtn.dataset.conversationId = tile.dataset.conversationKey;
-                }
             }
 
             function loadConversation(tile) {
@@ -614,17 +546,6 @@
             if (refreshButton) {
                 refreshButton.addEventListener('click', () => window.location.reload());
             }
-
-            const assignModal = document.getElementById('assignConversationModal');
-            assignModal?.addEventListener('show.bs.modal', function () {
-                if (!activeTile) {
-                    assignConversationIdInput.value = '';
-                    return;
-                }
-                assignConversationIdInput.value = activeTile.dataset.conversationKey;
-                assignSelect.value = activeTile.dataset.assignedId || '';
-                assignForm.action = assignRouteTemplate.replace('__ID__', encodeURIComponent(activeTile.dataset.conversationKey));
-            });
 
         });
     </script>

@@ -951,7 +951,7 @@ class ManualPaymentRequestController extends Controller
         try {
             $result = NotificationService::sendFcmNotification(
                 $tokens,
-                trans('Manual payment request update'),
+                __('manual_payment.notification.update.title'),
                 $validator->validated()['message'],
                 'manual-payment-message',
                 [

@@ -1,12 +1,220 @@
 @extends('layouts.main')
 
-@push('styles')
+@section('css')
     <style>
+        .wallet-detail-page {
+            background: linear-gradient(180deg, rgba(13, 110, 253, 0.07), rgba(13, 110, 253, 0.02));
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 1.25rem;
+            color: #212529;
+            padding: 1.25rem;
+        }
+        .wallet-detail-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .wallet-detail-hero {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .wallet-detail-title {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .wallet-detail-subtitle {
+            margin: 0.35rem 0 0;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .wallet-detail-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .wallet-detail-summary {
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 1rem;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+        }
+        .wallet-detail-summary-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .wallet-detail-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .wallet-detail-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #f59f00;
+            background: rgba(245, 159, 0, 0.12);
+        }
+        .wallet-detail-balance {
+            text-align: end;
+            margin-inline-start: auto;
+        }
+        .wallet-detail-stats {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding-bottom: 0.25rem;
+            -webkit-overflow-scrolling: touch;
+        }
+        .metric-card {
+            flex: 0 0 220px;
+            background: #ffffff;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 0.9rem;
+            padding: 0.85rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+            min-height: 76px;
+        }
+        .metric-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #0d6efd;
+            background: rgba(13, 110, 253, 0.12);
+        }
+        .metric-card.credit .metric-icon {
+            color: #198754;
+            background: rgba(25, 135, 84, 0.12);
+        }
+        .metric-card.debit .metric-icon {
+            color: #dc3545;
+            background: rgba(220, 53, 69, 0.12);
+        }
+        .metric-card.activity .metric-icon {
+            color: #b58100;
+            background: rgba(255, 193, 7, 0.18);
+        }
+        .metric-label {
+            font-size: 0.78rem;
+            color: #6c757d;
+            font-weight: 600;
+        }
+        .metric-value {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #212529;
+        }
+        .wallet-detail-filters {
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 1rem;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+        }
+        .wallet-detail-filters .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            padding: 1.1rem;
+        }
+        .filters-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+        .filters-title {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .filters-hint {
+            margin: 0.2rem 0 0;
+            font-size: 0.82rem;
+            color: #6c757d;
+        }
+        .filters-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 0.75rem;
+        }
+        .filters-row .form-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #6c757d;
+        }
+        .filters-row .form-select {
+            min-width: 200px;
+            border-radius: 0.75rem;
+            border-color: rgba(15, 23, 42, 0.12);
+        }
+        .filters-row .btn {
+            border-radius: 0.75rem;
+        }
+        .wallet-detail-table {
+            border-radius: 1rem;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            margin-bottom: 0;
+            overflow: hidden;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+        }
+        .wallet-detail-table .card-header {
+            background: #f8f9fb;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+            padding: 0.9rem 1.1rem;
+        }
+        .wallet-detail-table .card-body {
+            padding: 1.15rem;
+        }
+        .table-title {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .table-hint {
+            margin: 0.2rem 0 0;
+            font-size: 0.82rem;
+            color: #6c757d;
+        }
+        .wallet-detail-table .table thead th {
+            background: #f8f9fa;
+            color: #212529;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+            padding: 0.85rem 1rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .wallet-detail-table .table tbody td {
+            padding: 0.85rem 1rem;
+        }
+        .wallet-detail-table .table tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.04);
+        }
+        .wallet-detail-table .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: rgba(15, 23, 42, 0.02);
+        }
         .wallet-pagination .pagination {
             flex-wrap: wrap;
             gap: 0.25rem;
         }
-
         .wallet-pagination .page-item .page-link {
             padding: 0.35rem 0.75rem;
             font-size: .875rem;
@@ -14,14 +222,27 @@
             min-width: 2.25rem;
             text-align: center;
         }
-
         .wallet-pagination .page-item .page-link svg,
         .wallet-pagination .page-item .page-link .fi {
             width: 1rem;
             height: 1rem;
         }
+
+        @media (max-width: 768px) {
+            .wallet-detail-page {
+                padding: 1rem;
+            }
+            .wallet-detail-balance {
+                text-align: start;
+                margin-inline-start: 0;
+            }
+            .filters-row .form-select {
+                min-width: 0;
+                width: 100%;
+            }
+        }
     </style>
-@endpush
+@endsection
 
 @section('title')
     {{ __('Wallet for :name', ['name' => $user->name]) }}
@@ -180,272 +401,275 @@
 @endsection
 
 @section('content')
-    <section class="section">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-            <div class="d-flex flex-column">
-                <span class="text-muted small">{{ __('Manual Deposits') }}</span>
-                <h5 class="mb-0">{{ __('Wallet Overview') }}</h5>
+    <section class="section wallet-detail-page">
+        <div class="wallet-detail-shell">
+            <div class="wallet-detail-hero">
+                <div>
+                    <h5 class="wallet-detail-title">@yield('title')</h5>
+                    <p class="wallet-detail-subtitle">{{ __('Wallet Overview') }}</p>
+                </div>
+                <div class="wallet-detail-actions">
+                    <button type="button"
+                            class="btn btn-primary d-flex align-items-center gap-2"
+                            data-bs-toggle="modal"
+                            data-bs-target="#manualCreditModal"
+                            data-bs-tab-target="#manual-credit-form">
+                        <i class="bi bi-cash-stack"></i>
+                        <span>{{ __('New Deposit') }}</span>
+                    </button>
+                    <button type="button"
+                            class="btn btn-outline-secondary d-flex align-items-center gap-2"
+                            data-bs-toggle="modal"
+                            data-bs-target="#manualCreditModal"
+                            data-bs-tab-target="#manual-credit-history">
+                        <i class="bi bi-clock-history"></i>
+                        <span>{{ __('History') }}</span>
+                    </button>
+                </div>
             </div>
-            <div class="d-flex flex-wrap gap-2">
-                <button type="button"
-                        class="btn btn-primary d-flex align-items-center gap-2"
-                        data-bs-toggle="modal"
-                        data-bs-target="#manualCreditModal"
-                        data-bs-tab-target="#manual-credit-form">
-                    <i class="bi bi-cash-stack"></i>
-                    <span>{{ __('New Deposit') }}</span>
-                </button>
-                <button type="button"
-                        class="btn btn-outline-secondary d-flex align-items-center gap-2"
-                        data-bs-toggle="modal"
-                        data-bs-target="#manualCreditModal"
-                        data-bs-tab-target="#manual-credit-history">
-                    <i class="bi bi-clock-history"></i>
-                    <span>{{ __('History') }}</span>
-                </button>
-            </div>
-        </div>
-        <div class="row g-3">
-            <div class="col-12">
-                <div class="card shadow-sm border-0 mb-3">
-                    <div class="card-body">
-                        <div class="row g-3 align-items-center">
-                            <div class="col-lg-6 d-flex align-items-center gap-3">
-                                <span class="avatar avatar-xl bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-wallet2 fs-3"></i>
-                                </span>
-                                <div>
-                                    <p class="text-muted mb-1">{{ __('محفظة المستخدم') }}</p>
-                                    <h4 class="mb-0">{{ $user->name }}</h4>
-                                    <small class="text-muted">{{ $user->email }}</small>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 text-lg-end">
-                                <p class="text-muted mb-1">{{ __('الرصيد الحالي') }}</p>
-                                <h2 class="fw-bold mb-2">{{ number_format((float) $walletAccount->balance, 2) }} {{ $currency }}</h2>
-                                <span class="badge bg-primary-subtle text-primary">{{ __('محدّث حتى') }} {{ now()->format('Y-m-d H:i') }}</span>
+
+            <div class="card wallet-detail-summary">
+                <div class="card-body">
+                    <div class="wallet-detail-summary-row">
+                        <div class="wallet-detail-user">
+                            <span class="wallet-detail-avatar">
+                                <i class="bi bi-wallet2"></i>
+                            </span>
+                            <div>
+                                <p class="text-muted mb-1">{{ __('محفظة المستخدم') }}</p>
+                                <h4 class="mb-0">{{ $user->name }}</h4>
+                                <small class="text-muted">{{ $user->email }}</small>
                             </div>
                         </div>
-                        <div class="row g-3 mt-4">
-                            <div class="col-6 col-md-3">
-                                <div class="p-3 rounded-3 bg-light-subtle border text-center">
-                                    <p class="text-muted small mb-1">{{ __('إجمالي الحركات') }}</p>
-                                    <h5 class="fw-bold mb-0">{{ number_format($walletMetrics['total_transactions']) }}</h5>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="p-3 rounded-3 bg-success-subtle border text-center">
-                                    <p class="text-muted small mb-1">{{ __('إجمالي الإيداعات') }}</p>
-                                    <h5 class="fw-bold mb-0 text-success">
-                                        {{ number_format((float) $walletMetrics['total_credits'], 2) }} {{ $currency }}
-                                    </h5>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="p-3 rounded-3 bg-danger-subtle border text-center">
-                                    <p class="text-muted small mb-1">{{ __('إجمالي الخصومات') }}</p>
-                                    <h5 class="fw-bold mb-0 text-danger">
-                                        {{ number_format((float) $walletMetrics['total_debits'], 2) }} {{ $currency }}
-                                    </h5>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="p-3 rounded-3 bg-warning-subtle border text-center">
-                                    <p class="text-muted small mb-1">{{ __('آخر عملية') }}</p>
-                                    <h6 class="fw-bold mb-0">
-                                        {{ optional($walletMetrics['last_activity'])->diffForHumans() ?? __('لا يوجد سجل بعد') }}
-                                    </h6>
-                                </div>
-                            </div>
+                        <div class="wallet-detail-balance">
+                            <p class="text-muted mb-1">{{ __('الرصيد الحالي') }}</p>
+                            <h2 class="fw-bold mb-2">{{ number_format((float) $walletAccount->balance, 2) }} {{ $currency }}</h2>
+                            <span class="badge bg-primary-subtle text-primary">{{ __('محّث حتى') }} {{ now()->format('Y-m-d H:i') }}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-12">
-                <div class="card shadow-sm border-0 mb-3">
-                    <div class="card-header bg-white border-0">
-                        <div class="d-flex flex-column gap-3">
-                            <div class="d-flex flex-column flex-xl-row justify-content-between align-items-start align-items-xl-center gap-3">
-                            <div>
-                                <h5 class="card-title mb-1">{{ __('سجل الحركات المالية') }}</h5>
-                                <p class="text-muted small mb-0">{{ __('يمكنك فلترة العمليات بحسب نوعها ومراجعة التفاصيل الدقيقة لكل عملية.') }}</p>
-                            </div>
-                            <form method="get" class="row g-2 align-items-end">
-                                <div class="col-auto">
-                                    <label for="filter" class="form-label mb-0">{{ __('نوع الحركة') }}</label>
-                                </div>
-                                <div class="col-auto">
-                                    <select id="filter" name="filter" class="form-select" onchange="this.form.submit()">
-                                        @foreach($filters as $filterOption)
-                                            <option value="{{ $filterOption }}" @selected($appliedFilter === $filterOption)>
-                                                {{ __('wallet.filters.' . $filterOption) }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-auto">
-                                    <a href="{{ route('wallet.show', ['user' => $user->getKey()]) }}" class="btn btn-outline-secondary">
-                                        {{ __('Reset') }}
-                                    </a>
-                                </div>
-                            </form>
-                        </div>
+            <div class="wallet-detail-stats">
+                <div class="metric-card">
+                    <span class="metric-icon"><i class="bi bi-list-check"></i></span>
+                    <div>
+                        <div class="metric-label">{{ __('إجمالي الحركات') }}</div>
+                        <div class="metric-value">{{ number_format($walletMetrics['total_transactions']) }}</div>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="tab-content">
-                            <div class="tab-pane fade show active" id="wallet-ledger-transactions" role="tabpanel"
-                                 aria-labelledby="wallet-ledger-transactions-tab">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                <tr>
-                                    <th class="text-center">#</th>
-                                    <th>{{ __('المرجع') }}</th>
-                                    <th>{{ __('نوع الحركة') }}</th>
-                                    <th class="text-end">{{ __('المبلغ') }}</th>
-                                    <th class="text-end">{{ __('الرصيد بعد العملية') }}</th>
-                                    <th>{{ __('تفاصيل إضافية') }}</th>
-                                    <th>{{ __('تاريخ التنفيذ') }}</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                @php
-                                    $rowNumber = ($transactions->currentPage() - 1) * $transactions->perPage();
-                                @endphp
-                                @forelse($transactions as $transaction)
-                                    @php
-                                        $metaReason = data_get($transaction->meta, 'reason');
-                                        $operationReference = data_get($transaction->meta, 'operation_reference');
-                                        $notes = data_get($transaction->meta, 'notes');
-                                        $typeLabel = $transaction->type === 'credit' ? __('إيداع') : __('خصم');
-                                        $typeBadgeClass = $transaction->type === 'credit' ? 'bg-success' : 'bg-danger';
-                                    @endphp
-                                    <tr>
-                                        <td class="text-center fw-semibold">{{ ++$rowNumber }}</td>
-                                        <td>
-                                            <div class="fw-semibold">#{{ $transaction->getKey() }}</div>
-                                            @if($operationReference)
-                                                <div class="small text-muted">{{ $operationReference }}</div>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <span class="badge {{ $typeBadgeClass }}">
-                                                {{ $typeLabel }}
-                                            </span>
-                                        </td>
-                                        <td class="text-end">
-                                            <span class="fw-semibold {{ $transaction->type === 'credit' ? 'text-success' : 'text-danger' }}">
-                                                {{ number_format((float) $transaction->amount, 2) }} {{ $currency }}
-                                            </span>
-                                        </td>
-                                        <td class="text-end">{{ number_format((float) $transaction->balance_after, 2) }} {{ $currency }}</td>
-                                        <td>
-                                            <div class="small text-muted d-flex flex-column gap-1">
-                                                @if($transaction->manualPaymentRequest)
-                                                    @php
-                                                        $mprRef = \App\Support\Payments\ReferencePresenter::forManualRequest(
-                                                            $transaction->manualPaymentRequest,
-                                                            $transaction->paymentTransaction ?? null
-                                                        );
-                                                    @endphp
-                                                    <div>
-                                                        <i class="bi bi-file-earmark-text me-1"></i>
-                                                        {{ __('طلب دفع يدوي') }}: {{ $mprRef ?? $transaction->manualPaymentRequest->getKey() }}
-                                                    </div>
-                                                @endif
-                                                @if($transaction->paymentTransaction)
-                                                    @php
-                                                        $txRef = \App\Support\Payments\ReferencePresenter::forTransaction($transaction->paymentTransaction);
-                                                    @endphp
-                                                    <div>
-                                                        <i class="bi bi-credit-card me-1"></i>
-                                                        {{ __('عملية دفع') }}: {{ $txRef ?? $transaction->paymentTransaction->getKey() }}
-                                                    </div>
-                                                @endif
-                                                @if($metaReason)
-                                                    <div>
-                                                        <i class="bi bi-info-circle me-1"></i>
-                                                        {{ __('السبب') }}: {{ \Illuminate\Support\Str::headline($metaReason) }}
-                                                    </div>
-                                                @endif
-                                                @if($notes)
-                                                    <div>
-                                                        <i class="bi bi-chat-text me-1"></i>
-                                                        {{ __('ملاحظات') }}: {{ $notes }}
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="small">{{ optional($transaction->created_at)->format('Y-m-d H:i') }}</div>
-                                            <div class="text-muted small">{{ optional($transaction->created_at)->diffForHumans() }}</div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="7" class="text-center py-4 text-muted">
-                                            <i class="bi bi-inboxes display-6 d-block mb-2"></i>
-                                            {{ __('لا توجد حركات مطابقة للفلتر الحالي.') }}
-                                        </td>
-                                    </tr>
-                                @endforelse
-                                </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                    <div class="tab-pane fade" id="wallet-ledger-manual" role="tabpanel"
-                         aria-labelledby="wallet-ledger-manual-tab">
-                        <div class="table-responsive">
-                            <table class="table table-striped mb-0">
-                                <thead class="table-light">
-                                <tr>
-                                    <th class="text-center">#</th>
-                                    <th>{{ __('Reference') }}</th>
-                                    <th class="text-end">{{ __('Amount') }}</th>
-                                    <th>{{ __('Created At') }}</th>
-                                    <th>{{ __('Notes') }}</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                @php
-                                    $manualRow = 0;
-                                @endphp
-                                @forelse($manualCreditEntries as $entry)
-                                    <tr>
-                                        <td class="text-center fw-semibold">{{ ++$manualRow }}</td>
-                                        <td>{{ data_get($entry->meta, 'operation_reference') ?? $entry->getKey() }}</td>
-                                        <td class="text-end text-success">+{{ number_format((float) $entry->amount, 2) }} {{ $currency }}</td>
-                                        <td>
-                                            <div>{{ optional($entry->created_at)->format('Y-m-d H:i') }}</div>
-                                            <small class="text-muted">{{ optional($entry->created_at)->diffForHumans() }}</small>
-                                        </td>
-                                        <td>{{ data_get($entry->meta, 'notes') ?? __('Not available') }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4 text-muted">
-                                            <i class="bi bi-journal-x display-6 d-block mb-2"></i>
-                                            {{ __('No manual deposits have been recorded yet.') }}
-                                        </td>
-                                    </tr>
-                                @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                </div>
+                <div class="metric-card credit">
+                    <span class="metric-icon"><i class="bi bi-arrow-down-circle"></i></span>
+                    <div>
+                        <div class="metric-label">{{ __('إجمالي الإيداعات') }}</div>
+                        <div class="metric-value">{{ number_format((float) $walletMetrics['total_credits'], 2) }} {{ $currency }}</div>
+                    </div>
+                </div>
+                <div class="metric-card debit">
+                    <span class="metric-icon"><i class="bi bi-arrow-up-right-circle"></i></span>
+                    <div>
+                        <div class="metric-label">{{ __('إجمالي الخصومات') }}</div>
+                        <div class="metric-value">{{ number_format((float) $walletMetrics['total_debits'], 2) }} {{ $currency }}</div>
+                    </div>
+                </div>
+                <div class="metric-card activity">
+                    <span class="metric-icon"><i class="bi bi-clock-history"></i></span>
+                    <div>
+                        <div class="metric-label">{{ __('آخر عملية') }}</div>
+                        <div class="metric-value">{{ optional($walletMetrics['last_activity'])->diffForHumans() ?? __('لا يوجد سجل بعد') }}</div>
                     </div>
                 </div>
             </div>
-                    @if($transactions->hasPages())
-                        <div class="card-footer bg-white border-0 wallet-pagination">
-                            {{ $transactions->onEachSide(1)->links('pagination::bootstrap-5') }}
+
+            <div class="card wallet-detail-filters">
+                <div class="card-body">
+                    <div class="filters-header">
+                        <div>
+                            <h6 class="filters-title">{{ __('سجل الحركات المالية') }}</h6>
+                            <p class="filters-hint">{{ __('يمكنك فلترة العمليات بحسب نوعها ومراجعة التفاصيل الدقيقة لكل عملية.') }}</p>
                         </div>
-                    @endif
+                    </div>
+                    <form method="get" class="filters-row">
+                        <div>
+                            <label for="filter" class="form-label mb-1">{{ __('نوع الحركة') }}</label>
+                            <select id="filter" name="filter" class="form-select" onchange="this.form.submit()">
+                                @foreach($filters as $filterOption)
+                                    <option value="{{ $filterOption }}" @selected($appliedFilter === $filterOption)>
+                                        {{ __('wallet.filters.' . $filterOption) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <a href="{{ route('wallet.show', ['user' => $user->getKey()]) }}" class="btn btn-outline-secondary">
+                                {{ __('Reset') }}
+                            </a>
+                        </div>
+                    </form>
                 </div>
+            </div>
+
+            <div class="card wallet-detail-table">
+                <div class="card-header">
+                    <div>
+                        <h6 class="table-title">{{ __('سجل الحركات المالية') }}</h6>
+                        <p class="table-hint">{{ __('يمكنك فلترة العمليات بحسب نوعها ومراجعة التفاصيل الدقيقة لكل عملية.') }}</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="wallet-ledger-transactions" role="tabpanel"
+                             aria-labelledby="wallet-ledger-transactions-tab">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th>{{ __('المرجع') }}</th>
+                                        <th>{{ __('نوع الحركة') }}</th>
+                                        <th class="text-end">{{ __('البلغ') }}</th>
+                                        <th class="text-end">{{ __('الرصيد بعد العملية') }}</th>
+                                        <th>{{ __('تفاصيل إضافية') }}</th>
+                                        <th>{{ __('تاريخ التنفيذ') }}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    @php
+                                        $rowNumber = ($transactions->currentPage() - 1) * $transactions->perPage();
+                                    @endphp
+                                    @forelse($transactions as $transaction)
+                                        @php
+                                            $metaReason = data_get($transaction->meta, 'reason');
+                                            $operationReference = data_get($transaction->meta, 'operation_reference');
+                                            $notes = data_get($transaction->meta, 'notes');
+                                            $typeLabel = $transaction->type === 'credit' ? __('إداع') : __('خصم');
+                                            $typeBadgeClass = $transaction->type === 'credit' ? 'bg-success' : 'bg-danger';
+                                        @endphp
+                                        <tr>
+                                            <td class="text-center fw-semibold">{{ ++$rowNumber }}</td>
+                                            <td>
+                                                <div class="fw-semibold">#{{ $transaction->getKey() }}</div>
+                                                @if($operationReference)
+                                                    <div class="small text-muted">{{ $operationReference }}</div>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <span class="badge {{ $typeBadgeClass }}">
+                                                    {{ $typeLabel }}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="fw-semibold {{ $transaction->type === 'credit' ? 'text-success' : 'text-danger' }}">
+                                                    {{ number_format((float) $transaction->amount, 2) }} {{ $currency }}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">{{ number_format((float) $transaction->balance_after, 2) }} {{ $currency }}</td>
+                                            <td>
+                                                <div class="small text-muted d-flex flex-column gap-1">
+                                                    @if($transaction->manualPaymentRequest)
+                                                        @php
+                                                            $mprRef = \App\Support\Payments\ReferencePresenter::forManualRequest(
+                                                                $transaction->manualPaymentRequest,
+                                                                $transaction->paymentTransaction ?? null
+                                                            );
+                                                        @endphp
+                                                        <div>
+                                                            <i class="bi bi-file-earmark-text me-1"></i>
+                                                            {{ __('طلب دفع يدوي') }}: {{ $mprRef ?? $transaction->manualPaymentRequest->getKey() }}
+                                                        </div>
+                                                    @endif
+                                                    @if($transaction->paymentTransaction)
+                                                        @php
+                                                            $txRef = \App\Support\Payments\ReferencePresenter::forTransaction($transaction->paymentTransaction);
+                                                        @endphp
+                                                        <div>
+                                                            <i class="bi bi-credit-card me-1"></i>
+                                                            {{ __('عملية دفع') }}: {{ $txRef ?? $transaction->paymentTransaction->getKey() }}
+                                                        </div>
+                                                    @endif
+                                                    @if($metaReason)
+                                                        <div>
+                                                            <i class="bi bi-info-circle me-1"></i>
+                                                            {{ __('السبب') }}: {{ \Illuminate\Support\Str::headline($metaReason) }}
+                                                        </div>
+                                                    @endif
+                                                    @if($notes)
+                                                        <div>
+                                                            <i class="bi bi-chat-text me-1"></i>
+                                                            {{ __('ملاح�ات') }}: {{ $notes }}
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="small">{{ optional($transaction->created_at)->format('Y-m-d H:i') }}</div>
+                                                <div class="text-muted small">{{ optional($transaction->created_at)->diffForHumans() }}</div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="text-center py-4 text-muted">
+                                                <i class="bi bi-inboxes display-6 d-block mb-2"></i>
+                                                {{ __('لا توجد حركات مطابقة للفلتر الحالي.') }}
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="wallet-ledger-manual" role="tabpanel"
+                             aria-labelledby="wallet-ledger-manual-tab">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th>{{ __('Reference') }}</th>
+                                        <th class="text-end">{{ __('Amount') }}</th>
+                                        <th>{{ __('Created At') }}</th>
+                                        <th>{{ __('Notes') }}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    @php
+                                        $manualRow = 0;
+                                    @endphp
+                                    @forelse($manualCreditEntries as $entry)
+                                        <tr>
+                                            <td class="text-center fw-semibold">{{ ++$manualRow }}</td>
+                                            <td>{{ data_get($entry->meta, 'operation_reference') ?? $entry->getKey() }}</td>
+                                            <td class="text-end text-success">+{{ number_format((float) $entry->amount, 2) }} {{ $currency }}</td>
+                                            <td>
+                                                <div>{{ optional($entry->created_at)->format('Y-m-d H:i') }}</div>
+                                                <small class="text-muted">{{ optional($entry->created_at)->diffForHumans() }}</small>
+                                            </td>
+                                            <td>{{ data_get($entry->meta, 'notes') ?? __('Not available') }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4 text-muted">
+                                                <i class="bi bi-journal-x display-6 d-block mb-2"></i>
+                                                {{ __('No manual deposits have been recorded yet.') }}
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @if($transactions->hasPages())
+                    <div class="card-footer bg-white border-0 wallet-pagination">
+                        {{ $transactions->onEachSide(1)->links('pagination::bootstrap-5') }}
+                    </div>
+                @endif
             </div>
         </div>
     </section>
 @endsection
+
 
 
 

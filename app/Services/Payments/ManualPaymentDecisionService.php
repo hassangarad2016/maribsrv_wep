@@ -443,16 +443,25 @@ class ManualPaymentDecisionService
         }
 
         $title = $status === ManualPaymentRequest::STATUS_APPROVED
-            ? __('تم تأكيد حوالة أحد العملاء')
-            : __('تم رفض حوالة أحد العملاء');
+            ? __('manual_payment.notification.store.approved.title')
+            : __('manual_payment.notification.store.rejected.title');
 
         $reference = $manualPaymentRequest->reference ?? $manualPaymentRequest->id;
         $orderId = $transaction->order_id ?? $manualPaymentRequest->payable_id;
+        $statusLabel = $this->humanReadableStatus($status);
+        $noteKey = $status === ManualPaymentRequest::STATUS_REJECTED
+            ? 'manual_payment.notification.detail.rejection_reason'
+            : 'manual_payment.notification.detail.note';
 
-        $body = __('الحوالة رقم :ref أصبحت :status.', [
-            'ref' => $reference,
-            'status' => $this->humanReadableStatus($status),
-        ]);
+        $details = $this->buildManualPaymentDetails(
+            $manualPaymentRequest,
+            $transaction,
+            $note,
+            $noteKey,
+            $statusLabel
+        );
+
+        $body = __('manual_payment.notification.store.body', ['details' => $details]);
 
         $deeplink = $this->resolveStoreManualPaymentRoute($manualPaymentRequest);
 
@@ -512,14 +521,23 @@ class ManualPaymentDecisionService
         $orderId = $transaction->order_id ?? $manualPaymentRequest->payable_id;
 
         $title = $status === ManualPaymentRequest::STATUS_APPROVED
-            ? __('تم اعتماد حوالة يدويـة')
-            : __('تم رفض حوالة يدويـة');
+            ? __('manual_payment.notification.admin.approved.title')
+            : __('manual_payment.notification.admin.rejected.title');
 
-        $body = __('الحوالة رقم :ref للطلب :order أصبحت :status.', [
-            'ref' => $reference,
-            'order' => $orderId ?? '-',
-            'status' => $this->humanReadableStatus($status),
-        ]);
+        $statusLabel = $this->humanReadableStatus($status);
+        $noteKey = $status === ManualPaymentRequest::STATUS_REJECTED
+            ? 'manual_payment.notification.detail.rejection_reason'
+            : 'manual_payment.notification.detail.note';
+
+        $details = $this->buildManualPaymentDetails(
+            $manualPaymentRequest,
+            $transaction,
+            $note,
+            $noteKey,
+            $statusLabel
+        );
+
+        $body = __('manual_payment.notification.admin.body', ['details' => $details]);
 
         $deeplink = $this->resolveAdminManualPaymentRoute($manualPaymentRequest);
 
@@ -547,13 +565,163 @@ class ManualPaymentDecisionService
     private function humanReadableStatus(string $status): string
     {
         return match ($status) {
-            ManualPaymentRequest::STATUS_APPROVED => __('مقبولة'),
-            ManualPaymentRequest::STATUS_REJECTED => __('مرفوضة'),
-            ManualPaymentRequest::STATUS_UNDER_REVIEW => __('قيد المراجعة'),
-            default => __('قيد المعالجة'),
+            ManualPaymentRequest::STATUS_APPROVED => __('manual_payment.notification.status.approved'),
+            ManualPaymentRequest::STATUS_REJECTED => __('manual_payment.notification.status.rejected'),
+            ManualPaymentRequest::STATUS_UNDER_REVIEW => __('manual_payment.notification.status.under_review'),
+            default => __('manual_payment.notification.status.pending'),
         };
     }
 
+    private function buildManualPaymentDetails(
+        ManualPaymentRequest $manualPaymentRequest,
+        PaymentTransaction $transaction,
+        ?string $note = null,
+        ?string $noteKey = null,
+        ?string $statusLabel = null
+    ): string {
+        $segments = [];
+
+        if ($statusLabel) {
+            $segments[] = __('manual_payment.notification.detail.status', [
+                'status' => $statusLabel,
+            ]);
+        }
+
+        $amount = $this->formatNotificationAmount($manualPaymentRequest);
+        if ($amount !== null) {
+            $segments[] = __('manual_payment.notification.detail.amount', ['amount' => $amount]);
+        }
+
+        $requestReference = $this->normalizeNotificationValue(
+            $manualPaymentRequest->reference ?? $manualPaymentRequest->getKey()
+        );
+        if ($requestReference !== null) {
+            $segments[] = __('manual_payment.notification.detail.request_reference', [
+                'reference' => $requestReference,
+            ]);
+        }
+
+        $transferDetails = TransferDetailsResolver::forManualPaymentRequest($manualPaymentRequest)->toArray();
+
+        $transferReference = $this->normalizeNotificationValue($transferDetails['transfer_reference'] ?? null);
+        if ($transferReference !== null && $transferReference !== $requestReference) {
+            $segments[] = __('manual_payment.notification.detail.transfer_reference', [
+                'reference' => $transferReference,
+            ]);
+        }
+
+        $bankName = $this->resolveNotificationBankName($manualPaymentRequest, $transferDetails);
+        if ($bankName !== null) {
+            $segments[] = __('manual_payment.notification.detail.bank_name', ['bank' => $bankName]);
+        }
+
+        $senderName = $this->normalizeNotificationValue($transferDetails['sender_name'] ?? null);
+        if ($senderName !== null) {
+            $segments[] = __('manual_payment.notification.detail.sender_name', ['name' => $senderName]);
+        }
+
+        if ($manualPaymentRequest->isWalletTopUp()) {
+            $segments[] = __('manual_payment.notification.detail.type.wallet_top_up');
+        } else {
+            $orderId = $this->resolveNotificationOrderId($manualPaymentRequest, $transaction);
+            if ($orderId !== null) {
+                $segments[] = __('manual_payment.notification.detail.order_id', ['id' => $orderId]);
+            }
+        }
+
+        $normalizedNote = $this->normalizeNotificationValue($note);
+        if ($normalizedNote !== null) {
+            $segments[] = __($noteKey ?? 'manual_payment.notification.detail.note', [
+                'note' => $normalizedNote,
+            ]);
+        }
+
+        $segments = array_values(array_filter(
+            $segments,
+            static fn ($segment) => is_string($segment) && trim($segment) !== ''
+        ));
+
+        if ($segments === []) {
+            return __('manual_payment.notification.detail.not_available');
+        }
+
+        return implode(' | ', $segments);
+    }
+
+    private function formatNotificationAmount(ManualPaymentRequest $manualPaymentRequest): ?string
+    {
+        $amount = $manualPaymentRequest->amount;
+        if ($amount === null || $amount === '') {
+            return null;
+        }
+
+        $amountValue = is_numeric($amount) ? (float) $amount : null;
+        if ($amountValue === null) {
+            return null;
+        }
+
+        $amountText = number_format($amountValue, 2);
+        $currency = strtoupper((string) ($manualPaymentRequest->currency ?? config('app.currency', '')));
+
+        return $currency !== '' ? $amountText . ' ' . $currency : $amountText;
+    }
+
+    private function resolveNotificationOrderId(
+        ManualPaymentRequest $manualPaymentRequest,
+        PaymentTransaction $transaction
+    ): ?int {
+        $orderId = $transaction->order_id;
+
+        if (! $orderId
+            && $manualPaymentRequest->payable_id
+            && ManualPaymentRequest::isOrderPayableType((string) $manualPaymentRequest->payable_type)
+        ) {
+            $orderId = (int) $manualPaymentRequest->payable_id;
+        }
+
+        return $orderId ? (int) $orderId : null;
+    }
+
+    /**
+     * @param array{bank_name?: string|null} $transferDetails
+     */
+    private function resolveNotificationBankName(
+        ManualPaymentRequest $manualPaymentRequest,
+        array $transferDetails
+    ): ?string {
+        $bankName = $transferDetails['bank_name'] ?? null;
+
+        if ($bankName === null) {
+            $bankName = $manualPaymentRequest->bank_label
+                ?? $manualPaymentRequest->bank_name
+                ?? $manualPaymentRequest->gateway_label;
+        }
+
+        return $this->normalizeNotificationValue($bankName);
+    }
+
+    private function normalizeNotificationValue(mixed $value): ?string
+    {
+        if ($value instanceof \Stringable) {
+            $value = (string) $value;
+        }
+
+        if ($value === null || is_bool($value)) {
+            return null;
+        }
+
+        if (is_numeric($value) && ! is_string($value)) {
+            $value = (string) $value;
+        }
+
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $trimmed = trim($value);
+
+        return $trimmed !== '' ? $trimmed : null;
+    }
     private function resolveStoreManualPaymentRoute(ManualPaymentRequest $manualPaymentRequest): ?string
     {
         if (! Route::has('merchant.manual-payments.show')) {
