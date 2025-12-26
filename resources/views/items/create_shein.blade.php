@@ -648,7 +648,7 @@
             const customColorCode = document.querySelector('[data-custom-color-code]');
             const customColorLabel = document.querySelector('[data-custom-color-label]');
             const importButton = document.getElementById('shein_import_btn');
-            const importStatus = document.getElementById('shein_import_status');
+            let importStatus = document.getElementById('shein_import_status');
             const importPreview = document.getElementById('imported_images_preview');
             const importInputs = document.getElementById('imported_images_inputs');
             const productLinkInput = document.getElementById('product_link');
@@ -734,6 +734,12 @@
             };
 
             const setImportStatus = (message, isError = false) => {
+                if (!importStatus && importButton && importButton.parentElement) {
+                    importStatus = document.createElement('small');
+                    importStatus.id = 'shein_import_status';
+                    importStatus.className = 'form-text text-muted';
+                    importButton.parentElement.appendChild(importStatus);
+                }
                 if (!importStatus) {
                     return;
                 }
@@ -1360,45 +1366,58 @@
                 setImportStatus('Shein data loaded.', false);
             };
 
-            if (importButton && productLinkInput) {
-                importButton.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    const url = normalizeText(productLinkInput.value);
-                    if (url === '') {
-                        setImportStatus('Paste the Shein product link first.', true);
-                        return;
-                    }
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]');
-                    const csrfValue = csrfToken ? csrfToken.getAttribute('content') : null;
+            const triggerSheinImport = () => {
+                if (!productLinkInput || !importButton || importButton.disabled) {
+                    return;
+                }
 
-                    setImportBusy(true);
-                    setImportStatus('Fetching data from Shein...', false);
+                const url = normalizeText(productLinkInput.value);
+                if (url === '') {
+                    setImportStatus('Paste the Shein product link first.', true);
+                    return;
+                }
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                const csrfValue = csrfToken ? csrfToken.getAttribute('content') : null;
 
-                    $.ajax({
-                        url: importRoute,
-                        method: 'POST',
-                        data: { url },
-                        headers: csrfValue ? { 'X-CSRF-TOKEN': csrfValue } : {},
-                    })
-                        .done((response) => {
-                            if (response && response.error) {
-                                const message = response.message || 'Failed to fetch Shein data.';
-                                setImportStatus(message, true);
-                                return;
-                            }
-                            const payload = response && response.data ? response.data : response;
-                            applyImportData(payload);
-                        })
-                        .fail((xhr) => {
-                            const message =
-                                (xhr.responseJSON && xhr.responseJSON.message) ||
-                                'Failed to fetch Shein data.';
+                setImportBusy(true);
+                setImportStatus('Fetching data from Shein...', false);
+
+                $.ajax({
+                    url: importRoute,
+                    method: 'POST',
+                    data: { url },
+                    headers: csrfValue ? { 'X-CSRF-TOKEN': csrfValue } : {},
+                })
+                    .done((response) => {
+                        if (response && response.error) {
+                            const message = response.message || 'Failed to fetch Shein data.';
                             setImportStatus(message, true);
-                        })
-                        .always(() => {
-                            setImportBusy(false);
-                        });
+                            return;
+                        }
+                        const payload = response && response.data ? response.data : response;
+                        applyImportData(payload);
+                    })
+                    .fail((xhr) => {
+                        const message =
+                            (xhr.responseJSON && xhr.responseJSON.message) ||
+                            'Failed to fetch Shein data.';
+                        setImportStatus(message, true);
+                    })
+                    .always(() => {
+                        setImportBusy(false);
+                    });
+            };
+
+            if (importButton) {
+                $(document).on('click', '#shein_import_btn', (event) => {
+                    event.preventDefault();
+                    try {
+                        triggerSheinImport();
+                    } catch (error) {
+                        setImportStatus(`Import failed: ${error}`, true);
+                    }
                 });
+                setImportStatus('Ready to import.', false);
             }
 
             refreshVariants();

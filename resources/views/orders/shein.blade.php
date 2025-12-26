@@ -393,7 +393,10 @@
 
                     <div class="card service-requests-table mb-4">
                         <div class="card-header">
-                            <h6 class="table-title">مجموعات الدفع الخاصة بطلبات شي ان</h6>`n                                <p class="table-hint">{{ __("Payment groups summary for Shein orders.") }}</p>
+                            <div>
+                                <h6 class="table-title">مجموعات الدفع الخاصة بطلبات شي ان</h6>
+                                <p class="table-hint">{{ __("Payment groups summary for Shein orders.") }}</p>
+                            </div>
                         </div>
                         <div class="card-body p-0">
                             @if($sheinPaymentGroups->isEmpty())
@@ -765,6 +768,7 @@
         </div>
     </div>
 </div>
+</div>
 @endsection
 
 @section('script')
@@ -820,6 +824,9 @@
     });
 </script>
 @endsection 
+
+
+
 
 
 
