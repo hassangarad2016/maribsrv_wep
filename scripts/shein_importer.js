@@ -1,7 +1,8 @@
-const { chromium } = require("playwright-extra");
-const stealthPlugin = require("playwright-extra-plugin-stealth")();
+const fs = require("fs");
+const puppeteer = require("puppeteer-extra");
+const stealthPlugin = require("puppeteer-extra-plugin-stealth");
 
-chromium.use(stealthPlugin);
+puppeteer.use(stealthPlugin());
 
 const targetUrl = process.argv[2];
 if (!targetUrl || !/^https?:\/\//i.test(targetUrl)) {
@@ -11,21 +12,21 @@ if (!targetUrl || !/^https?:\/\//i.test(targetUrl)) {
   process.exit(1);
 }
 
-const resolveLaunchOptions = () => {
-  const options = {
-    headless: true,
-    args: ["--disable-blink-features=AutomationControlled"],
-  };
-  const executablePath = process.env.SHEIN_BROWSER_EXECUTABLE;
-  const channel = process.env.SHEIN_BROWSER_CHANNEL || "msedge";
-
-  if (executablePath) {
-    options.executablePath = executablePath;
-  } else if (channel) {
-    options.channel = channel;
+const resolveExecutablePath = () => {
+  if (process.env.SHEIN_BROWSER_EXECUTABLE) {
+    return process.env.SHEIN_BROWSER_EXECUTABLE;
   }
 
-  return options;
+  const candidates = [
+    "C:\\\\Program Files\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe",
+    "C:\\\\Program Files (x86)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe",
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return null;
 };
 
 const extractInPage = () => {
@@ -341,44 +342,49 @@ const extractInPage = () => {
   };
 };
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const run = async () => {
-  const browser = await chromium.launch(resolveLaunchOptions());
-  const context = await browser.newContext({
-    userAgent:
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    locale: "ar",
-    viewport: { width: 1280, height: 720 },
+  const executablePath = resolveExecutablePath();
+  if (!executablePath) {
+    process.stderr.write(
+      JSON.stringify({ ok: false, error: "browser_not_found" }, null, 2)
+    );
+    process.exit(1);
+  }
+
+  const headlessEnv = String(process.env.SHEIN_HEADLESS || "").toLowerCase();
+  const headless = headlessEnv === "0" || headlessEnv === "false" ? false : "new";
+  const userDataDir = process.env.SHEIN_BROWSER_PROFILE;
+
+  const launchOptions = {
+    headless,
+    executablePath,
+    args: [
+      "--disable-blink-features=AutomationControlled",
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+    ],
+  };
+
+  if (userDataDir) {
+    launchOptions.userDataDir = userDataDir;
+  }
+
+  const browser = await puppeteer.launch(launchOptions);
+
+  const page = await browser.newPage();
+  await page.setUserAgent(
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  );
+  await page.setViewport({ width: 1280, height: 720 });
+  await page.setExtraHTTPHeaders({
+    "accept-language": "ar,en-US;q=0.8,en;q=0.7",
   });
-  await context.addInitScript(() => {
-    Object.defineProperty(navigator, "webdriver", {
-      get: () => undefined,
-    });
-    Object.defineProperty(navigator, "languages", {
-      get: () => ["ar", "en-US", "en"],
-    });
-    Object.defineProperty(navigator, "language", {
-      get: () => "ar",
-    });
-    Object.defineProperty(navigator, "platform", {
-      get: () => "Win32",
-    });
-    Object.defineProperty(navigator, "plugins", {
-      get: () => [1, 2, 3, 4, 5],
-    });
-    window.chrome = window.chrome || { runtime: {} };
-    const originalQuery = navigator.permissions.query.bind(navigator.permissions);
-    navigator.permissions.query = (parameters) => {
-      if (parameters && parameters.name === "notifications") {
-        return Promise.resolve({ state: Notification.permission });
-      }
-      return originalQuery(parameters);
-    };
-  });
-  const page = await context.newPage();
   page.setDefaultTimeout(45000);
 
   await page.goto(targetUrl, { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2000);
+  await sleep(2000);
   const currentUrl = page.url();
   if (/\/risk\/challenge/i.test(currentUrl)) {
     await browser.close();
@@ -394,8 +400,8 @@ const run = async () => {
   await page.evaluate(() => {
     window.scrollTo(0, document.body.scrollHeight);
   });
-  await page.waitForTimeout(1200);
-  await page.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
+  await sleep(1200);
+  await page.waitForNetworkIdle({ idleTime: 1000, timeout: 8000 }).catch(() => {});
 
   const data = await page.evaluate(extractInPage);
   await browser.close();

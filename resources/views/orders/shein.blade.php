@@ -391,9 +391,9 @@
                             ->values();
                     @endphp
 
-                    <div class="card card-outline card-primary mb-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3 class="card-title mb-0">مجموعات الدفع الخاصة بطلبات شي ان</h3>
+                    <div class="card service-requests-table mb-4">
+                        <div class="card-header">
+                            <h6 class="table-title">مجموعات الدفع الخاصة بطلبات شي ان</h6>`n                                <p class="table-hint">{{ __("Payment groups summary for Shein orders.") }}</p>
                         </div>
                         <div class="card-body p-0">
                             @if($sheinPaymentGroups->isEmpty())
@@ -402,7 +402,7 @@
                                 </div>
                             @else
                                 <div class="table-responsive">
-                                    <table class="table table-striped mb-0">
+                                    <table class="table table-striped table-hover align-middle mb-0 shein-orders-table">
                                         <thead>
                                             <tr>
                                                 <th>اسم المجموعة</th>
@@ -462,8 +462,16 @@
                         ];
                     @endphp
 
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
+                    <div class="card service-requests-table">
+                        <div class="card-header">
+                            <div>
+                                <h6 class="table-title">{{ __("Shein orders list") }}</h6>
+                                <p class="table-hint">{{ __("Review, update, and manage Shein orders.") }}</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle shein-orders-table">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -810,3 +818,7 @@
     });
 </script>
 @endsection 
+
+
+
+
