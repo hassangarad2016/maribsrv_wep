@@ -321,6 +321,13 @@ class ItemController extends Controller {
             ResponseService::errorResponse('Shein importer script not found.', null, 500);
         }
 
+        $nodeBinary = env('SHEIN_NODE_BINARY', 'node');
+        if (! $this->canExecuteNodeBinary($nodeBinary)) {
+            ResponseService::errorResponse('Node.js binary not found or not executable.', [
+                'details' => 'Set SHEIN_NODE_BINARY to the full Node.js path.',
+            ], 422);
+        }
+
         $processEnv = [];
         $scriptEnv = [
             'SHEIN_BROWSER_EXECUTABLE' => env('SHEIN_BROWSER_EXECUTABLE'),
@@ -333,7 +340,6 @@ class ItemController extends Controller {
             }
         }
 
-        $nodeBinary = env('SHEIN_NODE_BINARY', 'node');
         $process = new Process([$nodeBinary, $scriptPath, $request->input('url')], base_path(), array_merge($_ENV, $processEnv));
         $process->setTimeout(120);
         $process->run();
@@ -1550,6 +1556,25 @@ class ItemController extends Controller {
                 @unlink($path);
             }
         }
+    }
+
+    private function canExecuteNodeBinary(string $binary): bool
+    {
+        if (str_contains($binary, DIRECTORY_SEPARATOR)) {
+            if (! is_file($binary) || ! is_executable($binary)) {
+                return false;
+            }
+        }
+
+        try {
+            $process = new Process([$binary, '-v']);
+            $process->setTimeout(10);
+            $process->run();
+        } catch (Throwable $exception) {
+            return false;
+        }
+
+        return $process->isSuccessful();
     }
 
     private function storeCustomFieldValues(Item $item, Request $request): void
