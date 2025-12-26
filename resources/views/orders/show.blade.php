@@ -370,7 +370,7 @@
 
 
     <div class="row">
-        <div class="col-12 col-xl-7 mb-4 mb-xl-0">
+        <div class="col-12 mb-4">
             <div class="card order-overview-card">
                 <div class="card-header">
                     <h4 class="card-title">معلومات الطلب</h4>
@@ -880,7 +880,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-12 col-xl-5">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">سجل الطلب</h4>
