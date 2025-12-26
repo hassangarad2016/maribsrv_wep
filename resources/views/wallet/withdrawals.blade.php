@@ -238,6 +238,41 @@
     .wallet-withdrawals-table .table-striped > tbody > tr:nth-of-type(odd) {
         background-color: rgba(15, 23, 42, 0.02);
     }
+    .wallet-withdrawals-table .fixed-table-toolbar {
+        margin-bottom: 0.75rem;
+    }
+    .wallet-withdrawals-table .fixed-table-toolbar .columns {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.15rem;
+        background: #4b5563;
+        border-radius: 0.75rem;
+        padding: 0.25rem;
+        box-shadow: 0 10px 18px rgba(15, 23, 42, 0.18);
+    }
+    .wallet-withdrawals-table .fixed-table-toolbar .columns .btn,
+    .wallet-withdrawals-table .fixed-table-toolbar .columns .btn-group > .btn {
+        background: transparent;
+        border: 0;
+        color: #ffffff;
+        width: 36px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: none;
+    }
+    .wallet-withdrawals-table .fixed-table-toolbar .columns .btn:hover,
+    .wallet-withdrawals-table .fixed-table-toolbar .columns .btn-group > .btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+    .wallet-withdrawals-table .fixed-table-toolbar .columns .dropdown-toggle::after {
+        display: none;
+    }
+    .wallet-withdrawals-table .fixed-table-toolbar .columns .btn i {
+        font-size: 1rem;
+    }
+    #wallet_withdrawals_table { width: 100%; }
 
     @media (min-width: 992px) {
         .wallet-withdrawals-hero {
@@ -332,9 +367,9 @@
                             <p class="filters-hint">{{ __('Approve or reject pending withdrawals directly from this toolbar.') }}</p>
                         </div>
                     </div>
-                    <form method="get" id="withdrawalsFilterForm" class="filters-row">
+                    <form id="withdrawalsFilterForm" class="filters-row" onsubmit="return false;">
                         <div class="status-tabs" role="tablist">
-                            <button type="button" class="status-tab {{ $filters['status'] === '' ? 'active' : '' }}" data-status="">{{ __('All statuses') }}</button>
+                            <button type="button" class="status-tab {{ empty($filters['status']) ? 'active' : '' }}" data-status="">{{ __('All statuses') }}</button>
                             <button type="button" class="status-tab {{ $filters['status'] === \App\Models\WalletWithdrawalRequest::STATUS_PENDING ? 'active' : '' }}" data-status="{{ \App\Models\WalletWithdrawalRequest::STATUS_PENDING }}">{{ $statusOptions[\App\Models\WalletWithdrawalRequest::STATUS_PENDING] ?? __('Pending') }}</button>
                             <button type="button" class="status-tab {{ $filters['status'] === \App\Models\WalletWithdrawalRequest::STATUS_APPROVED ? 'active' : '' }}" data-status="{{ \App\Models\WalletWithdrawalRequest::STATUS_APPROVED }}">{{ $statusOptions[\App\Models\WalletWithdrawalRequest::STATUS_APPROVED] ?? __('Approved') }}</button>
                             <button type="button" class="status-tab {{ $filters['status'] === \App\Models\WalletWithdrawalRequest::STATUS_REJECTED ? 'active' : '' }}" data-status="{{ \App\Models\WalletWithdrawalRequest::STATUS_REJECTED }}">{{ $statusOptions[\App\Models\WalletWithdrawalRequest::STATUS_REJECTED] ?? __('Rejected') }}</button>
@@ -342,7 +377,7 @@
                         <input type="hidden" name="status" id="status_filter" value="{{ $filters['status'] }}">
                         <div>
                             <label for="method" class="form-label mb-1">{{ __('Withdrawal Method') }}</label>
-                            <select id="method" name="method" class="form-select" onchange="this.form.submit()">
+                            <select id="method" name="method" class="form-select">
                                 <option value="">{{ __('All methods') }}</option>
                                 @foreach($methodOptions as $value => $option)
                                     <option value="{{ $value }}" @selected($filters['method'] === $value)>{{ $option['name'] }}</option>
@@ -392,223 +427,94 @@
                 </div>
                 <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover align-middle mb-0">
+                            <table
+                               class="table table-striped table-hover align-middle mb-0"
+                               aria-describedby="walletWithdrawalsTableCaption"
+                               id="wallet_withdrawals_table"
+                               data-toggle="table"
+                               data-url="{{ route('wallet.withdrawals.datatable') }}"
+                               data-click-to-select="true"
+                               data-side-pagination="server"
+                               data-pagination="true"
+                               data-page-list="[5, 10, 20, 50, 100, 200]"
+                               data-search="true"
+                               data-show-columns="true"
+                               data-show-refresh="true"
+                               data-trim-on-search="false"
+                               data-escape="false"
+                               data-responsive="true"
+                               data-sort-name="id"
+                               data-sort-order="desc"
+                               data-pagination-successively-size="3"
+                               data-show-export="true"
+                               data-export-options='{"fileName": "wallet-withdrawals","ignoreColumn": ["operate"]}'
+                               data-export-types='["pdf","json","xml","csv","txt","sql","doc","excel"]'
+                               data-icons="walletWithdrawalsTableIcons"
+                               data-icons-prefix="bi"
+                               data-mobile-responsive="true"
+                               data-query-params="queryParams">
                                 <thead class="table-light">
                                 <tr>
-                                    <th class="py-3">{{ __('Request') }}</th>
-                                    <th class="py-3">{{ __('User') }}</th>
-                                    <th class="text-center text-md-start py-3">{{ __('Amount') }}</th>
-                                    <th class="py-3">{{ __('Method') }}</th>
-                                    <th class="py-3">{{ __('Notes') }}</th>
-                                    <th class="py-3">{{ __('Requested At') }}</th>
-                                    <th class="text-center text-md-end py-3">{{ __('Actions') }}</th>
+                                    <th data-field="id" data-sortable="true" data-formatter="withdrawalRequestFormatter">{{ __('Request') }}</th>
+                                    <th data-field="user.name" data-sortable="false" data-formatter="userFormatter">{{ __('User') }}</th>
+                                    <th data-field="amount" data-sortable="true" data-formatter="amountFormatter">{{ __('Amount') }}</th>
+                                    <th data-field="preferred_method" data-sortable="false" data-formatter="methodFormatter">{{ __('Method') }}</th>
+                                    <th data-field="notes" data-sortable="false" data-formatter="notesFormatter">{{ __('Notes') }}</th>
+                                    <th data-field="created_at" data-sortable="true" data-formatter="createdAtFormatter">{{ __('Requested At') }}</th>
+                                    <th data-field="status" data-sortable="true" data-formatter="statusFormatter">{{ __('Status') }}</th>
+                                    <th data-field="operate" data-align="center" data-sortable="false" data-events="withdrawalEvents">{{ __('Actions') }}</th>
                                 </tr>
                                 </thead>
-                                <tbody>
-                                @forelse($withdrawals as $withdrawal)
-                                    @php
-                                        $statusClass = match ($withdrawal->status) {
-                                            \App\Models\WalletWithdrawalRequest::STATUS_APPROVED => 'bg-success-subtle text-success',
-                                            \App\Models\WalletWithdrawalRequest::STATUS_REJECTED => 'bg-danger-subtle text-danger',
-                                            default => 'bg-warning-subtle text-warning'
-                                        };
-                                        $methodLabel = $methodOptions[$withdrawal->preferred_method]['name'] ?? Str::headline(str_replace('_', ' ', $withdrawal->preferred_method));
-                                    @endphp
-                                    <tr class="table-row-spacious">
-                                        <td class="py-4">
-                                            <div class="d-flex align-items-center gap-3">
-                                                <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-secondary-subtle text-secondary" style="width: 48px; height: 48px;">
-                                                    <i class="bi bi-receipt fs-4"></i>
-                                                </span>
-                                                <div>
-                                                    <div class="fw-semibold">#{{ $withdrawal->getKey() }}</div>
-                                                    <span class="badge {{ $statusClass }} mt-2">{{ $statusOptions[$withdrawal->status] ?? Str::headline($withdrawal->status) }}</span>
-                                                </div>
-                                            </div>
-
-                                        </td>
-                                        <td class="py-4">
-                                            <div class="d-flex align-items-center gap-3">
-                                                <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary" style="width: 48px; height: 48px;">
-                                                    <i class="bi bi-person-circle fs-4"></i>
-                                                </span>
-                                                <div>
-                                                    <div class="fw-semibold">{{ $withdrawal->account?->user?->name ?? __('Unknown User') }}</div>
-                                                    <div class="text-muted small">{{ $withdrawal->account?->user?->email }}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="text-center text-md-start py-4">
-                                            <span class="badge bg-warning-subtle text-warning fw-semibold px-3 py-2">
-                                                <i class="bi bi-cash-stack"></i>
-                                                {{ number_format((float) $withdrawal->amount, 2) }} {{ $currency }}
-                                            </span>
-
-                                        </td>
-                                        <td class="py-4">
-                                            <span class="badge bg-info-subtle text-info">{{ $methodLabel }}</span>
-                                                @if($withdrawal->wallet_reference)
-                                                    <div class="text-muted small mt-1 d-flex align-items-center gap-2">
-                                                        <i class="bi bi-link-45deg"></i>
-                                                        <span>{{ $withdrawal->wallet_reference }}</span>
-                                                    </div>
-                                                @endif
-                                        </td>
-                                        <td class="py-4">
-                                            @if($withdrawal->notes)
-                                                <div class="small">{{ $withdrawal->notes }}</div>
-                                            @else
-                                                <span class="text-muted small">{{ __('No notes provided.') }}</span>
-                                            @endif
-                                            @if($withdrawal->review_notes)
-                                                <div class="small text-muted mt-1">{{ __('Reviewer notes:') }} {{ $withdrawal->review_notes }}</div>
-                                            @endif
-                                        </td>
-                                        <td class="py-4">
-                                            <div class="small d-flex align-items-center gap-2">
-                                                <i class="bi bi-calendar-week"></i>
-                                                <span>{{ optional($withdrawal->created_at)->format('Y-m-d H:i') }}</span>
-                                            </div>
-                                            <div class="text-muted small mt-1 d-flex align-items-center gap-2">
-                                                <i class="bi bi-clock-history"></i>
-                                                <span>{{ optional($withdrawal->created_at)->diffForHumans() }}</span>
-                                            </div>
-
-                                        </td>
-                                        <td class="text-center text-md-end py-4">
-                                            <div class="btn-toolbar justify-content-center justify-content-md-end gap-2 flex-wrap" role="toolbar" aria-label="{{ __('Actions') }}">
-                                                <button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2"
-                                                        data-bs-toggle="offcanvas"
-                                                        data-bs-target="#withdrawalPreview{{ $withdrawal->getKey() }}"
-                                                        aria-controls="withdrawalPreview{{ $withdrawal->getKey() }}">
-                                                    <i class="bi bi-eye"></i>
-                                                    <span>{{ __('Preview') }}</span>
-                                                </button>
-                                                @if($withdrawal->isPending())
-                                                    <form method="post" action="{{ route('wallet.withdrawals.approve', $withdrawal) }}" class="d-flex">
-
-
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-success btn-sm d-flex align-items-center gap-2" onclick="return confirm('{{ __('Approve this withdrawal request?') }}');">
-                                                            <i class="bi bi-check-circle"></i>
-                                                            <span>{{ __('Approve') }}</span>
-
-                                                        </button>
-                                                    </form>
-                                                    <form method="post" action="{{ route('wallet.withdrawals.reject', $withdrawal) }}" class="d-flex">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-danger btn-sm d-flex align-items-center gap-2" onclick="return confirm('{{ __('Reject this withdrawal request?') }}');">
-                                                            <i class="bi bi-x-circle"></i>
-                                                            <span>{{ __('Reject') }}</span>
-                                                        </button>
-                                                    </form>
-                                                @else
-                                                    <span class="badge bg-secondary-subtle text-secondary">{{ __('Processed') }}</span>
-                                                @endif
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @push('modals')
-                                        <div class="offcanvas offcanvas-end" tabindex="-1" id="withdrawalPreview{{ $withdrawal->getKey() }}" aria-labelledby="withdrawalPreviewLabel{{ $withdrawal->getKey() }}">
-                                            <div class="offcanvas-header">
-                                                <h5 class="offcanvas-title" id="withdrawalPreviewLabel{{ $withdrawal->getKey() }}">{{ __('Withdrawal Snapshot') }}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{{ __('Close') }}"></button>
-                                            </div>
-                                            <div class="offcanvas-body">
-                                                <div class="mb-3">
-                                                    <p class="text-muted small mb-1">{{ __('Request Identifier') }}</p>
-                                                    <p class="fw-semibold mb-0">#{{ $withdrawal->getKey() }}</p>
-                                                    <span class="badge {{ $statusClass }} mt-2">{{ $statusOptions[$withdrawal->status] ?? Str::headline($withdrawal->status) }}</span>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <p class="text-muted small mb-1">{{ __('Requested Amount') }}</p>
-                                                    <p class="fw-bold fs-4 mb-0">{{ number_format((float) $withdrawal->amount, 2) }} {{ $currency }}</p>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <p class="text-muted small mb-1">{{ __('Preferred Method') }}</p>
-                                                    <p class="mb-0">{{ $methodLabel }}</p>
-                                                    @if($withdrawal->wallet_reference)
-                                                        <a href="{{ $withdrawal->wallet_reference }}" target="_blank" rel="noopener" class="d-inline-flex align-items-center gap-1 mt-1">
-                                                            <i class="bi bi-box-arrow-up-right"></i>
-                                                            <span>{{ __('Open reference link') }}</span>
-                                                        </a>
-                                                    @endif
-                                                </div>
-                                                <div class="mb-3">
-                                                    <p class="text-muted small mb-1">{{ __('Notes') }}</p>
-                                                    <p class="mb-0">{{ $withdrawal->notes ?: __('No notes provided.') }}</p>
-                                                </div>
-                                                @if($withdrawal->review_notes)
-                                                    <div class="mb-3">
-                                                        <p class="text-muted small mb-1">{{ __('Review Notes') }}</p>
-                                                        <p class="mb-0">{{ $withdrawal->review_notes }}</p>
-                                                    </div>
-                                                @endif
-                                                @php
-                                                    $documents = collect($withdrawal->meta['documents'] ?? [])->filter(fn ($doc) => filled($doc));
-                                                @endphp
-                                                <div class="mb-3">
-                                                    <p class="text-muted small mb-2">{{ __('Supporting Documents') }}</p>
-                                                    @if($documents->isNotEmpty())
-                                                        <ul class="list-unstyled mb-0 d-grid gap-2">
-                                                            @foreach($documents as $document)
-                                                                @php
-                                                                    $link = is_array($document) ? ($document['url'] ?? ($document['link'] ?? null)) : $document;
-                                                                    $label = is_array($document) ? ($document['name'] ?? ($document['label'] ?? $link)) : $document;
-                                                                @endphp
-                                                                @if($link)
-                                                                    <li>
-                                                                        <a href="{{ $link }}" target="_blank" rel="noopener" class="d-inline-flex align-items-center gap-2">
-                                                                            <i class="bi bi-paperclip"></i>
-                                                                            <span>{{ $label }}</span>
-                                                                        </a>
-                                                                    </li>
-                                                                @endif
-                                                            @endforeach
-                                                        </ul>
-                                                    @else
-                                                        <p class="text-muted small mb-0">{{ __('No documents provided.') }}</p>
-                                                    @endif
-                                                </div>
-                                                <div class="d-grid gap-2">
-                                                    @if($withdrawal->isPending())
-                                                        <form method="post" action="{{ route('wallet.withdrawals.approve', $withdrawal) }}">
-                                                            @csrf
-                                                            <button type="submit" class="btn btn-success d-flex align-items-center gap-2" onclick="return confirm('{{ __('Approve this withdrawal request?') }}');">
-                                                                <i class="bi bi-check-circle"></i>
-                                                                <span>{{ __('Approve') }}</span>
-                                                            </button>
-                                                        </form>
-                                                        <form method="post" action="{{ route('wallet.withdrawals.reject', $withdrawal) }}">
-                                                            @csrf
-                                                            <button type="submit" class="btn btn-danger d-flex align-items-center gap-2" onclick="return confirm('{{ __('Reject this withdrawal request?') }}');">
-                                                                <i class="bi bi-x-circle"></i>
-                                                                <span>{{ __('Reject') }}</span>
-                                                            </button>
-                                                        </form>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endpush    
-
-                                @empty
-                                    <tr>
-                                        <td colspan="7" class="text-center py-4 text-muted">
-                                            <i class="bi bi-cash-coin display-6 d-block mb-2"></i>
-                                            {{ __('No withdrawal requests found for the selected filters.') }}
-                                        </td>
-                                    </tr>
-                                @endforelse
-                                </tbody>
                             </table>
                         </div>
+                        <div id="walletWithdrawalsTableCaption" class="visually-hidden">{{ __('Review and manage wallet withdrawal requests from users.') }}</div>
                 </div>
-                @if($withdrawals->hasPages())
-                    <div class="card-footer bg-white border-0">
-                        {{ $withdrawals->links() }}
+            </div>
+        </div>
+
+        <div class="modal fade" id="withdrawalPreviewModal" tabindex="-1" aria-labelledby="withdrawalPreviewLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="withdrawalPreviewLabel">{{ __('Withdrawal Details') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
                     </div>
-                @endif
+                    <div class="modal-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4 text-muted">{{ __('Request ID') }}</dt>
+                            <dd class="col-sm-8" id="withdrawalPreviewId">-</dd>
+
+                            <dt class="col-sm-4 text-muted">{{ __('Status') }}</dt>
+                            <dd class="col-sm-8">
+                                <span id="withdrawalPreviewStatus" class="badge bg-secondary">-</span>
+                            </dd>
+
+                            <dt class="col-sm-4 text-muted">{{ __('Amount') }}</dt>
+                            <dd class="col-sm-8" id="withdrawalPreviewAmount">-</dd>
+
+                            <dt class="col-sm-4 text-muted">{{ __('Method') }}</dt>
+                            <dd class="col-sm-8" id="withdrawalPreviewMethod">-</dd>
+
+                            <dt class="col-sm-4 text-muted">{{ __('User') }}</dt>
+                            <dd class="col-sm-8">
+                                <div id="withdrawalPreviewUser">-</div>
+                                <div id="withdrawalPreviewEmail" class="text-muted small"></div>
+                            </dd>
+
+                            <dt class="col-sm-4 text-muted">{{ __('Reference') }}</dt>
+                            <dd class="col-sm-8" id="withdrawalPreviewReference">-</dd>
+
+                            <dt class="col-sm-4 text-muted">{{ __('Notes') }}</dt>
+                            <dd class="col-sm-8" id="withdrawalPreviewNotes">-</dd>
+
+                            <dt class="col-sm-4 text-muted">{{ __('Review Notes') }}</dt>
+                            <dd class="col-sm-8" id="withdrawalPreviewReviewNotes">-</dd>
+
+                            <dt class="col-sm-4 text-muted">{{ __('Requested At') }}</dt>
+                            <dd class="col-sm-8" id="withdrawalPreviewCreatedAt">-</dd>
+                        </dl>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -616,18 +522,143 @@
 
 @section('script')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('withdrawalsFilterForm');
-        const statusInput = document.getElementById('status_filter');
-        const tabs = document.querySelectorAll('.status-tab');
+    window.walletWithdrawalsTableIcons = {
+        refresh: 'bi-arrow-clockwise',
+        columns: 'bi-list-ul',
+        export: 'bi-download'
+    };
+    const WALLET_CURRENCY = @json($currency);
 
-        tabs.forEach((tab) => {
-            tab.addEventListener('click', () => {
-                tabs.forEach((item) => item.classList.remove('active'));
-                tab.classList.add('active');
-                statusInput.value = tab.dataset.status || '';
-                form.submit();
-            });
+    function escapeHtml(value) {
+        if (value === null || value === undefined) {
+            return '';
+        }
+        return String(value).replace(/[&<>"'`=\/]/g, function (char) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;',
+                '/': '&#x2F;',
+                '`': '&#x60;',
+                '=': '&#x3D;'
+            }[char];
+        });
+    }
+
+    function withdrawalRequestFormatter(value, row) {
+        const reference = row.wallet_reference ? `<div class="text-muted small mt-1">Ref: ${escapeHtml(row.wallet_reference)}</div>` : '';
+        const label = value ? `#${escapeHtml(value)}` : '-';
+        return `<span class="badge bg-primary text-white fw-semibold px-3 py-2">${label}</span>${reference}`;
+    }
+
+    function userFormatter(value, row) {
+        const name = row.user && row.user.name ? row.user.name : '-';
+        const email = row.user && row.user.email ? row.user.email : '';
+        return `<div class="fw-semibold">${escapeHtml(name)}</div>${email ? `<div class="text-muted small">${escapeHtml(email)}</div>` : ''}`;
+    }
+
+    function amountFormatter(value) {
+        let amount = Number(value);
+        if (Number.isNaN(amount)) {
+            amount = 0;
+        }
+        const formatted = amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return `<span class="fw-semibold">${formatted}</span> <span class="text-muted small">${escapeHtml(WALLET_CURRENCY)}</span>`;
+    }
+
+    function methodFormatter(value, row) {
+        const label = row.method_label || value || '-';
+        return `<span class="badge bg-light text-dark">${escapeHtml(label)}</span>`;
+    }
+
+    function notesFormatter(value) {
+        if (!value) {
+            return '<span class="text-muted">-</span>';
+        }
+        const full = String(value);
+        const short = full.length > 60 ? `${full.slice(0, 57)}...` : full;
+        return `<span title="${escapeHtml(full)}">${escapeHtml(short)}</span>`;
+    }
+
+    function createdAtFormatter(value, row) {
+        const label = row.created_human || value || '-';
+        return `<span class="text-nowrap">${escapeHtml(label)}</span>`;
+    }
+
+    function statusFormatter(value, row) {
+        const status = row.status || value || 'pending';
+        const label = row.status_label || status;
+        const badgeClass = {
+            pending: 'warning',
+            approved: 'success',
+            rejected: 'danger'
+        }[status] || 'secondary';
+        return `<span class="badge bg-${badgeClass} text-white">${escapeHtml(label)}</span>`;
+    }
+
+    function queryParams(params) {
+        return {
+            status_filter: $('#status_filter').val(),
+            method_filter: $('#method').val(),
+            offset: params.offset,
+            limit: params.limit,
+            search: params.search,
+            sort: params.sort,
+            order: params.order,
+            filter: params.filter
+        };
+    }
+
+    function fillPreviewModal(row) {
+        const statusClass = {
+            pending: 'bg-warning',
+            approved: 'bg-success',
+            rejected: 'bg-danger'
+        }[row.status] || 'bg-secondary';
+
+        $('#withdrawalPreviewId').text(row.id ?? '-');
+        $('#withdrawalPreviewStatus')
+            .attr('class', `badge ${statusClass}`)
+            .text(row.status_label || row.status || '-');
+        $('#withdrawalPreviewAmount').text(`${row.amount ?? 0} ${WALLET_CURRENCY}`);
+        $('#withdrawalPreviewMethod').text(row.method_label || row.preferred_method || '-');
+        $('#withdrawalPreviewUser').text(row.user && row.user.name ? row.user.name : '-');
+        $('#withdrawalPreviewEmail').text(row.user && row.user.email ? row.user.email : '');
+        $('#withdrawalPreviewReference').text(row.wallet_reference || '-');
+        $('#withdrawalPreviewNotes').text(row.notes || '-');
+        $('#withdrawalPreviewReviewNotes').text(row.review_notes || '-');
+        $('#withdrawalPreviewCreatedAt').text(row.created_human || row.created_at || '-');
+    }
+
+    window.withdrawalEvents = {
+        'click .preview-withdrawal': function (e, value, row) {
+            fillPreviewModal(row);
+            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('withdrawalPreviewModal'));
+            modal.show();
+        }
+    };
+
+    $(document).ready(function () {
+        const $table = $('#wallet_withdrawals_table');
+        const $statusFilter = $('#status_filter');
+
+        function refreshTableToFirstPage() {
+            const options = $table.bootstrapTable('getOptions');
+            options.pageNumber = 1;
+            $table.bootstrapTable('refresh');
+        }
+
+        $('.status-tab').on('click', function () {
+            $('.status-tab').removeClass('active');
+            $(this).addClass('active');
+            $statusFilter.val($(this).data('status'));
+            refreshTableToFirstPage();
+        });
+
+        $('#method').on('change', function () {
+            refreshTableToFirstPage();
         });
     });
 </script>

@@ -69,22 +69,6 @@ class WalletWithdrawalRequestAdminController extends Controller
 
         $filters = $validator->validated();
 
-        $withdrawalRequests = WalletWithdrawalRequest::query()
-            ->with(['account.user'])
-            ->latest();
-
-        if (!empty($filters['status'])) {
-            $withdrawalRequests->where('status', $filters['status']);
-        }
-
-        if (!empty($filters['method'])) {
-            $withdrawalRequests->where('preferred_method', $filters['method']);
-        }
-
-        $withdrawals = $withdrawalRequests
-            ->paginate(20)
-            ->withQueryString();
-
         $statusAggregates = WalletWithdrawalRequest::query()
             ->select('status', DB::raw('COUNT(*) as total_count'), DB::raw('COALESCE(SUM(amount), 0) as total_amount'))
             ->groupBy('status')
@@ -114,7 +98,6 @@ class WalletWithdrawalRequestAdminController extends Controller
 
 
         return view('wallet.withdrawals', [
-            'withdrawals' => $withdrawals,
             'statusOptions' => $statusOptions,
             'methodOptions' => $methodOptions,
             'filters' => [
@@ -126,6 +109,159 @@ class WalletWithdrawalRequestAdminController extends Controller
             'totalWithdrawalAmount' => $totalWithdrawalAmount,
 
         ]);
+    }
+
+    public function datatable(Request $request)
+    {
+        try {
+            ResponseService::noPermissionThenSendJson('wallet-manage');
+
+            $offset = (int) $request->input('offset', 0);
+            $limitParam = $request->input('limit', 50);
+
+            if (is_string($limitParam) && strtolower($limitParam) === 'all') {
+                $limit = -1;
+            } else {
+                $limit = (int) $limitParam;
+                if ($limit === 0) {
+                    $limit = 50;
+                }
+            }
+
+            $sort = (string) $request->input('sort', 'id');
+            $order = strtoupper((string) $request->input('order', 'DESC')) === 'ASC' ? 'ASC' : 'DESC';
+
+            $statusFilter = $request->input('status_filter');
+            if ($statusFilter === null || $statusFilter === '') {
+                $statusFilter = $request->input('status');
+            }
+
+            $methodFilter = $request->input('method_filter');
+            if ($methodFilter === null || $methodFilter === '') {
+                $methodFilter = $request->input('method');
+            }
+
+            $statusLabels = [
+                WalletWithdrawalRequest::STATUS_PENDING => __('Pending'),
+                WalletWithdrawalRequest::STATUS_APPROVED => __('Approved'),
+                WalletWithdrawalRequest::STATUS_REJECTED => __('Rejected'),
+            ];
+
+            $methodLabels = collect(config('wallet.withdrawals.methods', []))
+                ->mapWithKeys(static function (array $method): array {
+                    $key = (string) ($method['key'] ?? '');
+
+                    if ($key === '') {
+                        return [];
+                    }
+
+                    $name = __($method['name'] ?? Str::headline(str_replace('_', ' ', $key)));
+
+                    return [$key => [
+                        'key' => $key,
+                        'name' => $name,
+                    ]];
+                })
+                ->all();
+
+            $query = WalletWithdrawalRequest::query()->with(['account.user']);
+
+            if ($statusFilter !== null && $statusFilter !== '') {
+                $query->where('status', $statusFilter);
+            }
+
+            if ($methodFilter !== null && $methodFilter !== '') {
+                $query->where('preferred_method', $methodFilter);
+            }
+
+            if (!empty($request->search)) {
+                $search = trim((string) $request->search);
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('id', (int) $search)
+                        ->orWhere('wallet_reference', 'like', "%{$search}%")
+                        ->orWhere('notes', 'like', "%{$search}%")
+                        ->orWhere('review_notes', 'like', "%{$search}%")
+                        ->orWhereHas('account.user', function ($user) use ($search) {
+                            $user->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                        });
+                });
+            }
+
+            $total = (clone $query)->count();
+
+            $sortable = ['id', 'amount', 'status', 'preferred_method', 'created_at'];
+            if (!in_array($sort, $sortable, true)) {
+                $sort = 'id';
+            }
+
+            if ($limit <= 0) {
+                $rows = $query->orderBy($sort, $order)->get();
+            } else {
+                $rows = $query->orderBy($sort, $order)
+                    ->skip($offset)
+                    ->take($limit)
+                    ->get();
+            }
+
+            $csrfToken = csrf_token();
+            $dataRows = [];
+
+            foreach ($rows as $row) {
+                $user = $row->account?->user;
+                $statusLabel = $statusLabels[$row->status] ?? Str::headline((string) $row->status);
+                $methodLabel = $methodLabels[$row->preferred_method]['name']
+                    ?? Str::headline(str_replace('_', ' ', (string) $row->preferred_method));
+
+                $operate = '<button type="button" class="btn btn-sm btn-outline-primary preview-withdrawal" data-request-id="'
+                    . $row->getKey()
+                    . '"><i class="bi bi-eye"></i></button>';
+
+                if ($row->isPending()) {
+                    $approveRoute = route('wallet.withdrawals.approve', $row);
+                    $rejectRoute = route('wallet.withdrawals.reject', $row);
+
+                    $operate .= '<form method="POST" action="' . $approveRoute . '" class="d-inline-block ms-1">'
+                        . '<input type="hidden" name="_token" value="' . $csrfToken . '">'
+                        . '<button type="submit" class="btn btn-sm btn-success">' . __('Approve') . '</button>'
+                        . '</form>';
+
+                    $operate .= '<form method="POST" action="' . $rejectRoute . '" class="d-inline-block ms-1">'
+                        . '<input type="hidden" name="_token" value="' . $csrfToken . '">'
+                        . '<button type="submit" class="btn btn-sm btn-danger">' . __('Reject') . '</button>'
+                        . '</form>';
+                } else {
+                    $operate .= '<span class="badge bg-light text-muted ms-2">' . __('Processed') . '</span>';
+                }
+
+                $dataRows[] = [
+                    'id' => $row->getKey(),
+                    'amount' => (float) $row->amount,
+                    'status' => $row->status,
+                    'status_label' => $statusLabel,
+                    'preferred_method' => $row->preferred_method,
+                    'method_label' => $methodLabel,
+                    'notes' => $row->notes,
+                    'review_notes' => $row->review_notes,
+                    'wallet_reference' => $row->wallet_reference,
+                    'created_at' => optional($row->created_at)->toDateTimeString(),
+                    'created_human' => optional($row->created_at)->format('Y-m-d H:i'),
+                    'user' => [
+                        'name' => $user?->name ?? '-',
+                        'email' => $user?->email ?? '-',
+                    ],
+                    'operate' => $operate,
+                ];
+            }
+
+            return response()->json([
+                'total' => $total,
+                'rows' => $dataRows,
+            ]);
+        } catch (Throwable $throwable) {
+            ResponseService::logErrorResponse($throwable, 'WalletWithdrawalRequestAdminController -> datatable');
+            ResponseService::errorResponse();
+        }
     }
 
     public function approve(Request $request, WalletWithdrawalRequest $withdrawalRequest): RedirectResponse

@@ -323,6 +323,8 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
         Route::get('/', [WalletAdminController::class, 'index'])->name('index');
         Route::get('/withdrawals', [WalletWithdrawalRequestAdminController::class, 'index'])
             ->name('withdrawals.index');
+        Route::get('/withdrawals/datatable', [WalletWithdrawalRequestAdminController::class, 'datatable'])
+            ->name('withdrawals.datatable');
 
         Route::post('/withdrawals/{withdrawalRequest}/approve', [WalletWithdrawalRequestAdminController::class, 'approve'])
             ->name('withdrawals.approve')
