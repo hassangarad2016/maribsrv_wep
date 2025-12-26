@@ -7,8 +7,128 @@
 
 @section('title', 'إدارة طلبات شي ان')
 
-@section('styles')
+@section('css')
 <style>
+    .service-requests-page {
+        background: linear-gradient(180deg, rgba(13, 110, 253, 0.07), rgba(13, 110, 253, 0.02));
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        border-radius: 1.25rem;
+        color: #212529;
+        padding: 1.25rem;
+    }
+    .service-requests-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .service-requests-hero {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .service-requests-title {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .service-requests-subtitle {
+        margin: 0.35rem 0 0;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .service-requests-filters {
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 1rem;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+    }
+    .service-requests-filters .card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+        padding: 1.1rem;
+    }
+    .filters-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+    .filters-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .filters-hint {
+        margin: 0.2rem 0 0;
+        font-size: 0.82rem;
+        color: #6c757d;
+    }
+    .filters-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .service-requests-table {
+        border-radius: 1rem;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        margin-bottom: 0;
+        overflow: hidden;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+    }
+    .service-requests-table .card-header {
+        background: #f8f9fb;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        padding: 0.9rem 1.1rem;
+    }
+    .service-requests-table .card-body {
+        padding: 1.15rem;
+    }
+    .table-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .table-hint {
+        margin: 0.2rem 0 0;
+        font-size: 0.82rem;
+        color: #6c757d;
+    }
+    .service-requests-table .table {
+        margin-bottom: 0;
+    }
+    .service-requests-table .table thead th {
+        background: #f8f9fa;
+        color: #212529;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        padding: 0.85rem 1rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .service-requests-table .table tbody td {
+        padding: 0.85rem 1rem;
+    }
+    .service-requests-table .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    .service-requests-table .table tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.04);
+    }
+    .service-requests-table .table-striped > tbody > tr:nth-of-type(odd) {
+        background-color: rgba(15, 23, 42, 0.02);
+    }
+    .shein-orders-table th,
+    .shein-orders-table td {
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+    .shein-orders-table td br {
+        display: none;
+    }
     .pagination {
         margin: 0;
     }
@@ -73,6 +193,17 @@
 
 
 </style>
+@endsection
+
+@section('page-title')
+    <div class="page-title">
+        <div class="row">
+            <div class="col-12 col-md-6 order-md-1 order-last">
+                <h4>@yield('title')</h4>
+            </div>
+            <div class="col-12 col-md-6 order-md-2 order-first"></div>
+        </div>
+    </div>
 @endsection
 
 @section('content')

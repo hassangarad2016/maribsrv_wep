@@ -289,6 +289,17 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group mb-3">
+                                <label class="form-label">{{ __('Imported Images') }}</label>
+                                <div id="imported_images_preview" class="d-flex flex-wrap gap-2"></div>
+                                <div id="imported_images_inputs"></div>
+                                <small class="form-text text-muted">{{ __('Imported images are used for the main image (first) and gallery (rest).') }}</small>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="card">
@@ -624,6 +635,8 @@
             const stockHeader = @json(__('merchant_products.form.stock'));
             const variantStocksSeed = @json($variantStocks);
             const variantStockMap = {};
+            const sizeCatalogValues = @json($sizeCatalogValues ?? []);
+            const importRoute = @json(route('item.shein.products.import'));
 
             const colorSelect = document.querySelector('[data-color-select]');
             const sizeSelect = document.querySelector('[data-size-select]');
@@ -634,6 +647,15 @@
             const customColorButton = document.querySelector('[data-add-custom-color]');
             const customColorCode = document.querySelector('[data-custom-color-code]');
             const customColorLabel = document.querySelector('[data-custom-color-label]');
+            const importButton = document.getElementById('shein_import_btn');
+            const importStatus = document.getElementById('shein_import_status');
+            const importPreview = document.getElementById('imported_images_preview');
+            const importInputs = document.getElementById('imported_images_inputs');
+            const productLinkInput = document.getElementById('product_link');
+            const imageInput = document.getElementById('image');
+            const importedState = { images: [] };
+            const importButtonLabel = importButton ? importButton.textContent : 'Fetch Shein Data';
+            const importedSeed = @json(old('imported_images', []));
 
             const normalizeColorCode = (value) => {
                 if (value === null || value === undefined) {
@@ -654,6 +676,32 @@
                     return '';
                 }
                 return value.toString().trim();
+            };
+
+            const normalizeText = (value) => {
+                if (value === null || value === undefined) {
+                    return '';
+                }
+                return value.toString().trim();
+            };
+
+            const parsePrice = (value) => {
+                const text = normalizeText(value).replace(/,/g, '');
+                const match = text.match(/-?\d+(\.\d+)?/);
+                return match ? match[0] : '';
+            };
+
+            const sizeTokens = new Set((sizeCatalogValues || []).map((value) => normalizeText(value).toUpperCase()));
+
+            const looksLikeSize = (value) => {
+                const text = normalizeText(value).toUpperCase();
+                if (text === '') {
+                    return false;
+                }
+                if (sizeTokens.has(text)) {
+                    return true;
+                }
+                return /^[0-9]{1,3}(\.[0-9]+)?$/.test(text);
             };
 
             const escapeHtml = (value) => {
@@ -679,6 +727,101 @@
                 container.appendChild(input);
             };
 
+            const updateImageRequirement = () => {
+                if (imageInput) {
+                    imageInput.required = importedState.images.length === 0;
+                }
+            };
+
+            const setImportStatus = (message, isError = false) => {
+                if (!importStatus) {
+                    return;
+                }
+                importStatus.textContent = message || '';
+                importStatus.classList.toggle('text-danger', isError);
+                importStatus.classList.toggle('text-success', !isError && message);
+            };
+
+            const setImportBusy = (busy) => {
+                if (!importButton) {
+                    return;
+                }
+                importButton.disabled = busy;
+                importButton.textContent = busy ? 'Fetching...' : importButtonLabel;
+            };
+
+            const rgbToHex = (value) => {
+                const match = String(value).match(/rgb[a]?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/i);
+                if (!match) {
+                    return '';
+                }
+                const r = Number(match[1]);
+                const g = Number(match[2]);
+                const b = Number(match[3]);
+                if ([r, g, b].some((v) => Number.isNaN(v))) {
+                    return '';
+                }
+                return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`.toUpperCase();
+            };
+
+            const hashToColor = (label) => {
+                const text = normalizeText(label);
+                let hash = 7;
+                for (let i = 0; i < text.length; i += 1) {
+                    hash = (hash * 31 + text.charCodeAt(i)) >>> 0;
+                }
+                const hex = (hash & 0xffffff).toString(16).padStart(6, '0');
+                return `#${hex.toUpperCase()}`;
+            };
+
+            const normalizeImportedColorCode = (value, label) => {
+                const text = normalizeText(value);
+                if (text !== '') {
+                    if (text.startsWith('rgb')) {
+                        const rgb = rgbToHex(text);
+                        if (rgb) {
+                            return normalizeColorCode(rgb);
+                        }
+                    }
+                    if (/^#?[0-9a-f]{6}$/i.test(text)) {
+                        return normalizeColorCode(text);
+                    }
+                }
+                return normalizeColorCode(hashToColor(label || 'color'));
+            };
+
+            const renderImportedImages = () => {
+                if (!importPreview || !importInputs) {
+                    return;
+                }
+                importPreview.innerHTML = '';
+                importInputs.innerHTML = '';
+
+                importedState.images.forEach((url, index) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'position-relative';
+                    wrapper.style.width = '100px';
+                    wrapper.style.height = '100px';
+                    wrapper.innerHTML = `
+                        <img src="${escapeAttribute(url)}" alt="Imported" style="width:100%;height:100%;object-fit:cover;border-radius:6px;border:1px solid #e5e5e5;">
+                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" data-remove-imported="${index}" style="transform: translate(35%, -35%);padding:2px 6px;line-height:1;">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    `;
+                    importPreview.appendChild(wrapper);
+                    appendHiddenInput(importInputs, `imported_images[${index}]`, url);
+                });
+
+                updateImageRequirement();
+            };
+
+            if (Array.isArray(importedSeed) && importedSeed.length) {
+                importedState.images = importedSeed
+                    .map((url) => normalizeText(url))
+                    .filter((url) => url !== '');
+                renderImportedImages();
+            }
+
             const getColorLabel = (code) => {
                 if (!colorSelect) {
                     return '';
@@ -702,6 +845,40 @@
                     }
                 }
                 return '';
+            };
+
+            const ensureSelectOption = (select, value, text, dataLabel = null) => {
+                if (!select) {
+                    return;
+                }
+                const normalized = normalizeText(value);
+                if (normalized === '') {
+                    return;
+                }
+                const existing = Array.from(select.options).find((option) => normalizeText(option.value) === normalized);
+                const label = text || normalized;
+
+                if (existing) {
+                    existing.textContent = label;
+                    if (dataLabel !== null) {
+                        existing.setAttribute('data-label', dataLabel);
+                    }
+                    return;
+                }
+
+                const option = new Option(label, normalized, false, false);
+                if (dataLabel !== null) {
+                    option.setAttribute('data-label', dataLabel);
+                }
+                select.appendChild(option);
+            };
+
+            const setSelectValues = (select, values) => {
+                if (!select) {
+                    return;
+                }
+                const unique = Array.from(new Set(values.map((value) => normalizeText(value)).filter((value) => value !== '')));
+                $(select).val(unique).trigger('change');
             };
 
             if (Array.isArray(variantStocksSeed)) {
@@ -914,6 +1091,313 @@
                     if (customColorLabel) {
                         customColorLabel.value = '';
                     }
+                });
+            }
+
+            if (importPreview) {
+                importPreview.addEventListener('click', (event) => {
+                    const target = event.target.closest('[data-remove-imported]');
+                    if (!target) {
+                        return;
+                    }
+                    const index = Number(target.getAttribute('data-remove-imported'));
+                    if (Number.isNaN(index)) {
+                        return;
+                    }
+                    importedState.images.splice(index, 1);
+                    renderImportedImages();
+                });
+            }
+
+            if (imageInput) {
+                imageInput.addEventListener('change', updateImageRequirement);
+            }
+
+            const findPropertyByName = (properties, needle) => {
+                const lowered = needle.toLowerCase();
+                return properties.find((property) => normalizeText(property.name).toLowerCase().includes(lowered));
+            };
+
+            const findSizeProperty = (properties) => {
+                if (!Array.isArray(properties)) {
+                    return null;
+                }
+                const named = findPropertyByName(properties, 'size');
+                if (named) {
+                    return named;
+                }
+                let best = null;
+                let bestScore = 0;
+                properties.forEach((property) => {
+                    const items = Array.isArray(property.items) ? property.items : [];
+                    const score = items.filter((item) => looksLikeSize(item.name)).length;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = property;
+                    }
+                });
+                return best;
+            };
+
+            const findColorProperty = (properties, sizeProperty) => {
+                if (!Array.isArray(properties)) {
+                    return null;
+                }
+                const named = findPropertyByName(properties, 'color') || findPropertyByName(properties, 'colour');
+                if (named && named !== sizeProperty) {
+                    return named;
+                }
+                let best = null;
+                let bestScore = 0;
+                properties.forEach((property) => {
+                    if (property === sizeProperty) {
+                        return;
+                    }
+                    const items = Array.isArray(property.items) ? property.items : [];
+                    const score = items.filter((item) => {
+                        if (normalizeText(item.color) !== '' || normalizeText(item.image) !== '') {
+                            return true;
+                        }
+                        return /^#?[0-9a-f]{6}$/i.test(normalizeText(item.name));
+                    }).length;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = property;
+                    }
+                });
+                if (best) {
+                    return best;
+                }
+                let fallback = null;
+                let fallbackCount = 0;
+                properties.forEach((property) => {
+                    if (property === sizeProperty) {
+                        return;
+                    }
+                    const items = Array.isArray(property.items) ? property.items : [];
+                    if (items.length > fallbackCount) {
+                        fallbackCount = items.length;
+                        fallback = property;
+                    }
+                });
+                return fallback;
+            };
+
+            const applyVariantStocks = (variants, colors, sizes) => {
+                if (!Array.isArray(variants)) {
+                    return;
+                }
+                const sizeLookup = new Map(
+                    sizes.map((size) => [normalizeText(size).toLowerCase(), normalizeText(size)])
+                );
+                const colorLookup = new Map();
+                colors.forEach((color) => {
+                    const code = normalizeColorCode(color.code);
+                    if (color.label) {
+                        colorLookup.set(normalizeText(color.label).toLowerCase(), code);
+                    }
+                    colorLookup.set(code.toLowerCase(), code);
+                });
+
+                Object.keys(variantStockMap).forEach((key) => {
+                    delete variantStockMap[key];
+                });
+
+                variants.forEach((variant) => {
+                    if (!variant || typeof variant !== 'object') {
+                        return;
+                    }
+                    const stock = variant.stock;
+                    if (stock === null || stock === undefined || stock === '') {
+                        return;
+                    }
+                    const values = Object.values(variant.props || {}).map(normalizeText).filter((value) => value !== '');
+                    let sizeValue = null;
+                    let colorCode = null;
+
+                    values.forEach((value) => {
+                        const key = value.toLowerCase();
+                        if (!sizeValue && sizeLookup.has(key)) {
+                            sizeValue = sizeLookup.get(key);
+                        }
+                        if (!colorCode && colorLookup.has(key)) {
+                            colorCode = colorLookup.get(key);
+                        }
+                    });
+
+                    if (sizeValue && colorCode) {
+                        const key = `${normalizeColorCode(colorCode)}||${normalizeSizeValue(sizeValue)}`;
+                        variantStockMap[key] = stock;
+                    }
+                });
+            };
+
+            const applyImportData = (data) => {
+                if (!data || typeof data !== 'object') {
+                    setImportStatus('No data returned from Shein.', true);
+                    return;
+                }
+
+                const title = normalizeText(data.title);
+                if (title !== '') {
+                    $('#name').val(title);
+                }
+
+                const description = normalizeText(data.description);
+                if (description !== '') {
+                    $('#description').val(description);
+                }
+
+                const price = parsePrice(data.price);
+                if (price !== '') {
+                    $('#price').val(price);
+                }
+
+                const currency = normalizeText(data.currency).toUpperCase();
+                if (currency !== '' && $('#currency option[value="' + currency + '"]').length) {
+                    $('#currency').val(currency);
+                }
+
+                if (data.stockTotal !== null && data.stockTotal !== undefined && data.stockTotal !== '') {
+                    $('#stock').val(data.stockTotal);
+                }
+
+                const images = Array.isArray(data.images) ? data.images : [];
+                importedState.images = Array.from(new Set(images.map((url) => normalizeText(url)).filter((url) => url !== '')));
+                renderImportedImages();
+
+                const properties = Array.isArray(data.properties) ? data.properties : [];
+                const variants = Array.isArray(data.variants) ? data.variants : [];
+
+                const sizeProperty = findSizeProperty(properties);
+                const colorProperty = findColorProperty(properties, sizeProperty);
+
+                let sizes = [];
+                if (sizeProperty && Array.isArray(sizeProperty.items)) {
+                    sizes = sizeProperty.items
+                        .map((item) => normalizeText(item.name))
+                        .filter((value) => value !== '');
+                }
+
+                let colors = [];
+                if (colorProperty && Array.isArray(colorProperty.items)) {
+                    colors = colorProperty.items
+                        .map((item) => {
+                            const label = normalizeText(item.name);
+                            if (label === '') {
+                                return null;
+                            }
+                            const code = normalizeImportedColorCode(item.color, label);
+                            return { code, label };
+                        })
+                        .filter((value) => value);
+                }
+
+                if (sizes.length === 0 && variants.length) {
+                    const sizeSet = new Set();
+                    variants.forEach((variant) => {
+                        Object.values(variant.props || {}).forEach((value) => {
+                            if (looksLikeSize(value)) {
+                                sizeSet.add(normalizeText(value));
+                            }
+                        });
+                    });
+                    sizes = Array.from(sizeSet);
+                }
+
+                if (colors.length === 0 && variants.length) {
+                    const colorSet = new Set();
+                    variants.forEach((variant) => {
+                        Object.values(variant.props || {}).forEach((value) => {
+                            const text = normalizeText(value);
+                            if (text !== '' && !looksLikeSize(text)) {
+                                colorSet.add(text);
+                            }
+                        });
+                    });
+                    colors = Array.from(colorSet).map((label) => ({
+                        label,
+                        code: normalizeImportedColorCode(null, label),
+                    }));
+                }
+
+                const uniqueSizes = Array.from(new Set(sizes.map((value) => normalizeText(value)).filter((value) => value !== '')));
+                const uniqueColors = [];
+                const colorSeen = new Set();
+                colors.forEach((color) => {
+                    if (!color || !color.code) {
+                        return;
+                    }
+                    const code = normalizeColorCode(color.code);
+                    if (colorSeen.has(code)) {
+                        return;
+                    }
+                    colorSeen.add(code);
+                    uniqueColors.push({
+                        code,
+                        label: normalizeText(color.label),
+                    });
+                });
+
+                if (colorSelect) {
+                    uniqueColors.forEach((color) => {
+                        const displayText = color.label ? `${color.label} (${color.code})` : color.code;
+                        ensureSelectOption(colorSelect, color.code, displayText, color.label || '');
+                    });
+                    setSelectValues(colorSelect, uniqueColors.map((color) => color.code));
+                }
+
+                if (sizeSelect) {
+                    uniqueSizes.forEach((size) => {
+                        ensureSelectOption(sizeSelect, size, size);
+                    });
+                    setSelectValues(sizeSelect, uniqueSizes);
+                }
+
+                applyVariantStocks(variants, uniqueColors, uniqueSizes);
+                refreshVariants();
+
+                setImportStatus('Shein data loaded.', false);
+            };
+
+            if (importButton && productLinkInput) {
+                importButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const url = normalizeText(productLinkInput.value);
+                    if (url === '') {
+                        setImportStatus('Paste the Shein product link first.', true);
+                        return;
+                    }
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                    const csrfValue = csrfToken ? csrfToken.getAttribute('content') : null;
+
+                    setImportBusy(true);
+                    setImportStatus('Fetching data from Shein...', false);
+
+                    $.ajax({
+                        url: importRoute,
+                        method: 'POST',
+                        data: { url },
+                        headers: csrfValue ? { 'X-CSRF-TOKEN': csrfValue } : {},
+                    })
+                        .done((response) => {
+                            if (response && response.error) {
+                                const message = response.message || 'Failed to fetch Shein data.';
+                                setImportStatus(message, true);
+                                return;
+                            }
+                            const payload = response && response.data ? response.data : response;
+                            applyImportData(payload);
+                        })
+                        .fail((xhr) => {
+                            const message =
+                                (xhr.responseJSON && xhr.responseJSON.message) ||
+                                'Failed to fetch Shein data.';
+                            setImportStatus(message, true);
+                        })
+                        .always(() => {
+                            setImportBusy(false);
+                        });
                 });
             }
 
