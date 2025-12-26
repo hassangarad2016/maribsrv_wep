@@ -409,6 +409,34 @@ const run = async () => {
   await page.waitForNetworkIdle({ idleTime: 1000, timeout: 8000 }).catch(() => {});
 
   const data = await page.evaluate(extractInPage);
+  const titleLower = (data && data.title ? String(data.title) : "").toLowerCase();
+  const descLower =
+    (data && data.description ? String(data.description) : "").toLowerCase();
+  const hasDetails =
+    data &&
+    ((data.price && String(data.price).trim() !== "") ||
+      (Array.isArray(data.variants) && data.variants.length > 0) ||
+      (Array.isArray(data.properties) && data.properties.length > 0));
+  const homepageSignals = [
+    "shein.com is mainly design",
+    "تسوق الموضة",
+    "ملابس نسائية ورجالية",
+  ];
+  const looksLikeHomepage = homepageSignals.some(
+    (signal) => titleLower.includes(signal) || descLower.includes(signal)
+  );
+
+  if (!hasDetails && looksLikeHomepage) {
+    await browser.close();
+    process.stderr.write(
+      JSON.stringify(
+        { ok: false, error: "not_product_page", url: page.url() },
+        null,
+        2
+      )
+    );
+    process.exit(3);
+  }
   await browser.close();
 
   process.stdout.write(JSON.stringify({ ok: true, data }, null, 2));
