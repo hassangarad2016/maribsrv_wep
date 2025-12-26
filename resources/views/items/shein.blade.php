@@ -1,57 +1,93 @@
 @extends('layouts.main')
 
-@section('page-title')
-    <div class="page-title">
-        <div class="row">
-            <div class="col-12 col-md-6 order-md-1 order-last">
-                <h4>{{ __('Shein Items') }}</h4>
-            </div>
-            <div class="col-12 col-md-6 order-md-2 order-first"></div>
-        </div>
-    </div>
+@section('title')
+    {{ __('Shein Items') }}
 @endsection
 
-@section('page-style')
+@section('css')
 <style>
-    .shein-products-page {
+    .service-requests-page {
         background: linear-gradient(180deg, rgba(13, 110, 253, 0.07), rgba(13, 110, 253, 0.02));
         border: 1px solid rgba(15, 23, 42, 0.06);
         border-radius: 1.25rem;
         color: #212529;
         padding: 1.25rem;
     }
-    .shein-products-shell {
+    .service-requests-shell {
         display: flex;
         flex-direction: column;
         gap: 1rem;
     }
-    .shein-products-hero {
+    .service-requests-hero {
         display: flex;
         flex-direction: column;
         gap: 1rem;
     }
-    .shein-products-title {
+    .service-requests-title {
         margin: 0;
         font-size: 1.35rem;
         font-weight: 700;
         color: #0f172a;
     }
-    .shein-products-subtitle {
+    .service-requests-subtitle {
         margin: 0.35rem 0 0;
         font-size: 0.9rem;
         color: #6c757d;
     }
-    .shein-products-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
+    .service-requests-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.75rem;
     }
-    .shein-products-filters {
+    .metric-card {
+        background: #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 0.9rem;
+        padding: 0.85rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+        min-height: 76px;
+    }
+    .metric-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #0d6efd;
+        background: rgba(13, 110, 253, 0.12);
+    }
+    .metric-card.category .metric-icon {
+        color: #198754;
+        background: rgba(25, 135, 84, 0.12);
+    }
+    .metric-card.review .metric-icon {
+        color: #b58100;
+        background: rgba(255, 193, 7, 0.18);
+    }
+    .metric-label {
+        font-size: 0.78rem;
+        color: #6c757d;
+        font-weight: 600;
+    }
+    .metric-value {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #212529;
+    }
+    .metric-value.text-truncate {
+        max-width: 180px;
+    }
+    .service-requests-filters {
         border: 1px solid rgba(15, 23, 42, 0.08);
         border-radius: 1rem;
         box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
     }
-    .shein-products-filters .card-body {
+    .service-requests-filters .card-body {
         display: flex;
         flex-direction: column;
         gap: 0.85rem;
@@ -75,19 +111,106 @@
         font-size: 0.82rem;
         color: #6c757d;
     }
-    .shein-products-table {
+    .filters-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .status-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .status-tab {
+        border: 1px solid rgba(15, 23, 42, 0.15);
+        background: #ffffff;
+        color: #495057;
+        border-radius: 0.75rem;
+        padding: 0.4rem 0.9rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .status-tab:hover {
+        border-color: #0d6efd;
+        color: #0d6efd;
+    }
+    .status-tab.active {
+        background: #0d6efd;
+        color: #ffffff;
+        border-color: #0d6efd;
+        box-shadow: 0 10px 18px rgba(13, 110, 253, 0.2);
+    }
+    .status-tab.active:hover {
+        color: #ffffff;
+    }
+    .search-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-inline-start: auto;
+    }
+    .search-group .input-group {
+        min-width: 240px;
+        max-width: 320px;
+    }
+    .search-group .input-group-text {
+        background: #f8f9fa;
+        border-radius: 0.75rem 0 0 0.75rem;
+        border-color: rgba(15, 23, 42, 0.12);
+    }
+    .search-group .form-control {
+        height: 38px;
+        font-size: 0.9rem;
+        border-radius: 0 0.75rem 0.75rem 0;
+        border-color: rgba(15, 23, 42, 0.12);
+    }
+    .search-group .btn {
+        height: 38px;
+        padding: 0 0.9rem;
+        font-size: 0.85rem;
+        border-radius: 0.75rem;
+    }
+    .search-group .form-select {
+        min-width: 220px;
+        max-width: 280px;
+        height: 38px;
+        font-size: 0.9rem;
+        border-radius: 0.75rem;
+        border-color: rgba(15, 23, 42, 0.12);
+    }
+    .search-group .select2-container {
+        min-width: 220px;
+        max-width: 280px;
+    }
+    .search-group .select2-container--bootstrap-5 .select2-selection--single {
+        height: 38px;
+        border-radius: 0.75rem;
+        border-color: rgba(15, 23, 42, 0.12);
+    }
+    .search-group .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+        line-height: 36px;
+        padding-inline-start: 0.75rem;
+    }
+    .search-group .select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+    .service-requests-table {
         border-radius: 1rem;
         border: 1px solid rgba(15, 23, 42, 0.08);
         margin-bottom: 0;
         overflow: hidden;
         box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
     }
-    .shein-products-table .card-header {
+    .service-requests-table .card-header {
         background: #f8f9fb;
         border-bottom: 1px solid rgba(15, 23, 42, 0.08);
         padding: 0.9rem 1.1rem;
     }
-    .shein-products-table .card-body {
+    .service-requests-table .card-body {
         padding: 1.15rem;
     }
     .table-title {
@@ -101,10 +224,10 @@
         font-size: 0.82rem;
         color: #6c757d;
     }
-    .shein-products-table .table {
+    .service-requests-table .table {
         margin-bottom: 0;
     }
-    .shein-products-table .table thead th {
+    .service-requests-table .table thead th {
         background: #f8f9fa;
         color: #212529;
         border-bottom: 1px solid rgba(15, 23, 42, 0.08);
@@ -112,22 +235,22 @@
         font-weight: 600;
         white-space: nowrap;
     }
-    .shein-products-table .table tbody td {
+    .service-requests-table .table tbody td {
         padding: 0.85rem 1rem;
     }
-    .shein-products-table .table tbody tr {
+    .service-requests-table .table tbody tr {
         transition: background-color 0.2s ease;
     }
-    .shein-products-table .table tbody tr:hover {
+    .service-requests-table .table tbody tr:hover {
         background-color: rgba(13, 110, 253, 0.04);
     }
-    .shein-products-table .table-striped > tbody > tr:nth-of-type(odd) {
+    .service-requests-table .table-striped > tbody > tr:nth-of-type(odd) {
         background-color: rgba(15, 23, 42, 0.02);
     }
-    .shein-products-table .fixed-table-toolbar {
+    .service-requests-table .fixed-table-toolbar {
         margin-bottom: 0.75rem;
     }
-    .shein-products-table .fixed-table-toolbar .columns {
+    .service-requests-table .fixed-table-toolbar .columns {
         display: inline-flex;
         align-items: center;
         gap: 0.15rem;
@@ -136,8 +259,8 @@
         padding: 0.25rem;
         box-shadow: 0 10px 18px rgba(15, 23, 42, 0.18);
     }
-    .shein-products-table .fixed-table-toolbar .columns .btn,
-    .shein-products-table .fixed-table-toolbar .columns .btn-group > .btn {
+    .service-requests-table .fixed-table-toolbar .columns .btn,
+    .service-requests-table .fixed-table-toolbar .columns .btn-group > .btn {
         background: transparent;
         border: 0;
         color: #ffffff;
@@ -148,101 +271,106 @@
         justify-content: center;
         box-shadow: none;
     }
-    .shein-products-table .fixed-table-toolbar .columns .btn:hover,
-    .shein-products-table .fixed-table-toolbar .columns .btn-group > .btn:hover {
+    .service-requests-table .fixed-table-toolbar .columns .btn:hover,
+    .service-requests-table .fixed-table-toolbar .columns .btn-group > .btn:hover {
         background: rgba(255, 255, 255, 0.12);
     }
-    .shein-products-table .fixed-table-toolbar .columns .dropdown-toggle::after {
+    .service-requests-table .fixed-table-toolbar .columns .dropdown-toggle::after {
         display: none;
     }
-    .shein-products-table .fixed-table-toolbar .columns .btn i {
+    .service-requests-table .fixed-table-toolbar .columns .btn i {
         font-size: 1rem;
     }
-    .shein-products-page .card-body {
-        overflow-x: hidden;
-    }
-    
-    /* Reset default Select2 width */
-    .select2-container {
-        width: 100% !important;
-    }
-    
-    /* Target category filter specifically with highest specificity */
-    #filters .col-lg-8 .select2-container,
-    #filters .col-lg-8 .select2-container.select2-container--default,
-    #filters .col-lg-8 .select2-container.select2-container--open,
-    #category_filter + .select2-container {
-        width: 100% !important;
-        min-width: 400px !important;
-    }
-    
-    /* Force width on dropdown */
-    .select2-dropdown,
-    .select2-dropdown.select2-dropdown--below,
-    .select2-dropdown.select2-dropdown--above {
-        width: auto !important;
-        min-width: 400px !important;
-    }
-    
-    /* Custom class for our dropdown */
-    .category-filter-dropdown {
-        width: 100% !important;
-        min-width: 400px !important;
-    }
-    
-    /* Force width on selection container */
-    .select2-container .select2-selection {
-        width: 100% !important;
-        min-width: 400px !important;
-    }
-
-    #table_list {
-        width: 100%;
-    }
+    #table_list { width: 100%; }
 
     @media (min-width: 992px) {
-        .shein-products-hero {
+        .service-requests-hero {
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
         }
+        .service-requests-metrics {
+            max-width: 720px;
+        }
     }
 
     @media (max-width: 768px) {
-        .shein-products-page {
+        .service-requests-page {
             padding: 1rem;
         }
-        .select2-container .select2-selection,
-        #category_filter + .select2-container {
-            min-width: 0 !important;
+        .search-group {
+            width: 100%;
+            margin-inline-start: 0;
         }
-        .select2-dropdown,
-        .select2-dropdown.select2-dropdown--below,
-        .select2-dropdown.select2-dropdown--above {
-            min-width: 0 !important;
+        .search-group .input-group {
+            flex: 1;
+            min-width: 0;
+            max-width: none;
+        }
+        .search-group .form-select,
+        .search-group .select2-container {
+            width: 100%;
+            max-width: none;
+        }
+        .metric-value.text-truncate {
+            max-width: 140px;
         }
     }
 </style>
 @endsection
 
+@section('page-title')
+    <div class="page-title">
+        <div class="row">
+            <div class="col-12 col-md-6 order-md-1 order-last">
+                <h4>@yield('title')</h4>
+            </div>
+            <div class="col-12 col-md-6 order-md-2 order-first"></div>
+        </div>
+    </div>
+@endsection
+
 @section('content')
-    <section class="section shein-products-page">
-        <div class="shein-products-shell">
-            <div class="shein-products-hero">
+    <section class="section service-requests-page">
+        @php
+            $totalItems = (int) ($stats['total'] ?? 0);
+            $reviewItems = (int) ($stats['review'] ?? 0);
+            $selectedCategoryName = $selectedCategory ? $selectedCategory->name : __('All Categories');
+        @endphp
+        <div class="service-requests-shell">
+            <div class="service-requests-hero">
                 <div>
-                    <h5 class="shein-products-title">{{ __('Shein Items') }}</h5>
-                    <p class="shein-products-subtitle">{{ __('Track Shein products, approvals, and inventory status.') }}</p>
+                    <h5 class="service-requests-title">@yield('title')</h5>
+                    <p class="service-requests-subtitle">{{ __('Track Shein products, approvals, and inventory status.') }}</p>
                 </div>
-                <div class="shein-products-actions">
-                    @can('shein-products-create')
-                        <a href="{{ route('item.shein.products.create') }}" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i> {{ __('Add New Item') }}
-                        </a>
-                    @endcan
+                <div class="service-requests-metrics">
+                    <div class="metric-card category">
+                        <span class="metric-icon"><i class="bi bi-folder2-open"></i></span>
+                        <div>
+                            <div class="metric-label">{{ __('Category') }}</div>
+                            <div class="metric-value text-truncate" title="{{ $selectedCategoryName }}">
+                                {{ $selectedCategoryName }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-icon"><i class="bi bi-collection"></i></span>
+                        <div>
+                            <div class="metric-label">{{ __('Total products') }}</div>
+                            <div class="metric-value">{{ number_format($totalItems) }}</div>
+                        </div>
+                    </div>
+                    <div class="metric-card review">
+                        <span class="metric-icon"><i class="bi bi-hourglass-split"></i></span>
+                        <div>
+                            <div class="metric-label">{{ __('Under Review') }}</div>
+                            <div class="metric-value">{{ number_format($reviewItems) }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="card shein-products-filters">
+            <div class="card service-requests-filters">
                 <div class="card-body">
                     <div class="filters-header">
                         <div>
@@ -250,31 +378,33 @@
                             <p class="filters-hint">{{ __('Narrow down by status or category before exporting data.') }}</p>
                         </div>
                     </div>
-                    <div id="filters" class="row g-3 align-items-end">
-                        <div class="col-12 col-lg-4">
-                            <label for="filter" class="form-label">{{__("Status")}}</label>
-                            <select class="form-control bootstrap-table-filter-control-status" id="filter">
-                                <option value="">{{__("All")}}</option>
-                                <option value="review">{{__("Under Review")}}</option>
-                                <option value="approved">{{__("Approved")}}</option>
-                                <option value="rejected">{{__("Rejected")}}</option>
-                                <option value="sold out">{{__("Sold Out")}}</option>
-                            </select>
+                    <div class="filters-row">
+                        <div class="status-tabs" role="tablist">
+                            <button type="button" class="status-tab active" data-status="">{{ __('All') }}</button>
+                            <button type="button" class="status-tab" data-status="review">{{ __('Under Review') }}</button>
+                            <button type="button" class="status-tab" data-status="approved">{{ __('Approved') }}</button>
+                            <button type="button" class="status-tab" data-status="rejected">{{ __('Rejected') }}</button>
                         </div>
-                        <div class="col-12 col-lg-8">
-                            <label for="category_filter" class="form-label">{{__("Category")}}</label>
-                            <select class="form-control select2" id="category_filter" name="category_filter">
-                                <option value="">{{__("All Categories")}}</option>
+                        <input type="hidden" id="status_filter" value="">
+                        <div class="search-group">
+                            <select class="form-select" id="category_filter" name="category_filter">
+                                <option value="">{{ __('All Categories') }}</option>
                                 @foreach($categories as $category)
                                     <option value="{{ $category->id }}" {{ $category->id == 4 ? 'selected' : '' }}>{{ $category->name }}</option>
                                 @endforeach
                             </select>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control" id="item_search" placeholder="{{ __('Search by name or ID') }}" autocomplete="off">
+                            </div>
+                            <button class="btn btn-primary" type="button" id="filtersApply">{{ __('Search') }}</button>
+                            <button class="btn btn-outline-secondary" type="button" id="filtersReset">{{ __('Reset') }}</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card shein-products-table">
+            <div class="card service-requests-table">
                 <div class="card-header">
                     <div>
                         <h6 class="table-title">{{ __('Shein product list') }}</h6>
@@ -283,18 +413,35 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover align-middle" aria-describedby="mydesc" id="table_list"
-                               data-toggle="table" data-url="{{ route('item.shein.products.data') }}" data-click-to-select="true"
-                               data-side-pagination="server" data-pagination="true"
-                               data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
-                               data-show-columns="true" data-show-refresh="true" data-fixed-columns="true"
-                               data-fixed-number="1" data-fixed-right-number="1" data-trim-on-search="false"
-                               data-escape="true"
-                               data-responsive="true" data-sort-name="id" data-sort-order="desc"
-                               data-pagination-successively-size="3" data-table="items" data-status-column="deleted_at"
-                               data-show-export="true" data-export-options='{"fileName": "shein-item-list","ignoreColumn": ["operate"]}' data-export-types="['pdf','json', 'xml', 'csv', 'txt', 'sql', 'doc', 'excel']"
-                               data-mobile-responsive="true" data-filter-control="true" data-filter-control-container="#filters" data-toolbar="#filters">
-                            <thead class="thead-dark">
+                        <table
+                           class="table table-striped table-hover align-middle"
+                           aria-describedby="sheinProductsTableCaption"
+                           id="table_list"
+                           data-toggle="table"
+                           data-url="{{ route('item.shein.products.data') }}"
+                           data-click-to-select="true"
+                           data-side-pagination="server"
+                           data-pagination="true"
+                           data-page-list="[5, 10, 20, 50, 100, 200]"
+                           data-search="false"
+                           data-show-columns="true"
+                           data-show-refresh="true"
+                           data-trim-on-search="false"
+                           data-escape="true"
+                           data-responsive="true"
+                           data-sort-name="id"
+                           data-sort-order="desc"
+                           data-pagination-successively-size="3"
+                           data-table="items"
+                           data-status-column="deleted_at"
+                           data-show-export="true"
+                           data-export-options='{"fileName": "shein-item-list","ignoreColumn": ["operate"]}'
+                           data-export-types='["pdf","json","xml","csv","txt","sql","doc","excel"]'
+                           data-icons="serviceRequestsTableIcons"
+                           data-icons-prefix="bi"
+                           data-mobile-responsive="true"
+                           data-query-params="queryParams">
+                            <thead>
                             <tr>
                                 <th scope="col" data-field="id" data-sortable="true">{{ __('ID') }}</th>
                                 <th scope="col" data-field="name" data-sortable="true">{{ __('Name') }}</th>
@@ -329,6 +476,7 @@
                             </thead>
                         </table>
                     </div>
+                    <div id="sheinProductsTableCaption" class="visually-hidden">{{ __('Use the toolbar to export, refresh, or customize columns.') }}</div>
                 </div>
             </div>
         </div>
@@ -361,18 +509,17 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <select name="status" class="form-select" id="status" aria-label="status">
-                                        <option value="review">{{__("Under Review")}}</option>
-                                        <option value="approved">{{__("Approve")}}</option>
-                                        <option value="rejected">{{__("Reject")}}</option>
+                                        <option value="review">{{ __('Under Review') }}</option>
+                                        <option value="approved">{{ __('Approve') }}</option>
+                                        <option value="rejected">{{ __('Reject') }}</option>
                                     </select>
                                 </div>
                             </div>
                             <div id="rejected_reason_container" class="col-md-12" style="display: none;">
                                 <label for="rejected_reason" class="mandatory form-label">{{ __('Reason') }}</label>
                                 <textarea name="rejected_reason" id="rejected_reason" class="form-control" placeholder={{ __('Reason') }}></textarea>
-                                {{-- <input type="text" name="rejected_reason" id="rejected_reason" class="form-control"> --}}
                             </div>
-                            <input type="submit" value="{{__("Save")}}" class="btn btn-primary mt-3">
+                            <input type="submit" value="{{ __('Save') }}" class="btn btn-primary mt-3">
                         </form>
                     </div>
                 </div>
@@ -381,30 +528,20 @@
         </div>
     </section>
 @endsection
+
 @section('script')
     <script>
+        window.serviceRequestsTableIcons = {
+            refresh: 'bi-arrow-clockwise',
+            columns: 'bi-list-ul',
+            export: 'bi-download'
+        };
+
         function updateApprovalSuccess() {
             $('#editStatusModal').modal('hide');
         }
 
-        function forceSelect2Width() {
-            // Force the width of all Select2 elements
-            $('.select2-container').css('width', '100%');
-            
-            // Specifically target category filter
-            var $categorySelect = $('#category_filter');
-            var $categoryContainer = $categorySelect.next('.select2-container');
-            
-            $categoryContainer.css({
-                'width': '100%',
-                'min-width': '400px'
-            });
-            
-            $categoryContainer.find('.select2-selection').css({
-                'width': '100%',
-                'min-width': '400px'
-            });
-        }
+        const CATEGORY_ROOT_ID = 4;
 
         function itemEvents() {
             return {
@@ -429,7 +566,6 @@
                     $('#custom_fields').html(html);
                 },
                 'click .edit-status': function (e, value, row, index) {
-                    // Redirect to edit page instead of showing status modal
                     window.location.href = row.edit_url;
                 },
                 'click .edit-item': function (e, value, row, index) {
@@ -441,13 +577,13 @@
         function itemStatusFormatter(value, row) {
             let status = '';
             if (value === 'review') {
-                status = '<span class="badge bg-warning">' + '{{ __("Under Review") }}' + '</span>';
+                status = '<span class="badge bg-warning">' + '{{ __('Under Review') }}' + '</span>';
             } else if (value === 'approved') {
-                status = '<span class="badge bg-success">' + '{{ __("Approved") }}' + '</span>';
+                status = '<span class="badge bg-success">' + '{{ __('Approved') }}' + '</span>';
             } else if (value === 'rejected') {
-                status = '<span class="badge bg-danger">' + '{{ __("Rejected") }}' + '</span>';
+                status = '<span class="badge bg-danger">' + '{{ __('Rejected') }}' + '</span>';
             } else if (value === 'sold out') {
-                status = '<span class="badge bg-secondary">' + '{{ __("Sold Out") }}' + '</span>';
+                status = '<span class="badge bg-secondary">' + '{{ __('Sold Out') }}' + '</span>';
             }
             return status;
         }
@@ -476,98 +612,92 @@
             return '';
         }
 
-        function sheinQueryParams(params) {
-            params = params || {};
+        function queryParams(params) {
+            const query = {
+                section: 'shein',
+                category_root: CATEGORY_ROOT_ID,
+                offset: params.offset,
+                limit: params.limit,
+                search: params.search,
+                sort: params.sort,
+                order: params.order,
+                filter: params.filter
+            };
 
-            params.section = 'shein';
-            params.category_root = 4;
-
-            var selectedCategory = $('#category_filter').val();
-            if (selectedCategory && selectedCategory !== '' && selectedCategory !== '4') {
-                params.category_id = selectedCategory;
-            } else {
-                delete params.category_id;
+            const status = ($('#status_filter').val() || '').trim();
+            if (status) {
+                query.status = status;
             }
 
-            var statusFilter = $('#filter').val();
-            if (statusFilter) {
-                params.status = statusFilter;
+            const selectedCategory = $('#category_filter').val();
+            if (selectedCategory) {
+                query.category_id = selectedCategory;
             } else {
-                delete params.status;
+                query.category_id = CATEGORY_ROOT_ID;
             }
 
-            return params;
+            const searchTerm = ($('#item_search').val() || '').trim();
+            if (searchTerm) {
+                query.search = searchTerm;
+            }
+
+            return query;
         }
 
-
         $(document).ready(function() {
-            // Initialize Select2 with explicit width
-            $('#category_filter').select2({
-                placeholder: "{{__("Search Categories")}}",
+            const $table = $('#table_list');
+            const $searchInput = $('#item_search');
+            const $statusFilter = $('#status_filter');
+            const $categoryFilter = $('#category_filter');
+
+            $categoryFilter.select2({
+                theme: 'bootstrap-5',
+                placeholder: "{{ __('All Categories') }}",
                 allowClear: true,
-                width: '100%',
-                dropdownCssClass: 'category-filter-dropdown'
+                width: 'style'
             });
 
-            // Set default category filter value for Shein page to category ID 4
-            $('#category_filter').val(4).trigger('change');
+            $categoryFilter.val(String(CATEGORY_ROOT_ID)).trigger('change');
 
-            // Override queryParams to always include category_id=4
-            var $table = $('#table_list');
-            
-            $table.bootstrapTable({
-                queryParams: sheinQueryParams
-
-            });
-
-            // Force width immediately after initialization
-            forceSelect2Width();
-            
-            // Force width again after a short delay
-            setTimeout(forceSelect2Width, 100);
-            
-            // Force width periodically to handle any dynamic changes
-            setInterval(forceSelect2Width, 500);
-            
-            // Force width when dropdown opens
-            $('#category_filter').on('select2:open', function() {
-                forceSelect2Width();
-                $('.select2-dropdown').css({
-                    'width': '100%',
-                    'min-width': '400px'
-                });
-            });
-
-            // Update filters and refresh table when category changes
-
-            function refreshSheinTable() {
-                $table.bootstrapTable('refresh', {
-                    query: {
-                        section: 'shein',
-                        category_root: 4
-                    }
-                });
+            function refreshTableToFirstPage() {
+                const options = $table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                $table.bootstrapTable('refresh');
             }
 
-
-            $('#category_filter').on('change', function() {
-                refreshSheinTable();
-                forceSelect2Width();
+            $('.status-tab').on('click', function () {
+                $('.status-tab').removeClass('active');
+                $(this).addClass('active');
+                $statusFilter.val($(this).data('status'));
+                refreshTableToFirstPage();
             });
 
-            // Update filters and refresh table when status changes
-            $('#filter').on('change', function() {
-                refreshSheinTable();
+            $('#filtersApply').on('click', function () {
+                refreshTableToFirstPage();
+            });
+
+            $('#filtersReset').on('click', function () {
+                $searchInput.val('');
+                $categoryFilter.val(String(CATEGORY_ROOT_ID)).trigger('change');
+                $statusFilter.val('');
+                $('.status-tab').removeClass('active');
+                $('.status-tab[data-status=""]').addClass('active');
+                refreshTableToFirstPage();
+            });
+
+            $searchInput.on('keypress', function (event) {
+                if (event.which === 13) {
+                    event.preventDefault();
+                    refreshTableToFirstPage();
+                }
+            });
+
+            $categoryFilter.on('change', function () {
+                refreshTableToFirstPage();
             });
 
             $('#status').on('change', function() {
-                if ($(this).val() == 'rejected') {
-                    $('#rejected_reason_container').show();
-                    $('#rejected_reason').attr('required', true);
-                } else {
-                    $('#rejected_reason_container').hide();
-                    $('#rejected_reason').attr('required', false);
-                }
+                $('#rejected_reason_container').toggle($(this).val() === 'rejected');
             });
         });
     </script>

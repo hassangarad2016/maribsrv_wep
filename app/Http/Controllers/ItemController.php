@@ -114,6 +114,7 @@ class ItemController extends Controller {
      
         $categoryPool = $this->getCategoryPool();
         $categoryIds = $this->collectSectionCategoryIds($categoryPool, 4, true);
+        $selectedCategory = $categoryPool->firstWhere('id', 4);
 
         $categories = $categoryPool
             ->filter(static fn ($category) => in_array($category->id, $categoryIds, true))
@@ -124,10 +125,13 @@ class ItemController extends Controller {
             })
             ->values();
 
+        $statsQuery = Item::withTrashed()->whereIn('category_id', $categoryIds);
+        $stats = [
+            'total' => (clone $statsQuery)->count(),
+            'review' => (clone $statsQuery)->where('status', 'review')->count(),
+        ];
 
-
-
-        return view('items.shein', compact('categories'));
+        return view('items.shein', compact('categories', 'stats', 'selectedCategory'));
     }
 
 
