@@ -334,6 +334,10 @@ class ItemController extends Controller {
             'SHEIN_BROWSER_PROFILE' => env('SHEIN_BROWSER_PROFILE'),
             'SHEIN_HEADLESS' => env('SHEIN_HEADLESS'),
         ];
+        $displayEnv = env('SHEIN_DISPLAY');
+        if ($displayEnv !== null && $displayEnv !== '') {
+            $scriptEnv['DISPLAY'] = $displayEnv;
+        }
         foreach ($scriptEnv as $key => $value) {
             if ($value !== null && $value !== '') {
                 $processEnv[$key] = (string) $value;
