@@ -332,6 +332,9 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
         Route::post('/withdrawals/{withdrawalRequest}/reject', [WalletWithdrawalRequestAdminController::class, 'reject'])
             ->name('withdrawals.reject')
             ->whereNumber('withdrawalRequest');
+        Route::get('/{user}/transactions/datatable', [WalletAdminController::class, 'datatable'])
+            ->name('transactions.datatable')
+            ->whereNumber('user');
         Route::get('/{user}', [WalletAdminController::class, 'show'])->name('show')->whereNumber('user');
         Route::post('/{user}/credit', [WalletAdminController::class, 'credit'])->name('credit')->whereNumber('user');
 

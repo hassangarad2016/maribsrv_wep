@@ -80,6 +80,147 @@ class WalletAdminController extends Controller
         ]);
     }
 
+    public function datatable(Request $request, User $user)
+    {
+        try {
+            ResponseService::noPermissionThenSendJson('wallet-manage');
+
+            $walletAccount = WalletAccount::query()->firstOrCreate(
+                ['user_id' => $user->getKey()],
+                ['balance' => 0]
+            );
+
+            $offset = (int) $request->input('offset', 0);
+            $limitParam = $request->input('limit', 50);
+
+            if (is_string($limitParam) && strtolower($limitParam) === 'all') {
+                $limit = -1;
+            } else {
+                $limit = (int) $limitParam;
+                if ($limit === 0) {
+                    $limit = 50;
+                }
+            }
+
+            $sort = (string) $request->input('sort', 'id');
+            $order = strtoupper((string) $request->input('order', 'DESC')) === 'ASC' ? 'ASC' : 'DESC';
+            $filter = $this->resolveFilter($request->input('filter'));
+
+            $query = WalletTransaction::query()
+                ->where('wallet_account_id', $walletAccount->getKey());
+
+            $this->applyWalletTransactionFilter($query, $filter);
+
+            if (!empty($request->search)) {
+                $search = trim((string) $request->search);
+                $query->where(function (Builder $builder) use ($search) {
+                    $builder->where('id', (int) $search)
+                        ->orWhere('idempotency_key', 'like', "%{$search}%")
+                        ->orWhere('meta->operation_reference', 'like', "%{$search}%")
+                        ->orWhere('meta->reference', 'like', "%{$search}%")
+                        ->orWhere('meta->transfer_reference', 'like', "%{$search}%")
+                        ->orWhere('meta->wallet_reference', 'like', "%{$search}%")
+                        ->orWhere('meta->transfer_key', 'like', "%{$search}%")
+                        ->orWhere('meta->client_tag', 'like', "%{$search}%")
+                        ->orWhere('meta->reason', 'like', "%{$search}%")
+                        ->orWhere('meta->notes', 'like', "%{$search}%");
+                });
+            }
+
+            $total = (clone $query)->count();
+
+            $sortable = ['id', 'amount', 'balance_after', 'created_at', 'type'];
+            if (!in_array($sort, $sortable, true)) {
+                $sort = 'id';
+            }
+
+            if ($limit <= 0) {
+                $rows = $query->orderBy($sort, $order)->get();
+            } else {
+                $rows = $query->orderBy($sort, $order)
+                    ->skip($offset)
+                    ->take($limit)
+                    ->get();
+            }
+
+            $dataRows = [];
+
+            foreach ($rows as $row) {
+                $meta = is_array($row->meta) ? $row->meta : [];
+                $reason = (string) data_get($meta, 'reason');
+                $context = (string) data_get($meta, 'context');
+                $transferDirection = (string) data_get($meta, 'direction');
+                $counterpartyName = trim((string) data_get($meta, 'counterparty.name', ''));
+                $counterpartyId = data_get($meta, 'counterparty.id');
+                $operationReference = data_get($meta, 'operation_reference');
+                $transferReference = data_get($meta, 'reference')
+                    ?? data_get($meta, 'transfer_reference')
+                    ?? data_get($meta, 'wallet_reference');
+
+                $isTransfer = $reason === 'wallet_transfer' || $context === 'wallet_transfer';
+                $isRefund = in_array($reason, ['refund', 'wallet_refund'], true);
+                $isAdminCredit = $reason === 'admin_manual_credit';
+                $isTopUp = $row->manual_payment_request_id
+                    || $reason === ManualPaymentRequest::PAYABLE_TYPE_WALLET_TOP_UP
+                    || $reason === 'wallet_top_up';
+
+                $categoryLabel = 'Other';
+                if ($isTransfer) {
+                    $categoryLabel = 'Transfer';
+                } elseif ($isRefund) {
+                    $categoryLabel = 'Refund';
+                } elseif ($isAdminCredit) {
+                    $categoryLabel = 'Manual credit';
+                } elseif ($isTopUp) {
+                    $categoryLabel = 'Top-up';
+                } elseif ($row->type === 'debit') {
+                    $categoryLabel = 'Purchase';
+                } elseif ($row->type === 'credit') {
+                    $categoryLabel = 'Credit';
+                }
+
+                $typeLabel = $row->type === 'credit' ? 'Credit' : 'Debit';
+                $direction = $transferDirection !== '' ? $transferDirection : ($row->type === 'credit' ? 'incoming' : 'outgoing');
+                $partyLabel = $counterpartyName !== '' ? $counterpartyName : ($counterpartyId ? 'User #' . $counterpartyId : null);
+
+                $currency = strtoupper((string) ($row->currency ?? config('app.currency', 'SAR')));
+
+                $dataRows[] = [
+                    'id' => $row->getKey(),
+                    'reference' => $operationReference ?: ($transferReference ?: '#' . $row->getKey()),
+                    'operation_reference' => $operationReference,
+                    'transfer_reference' => $transferReference,
+                    'category_label' => $categoryLabel,
+                    'type' => $row->type,
+                    'type_label' => $typeLabel,
+                    'direction' => $direction,
+                    'party_label' => $partyLabel,
+                    'party_id' => $counterpartyId,
+                    'amount' => (float) $row->amount,
+                    'balance_after' => (float) $row->balance_after,
+                    'currency' => $currency,
+                    'created_at' => optional($row->created_at)->toDateTimeString(),
+                    'created_human' => optional($row->created_at)->format('Y-m-d H:i'),
+                    'meta_reason' => $reason,
+                    'notes' => data_get($meta, 'notes'),
+                    'idempotency_key' => $row->idempotency_key,
+                    'manual_payment_request_id' => $row->manual_payment_request_id,
+                    'payment_transaction_id' => $row->payment_transaction_id,
+                    'transfer_key' => data_get($meta, 'transfer_key'),
+                    'client_tag' => data_get($meta, 'client_tag'),
+                ];
+            }
+
+            return response()->json([
+                'total' => $total,
+                'rows' => $dataRows,
+            ]);
+        } catch (Throwable $throwable) {
+            ResponseService::logErrorResponse($throwable, 'WalletAdminController -> datatable');
+            ResponseService::errorResponse();
+        }
+    }
+
     public function show(Request $request, User $user): View
     {
         ResponseService::noPermissionThenRedirect('wallet-manage');
