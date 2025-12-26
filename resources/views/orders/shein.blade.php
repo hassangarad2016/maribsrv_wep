@@ -121,6 +121,40 @@
     .service-requests-table .table-striped > tbody > tr:nth-of-type(odd) {
         background-color: rgba(15, 23, 42, 0.02);
     }
+    .service-requests-table .fixed-table-toolbar {
+        margin-bottom: 0.75rem;
+    }
+    .service-requests-table .fixed-table-toolbar .columns {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.15rem;
+        background: #4b5563;
+        border-radius: 0.75rem;
+        padding: 0.25rem;
+        box-shadow: 0 10px 18px rgba(15, 23, 42, 0.18);
+    }
+    .service-requests-table .fixed-table-toolbar .columns .btn,
+    .service-requests-table .fixed-table-toolbar .columns .btn-group > .btn {
+        background: transparent;
+        border: 0;
+        color: #ffffff;
+        width: 36px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: none;
+    }
+    .service-requests-table .fixed-table-toolbar .columns .btn:hover,
+    .service-requests-table .fixed-table-toolbar .columns .btn-group > .btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+    .service-requests-table .fixed-table-toolbar .columns .dropdown-toggle::after {
+        display: none;
+    }
+    .service-requests-table .fixed-table-toolbar .columns .btn i {
+        font-size: 1rem;
+    }
     .shein-orders-table th,
     .shein-orders-table td {
         white-space: nowrap;
@@ -128,6 +162,15 @@
     }
     .shein-orders-table td br {
         display: none;
+    }
+    .shein-orders-table td .badge + .badge {
+        margin-inline-start: 0.35rem;
+    }
+    .shein-orders-table td small {
+        white-space: nowrap;
+    }
+    .shein-orders-table .btn-group {
+        flex-wrap: nowrap;
     }
     .pagination {
         margin: 0;

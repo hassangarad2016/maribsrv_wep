@@ -1435,3 +1435,198 @@
         }
     </script>
 @endsection 
+
+@push('scripts')
+    <script>
+        (function() {
+            const button = document.getElementById('shein_import_btn');
+            if (!button || button.dataset.sheinImportBound === '1') {
+                return;
+            }
+
+            const productLinkInput = document.getElementById('product_link');
+            const statusId = 'shein_import_status';
+            let statusEl = document.getElementById(statusId);
+            const importUrl = button.getAttribute('data-import-url') || '';
+            const imageInput = document.getElementById('image');
+            const preview = document.getElementById('imported_images_preview');
+            const inputs = document.getElementById('imported_images_inputs');
+            const state = { images: [] };
+
+            const ensureStatus = () => {
+                if (!statusEl && button.parentElement) {
+                    statusEl = document.createElement('small');
+                    statusEl.id = statusId;
+                    statusEl.className = 'form-text text-muted';
+                    button.parentElement.appendChild(statusEl);
+                }
+            };
+
+            const setStatus = (message, isError) => {
+                ensureStatus();
+                if (!statusEl) {
+                    return;
+                }
+                statusEl.textContent = message || '';
+                statusEl.classList.toggle('text-danger', Boolean(isError));
+                statusEl.classList.toggle('text-success', !isError && message);
+            };
+
+            const setBusy = (busy) => {
+                button.disabled = busy;
+                if (busy) {
+                    button.textContent = 'Fetching...';
+                } else {
+                    button.textContent = button.getAttribute('data-label') || button.textContent || 'Fetch Shein Data';
+                }
+            };
+
+            const normalizeText = (value) => {
+                if (value === null || value === undefined) {
+                    return '';
+                }
+                return value.toString().trim();
+            };
+
+            const parsePrice = (value) => {
+                const text = normalizeText(value).replace(/,/g, '');
+                const match = text.match(/-?\d+(\.\d+)?/);
+                return match ? match[0] : '';
+            };
+
+            const updateImageRequirement = () => {
+                if (imageInput) {
+                    imageInput.required = state.images.length === 0;
+                }
+            };
+
+            const renderImages = () => {
+                if (!preview || !inputs) {
+                    return;
+                }
+                preview.innerHTML = '';
+                inputs.innerHTML = '';
+
+                state.images.forEach((url, index) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'position-relative';
+                    wrapper.style.width = '100px';
+                    wrapper.style.height = '100px';
+
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = 'Imported';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '6px';
+                    img.style.border = '1px solid #e5e5e5';
+
+                    const remove = document.createElement('button');
+                    remove.type = 'button';
+                    remove.className = 'btn btn-danger btn-sm position-absolute top-0 end-0';
+                    remove.style.transform = 'translate(35%, -35%)';
+                    remove.style.padding = '2px 6px';
+                    remove.style.lineHeight = '1';
+                    remove.innerHTML = '<i class="bi bi-x"></i>';
+                    remove.addEventListener('click', () => {
+                        state.images.splice(index, 1);
+                        renderImages();
+                    });
+
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = `imported_images[${index}]`;
+                    hidden.value = url;
+
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(remove);
+                    preview.appendChild(wrapper);
+                    inputs.appendChild(hidden);
+                });
+
+                updateImageRequirement();
+            };
+
+            const applyFallback = (data) => {
+                if (!data || typeof data !== 'object') {
+                    return;
+                }
+                const title = normalizeText(data.title);
+                if (title) {
+                    const el = document.getElementById('name');
+                    if (el) el.value = title;
+                }
+                const description = normalizeText(data.description);
+                if (description) {
+                    const el = document.getElementById('description');
+                    if (el) el.value = description;
+                }
+                const price = parsePrice(data.price);
+                if (price) {
+                    const el = document.getElementById('price');
+                    if (el) el.value = price;
+                }
+                const currency = normalizeText(data.currency).toUpperCase();
+                if (currency) {
+                    const el = document.getElementById('currency');
+                    if (el) el.value = currency;
+                }
+                const images = Array.isArray(data.images) ? data.images : [];
+                state.images = Array.from(new Set(images.map(normalizeText).filter((url) => url !== '')));
+                renderImages();
+            };
+
+            button.setAttribute('data-label', button.textContent || 'Fetch Shein Data');
+            button.dataset.sheinImportBound = '1';
+            setStatus('Ready to import.', false);
+
+            button.addEventListener('click', async (event) => {
+                event.preventDefault();
+
+                const url = productLinkInput ? normalizeText(productLinkInput.value) : '';
+                if (!url) {
+                    setStatus('Paste the Shein product link first.', true);
+                    return;
+                }
+                if (!importUrl) {
+                    setStatus('Import URL is missing.', true);
+                    return;
+                }
+
+                const csrf = document.querySelector('meta[name="csrf-token"]');
+                const csrfToken = csrf ? csrf.getAttribute('content') : '';
+
+                setBusy(true);
+                setStatus('Fetching data from Shein...', false);
+
+                try {
+                    const response = await fetch(importUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+                        },
+                        body: new URLSearchParams({ url }),
+                    });
+                    const payload = await response.json();
+                    if (payload && payload.error) {
+                        setStatus(payload.message || 'Failed to fetch Shein data.', true);
+                    } else {
+                        const data = payload && payload.data ? payload.data : payload;
+                        if (window.__sheinApplyImport) {
+                            window.__sheinApplyImport(data);
+                        } else {
+                            applyFallback(data);
+                        }
+                        setStatus('Shein data loaded.', false);
+                    }
+                } catch (error) {
+                    setStatus(`Import failed: ${error}`, true);
+                } finally {
+                    setBusy(false);
+                }
+            });
+        })();
+    </script>
+@endpush
