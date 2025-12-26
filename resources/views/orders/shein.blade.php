@@ -526,29 +526,29 @@
                                     data-show-columns="true"
                                     data-show-refresh="true"
                                     data-show-export="true"
-                                    data-export-options='{"fileName": "shein-orders"}'
+                                    data-export-options='{"fileName": "shein-orders","ignoreColumn": ["actions"]}'
                                     data-export-types='["csv","excel","txt"]'
                                     data-icons="sheinOrdersTableIcons"
                                     data-icons-prefix="bi"
                                     data-mobile-responsive="true">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>رقم الطلب</th>
-                                    <th>العميل</th>
-                                    <th>التاجر</th>
-                                    <th>الفئة</th>
-                                    <th>المبلغ الإجمالي</th>
-                                    <th>سعر التوصيل</th>
-                                    <th>المسافة</th>
-                                    <th>حجم الطلب</th>
-                                    <th>طريقة الدفع</th>
-                                    <th>حالة الدفع</th>
-                                    <th>حالة الطلب</th>
-                                    <th>تاريخ الطلب</th>
-                                    <th>الإجراءات</th>
-                                </tr>
-                            </thead>
+    <thead>
+        <tr>
+            <th data-field="id">#</th>
+            <th data-field="order_number">رقم الطلب</th>
+            <th data-field="user">العميل</th>
+            <th data-field="seller" data-visible="false">التاجر</th>
+            <th data-field="category">الفئة</th>
+            <th data-field="amount">المبلغ الإجمالي</th>
+            <th data-field="delivery_price" data-visible="false">سعر التوصيل</th>
+            <th data-field="delivery_distance" data-visible="false">المسافة</th>
+            <th data-field="delivery_size" data-visible="false">حجم الطلب</th>
+            <th data-field="payment_gateway">طريقة الدفع</th>
+            <th data-field="payment_status">حالة الدفع</th>
+            <th data-field="order_status">حالة الطلب</th>
+            <th data-field="created_at">تاريخ الطلب</th>
+            <th data-field="actions">الإجراءات</th>
+        </tr>
+    </thead>
                             <tbody>
 
                                 @php
@@ -602,7 +602,7 @@
                                             @endphp
                                             @if(count($categories) > 0)
                                                 @foreach($categories as $categoryId => $categoryName)
-                                                    <span class="badge badge-info">{{ $categoryName }}</span><br>
+                                                    <span class="badge bg-light text-dark border">{{ $categoryName }}</span><br>
                                                 @endforeach
                                             @else
                                                 <span class="text-muted">غير متوفر</span>
