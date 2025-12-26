@@ -602,6 +602,20 @@
                                     <span class="order-summary-value">{{ $deliveryPriceDisplay }}</span>
                                 </li>
                             </ul>
+                            <div class="order-summary-actions d-flex flex-wrap gap-2 mt-3">
+                                @if($googleMapsUrl)
+                                    <a href="{{ $googleMapsUrl }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-geo-alt"></i>
+                                        خرائط جوجل
+                                    </a>
+                                @endif
+                                @if($addressCopyText !== '')
+                                    <button type="button" class="btn btn-outline-secondary btn-sm copy-address-btn" data-address-copy="{{ e($addressCopyText) }}">
+                                        <i class="bi bi-clipboard"></i>
+                                        نسخ العنوان
+                                    </button>
+                                @endif
+                            </div>
                         </section>
 
                         <section class="order-summary-block">
@@ -674,115 +688,7 @@
                                 @endif
                             @endif
                         </section>
-                        <section class="order-summary-block order-summary-block--wide">
-                            <h6 class="order-summary-heading">عنوان الشحن والتتبع</h6>
-                            <div class="order-address">
-                                <div class="order-address-text">{{ $shippingAddressDisplay ?: 'غير متوفر' }}</div>
-                                <div class="order-address-actions">
-                                    @php
-                                        $availabilityBadgeClass = $hasCoordinates ? 'bg-success' : ($googleMapsUrl ? 'bg-info' : 'bg-secondary');
-                                        $availabilityBadgeLabel = $hasCoordinates ? 'الإحداثيات متوفرة' : ($googleMapsUrl ? 'رابط موقع متوفر' : 'الإحداثيات غير متوفرة');
-                                    @endphp
-                                    <span class="badge {{ $availabilityBadgeClass }}">{{ $availabilityBadgeLabel }}</span>
-                                    @if($coordinateDisplay)
-                                        <span class="text-muted small" dir="ltr">{{ $coordinateDisplay }}</span>
-                                    @endif
-                                    @if($hasCoordinates && $googleMapsUrl)
-                                        <a href="{{ $googleMapsUrl }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
-                                            <i class="bi bi-geo-alt"></i>
-                                            خرائط جوجل
-                                        </a>
-                                    @elseif(!$hasCoordinates && $googleMapsUrl)
-                                        <a href="{{ $googleMapsUrl }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
-                                            <i class="bi bi-geo-alt"></i>
-                                            فتح الخريطة
-                                        </a>
-                                    @endif
-                                    @if($hasCoordinates && $appleMapsUrl)
-                                        <a href="{{ $appleMapsUrl }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
-                                            <i class="bi bi-compass"></i>
-                                            خرائط أبل
-                                        </a>
-                                    @endif
-                                    @if($addressCopyText !== '')
-                                        <button type="button" class="btn btn-outline-secondary btn-sm copy-address-btn" data-address-copy="{{ e($addressCopyText) }}">
-                                            <i class="bi bi-clipboard"></i>
-                                            نسخ العنوان
-                                        </button>
-                                    @endif
-                                </div>
-
-                            </div>
-            
-
-                            @if(! $hasCoordinates && ! $googleMapsUrl)
-                                <div class="text-muted small mt-2">لا تتوفر بيانات موقع دقيقة لهذا العنوان.</div>
-                            @endif
-
-                            <ul class="order-summary-list order-summary-list--compact mt-3">
-                                <li>
-                                    <span class="order-summary-label">رابط التتبع</span>
-                                    <span class="order-summary-value">
-                                        @if($trackingUrl)
-                                            <a href="{{ $trackingUrl }}" target="_blank" rel="noopener">فتح رابط التتبع</a>
-                                        @else
-                                            <span class="text-muted">غير متوفر</span>
-                                        @endif
-                                    </span>
-                                </li>
-                                @if($trackingCarrier)
-                                    <li>
-                                        <span class="order-summary-label">شركة الشحن</span>
-                                        <span class="order-summary-value">{{ $trackingCarrier }}</span>
-                                    </li>
-                                @endif
-                                @if($trackingNumber)
-                                    <li>
-                                        <span class="order-summary-label">رقم التتبع</span>
-                                        <span class="order-summary-value"><code>{{ $trackingNumber }}</code></span>
-                                    </li>
-                                @endif
-                            </ul>
-
-                            @if($trackingProof !== [])
-                                <div class="order-tracking-proof mt-3">
-                                    <h6 class="order-summary-subheading">إثبات التسليم</h6>
-                                    <ul class="order-summary-list order-summary-list--compact mb-0">
-                                        @if($trackingImagePath)
-                                            <li>
-                                                <span class="order-summary-label">الصورة</span>
-                                                <span class="order-summary-value">
-                                                    @if($trackingImageUrl)
-                                                        <a href="{{ $trackingImageUrl }}" target="_blank" rel="noopener">عرض</a>
-                                                    @else
-                                                        <code>{{ $trackingImagePath }}</code>
-                                                    @endif
-                                                </span>
-                                            </li>
-                                        @endif
-                                        @if($trackingSignaturePath)
-                                            <li>
-                                                <span class="order-summary-label">التوقيع</span>
-                                                <span class="order-summary-value">
-                                                    @if($trackingSignatureUrl)
-                                                        <a href="{{ $trackingSignatureUrl }}" target="_blank" rel="noopener">عرض</a>
-                                                    @else
-                                                        <code>{{ $trackingSignaturePath }}</code>
-                                                    @endif
-                                                </span>
-                                            </li>
-                                        @endif
-                                        @if($trackingOtpCode)
-                                            <li>
-                                                <span class="order-summary-label">رمز OTP</span>
-                                                <span class="order-summary-value"><code>{{ $trackingOtpCode }}</code></span>
-                                            </li>
-                                        @endif
-                                    </ul>
-                                </div>
-                            @endif
-
-                        </section>
+                        
 
                         @if($orderNotes !== '')
                             <section class="order-summary-block order-summary-block--wide">
