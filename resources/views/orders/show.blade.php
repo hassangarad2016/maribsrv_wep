@@ -1,4 +1,4 @@
-﻿@extends('layouts.main')
+@extends('layouts.main')
 
 
 @php
@@ -604,6 +604,76 @@
                             </ul>
                         </section>
 
+                        <section class="order-summary-block">
+                            <h6 class="order-summary-heading">تحديث حالة الطلب</h6>
+                            @php
+                                $orderStatusLocked = isset($pendingManualPaymentRequest) && $pendingManualPaymentRequest;
+                                $paymentStatusLabelForUpdate = $paymentStatusOptions[$order->payment_status] ?? $order->payment_status;
+                                $statusLabelForUpdate = \App\Models\Order::statusLabel($order->order_status);
+                                $canChangeOrderStatus = $order->hasSuccessfulPayment() && ! $orderStatusLocked;
+                                $orderStatusLockMessage = null;
+
+                                if (! $order->hasSuccessfulPayment()) {
+                                    $orderStatusLockMessage = 'لا يمكن تحديث حالة الطلب قبل اكتمال الدفع.';
+                                } elseif ($orderStatusLocked) {
+                                    $orderStatusLockMessage = 'لا يمكن تحديث حالة الطلب أثناء مراجعة الدفع.';
+                                }
+                            @endphp
+                            @if($canChangeOrderStatus)
+                                <form action="{{ route('orders.update', $order->id) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="form-group mb-3">
+                                        <label for="order_status" class="form-label">حالة الطلب</label>
+                                        <select class="form-control" id="order_status" name="order_status" required>
+                                            @foreach($orderStatuses as $status)
+                                                <option value="{{ $status->code }}" {{ $order->order_status == $status->code ? 'selected' : '' }}
+                                                    style="color: {{ $status->color }}">
+                                                    {{ $status->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">حالة الدفع</label>
+                                        <div class="form-control-plaintext border rounded bg-light px-3 py-2">
+                                            {{ $paymentStatusLabelForUpdate ?? '—' }}
+                                        </div>
+                                        <small class="text-muted d-block mt-2">لا يمكن تعديل حالة الدفع من هنا.</small>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="comment" class="form-label">ملاحظات التحديث</label>
+                                        <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="notify_customer" name="notify_customer" value="1">
+                                        <label class="form-check-label" for="notify_customer">
+                                            إشعار العميل بالتحديث
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">تحديث الطلب</button>
+                                </form>
+                            @else
+                                <div class="form-group mb-3">
+                                    <label class="form-label">حالة الطلب</label>
+                                    <div class="form-control-plaintext border rounded bg-light px-3 py-2">
+                                        {{ $statusLabelForUpdate ?? '—' }}
+                                    </div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label class="form-label">حالة الدفع</label>
+                                    <div class="form-control-plaintext border rounded bg-light px-3 py-2">
+                                        {{ $paymentStatusLabelForUpdate ?? '—' }}
+                                    </div>
+                                    <small class="text-muted d-block mt-2">لا يمكن تعديل حالة الدفع من هنا.</small>
+                                </div>
+                                @if($orderStatusLockMessage)
+                                    <div class="alert alert-info mb-0">
+                                        {{ $orderStatusLockMessage }}
+                                    </div>
+                                @endif
+                            @endif
+                        </section>
                         <section class="order-summary-block order-summary-block--wide">
                             <h6 class="order-summary-heading">عنوان الشحن والتتبع</h6>
                             <div class="order-address">
@@ -863,101 +933,6 @@
             </div>
         </div>
     </div>
-
-
-
-    <div class="row mt-4">
-        <!-- تحديث حالة الطلب -->
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title">تحديث حالة الطلب</h4>
-                </div>
-                <div class="card-body">
-                    @php
-                        $paymentStatusLocked = true;
-                        $orderStatusLocked = isset($pendingManualPaymentRequest) && $pendingManualPaymentRequest;
-                        $paymentStatusLabel = $paymentStatusOptions[$order->payment_status] ?? $order->payment_status;
-                        
-                        $statusLabel = \App\Models\Order::statusLabel($order->order_status);
-                        $canChangeOrderStatus = $order->hasSuccessfulPayment() && ! $orderStatusLocked;
-                        $orderStatusLockMessage = null;
-
-                        if (! $order->hasSuccessfulPayment()) {
-                            $orderStatusLockMessage = 'لا يمكن تعديل حالة الطلب قبل تأكيد الدفع بنجاح.';
-                        } elseif ($orderStatusLocked) {
-                            $orderStatusLockMessage = 'لا يمكن تعديل حالة الطلب حتى يتم اعتماد الدفعة من خلال فريق المدفوعات.';
-                        }
-
-                    @endphp
-                    @if($canChangeOrderStatus)
-
-                    <form action="{{ route('orders.update', $order->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <div class="form-group">
-                            <label for="order_status">حالة الطلب</label>
-                            <select class="form-control" id="order_status" name="order_status" required>
-                                @foreach($orderStatuses as $status)
-                                    <option value="{{ $status->code }}" {{ $order->order_status == $status->code ? 'selected' : '' }}
-                                        style="color: {{ $status->color }}">
-                                        {{ $status->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-
-
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">حالة الدفع</label>
-                            <div class="form-control-plaintext border rounded bg-light px-3 py-2">
-                                {{ $paymentStatusLabel ?? '—' }}
-                            </div>
-                            <small class="text-muted d-block mt-2">يتم تحديث حالة الدفع حصراً من خلال واجهة طلبات الدفع.</small>
-                                
-                        </div>
-                        <div class="form-group">
-                            <label for="comment">ملاحظات التحديث</label>
-                            <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
-                        </div>
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="notify_customer" name="notify_customer" value="1">
-                            <label class="form-check-label" for="notify_customer">
-                                إشعار العميل بالتحديث
-                            </label>
-                        </div>
-                        <button type="submit" class="btn btn-primary">تحديث الحالة</button>
-                    </form>
-
-                    @else
-                        <div class="form-group">
-                            <label class="form-label">حالة الطلب</label>
-                            <div class="form-control-plaintext border rounded bg-light px-3 py-2">
-                                {{ $statusLabel ?? '—' }}
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">حالة الدفع</label>
-                            <div class="form-control-plaintext border rounded bg-light px-3 py-2">
-                                {{ $paymentStatusLabel ?? '—' }}
-                            </div>
-                            <small class="text-muted d-block mt-2">يتم تحديث حالة الدفع حصراً من خلال واجهة طلبات الدفع.</small>
-                        </div>
-                        @if($orderStatusLockMessage)
-                            <div class="alert alert-info mb-0">
-                                {{ $orderStatusLockMessage }}
-                            </div>
-                        @endif
-                    @endif
-
-                </div>
-            </div>
-        </div>
-
- 
-    </div>
-
-
 
 
 
