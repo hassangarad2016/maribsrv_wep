@@ -7,7 +7,7 @@
 
 
 
-@section('title', 'طھظپط§طµظٹظ„ ط§ظ„ط·ظ„ط¨ #' . $order->order_number)
+@section('title', 'تفاصيل الطلب #' . $order->order_number)
 
 @section('content')
 <div class="container-fluid order-details-page">
@@ -15,11 +15,11 @@
         $deliverySummary = $order->delivery_payment_summary ?? [];
         $paymentSummary = $order->payment_summary ?? [];
         $manualPaymentStatusLabels = [
-            ManualPaymentRequest::STATUS_PENDING => 'ظ‚ظٹط¯ ط§ظ„ظ…ط±ط§ط¬ط¹ط©',
-            ManualPaymentRequest::STATUS_UNDER_REVIEW => 'ظ‚ظٹط¯ ط§ظ„ظ…ط±ط§ط¬ط¹ط©',
-            ManualPaymentRequest::STATUS_APPROVED => 'ظ…ط¯ظپظˆط¹ (ظٹط¯ظˆظٹ)',
-            ManualPaymentRequest::STATUS_REJECTED => 'ظ…ط±ظپظˆط¶',
-        ];
+            ManualPaymentRequest::STATUS_PENDING => 'قيد الانتظار',
+            ManualPaymentRequest::STATUS_UNDER_REVIEW => 'قيد المراجعة',
+            ManualPaymentRequest::STATUS_APPROVED => 'مدفوع (يدوي)',
+            ManualPaymentRequest::STATUS_REJECTED => 'مرفوض',
+        ];];
         $manualPaymentStatusBadgeClasses = [
             ManualPaymentRequest::STATUS_PENDING => 'bg-warning text-dark',
             ManualPaymentRequest::STATUS_UNDER_REVIEW => 'bg-warning text-dark',
@@ -264,8 +264,7 @@
                 </a>
             @else
                 <button type="button" class="btn btn-outline-primary disabled" data-testid="invoice-button" title="{{ __('orders.invoice.balance_outstanding') }}" disabled>
-                    <i class="fa fa-file-invoice"></i> تحميل الفاتورة
-                </button>
+                    <i class="fa fa-file-invoice"></i> تحميل الفاتورة</button>
             @endif
 
             @if ($hasDepositReceipts)
@@ -275,7 +274,7 @@
             @endif
 
             <a href="{{ $reserveToggleUrl }}" class="btn btn-outline-secondary">
-                <i class="bi {{ $showReserve ? 'bi-shield-minus' : 'bi-shield-plus' }}"></i>
+                <i class="bi {{ $showReserve ? 'إخفاء الحالات المحجوزة' : 'إظهار الحالات المحجوزة' }}"></i>
                 {{ $showReserve ? 'إخفاء الحالات المحجوزة' : 'عرض الحالات المحجوزة' }}
             </a>
 
@@ -338,9 +337,7 @@
                 <div class="card-body">
                     <ul class="nav nav-pills" id="orderActionsTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <a class="nav-link active" id="orderActionsPaymentsTab" data-bs-toggle="tab" href="#orderActionsPayments" role="tab" aria-controls="orderActionsPayments" aria-selected="true">
-                                ط§ظ„ظ…ط¯ظپظˆط¹ط§طھ ظˆط§ظ„ط¥ط´ط¹ط§ط±ط§طھ
-                            </a>
+                            <a class="nav-link active" id="orderActionsPaymentsTab" data-bs-toggle="tab" href="#orderActionsPayments" role="tab" aria-controls="orderActionsPayments" aria-selected="true">الدفع اليدوي</a>
                         </li>
 
                     </ul>
@@ -349,22 +346,18 @@
                             <div class="d-flex flex-wrap align-items-center gap-2">
                                 @if($manualPaymentLocked)
                                     <span class="btn btn-outline-success disabled" aria-disabled="true" title="ظ„ط§ ظٹظ…ظƒظ† ط¥ط¶ط§ظپط© ط§ظ„ط·ظ„ط¨ ط¥ظ„ظ‰ ظ…ط¬ظ…ظˆط¹ط© ط£ط«ظ†ط§ط، ظ…ط±ط§ط¬ط¹ط© ط§ظ„ط¯ظپط¹" data-testid="add-to-payment-group-button">
-                                        <i class="fa fa-layer-group"></i> ط¥ط¶ط§ظپط© ط§ظ„ط·ظ„ط¨ ط¥ظ„ظ‰ ظ…ط¬ظ…ظˆط¹ط©
-                                    </span>
+                                        <i class="fa fa-layer-group"></i> إضافة إلى مجموعة الدفع</span>
                                 @else
                                     <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addOrderToGroupModal" data-testid="add-to-payment-group-button">
-                                        <i class="fa fa-layer-group"></i> ط¥ط¶ط§ظپط© ط§ظ„ط·ظ„ط¨ ط¥ظ„ظ‰ ظ…ط¬ظ…ظˆط¹ط©
-                                    </button>
+                                        <i class="fa fa-layer-group"></i> إضافة إلى مجموعة الدفع</button>
                                 @endif
 
                                 @if($manualPaymentLocked)
                                     <span class="btn btn-outline-warning disabled" aria-disabled="true" title="ظ„ط§ ظٹظ…ظƒظ† ط¥ط±ط³ط§ظ„ ط¥ط´ط¹ط§ط± ظپظˆط±ظٹ ط£ط«ظ†ط§ط، ظ…ط±ط§ط¬ط¹ط© ط§ظ„ط¯ظپط¹" data-testid="instant-notification-button">
-                                        <i class="fa fa-bell"></i> ط¥ط±ط³ط§ظ„ ط¥ط´ط¹ط§ط± ظپظˆط±ظٹ
-                                    </span>
+                                        <i class="fa fa-bell"></i> إرسال إشعار فوري</span>
                                 @else
                                     <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#instantNotificationModal" data-testid="instant-notification-button">
-                                        <i class="fa fa-bell"></i> ط¥ط±ط³ط§ظ„ ط¥ط´ط¹ط§ط± ظپظˆط±ظٹ
-                                    </button>
+                                        <i class="fa fa-bell"></i> إرسال إشعار فوري</button>
                                 @endif
                             </div>
                         </div>
@@ -896,14 +889,14 @@
                     </div>
 
                     <div class="order-items-section mt-4">
-                        <h5 class="order-section-heading">ط¹ظ†ط§طµط± ط§ظ„ط·ظ„ط¨</h5>
+                        <h5 class="order-section-heading">عناصر الطلب</h5>
                         <div class="order-items-grid">
                             @forelse($orderItemsDisplayData as $item)
                                 <article class="order-item-card">
                                     <div class="order-item-header">
-                                        <img src="{{ $item['thumbnail_url'] }}" alt="طµظˆط±ط© ط§ظ„ظ…ظ†طھط¬" class="order-item-thumb">
+                                        <img src="{{ $item['thumbnail_url'] }}" alt="صورة المنتج" class="order-item-thumb">
                                         <div class="order-item-header-body">
-                                            <div class="order-item-title">{{ $item['name'] ?? 'ظ…ظ†طھط¬ ط¨ط¯ظˆظ† ط§ط³ظ…' }}</div>
+                                            <div class="order-item-title">{{ $item['name'] ?? 'منتج بدون اسم' }}</div>
                                             @if(! empty($item['variant_label']))
                                                 <div class="order-item-variant text-muted small">{{ $item['variant_label'] }}</div>
                                             @endif
@@ -912,7 +905,7 @@
                                             @if($item['product_url'])
                                                 <a href="{{ $item['product_url'] }}" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener">
                                                     <i class="bi bi-box-arrow-up-right"></i>
-                                                    ط¹ط±ط¶ ط§ظ„ظ…ظ†طھط¬
+                                                    عرض المنتج
                                                 </a>
                                             @endif
                                         </div>
@@ -921,31 +914,31 @@
                                     <div class="order-item-meta">
                                         @if(! empty($item['item_id']))
                                             <div>
-                                                <span class="order-summary-label">ظ…ط¹ط±ظ‘ظپ ط§ظ„ظ…ظ†طھط¬</span>
+                                                <span class="order-summary-label">رقم المنتج</span>
                                                 <span class="order-summary-value">{{ $item['item_id'] }}</span>
                                             </div>
                                         @endif
                                         @if(! empty($item['variant_id']))
                                             <div>
-                                                <span class="order-summary-label">ط§ظ„ظ…ط¹ط±ظپ ط§ظ„ظپط±ط¹ظٹ</span>
+                                                <span class="order-summary-label">رقم المتغير</span>
                                                 <span class="order-summary-value">{{ $item['variant_id'] }}</span>
                                             </div>
                                         @endif
                                         <div>
-                                            <span class="order-summary-label">ط§ظ„ط³ط¹ط±</span>
+                                            <span class="order-summary-label">السعر</span>
                                             <span class="order-summary-value">{{ number_format($item['price'], 2) }}</span>
                                         </div>
                                         <div>
-                                            <span class="order-summary-label">ط§ظ„ظƒظ…ظٹط©</span>
+                                            <span class="order-summary-label">الكمية</span>
                                             <span class="order-summary-value">{{ rtrim(rtrim(number_format($item['quantity'], 3, '.', ''), '0'), '.') }}</span>
                                         </div>
                                         <div>
-                                            <span class="order-summary-label">ط§ظ„ظ…ط¬ظ…ظˆط¹ ط§ظ„ظپط±ط¹ظٹ</span>
+                                            <span class="order-summary-label">الإجمالي</span>
                                             <span class="order-summary-value">{{ number_format($item['subtotal'], 2) }}</span>
                                         </div>
                                         @if(! empty($item['currency']))
                                             <div>
-                                                <span class="order-summary-label">ط§ظ„ط¹ظ…ظ„ط©</span>
+                                                <span class="order-summary-label">العملة</span>
                                                 <span class="order-summary-value">{{ $item['currency'] }}</span>
                                             </div>
                                         @endif
@@ -953,24 +946,42 @@
 
                                     <div class="order-item-details">
                                         <div class="order-item-section">
-                                            <h6 class="order-summary-subheading">ط®ظٹط§ط±ط§طھ ط§ظ„ظ…ظ‚ط§ط³/ط§ظ„ظ„ظˆظ†</h6>
+                                            <h6 class="order-summary-subheading">خيارات المقاس/اللون</h6>
                                             @if($item['has_options'])
                                                 <ul class="order-summary-list order-summary-list--compact mb-0">
                                                     @foreach($item['options'] as $option)
+                                                        @php
+                                                            $optionValue = $option['value'] ?? null;
+                                                            $optionRaw = $option['raw_value'] ?? $optionValue;
+                                                            $isColor = $option['is_color'] ?? false;
+                                                            $isSize = $option['is_size'] ?? false;
+                                                            $colorValue = $option['color_value'] ?? null;
+                                                        @endphp
                                                         <li>
                                                             <span class="order-summary-label">{{ $option['label'] }}</span>
-                                                            <span class="order-summary-value">{{ $option['value'] }}</span>
+                                                            <span class="order-summary-value">
+                                                                @if($isColor && $colorValue)
+                                                                    <span class="order-color-swatch" style="--color: {{ $colorValue }};" title="{{ $optionRaw }}"></span>
+                                                                    @if($optionValue)
+                                                                        <span class="order-option-text">{{ $optionValue }}</span>
+                                                                    @endif
+                                                                @elseif($isSize)
+                                                                    <span class="order-size-badge">{{ $optionValue ?? $optionRaw }}</span>
+                                                                @else
+                                                                    {{ $optionValue ?? $optionRaw }}
+                                                                @endif
+                                                            </span>
                                                         </li>
                                                     @endforeach
                                                 </ul>
                                             @else
-                                                <p class="text-muted small mb-0">ظ„ط§ طھظˆط¬ط¯ ط®ظٹط§ط±ط§طھ ظ…طھط§ط­ط©</p>
-                                            @endif {{-- ظ†ظ‡ط§ظٹط© ط´ط±ط· ط®ظٹط§ط±ط§طھ ط§ظ„ظ…ظ‚ط§ط³/ط§ظ„ظ„ظˆظ† --}}
+                                                <p class="text-muted small mb-0">لا توجد خيارات.</p>
+                                            @endif
 
                                         </div>
 
                                         <div class="order-item-section">
-                                            <h6 class="order-summary-subheading">ط§ظ„ط¨ظٹط§ظ†ط§طھ ط§ظ„ط¥ط¹ظ„ط§ظ†ظٹط©</h6>
+                                            <h6 class="order-summary-subheading">بيانات الإعلان</h6>
                                             @if($item['has_advertiser'])
                                                 <ul class="order-summary-list order-summary-list--compact mb-0">
                                                     @foreach($item['advertiser'] as $field)
@@ -981,14 +992,14 @@
                                                     @endforeach
                                                 </ul>
                                             @else
-                                                <span class="text-muted">ط؛ظٹط± ظ…طھظˆظپط±</span>
+                                                <span class="text-muted">لا يوجد بيانات.</span>
                                             @endif
                                         </div>
                                     </div>
                                 </article>
                             @empty
                                 <div class="order-empty-state">
-                                    <p class="text-muted mb-0">ظ„ط§ طھظˆط¬ط¯ ط¹ظ†ط§طµط±</p>
+                                    <p class="text-muted mb-0">لا توجد عناصر.</p>
                                 </div>
                             @endforelse
                              
@@ -996,32 +1007,25 @@
   
                         <div class="order-items-summary mt-4">
                             <div>
-                                <span class="order-summary-label">ط§ظ„ظ…ط¬ظ…ظˆط¹</span>
+                                <span class="order-summary-label">الإجمالي</span>
                                 <span class="order-summary-value">{{ number_format($order->total_amount, 2) }}</span>
                             </div>
                             <div>
-                                <span class="order-summary-label">ط§ظ„ط¶ط±ظٹط¨ط© (15%)</span>
+                                <span class="order-summary-label">الضريبة (15%)</span>
                                 <span class="order-summary-value">{{ number_format($order->tax_amount, 2) }}</span>
                             </div>
                             <div>
-                                <span class="order-summary-label">ط§ظ„ط®طµظ…</span>
+                                <span class="order-summary-label">الخصم</span>
                                 <span class="order-summary-value">{{ number_format($order->discount_amount, 2) }}</span>
                             </div>
                             <div>
-                                <span class="order-summary-label">ط§ظ„ظ…ط¬ظ…ظˆط¹ ط§ظ„ظ†ظ‡ط§ط¦ظٹ</span>
+                                <span class="order-summary-label">الإجمالي النهائي</span>
                                 <span class="order-summary-value">{{ number_format($order->final_amount, 2) }}</span>
                             </div>
                         </div>
                     </div>
 
-
-
-                </div>
-            </div>
-        </div>
-
-        <!-- ط³ط¬ظ„ ط§ظ„ط·ظ„ط¨ -->
-        <div class="col-12 col-xl-5">
+        <div class="col-12 col-xl-5"><div class="col-12 col-xl-5">
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">ط³ط¬ظ„ ط§ظ„ط·ظ„ط¨</h4>
@@ -1425,8 +1429,7 @@
                             </div>
                             <div class="mt-3 d-flex justify-content-end align-items-center gap-2">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fa fa-layer-group"></i> ط¥ظ†ط´ط§ط، ط§ظ„ظ…ط¬ظ…ظˆط¹ط© ظˆط¥ط¶ط§ظپط© ط§ظ„ط·ظ„ط¨
-                                </button>
+                                    <i class="fa fa-layer-group"></i> إضافة إلى مجموعة الدفع</button>
                             </div>
                             <p class="small text-muted mb-0 mt-2">ط³ظٹطھظ… ط¥ط¶ط§ظپط© ظ‡ط°ط§ ط§ظ„ط·ظ„ط¨ طھظ„ظ‚ط§ط¦ظٹط§ظ‹ ط¥ظ„ظ‰ ط§ظ„ظ…ط¬ظ…ظˆط¹ط© ط§ظ„ط¬ط¯ظٹط¯ط© ط¨ط¹ط¯ ط¥ظ†ط´ط§ط¦ظ‡ط§.</p>
                         </form>
