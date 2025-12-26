@@ -164,7 +164,7 @@ class WalletWithdrawalRequestAdminController extends Controller
                 })
                 ->all();
 
-            $query = WalletWithdrawalRequest::query()->with(['account.user']);
+            $query = WalletWithdrawalRequest::query()->with(['account.user', 'transaction']);
 
             if ($statusFilter !== null && $statusFilter !== '') {
                 $query->where('status', $statusFilter);
@@ -235,6 +235,14 @@ class WalletWithdrawalRequestAdminController extends Controller
                 }
                 $operate .= '</div>';
 
+                $meta = is_array($row->meta) ? $row->meta : null;
+                if ($meta === null || $meta === []) {
+                    $transactionMeta = $row->transaction?->meta;
+                    if (is_array($transactionMeta)) {
+                        $meta = $transactionMeta['withdrawal_meta'] ?? $transactionMeta['withdrawal']['meta'] ?? $transactionMeta['withdrawal'] ?? null;
+                    }
+                }
+
                 $dataRows[] = [
                     'id' => $row->getKey(),
                     'amount' => (float) $row->amount,
@@ -245,7 +253,7 @@ class WalletWithdrawalRequestAdminController extends Controller
                     'notes' => $row->notes,
                     'review_notes' => $row->review_notes,
                     'wallet_reference' => $row->wallet_reference,
-                    'meta' => is_array($row->meta) ? $row->meta : null,
+                    'meta' => is_array($meta) ? $meta : null,
                     'created_at' => optional($row->created_at)->toDateTimeString(),
                     'created_human' => optional($row->created_at)->format('Y-m-d H:i'),
                     'user' => [
