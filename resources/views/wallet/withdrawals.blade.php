@@ -478,7 +478,7 @@
                                     <th data-field="user.name" data-sortable="false" data-formatter="userFormatter">{{ __('User') }}</th>
                                     <th data-field="amount" data-sortable="true" data-formatter="amountFormatter">{{ __('Amount') }}</th>
                                     <th data-field="preferred_method" data-sortable="false" data-formatter="methodFormatter">{{ __('Method') }}</th>
-                                    <th data-field="notes" data-sortable="false" data-formatter="notesFormatter">{{ __('Notes') }}</th>
+                                    <th data-field="notes" data-sortable="false" data-formatter="notesFormatter" data-visible="false">{{ __('Notes') }}</th>
                                     <th data-field="created_at" data-sortable="true" data-formatter="createdAtFormatter">{{ __('Requested At') }}</th>
                                     <th data-field="status" data-sortable="true" data-formatter="statusFormatter">{{ __('Status') }}</th>
                                     <th data-field="operate" data-align="center" data-sortable="false" data-events="withdrawalEvents">{{ __('Actions') }}</th>
