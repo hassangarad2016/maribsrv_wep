@@ -461,19 +461,19 @@
                                 <th scope="col" data-field="price" data-sortable="true">{{ __('Price') }}</th>
                                 <th scope="col" data-field="currency" data-sortable="true">{{ __('Currency') }}</th>
                                 <th scope="col" data-field="image" data-sortable="false" data-escape="false" data-formatter="imageFormatter">{{ __('Image') }}</th>
-                                <th scope="col" data-field="gallery_images" data-sortable="false" data-formatter="galleryImageFormatter" data-escape="false">{{ __('Other Images') }}</th>
+                                <th scope="col" data-field="gallery_images" data-sortable="false" data-formatter="galleryImageFormatter" data-escape="false" data-visible="false">{{ __('Other Images') }}</th>
                                 <th scope="col" data-field="latitude" data-sortable="true" data-visible="false">{{ __('Latitude') }}</th>
                                 <th scope="col" data-field="longitude" data-sortable="true" data-visible="false">{{ __('Longitude') }}</th>
                                 <th scope="col" data-field="address" data-sortable="true" data-visible="false">{{ __('Address') }}</th>
                                 <th scope="col" data-field="contact" data-sortable="true" data-visible="false">{{ __('Contact') }}</th>
-                                <th scope="col" data-field="country" data-sortable="true" data-visible="true">{{ __('Country') }}</th>
-                                <th scope="col" data-field="state" data-sortable="true" data-visible="true">{{ __('State') }}</th>
-                                <th scope="col" data-field="city" data-sortable="true" data-visible="true">{{ __('City') }}</th>
-                                <th scope="col" data-field="status" data-sortable="true" data-filter-control="select" data-filter-data="" data-escape="false" data-formatter="itemStatusFormatter">{{ __('Status') }}</th>
+                                <th scope="col" data-field="country" data-sortable="true" data-visible="false">{{ __('Country') }}</th>
+                                <th scope="col" data-field="state" data-sortable="true" data-visible="false">{{ __('State') }}</th>
+                                <th scope="col" data-field="city" data-sortable="true" data-visible="false">{{ __('City') }}</th>
+                                <th scope="col" data-field="status" data-sortable="true" data-filter-control="select" data-filter-data="" data-escape="false" data-formatter="itemStatusFormatter" data-visible="false">{{ __('Status') }}</th>
                                 @can('item-update')
-                                    <th scope="col" data-field="active_status" data-sortable="true" data-sort-name="deleted_at" data-visible="true" data-escape="false" data-formatter="statusSwitchFormatter">{{ __('Active') }}</th>
+                                    <th scope="col" data-field="active_status" data-sortable="true" data-sort-name="deleted_at" data-visible="false" data-escape="false" data-formatter="statusSwitchFormatter">{{ __('Active') }}</th>
                                 @endcan
-                                <th scope="col" data-field="rejected_reason" data-sortable="true" data-visible="true">{{ __('Rejected Reason') }}</th>
+                                <th scope="col" data-field="rejected_reason" data-sortable="true" data-visible="false">{{ __('Rejected Reason') }}</th>
                                 <th scope="col" data-field="created_at" data-sortable="true" data-visible="false">{{ __('Created At') }}</th>
                                 <th scope="col" data-field="updated_at" data-sortable="true" data-visible="false">{{ __('Updated At') }}</th>
                                 <th scope="col" data-field="user_id" data-sortable="true" data-visible="false">{{ __('User ID') }}</th>
