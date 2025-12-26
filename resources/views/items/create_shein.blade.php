@@ -162,7 +162,7 @@
                                 <label for="product_link" class="form-label mandatory">{{ __('Product Link') }}</label>
                                 <div class="input-group">
                                     <input type="url" id="product_link" name="product_link" class="form-control @error('product_link') is-invalid @enderror" value="{{ old('product_link') }}" required maxlength="2048">
-                                    <button type="button" class="btn btn-outline-primary" id="shein_import_btn">{{ __('Fetch Shein Data') }}</button>
+                                    <button type="button" class="btn btn-outline-primary" id="shein_import_btn" data-import-url="{{ route('item.shein.products.import') }}">{{ __('Fetch Shein Data') }}</button>
                                 </div>
                                 @error('product_link')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -1366,6 +1366,8 @@
                 setImportStatus('Shein data loaded.', false);
             };
 
+            window.__sheinApplyImport = applyImportData;
+
             const triggerSheinImport = () => {
                 if (!productLinkInput || !importButton || importButton.disabled) {
                     return;
@@ -1409,14 +1411,17 @@
             };
 
             if (importButton) {
-                $(document).on('click', '#shein_import_btn', (event) => {
-                    event.preventDefault();
-                    try {
-                        triggerSheinImport();
-                    } catch (error) {
-                        setImportStatus(`Import failed: ${error}`, true);
-                    }
-                });
+                if (importButton.dataset.sheinImportBound !== '1') {
+                    importButton.dataset.sheinImportBound = '1';
+                    $(document).on('click', '#shein_import_btn', (event) => {
+                        event.preventDefault();
+                        try {
+                            triggerSheinImport();
+                        } catch (error) {
+                            setImportStatus(`Import failed: ${error}`, true);
+                        }
+                    });
+                }
                 setImportStatus('Ready to import.', false);
             }
 
