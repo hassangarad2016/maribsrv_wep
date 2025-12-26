@@ -10,7 +10,7 @@
 @section('title', 'ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ø·Ù„Ø¨ #' . $order->order_number)
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid order-details-page">
     @php
         $deliverySummary = $order->delivery_payment_summary ?? [];
         $paymentSummary = $order->payment_summary ?? [];
@@ -190,55 +190,145 @@
             </button>
         </div>
     @endif
+    @php
+        $currencyCode = strtoupper((string) ($order->currency ?? config('app.currency', 'YER')));
+        $statusCollection = $orderStatuses instanceof \Illuminate\Support\Collection
+            ? $orderStatuses
+            : collect($orderStatuses ?? []);
+        $heroMatchedStatus = $statusCollection->firstWhere('code', $order->order_status);
+        $heroStatusDisplayEntry = $statusDisplayMap[$order->order_status] ?? null;
+        $heroStatusLabel = \App\Models\Order::statusLabel($order->order_status);
+        if ($heroStatusLabel === '') {
+            $heroStatusLabel = ($statusLabels ?? [])[$order->order_status]
+                ?? optional($heroMatchedStatus)->name
+                ?? (is_array($heroStatusDisplayEntry) ? ($heroStatusDisplayEntry['label'] ?? null) : null)
+                ?? \Illuminate\Support\Str::of($order->order_status)->replace('_', ' ')->headline();
+        }
+        $heroStatusColor = optional($heroMatchedStatus)->color ?: '#6c757d';
+        $heroStatusIcon = \App\Models\Order::statusIcon($order->order_status);
+        if (! $heroStatusIcon && is_array($heroStatusDisplayEntry)) {
+            $heroStatusIcon = $heroStatusDisplayEntry['icon'] ?? null;
+        }
+
+        $heroManualStatus = $latestManualPaymentRequest?->status;
+        $heroPaymentLabels = \App\Models\Order::paymentStatusLabels();
+        if ($heroManualStatus !== null) {
+            $heroPaymentStatusLabel = $manualPaymentStatusLabels[$heroManualStatus] ?? 'ÛíÑ ãÍÏÏ';
+            $heroPaymentStatusClass = $manualPaymentStatusBadgeClasses[$heroManualStatus] ?? 'bg-secondary';
+        } else {
+            $heroPaymentStatusLabel = $heroPaymentLabels[$order->payment_status] ?? ($order->payment_status ?: 'ÛíÑ ãÍÏÏ');
+            $heroPaymentStatusClass = match ($order->payment_status) {
+                'paid', 'success', 'succeed', 'completed', 'captured' => 'bg-success',
+                'pending' => 'bg-warning text-dark',
+                'partial', 'payment_partial' => 'bg-primary',
+                'refunded' => 'bg-info',
+                'failed', 'canceled', 'cancelled' => 'bg-danger',
+                default => 'bg-secondary',
+            };
+        }
+
+        $heroCustomerName = optional($order->user)->name ?? '-';
+        $heroSellerName = optional($order->seller)->name ?? '-';
+        $heroItemsCount = $order->items->count();
+    @endphp
 
 
 
 
-    <div class="row">
-        <div class="col-md-12 mb-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <h2>ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ø·Ù„Ø¨ #{{ $order->order_number }}</h2>
-                <div class="d-flex align-items-center">
-                    @php
-                        $showReserve = request()->boolean('include_reserve_statuses');
-                        $reserveToggleUrl = request()->fullUrlWithQuery(['include_reserve_statuses' => $showReserve ? 0 : 1]);
-                    @endphp
-
-
-                    @if ($canDownloadInvoice)
-                        <a href="{{ route('orders.invoice.pdf', $order->id) }}" target="_blank" class="btn btn-outline-primary ms-2" data-testid="invoice-button">
-                            <i class="fa fa-file-invoice"></i> ØªØ­Ù…ÙŠÙ„ Ø§Ù„ÙØ§ØªÙˆØ±Ø©
-                        </a>
-                    @else
-                        <button type="button" class="btn btn-outline-primary ms-2 disabled" data-testid="invoice-button" title="{{ __('orders.invoice.balance_outstanding') }}" disabled>
-                            <i class="fa fa-file-invoice"></i> ØªØ­Ù…ÙŠÙ„ Ø§Ù„ÙØ§ØªÙˆØ±Ø©
-                        </button>
+        <div class="order-details-hero">
+        <div class="order-details-info">
+            <div class="order-details-kicker">ÑŞã ÇáØáÈ #{{ $order->order_number }}</div>
+            <h2 class="order-details-title">ÊİÇÕíá ÇáØáÈ</h2>
+            <div class="order-details-meta">
+                <span class="badge d-inline-flex align-items-center gap-1" style="background-color: {{ $heroStatusColor }}">
+                    @if($heroStatusIcon)
+                        <i class="{{ $heroStatusIcon }}"></i>
                     @endif
-
-                    @if ($hasDepositReceipts)
-                        <a href="{{ route('orders.deposit-receipts', $order->id) }}" target="_blank" class="btn btn-outline-info ms-2" data-testid="deposit-receipt-button">
-                            <i class="fa fa-receipt"></i> Ø¥ÙŠØµØ§Ù„Ø§Øª Ø§Ù„ÙˆØ¯ÙŠØ¹Ø©
-                        </a>
-                    @endif
-
-
-
-
-
-                    <a href="{{ $reserveToggleUrl }}" class="btn btn-outline-secondary ms-2">
-                        <i class="bi {{ $showReserve ? 'bi-shield-minus' : 'bi-shield-plus' }}"></i>
-                        {{ $showReserve ? 'Ø¥Ø®ÙØ§Ø¡ Ø§Ù„Ù…Ø±Ø§Ø­Ù„ Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠØ©' : 'Ø¹Ø±Ø¶ Ø§Ù„Ù…Ø±Ø§Ø­Ù„ Ø§Ù„Ø§Ø­ØªÙŠØ§Ø·ÙŠØ©' }}
-                    </a>
-
-                    <a href="{{ route('orders.edit', $order->id) }}" class="btn btn-primary ms-2">
-
-
-                        <i class="fa fa-edit"></i> ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„Ø·Ù„Ø¨
-                    </a>
- 
-                </div>
+                    {{ $heroStatusLabel }}
+                </span>
+                <span class="badge {{ $heroPaymentStatusClass }}">{{ $heroPaymentStatusLabel }}</span>
+                <span class="text-muted">
+                    <i class="bi bi-calendar3"></i> {{ $order->created_at->format('Y-m-d H:i') }}
+                </span>
             </div>
         </div>
+        <div class="order-details-actions">
+            @php
+                $showReserve = request()->boolean('include_reserve_statuses');
+                $reserveToggleUrl = request()->fullUrlWithQuery(['include_reserve_statuses' => $showReserve ? 0 : 1]);
+            @endphp
+
+            @if ($canDownloadInvoice)
+                <a href="{{ route('orders.invoice.pdf', $order->id) }}" target="_blank" class="btn btn-outline-primary" data-testid="invoice-button">
+                    <i class="fa fa-file-invoice"></i> ÊÍãíá ÇáİÇÊæÑÉ
+                </a>
+            @else
+                <button type="button" class="btn btn-outline-primary disabled" data-testid="invoice-button" title="{{ __('orders.invoice.balance_outstanding') }}" disabled>
+                    <i class="fa fa-file-invoice"></i> ÊÍãíá ÇáİÇÊæÑÉ
+                </button>
+            @endif
+
+            @if ($hasDepositReceipts)
+                <a href="{{ route('orders.deposit-receipts', $order->id) }}" target="_blank" class="btn btn-outline-info" data-testid="deposit-receipt-button">
+                    <i class="fa fa-receipt"></i> ÅíÕÇá ÇáÏİÚ
+                </a>
+            @endif
+
+            <a href="{{ $reserveToggleUrl }}" class="btn btn-outline-secondary">
+                <i class="bi {{ $showReserve ? 'bi-shield-minus' : 'bi-shield-plus' }}"></i>
+                {{ $showReserve ? 'ÅÎİÇÁ ÇáÍÇáÇÊ ÇáãÍÌæÒÉ' : 'ÚÑÖ ÇáÍÇáÇÊ ÇáãÍÌæÒÉ' }}
+            </a>
+
+            <a href="{{ route('orders.edit', $order->id) }}" class="btn btn-primary">
+                <i class="fa fa-edit"></i> ÊÚÏíá ÇáØáÈ
+            </a>
+        </div>
+    </div>
+
+    <div class="order-metrics">
+        <div class="order-metric-card">
+            <div>
+                <div class="order-metric-label">ÅÌãÇáí ÇáØáÈ</div>
+                <div class="order-metric-value">{{ number_format($order->final_amount, 2) }} {{ $currencyCode }}</div>
+            </div>
+            <div class="order-metric-icon">
+                <i class="bi bi-cash-coin"></i>
+            </div>
+        </div>
+        <div class="order-metric-card">
+            <div>
+                <div class="order-metric-label">ÚÏÏ ÇáÚäÇÕÑ</div>
+                <div class="order-metric-value">{{ $heroItemsCount }}</div>
+            </div>
+            <div class="order-metric-icon">
+                <i class="bi bi-bag-check"></i>
+            </div>
+        </div>
+        <div class="order-metric-card">
+            <div>
+                <div class="order-metric-label">ÇáÚãíá</div>
+                <div class="order-metric-value">{{ $heroCustomerName }}</div>
+                @if(optional($order->user)->mobile)
+                    <div class="order-metric-sub">{{ $order->user->mobile }}</div>
+                @endif
+            </div>
+            <div class="order-metric-icon">
+                <i class="bi bi-person"></i>
+            </div>
+        </div>
+        <div class="order-metric-card">
+            <div>
+                <div class="order-metric-label">ÇáÊÇÌÑ</div>
+                <div class="order-metric-value">{{ $heroSellerName }}</div>
+                @if(optional($order->seller)->mobile)
+                    <div class="order-metric-sub">{{ $order->seller->mobile }}</div>
+                @endif
+            </div>
+            <div class="order-metric-icon">
+                <i class="bi bi-shop"></i>
+            </div>
+        </div>
+    </div>
     </div>
 
 
@@ -1579,10 +1669,9 @@
 
 }
 .order-party-title {
-
     font-weight: 600;
     margin-bottom: 0.5rem;
-
+}
 .order-summary-list {
     list-style: none;
     margin: 0;
@@ -1750,6 +1839,98 @@
 @media (max-width: 575.98px) {
     .order-summary-label {
         min-width: 0;
+    }
+}
+
+.order-details-page {
+    background: linear-gradient(180deg, rgba(13, 110, 253, 0.06), rgba(13, 110, 253, 0.015));
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+}
+.order-details-hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.order-details-title {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+.order-details-kicker {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 600;
+}
+.order-details-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.4rem;
+}
+.order-details-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+.order-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+.order-metric-card {
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 0.9rem;
+    padding: 0.85rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+    min-height: 78px;
+}
+.order-metric-label {
+    font-size: 0.78rem;
+    color: #6c757d;
+    font-weight: 600;
+}
+.order-metric-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #212529;
+}
+.order-metric-sub {
+    font-size: 0.78rem;
+    color: #6c757d;
+}
+.order-metric-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: #0d6efd;
+    background: rgba(13, 110, 253, 0.12);
+}
+
+@media (max-width: 768px) {
+    .order-details-page {
+        padding: 1rem;
+    }
+    .order-details-actions {
+        width: 100%;
+        justify-content: flex-start;
     }
 }
 </style>
