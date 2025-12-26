@@ -86,7 +86,7 @@
 
         .chat-workspace {
             display: grid;
-            grid-template-columns: 340px minmax(0, 1fr) 320px;
+            grid-template-columns: 340px 1fr;
             min-height: 520px;
             height: clamp(520px, 70vh, 820px);
         }
@@ -96,10 +96,9 @@
             min-height: 0;
         }
 
-        @media (max-width: 1200px) {
+        @media (max-width: 992px) {
             .chat-workspace {
-                display: flex;
-                flex-direction: column;
+                grid-template-columns: 1fr;
                 height: auto;
             }
         }
@@ -139,7 +138,7 @@
             transition: all 0.2s ease;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 10px;
         }
 
@@ -149,57 +148,21 @@
             box-shadow: 0 12px 30px rgba(55, 71, 133, 0.12);
         }
 
-        .conversation-tile .tile-header {
+        .conversation-tile .tile-title {
+            font-weight: 600;
+            color: var(--chat-heading-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 10px;
         }
 
-        .conversation-tile .tile-user {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 0;
-        }
-
-        .min-width-0 {
-            min-width: 0;
-        }
-
-        .conversation-tile .tile-avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid var(--chat-border-color);
-            flex-shrink: 0;
-        }
-
-        .conversation-tile .tile-name {
-            font-weight: 600;
-            color: var(--chat-heading-color);
-            font-size: 14px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .conversation-tile .tile-sub {
-            font-size: 12px;
-            color: var(--chat-muted-color);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .conversation-tile .tile-footer {
+        .conversation-tile .tile-meta {
             font-size: 12px;
             color: var(--chat-muted-color);
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
         }
 
         .conversation-tile .tile-preview {
@@ -221,65 +184,6 @@
             flex-direction: column;
             height: 100%;
             color: var(--chat-heading-color);
-        }
-
-        .details-panel {
-            border-left: 1px solid var(--chat-border-color);
-            background-color: var(--chat-panel-bg);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            padding: 18px;
-            color: var(--chat-heading-color);
-        }
-
-        .detail-card {
-            background: var(--chat-panel-contrast);
-            border: 1px solid var(--chat-border-color);
-            border-radius: 16px;
-            padding: 16px;
-            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
-        }
-
-        .detail-title {
-            font-weight: 600;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
-            font-size: 13px;
-            color: var(--chat-muted-color);
-            margin-bottom: 8px;
-        }
-
-        .detail-row strong {
-            color: var(--chat-heading-color);
-            font-weight: 600;
-        }
-
-        .attachment-item {
-            border: 1px solid var(--chat-border-color);
-            border-radius: 12px;
-            padding: 10px 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 8px;
-            background: var(--chat-panel-bg);
-        }
-
-        @media (max-width: 1200px) {
-            .conversation-panel,
-            .details-panel {
-                border: none;
-            }
         }
 
         .reader-header {
@@ -392,6 +296,16 @@
             </div>
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="stat-card">
+                    <div class="stat-icon bg-warning text-dark"><i class="bi bi-people"></i></div>
+                    <div>
+                        <p class="text-muted mb-1">{{ __('وكلاء متاحون') }}</p>
+                        <h2>{{ number_format($assignableAgents->count()) }}</h2>
+                        <small>{{ __('وكلاء يملكون صلاحية مراقبة المحادثات') }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card">
                     <div class="stat-icon bg-info"><i class="bi bi-graph-up"></i></div>
                     <div>
                         <p class="text-muted mb-1">{{ __('متوسط الرسائل لكل محادثة') }}</p>
@@ -470,36 +384,18 @@
                                 $departmentLabel = $conversation['department']
                                     ? ($availableDepartments[$conversation['department']] ?? ($conversation['department'] === 'general' ? __('قسم عام') : $conversation['department']))
                                     : __('قسم عام');
-                                $participants = collect($conversation['participants'] ?? []);
-                                $primaryUser = $participants->first();
-                                $primaryName = data_get($primaryUser, 'name') ?? __('مستخدم');
-                                $primaryEmail = data_get($primaryUser, 'email') ?? '';
-                                $primaryAvatar = data_get($primaryUser, 'profile') ?: data_get($primaryUser, 'image');
-                                if ($primaryAvatar) {
-                                    $primaryAvatar = \Illuminate\Support\Str::startsWith($primaryAvatar, ['http://', 'https://'])
-                                        ? $primaryAvatar
-                                        : url($primaryAvatar);
-                                } else {
-                                    $primaryAvatar = asset('assets/images/no_image_available.png');
-                                }
+                                $assignedName = optional($conversation['assigned_agent'])->name;
+                                $assignedId = $conversation['assigned_to'];
                             @endphp
                             <button type="button" class="conversation-tile"
                                     data-conversation-id="{{ $conversation['item_offer_id'] }}"
                                     data-conversation-key="{{ $conversation['conversation_id'] }}"
-                                    data-user-id="{{ data_get($primaryUser, 'id') }}"
-                                    data-user-name="{{ $primaryName }}"
-                                    data-user-email="{{ $primaryEmail }}"
-                                    data-user-avatar="{{ $primaryAvatar }}"
+                                    data-assigned-name="{{ $assignedName }}"
+                                    data-assigned-id="{{ $assignedId }}"
                                     data-department-label="{{ $departmentLabel }}"
                                     data-created-at="{{ $conversation['created_at'] }}">
-                                <div class="tile-header">
-                                    <div class="tile-user">
-                                        <img class="tile-avatar" src="{{ $primaryAvatar }}" alt="avatar">
-                                        <div class="min-width-0">
-                                            <div class="tile-name">{{ $primaryName }}</div>
-                                            <div class="tile-sub">{{ $primaryEmail }}</div>
-                                        </div>
-                                    </div>
+                                <div class="tile-title">
+                                    <span>#{{ $conversation['conversation_id'] ?? $conversation['item_offer_id'] }}</span>
                                     <span class="badge rounded-pill bg-light text-dark">
                                         {{ $conversation['total_messages'] }} {{ __('رسالة') }}
                                     </span>
@@ -507,8 +403,12 @@
                                 <div class="tile-preview">
                                     {{ \Illuminate\Support\Str::limit($conversation['last_message'] ?? __('لا يوجد محتوى'), 80) }}
                                 </div>
-                                <div class="tile-footer">
+                                <div class="tile-meta">
                                     <span><i class="bi bi-diagram-3 me-1"></i>{{ $departmentLabel }}</span>
+                                    <span>
+                                        <i class="bi bi-person-workspace me-1"></i>
+                                        {{ $assignedName ?? __('غير معيّن') }}
+                                    </span>
                                     <span class="text-muted">
                                         <i class="bi bi-clock-history me-1"></i>
                                         {{ optional($conversation['created_at']) ? \Carbon\Carbon::parse($conversation['created_at'])->diffForHumans() : '' }}
@@ -545,6 +445,15 @@
                                     <div class="text-muted small" id="chatConversationMeta"></div>
                                 </div>
                             </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="reassignConversationBtn"
+                                        data-bs-toggle="modal" data-bs-target="#assignConversationModal" disabled>
+                                    <i class="bi bi-person-plus me-1"></i>{{ __('تعيين لوكيل آخر') }}
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="markCompleteBtn" disabled>
+                                    <i class="bi bi-check2-circle me-1"></i>{{ __('إغلاق المحادثة') }}
+                                </button>
+                            </div>
                         </div>
                         <div class="reader-messages" id="chatMessages"></div>
                         <div class="reader-composer">
@@ -561,63 +470,46 @@
                         </div>
                     </div>
                 </div>
-                <aside class="details-panel" id="chatDetailsPanel">
-                    <div id="chatDetailsEmpty" class="reader-state text-center">
-                        <i class="bi bi-person-lines-fill fs-1 mb-3 d-block"></i>
-                        <p class="mb-1">{{ __('تفاصيل العميل ستظهر هنا بعد اختيار محادثة.') }}</p>
-                        <small>{{ __('يمكنك استعراض سجل الرسائل والمرفقات والمعلومات الأساسية.') }}</small>
-                    </div>
-                    <div id="chatDetailsContent" class="d-none">
-                        <div class="detail-card">
-                            <div class="detail-title">{{ __('العميل') }}</div>
-                            <div class="d-flex align-items-center gap-3">
-                                <img id="chatDetailsAvatar" src="{{ asset('assets/images/no_image_available.png') }}" alt="avatar" width="56" height="56" class="rounded-circle border">
-                                <div>
-                                    <div id="chatDetailsUserName" class="fw-semibold">—</div>
-                                    <div id="chatDetailsUserEmail" class="text-muted small"></div>
-                                    <div id="chatDetailsUserId" class="text-muted small"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="detail-card">
-                            <div class="detail-title">{{ __('ملخص المحادثة') }}</div>
-                            <div class="detail-row">
-                                <span>{{ __('عدد الرسائل') }}</span>
-                                <strong id="chatDetailsMessageCount">0</strong>
-                            </div>
-                            <div class="detail-row">
-                                <span>{{ __('أول رسالة') }}</span>
-                                <strong id="chatDetailsFirstSeen">—</strong>
-                            </div>
-                            <div class="detail-row">
-                                <span>{{ __('آخر نشاط') }}</span>
-                                <strong id="chatDetailsLastSeen">—</strong>
-                            </div>
-                            <div class="detail-row">
-                                <span>{{ __('القسم') }}</span>
-                                <strong id="chatDetailsDepartment">—</strong>
-                            </div>
-                        </div>
-                        <div class="detail-card">
-                            <div class="detail-title">{{ __('المرفقات') }}</div>
-                            <div id="chatAttachmentsEmpty" class="text-muted small">{{ __('لا توجد مرفقات بعد.') }}</div>
-                            <div id="chatAttachmentsList"></div>
-                        </div>
-                        <div class="detail-card">
-                            <div class="detail-title">{{ __('ملاحظات داخلية') }}</div>
-                            <textarea class="form-control" rows="3" placeholder="{{ __('قريباً: تسجيل ملاحظات الدعم الداخلية.') }}" disabled></textarea>
-                        </div>
-                    </div>
-                </aside>
             </div>
         </div>
     </section>
+
+    <div class="modal fade" id="assignConversationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ __('تعيين المحادثة لوكيل') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="assignConversationForm" method="POST" action="#">
+                    @csrf
+                    <div class="modal-body">
+                        <input type="hidden" id="assignConversationId" name="conversation_id">
+                        <div class="mb-3">
+                            <label class="form-label" for="assignAgentSelect">{{ __('الوكيل المسؤول') }}</label>
+                            <select class="form-select" id="assignAgentSelect" name="assigned_to">
+                                <option value="">{{ __('غير معيّن') }}</option>
+                                @foreach($assignableAgents as $agent)
+                                    <option value="{{ $agent->id }}">{{ $agent->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">{{ __('إلغاء') }}</button>
+                        <button type="submit" class="btn btn-primary">{{ __('حفظ التعيين') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('script')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const conversationTiles = document.querySelectorAll('.conversation-tile');
             const viewRouteTemplate = @json(route('chat-monitor.view-conversation', ['id' => '__ID__']));
+            const assignRouteTemplate = @json(route('chat-monitor.assign', ['conversation' => '__ID__']));
             const chatEmptyState = document.getElementById('chatEmptyState');
             const chatLoadingState = document.getElementById('chatLoadingState');
             const chatContent = document.getElementById('chatContent');
@@ -625,18 +517,10 @@
             const chatPartnerName = document.getElementById('chatPartnerName');
             const chatConversationMeta = document.getElementById('chatConversationMeta');
             const chatPartnerAvatar = document.getElementById('chatPartnerAvatar');
-            const chatDetailsEmpty = document.getElementById('chatDetailsEmpty');
-            const chatDetailsContent = document.getElementById('chatDetailsContent');
-            const chatDetailsAvatar = document.getElementById('chatDetailsAvatar');
-            const chatDetailsUserName = document.getElementById('chatDetailsUserName');
-            const chatDetailsUserEmail = document.getElementById('chatDetailsUserEmail');
-            const chatDetailsUserId = document.getElementById('chatDetailsUserId');
-            const chatDetailsMessageCount = document.getElementById('chatDetailsMessageCount');
-            const chatDetailsFirstSeen = document.getElementById('chatDetailsFirstSeen');
-            const chatDetailsLastSeen = document.getElementById('chatDetailsLastSeen');
-            const chatDetailsDepartment = document.getElementById('chatDetailsDepartment');
-            const chatAttachmentsList = document.getElementById('chatAttachmentsList');
-            const chatAttachmentsEmpty = document.getElementById('chatAttachmentsEmpty');
+            const reassignBtn = document.getElementById('reassignConversationBtn');
+            const assignConversationIdInput = document.getElementById('assignConversationId');
+            const assignForm = document.getElementById('assignConversationForm');
+            const assignSelect = document.getElementById('assignAgentSelect');
             const refreshButton = document.getElementById('refreshConversations');
             const currentUserId = {{ auth()->id() ?? 'null' }};
             let activeTile = null;
@@ -645,23 +529,12 @@
                 chatEmptyState.classList.toggle('d-none', state !== 'empty');
                 chatLoadingState.classList.toggle('d-none', state !== 'loading');
                 chatContent.classList.toggle('d-none', state !== 'content');
-                if (chatDetailsEmpty && chatDetailsContent) {
-                    chatDetailsEmpty.classList.toggle('d-none', state === 'content');
-                    chatDetailsContent.classList.toggle('d-none', state !== 'content');
-                }
             }
 
             function escapeHtml(text) {
                 const div = document.createElement('div');
                 div.appendChild(document.createTextNode(text ?? ''));
                 return div.innerHTML;
-            }
-
-            function formatDateTime(value) {
-                if (!value) return '—';
-                const date = new Date(value);
-                if (Number.isNaN(date.getTime())) return '—';
-                return date.toLocaleString('ar-EG');
             }
 
             function createMessageBubble(message, users) {
@@ -681,66 +554,6 @@
                 return bubble;
             }
 
-            function renderAttachments(messages) {
-                if (!chatAttachmentsList || !chatAttachmentsEmpty) return;
-                chatAttachmentsList.innerHTML = '';
-                let attachmentCount = 0;
-
-                messages.forEach(message => {
-                    if (message.file) {
-                        attachmentCount += 1;
-                        const row = document.createElement('div');
-                        row.className = 'attachment-item';
-                        row.innerHTML = `
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-paperclip"></i>
-                                <span>${message.message ? escapeHtml(message.message) : '{{ __('مرفق') }}'}</span>
-                            </div>
-                            <a class="btn btn-sm btn-light" target="_blank" rel="noopener" href="${message.file}">{{ __('عرض') }}</a>
-                        `;
-                        chatAttachmentsList.appendChild(row);
-                    }
-
-                    if (message.audio) {
-                        attachmentCount += 1;
-                        const row = document.createElement('div');
-                        row.className = 'attachment-item';
-                        row.innerHTML = `
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-soundwave"></i>
-                                <span>{{ __('رسالة صوتية') }}</span>
-                            </div>
-                            <a class="btn btn-sm btn-light" target="_blank" rel="noopener" href="${message.audio}">{{ __('تشغيل') }}</a>
-                        `;
-                        chatAttachmentsList.appendChild(row);
-                    }
-                });
-
-                chatAttachmentsEmpty.classList.toggle('d-none', attachmentCount > 0);
-            }
-
-            function renderDetails(data, tile) {
-                if (!chatDetailsUserName) return;
-                const users = data.users || {};
-                const userValues = Object.values(users);
-                const partner = userValues.find(user => parseInt(user.id, 10) !== parseInt(currentUserId ?? -1, 10)) || userValues[0];
-
-                chatDetailsUserName.textContent = partner ? partner.name : '—';
-                chatDetailsUserEmail.textContent = partner?.email || '';
-                chatDetailsUserId.textContent = partner ? `#${partner.id}` : '';
-                chatDetailsAvatar.src = partner?.image ? partner.image : '{{ asset('assets/images/no_image_available.png') }}';
-
-                const messages = data.chats || [];
-                chatDetailsMessageCount.textContent = messages.length.toString();
-                const firstMessage = messages[0];
-                const lastMessage = messages[messages.length - 1];
-                chatDetailsFirstSeen.textContent = formatDateTime(firstMessage?.created_at);
-                chatDetailsLastSeen.textContent = formatDateTime(lastMessage?.created_at);
-                chatDetailsDepartment.textContent = tile?.dataset?.departmentLabel || '—';
-
-                renderAttachments(messages);
-            }
-
             function renderConversation(data, tile) {
                 const users = data.users || {};
                 const partner = Object.values(users).find(user => parseInt(user.id, 10) !== parseInt(currentUserId ?? -1, 10)) || Object.values(users)[0];
@@ -755,7 +568,11 @@
                 });
                 chatMessages.scrollTop = chatMessages.scrollHeight;
 
-                renderDetails(data, tile);
+                if (tile) {
+                    reassignBtn.disabled = false;
+                    assignSelect.value = tile.dataset.assignedId || '';
+                    reassignBtn.dataset.conversationId = tile.dataset.conversationKey;
+                }
             }
 
             function loadConversation(tile) {
@@ -797,6 +614,17 @@
             if (refreshButton) {
                 refreshButton.addEventListener('click', () => window.location.reload());
             }
+
+            const assignModal = document.getElementById('assignConversationModal');
+            assignModal?.addEventListener('show.bs.modal', function () {
+                if (!activeTile) {
+                    assignConversationIdInput.value = '';
+                    return;
+                }
+                assignConversationIdInput.value = activeTile.dataset.conversationKey;
+                assignSelect.value = activeTile.dataset.assignedId || '';
+                assignForm.action = assignRouteTemplate.replace('__ID__', encodeURIComponent(activeTile.dataset.conversationKey));
+            });
 
         });
     </script>

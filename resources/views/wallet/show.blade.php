@@ -211,6 +211,23 @@
         .wallet-detail-table .table-striped > tbody > tr:nth-of-type(odd) {
             background-color: rgba(15, 23, 42, 0.02);
         }
+        .wallet-transaction-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+        .wallet-transaction-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .wallet-counterparty {
+            display: flex;
+            flex-direction: column;
+        }
+        .wallet-counterparty small {
+            color: #6c757d;
+        }
         .wallet-pagination .pagination {
             flex-wrap: wrap;
             gap: 0.25rem;
@@ -526,7 +543,8 @@
                                     <tr>
                                         <th class="text-center">#</th>
                                         <th>{{ __('المرجع') }}</th>
-                                        <th>{{ __('نوع الحركة') }}</th>
+                                        <th>{{ __('Operation') }}</th>
+                                        <th>{{ __('Transfer party') }}</th>
                                         <th class="text-end">{{ __('البلغ') }}</th>
                                         <th class="text-end">{{ __('الرصيد بعد العملية') }}</th>
                                         <th>{{ __('تفاصيل إضافية') }}</th>
@@ -539,11 +557,50 @@
                                     @endphp
                                     @forelse($transactions as $transaction)
                                         @php
-                                            $metaReason = data_get($transaction->meta, 'reason');
-                                            $operationReference = data_get($transaction->meta, 'operation_reference');
-                                            $notes = data_get($transaction->meta, 'notes');
-                                            $typeLabel = $transaction->type === 'credit' ? __('إداع') : __('خصم');
+                                            $meta = is_array($transaction->meta) ? $transaction->meta : [];
+                                            $metaReason = data_get($meta, 'reason');
+                                            $metaContext = data_get($meta, 'context');
+                                            $operationReference = data_get($meta, 'operation_reference');
+                                            $notes = data_get($meta, 'notes');
+                                            $transferReference = data_get($meta, 'reference')
+                                                ?? data_get($meta, 'transfer_reference')
+                                                ?? data_get($meta, 'wallet_reference');
+                                            $transferKey = data_get($meta, 'transfer_key');
+                                            $clientTag = data_get($meta, 'client_tag');
+                                            $counterpartyName = trim((string) data_get($meta, 'counterparty.name', ''));
+                                            $counterpartyId = data_get($meta, 'counterparty.id');
+                                            $transferDirection = (string) data_get($meta, 'direction');
+                                            $isTransfer = $metaReason === 'wallet_transfer' || $metaContext === 'wallet_transfer';
+                                            $isRefund = in_array($metaReason, ['refund', 'wallet_refund'], true);
+                                            $isAdminCredit = $metaReason === 'admin_manual_credit';
+                                            $isTopUp = $transaction->manual_payment_request_id
+                                                || $metaReason === \App\Models\ManualPaymentRequest::PAYABLE_TYPE_WALLET_TOP_UP
+                                                || $metaReason === 'wallet_top_up';
+                                            $categoryLabel = 'Other';
+                                            $categoryBadgeClass = 'bg-secondary';
+                                            if ($isTransfer) {
+                                                $categoryLabel = 'Transfer';
+                                                $categoryBadgeClass = 'bg-info';
+                                            } elseif ($isRefund) {
+                                                $categoryLabel = 'Refund';
+                                                $categoryBadgeClass = 'bg-warning text-dark';
+                                            } elseif ($isAdminCredit) {
+                                                $categoryLabel = 'Manual credit';
+                                                $categoryBadgeClass = 'bg-primary';
+                                            } elseif ($isTopUp) {
+                                                $categoryLabel = 'Top-up';
+                                                $categoryBadgeClass = 'bg-success';
+                                            } elseif ($transaction->type === 'debit') {
+                                                $categoryLabel = 'Purchase';
+                                                $categoryBadgeClass = 'bg-danger';
+                                            } elseif ($transaction->type === 'credit') {
+                                                $categoryLabel = 'Credit';
+                                                $categoryBadgeClass = 'bg-success';
+                                            }
+                                            $typeLabel = $transaction->type === 'credit' ? 'Credit' : 'Debit';
                                             $typeBadgeClass = $transaction->type === 'credit' ? 'bg-success' : 'bg-danger';
+                                            $transferSide = $transferDirection === 'incoming' ? 'From' : ($transferDirection === 'outgoing' ? 'To' : ($transaction->type === 'credit' ? 'From' : 'To'));
+                                            $counterpartyLabel = $counterpartyName !== '' ? $counterpartyName : ($counterpartyId ? 'User #' . $counterpartyId : 'Unknown');
                                         @endphp
                                         <tr>
                                             <td class="text-center fw-semibold">{{ ++$rowNumber }}</td>
@@ -551,12 +608,25 @@
                                                 <div class="fw-semibold">#{{ $transaction->getKey() }}</div>
                                                 @if($operationReference)
                                                     <div class="small text-muted">{{ $operationReference }}</div>
+                                                @elseif($transferReference)
+                                                    <div class="small text-muted">{{ $transferReference }}</div>
                                                 @endif
                                             </td>
                                             <td>
-                                                <span class="badge {{ $typeBadgeClass }}">
-                                                    {{ $typeLabel }}
-                                                </span>
+                                                <div class="wallet-transaction-badges">
+                                                    <span class="badge {{ $categoryBadgeClass }}">{{ $categoryLabel }}</span>
+                                                    <span class="badge {{ $typeBadgeClass }}">{{ $typeLabel }}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if($isTransfer)
+                                                    <div class="wallet-counterparty">
+                                                        <span class="fw-semibold">{{ $counterpartyLabel }}</span>
+                                                        <small>{{ $transferSide }}{{ $counterpartyId ? ' #' . $counterpartyId : '' }}</small>
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
                                             </td>
                                             <td class="text-end">
                                                 <span class="fw-semibold {{ $transaction->type === 'credit' ? 'text-success' : 'text-danger' }}">
@@ -565,7 +635,7 @@
                                             </td>
                                             <td class="text-end">{{ number_format((float) $transaction->balance_after, 2) }} {{ $currency }}</td>
                                             <td>
-                                                <div class="small text-muted d-flex flex-column gap-1">
+                                                <div class="small text-muted wallet-transaction-meta">
                                                     @if($transaction->manualPaymentRequest)
                                                         @php
                                                             $mprRef = \App\Support\Payments\ReferencePresenter::forManualRequest(
@@ -575,7 +645,7 @@
                                                         @endphp
                                                         <div>
                                                             <i class="bi bi-file-earmark-text me-1"></i>
-                                                            {{ __('طلب دفع يدوي') }}: {{ $mprRef ?? $transaction->manualPaymentRequest->getKey() }}
+                                                            {{ __('?�?"?� ?�???� ???�?^??') }}: {{ $mprRef ?? $transaction->manualPaymentRequest->getKey() }}
                                                         </div>
                                                     @endif
                                                     @if($transaction->paymentTransaction)
@@ -584,19 +654,43 @@
                                                         @endphp
                                                         <div>
                                                             <i class="bi bi-credit-card me-1"></i>
-                                                            {{ __('عملية دفع') }}: {{ $txRef ?? $transaction->paymentTransaction->getKey() }}
+                                                            {{ __('?�?.?"???� ?�???�') }}: {{ $txRef ?? $transaction->paymentTransaction->getKey() }}
                                                         </div>
+                                                    @endif
+                                                    @if($isTransfer)
+                                                        <div>
+                                                            <i class="bi bi-arrow-left-right me-1"></i>
+                                                            {{ $transferSide }} {{ $counterpartyLabel }}
+                                                        </div>
+                                                        @if($transferReference)
+                                                            <div>
+                                                                <i class="bi bi-hash me-1"></i>
+                                                                {{ __('Reference') }}: {{ $transferReference }}
+                                                            </div>
+                                                        @endif
+                                                        @if($transferKey)
+                                                            <div>
+                                                                <i class="bi bi-key me-1"></i>
+                                                                {{ __('Transfer key') }}: {{ $transferKey }}
+                                                            </div>
+                                                        @endif
+                                                        @if($clientTag)
+                                                            <div>
+                                                                <i class="bi bi-tag me-1"></i>
+                                                                {{ __('Client tag') }}: {{ $clientTag }}
+                                                            </div>
+                                                        @endif
                                                     @endif
                                                     @if($metaReason)
                                                         <div>
                                                             <i class="bi bi-info-circle me-1"></i>
-                                                            {{ __('السبب') }}: {{ \Illuminate\Support\Str::headline($metaReason) }}
+                                                            {{ __('Reason') }}: {{ \Illuminate\Support\Str::headline($metaReason) }}
                                                         </div>
                                                     @endif
                                                     @if($notes)
                                                         <div>
                                                             <i class="bi bi-chat-text me-1"></i>
-                                                            {{ __('ملاح�ات') }}: {{ $notes }}
+                                                            {{ __('Notes') }}: {{ $notes }}
                                                         </div>
                                                     @endif
                                                 </div>
@@ -608,7 +702,218 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="text-center py-4 text-muted">
+                                            <td colspan="8" class="text-center py-4 text-muted">
+                                                <i class="bi bi-inboxes display-6 d-block mb-2"></i>
+                                                {{ __('لا توجد حركات مطابقة للفلتر الحالي.') }}
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="wallet-ledger-manual" role="tabpanel"
+                             aria-labelledby="wallet-ledger-manual-tab">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th>{{ __('Reference') }}</th>
+                                        <th class="text-end">{{ __('Amount') }}</th>
+                                        <th>{{ __('Created At') }}</th>
+                                        <th>{{ __('Notes') }}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    @php
+                                        $manualRow = 0;
+                                    @endphp
+                                    @forelse($manualCreditEntries as $entry)
+                                        <tr>
+                                            <td class="text-center fw-semibold">{{ ++$manualRow }}</td>
+                                            <td>{{ data_get($entry->meta, 'operation_reference') ?? $entry->getKey() }}</td>
+                                            <td class="text-end text-success">+{{ number_format((float) $entry->amount, 2) }} {{ $currency }}</td>
+                                            <td>
+                                                <div>{{ optional($entry->created_at)->format('Y-m-d H:i') }}</div>
+                                                <small class="text-muted">{{ optional($entry->created_at)->diffForHumans() }}</small>
+                                            </td>
+                                            <td>{{ data_get($entry->meta, 'notes') ?? __('Not available') }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4 text-muted">
+                                                <i class="bi bi-journal-x display-6 d-block mb-2"></i>
+                                                {{ __('No manual deposits have been recorded yet.') }}
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @if($transactions->hasPages())
+                    <div class="card-footer bg-white border-0 wallet-pagination">
+                        {{ $transactions->onEachSide(1)->links('pagination::bootstrap-5') }}
+                    </div>
+                @endif
+            </div>
+        </div>
+    </section>
+@endsection
+
+
+
+
+ = 
+                                            $meta = is_array($transaction->meta) ? $transaction->meta : [];
+                                            $metaReason = data_get($meta, 'reason');
+                                            $metaContext = data_get($meta, 'context');
+                                            $operationReference = data_get($meta, 'operation_reference');
+                                            $notes = data_get($meta, 'notes');
+                                            $transferReference = data_get($meta, 'reference')
+                                                ?? data_get($meta, 'transfer_reference')
+                                                ?? data_get($meta, 'wallet_reference');
+                                            $transferKey = data_get($meta, 'transfer_key');
+                                            $clientTag = data_get($meta, 'client_tag');
+                                            $counterpartyName = trim((string) data_get($meta, 'counterparty.name', ''));
+                                            $counterpartyId = data_get($meta, 'counterparty.id');
+                                            $transferDirection = (string) data_get($meta, 'direction');
+                                            $isTransfer = $metaReason === 'wallet_transfer' || $metaContext === 'wallet_transfer';
+                                            $isRefund = in_array($metaReason, ['refund', 'wallet_refund'], true);
+                                            $isAdminCredit = $metaReason === 'admin_manual_credit';
+                                            $isTopUp = $transaction->manual_payment_request_id
+                                                || $metaReason === \App\Models\ManualPaymentRequest::PAYABLE_TYPE_WALLET_TOP_UP
+                                                || $metaReason === 'wallet_top_up';
+                                            $categoryLabel = 'Other';
+                                            $categoryBadgeClass = 'bg-secondary';
+                                            if ($isTransfer) {
+                                                $categoryLabel = 'Transfer';
+                                                $categoryBadgeClass = 'bg-info';
+                                            } elseif ($isRefund) {
+                                                $categoryLabel = 'Refund';
+                                                $categoryBadgeClass = 'bg-warning text-dark';
+                                            } elseif ($isAdminCredit) {
+                                                $categoryLabel = 'Manual credit';
+                                                $categoryBadgeClass = 'bg-primary';
+                                            } elseif ($isTopUp) {
+                                                $categoryLabel = 'Top-up';
+                                                $categoryBadgeClass = 'bg-success';
+                                            } elseif ($transaction->type === 'debit') {
+                                                $categoryLabel = 'Purchase';
+                                                $categoryBadgeClass = 'bg-danger';
+                                            } elseif ($transaction->type === 'credit') {
+                                                $categoryLabel = 'Credit';
+                                                $categoryBadgeClass = 'bg-success';
+                                            }
+                                            $typeLabel = $transaction->type === 'credit' ? 'Credit' : 'Debit';
+                                            $typeBadgeClass = $transaction->type === 'credit' ? 'bg-success' : 'bg-danger';
+                                            $transferSide = $transferDirection === 'incoming' ? 'From' : ($transferDirection === 'outgoing' ? 'To' : ($transaction->type === 'credit' ? 'From' : 'To'));
+                                            $counterpartyLabel = $counterpartyName !== '' ? $counterpartyName : ($counterpartyId ? 'User #' . $counterpartyId : 'Unknown');
+                                        @endphp
+                                        <tr>
+                                            <td class="text-center fw-semibold">{{ ++$rowNumber }}</td>
+                                            <td>
+                                                <div class="fw-semibold">#{{ $transaction->getKey() }}</div>
+                                                @if($operationReference)
+                                                    <div class="small text-muted">{{ $operationReference }}</div>
+                                                @elseif($transferReference)
+                                                    <div class="small text-muted">{{ $transferReference }}</div>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <div class="wallet-transaction-badges">
+                                                    <span class="badge {{ $categoryBadgeClass }}">{{ $categoryLabel }}</span>
+                                                    <span class="badge {{ $typeBadgeClass }}">{{ $typeLabel }}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if($isTransfer)
+                                                    <div class="wallet-counterparty">
+                                                        <span class="fw-semibold">{{ $counterpartyLabel }}</span>
+                                                        <small>{{ $transferSide }}{{ $counterpartyId ? ' #' . $counterpartyId : '' }}</small>
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="fw-semibold {{ $transaction->type === 'credit' ? 'text-success' : 'text-danger' }}">
+                                                    {{ number_format((float) $transaction->amount, 2) }} {{ $currency }}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">{{ number_format((float) $transaction->balance_after, 2) }} {{ $currency }}</td>
+                                            <td>
+                                                <div class="small text-muted wallet-transaction-meta">
+                                                    @if($transaction->manualPaymentRequest)
+                                                        @php
+                                                            $mprRef = \App\Support\Payments\ReferencePresenter::forManualRequest(
+                                                                $transaction->manualPaymentRequest,
+                                                                $transaction->paymentTransaction ?? null
+                                                            );
+                                                        @endphp
+                                                        <div>
+                                                            <i class="bi bi-file-earmark-text me-1"></i>
+                                                            {{ __('?�?"?� ?�???� ???�?^??') }}: {{ $mprRef ?? $transaction->manualPaymentRequest->getKey() }}
+                                                        </div>
+                                                    @endif
+                                                    @if($transaction->paymentTransaction)
+                                                        @php
+                                                            $txRef = \App\Support\Payments\ReferencePresenter::forTransaction($transaction->paymentTransaction);
+                                                        @endphp
+                                                        <div>
+                                                            <i class="bi bi-credit-card me-1"></i>
+                                                            {{ __('?�?.?"???� ?�???�') }}: {{ $txRef ?? $transaction->paymentTransaction->getKey() }}
+                                                        </div>
+                                                    @endif
+                                                    @if($isTransfer)
+                                                        <div>
+                                                            <i class="bi bi-arrow-left-right me-1"></i>
+                                                            {{ $transferSide }} {{ $counterpartyLabel }}
+                                                        </div>
+                                                        @if($transferReference)
+                                                            <div>
+                                                                <i class="bi bi-hash me-1"></i>
+                                                                {{ __('Reference') }}: {{ $transferReference }}
+                                                            </div>
+                                                        @endif
+                                                        @if($transferKey)
+                                                            <div>
+                                                                <i class="bi bi-key me-1"></i>
+                                                                {{ __('Transfer key') }}: {{ $transferKey }}
+                                                            </div>
+                                                        @endif
+                                                        @if($clientTag)
+                                                            <div>
+                                                                <i class="bi bi-tag me-1"></i>
+                                                                {{ __('Client tag') }}: {{ $clientTag }}
+                                                            </div>
+                                                        @endif
+                                                    @endif
+                                                    @if($metaReason)
+                                                        <div>
+                                                            <i class="bi bi-info-circle me-1"></i>
+                                                            {{ __('Reason') }}: {{ \Illuminate\Support\Str::headline($metaReason) }}
+                                                        </div>
+                                                    @endif
+                                                    @if($notes)
+                                                        <div>
+                                                            <i class="bi bi-chat-text me-1"></i>
+                                                            {{ __('Notes') }}: {{ $notes }}
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="small">{{ optional($transaction->created_at)->format('Y-m-d H:i') }}</div>
+                                                <div class="text-muted small">{{ optional($transaction->created_at)->diffForHumans() }}</div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="8" class="text-center py-4 text-muted">
                                                 <i class="bi bi-inboxes display-6 d-block mb-2"></i>
                                                 {{ __('لا توجد حركات مطابقة للفلتر الحالي.') }}
                                             </td>
