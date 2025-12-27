@@ -125,6 +125,16 @@
                                         <input class="form-check-input checkbox-toggle-switch" type="checkbox" role="switch" {{ $settings['number_with_suffix'] == '1' ? 'checked' : '' }} id="switch_number_with_suffix" aria-label="switch_number_with_suffix">
                                     </div>
                                 </div>
+
+                                <div class="form-group col-sm-12 col-md-4">
+                                    <label class="form-label">{{ __('Data Saver Mode') }}</label>
+                                    <div class="form-check form-switch">
+                                        <input type="hidden" name="data_saver_mode" id="data_saver_mode" class="checkbox-toggle-switch-input" value="{{ $settings['data_saver_mode'] ?? 1 }}">
+                                        <input class="form-check-input checkbox-toggle-switch" type="checkbox" role="switch" {{ ($settings['data_saver_mode'] ?? 1) == '1' ? 'checked' : '' }} id="switch_data_saver_mode">
+                                        <label class="form-check-label" for="switch_data_saver_mode"></label>
+                                    </div>
+                                    <small class="text-muted">{{ __('Reduce data usage for low-end devices') }}</small>
+                                </div>
                             </div>
 
                     </div>

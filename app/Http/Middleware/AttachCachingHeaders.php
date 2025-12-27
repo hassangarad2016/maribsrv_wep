@@ -163,6 +163,10 @@ class AttachCachingHeaders
             $isPrivate = $this->shouldUsePrivateCache($request, $cacheRule);
             $response->headers->set('Cache-Control', $this->cacheControlValue($response, $maxAge, $isPrivate));
             $response->headers->set('Expires', $this->formatHttpDate(Carbon::now('UTC')->addSeconds($maxAge)));
+            $this->appendVaryHeader($response, ['Content-Language']);
+            if ($isPrivate) {
+                $this->appendVaryHeader($response, ['Authorization', 'X-User-Id']);
+            }
         }
 
         if ($request->isMethod('GET') || $request->isMethod('HEAD')) {
@@ -278,6 +282,40 @@ class AttachCachingHeaders
         }
 
         return null;
+    }
+
+    private function appendVaryHeader(Response $response, array $headers): void
+    {
+        if (empty($headers)) {
+            return;
+        }
+
+        $current = $response->headers->get('Vary');
+        $existing = [];
+
+        if (! empty($current)) {
+            foreach (explode(',', $current) as $value) {
+                $trimmed = trim($value);
+                if ($trimmed !== '') {
+                    $existing[strtolower($trimmed)] = $trimmed;
+                }
+            }
+        }
+
+        foreach ($headers as $header) {
+            $trimmed = trim($header);
+            if ($trimmed === '') {
+                continue;
+            }
+            $key = strtolower($trimmed);
+            if (! isset($existing[$key])) {
+                $existing[$key] = $trimmed;
+            }
+        }
+
+        if (! empty($existing)) {
+            $response->headers->set('Vary', implode(', ', array_values($existing)));
+        }
     }
 
     private function isJsonResponse(Response $response): bool

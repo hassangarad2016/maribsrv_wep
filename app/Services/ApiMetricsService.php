@@ -58,7 +58,7 @@ class ApiMetricsService
             $logContext['payload_bytes'] = $payloadBytes;
         }
 
-        Log::info('api.response.metrics', $logContext);
+        Log::channel('api-metrics')->info('api.response.metrics', $logContext);
 
         if ($payloadBytes !== null) {
             self::updateHistograms($endpointName, $durationMs, $payloadBytes);
@@ -144,7 +144,7 @@ class ApiMetricsService
             'p95_payload_bytes' => self::percentile($histogram['payloads'], 0.95),
         ];
 
-        Log::info('api.response.metrics.percentiles', $percentiles);
+        Log::channel('api-metrics')->info('api.response.metrics.percentiles', $percentiles);
     }
 
     protected static function normalizeSeries(array $series): array

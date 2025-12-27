@@ -72,6 +72,13 @@ return [
             'permission' => 0644,
         ],
 
+        'api-metrics' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/api-metrics.log'),
+            'level' => env('LOG_LEVEL', 'info'),
+            'permission' => 0644,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

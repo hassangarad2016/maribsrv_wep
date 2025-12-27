@@ -954,6 +954,7 @@ class OrderController extends Controller
         // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ط§ظ„ط·ظ„ط¨ ظ…ط¹ ط§ظ„ط¹ظ„ط§ظ‚ط§طھ
         $order = Order::with([
                 'user' => static fn ($query) => $query->withTrashed(),
+                'seller' => static fn ($query) => $query->withTrashed(),
                 'items',
                 'history.user' => static fn ($query) => $query->withTrashed(),
                 'manualPaymentRequests.paymentTransaction',
@@ -978,6 +979,8 @@ class OrderController extends Controller
         $orderStatuses = $this->allowedOrderStatuses($order, true);
 
         $paymentStatusOptions = Order::paymentStatusLabels();
+        $deliveryPaymentTimingLabels = $this->deliveryPaymentTimingLabels();
+        $deliveryPaymentStatusLabels = $this->deliveryPaymentStatusLabels();
 
         return view(
             'orders.edit',
@@ -986,6 +989,8 @@ class OrderController extends Controller
                 'users',
                 'orderStatuses',
                 'paymentStatusOptions',
+                'deliveryPaymentTimingLabels',
+                'deliveryPaymentStatusLabels',
                 'pendingManualPaymentRequest',
                 'latestManualPaymentRequest'
             )

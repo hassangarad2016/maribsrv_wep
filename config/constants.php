@@ -30,6 +30,7 @@ return [
         ['name' => 'android_version', 'value' => '1.0.0', 'type' => 'string'],
         ['name' => 'number_with_suffix', 'value' => '0', 'type' => 'string'],
         ['name' => 'maintenance_mode', 'value' => 0, 'type' => 'string'],
+        ['name' => 'data_saver_mode', 'value' => 1, 'type' => 'boolean'],
         ['name' => 'privacy_policy', 'value' => '', 'type' => 'string'],
         ['name' => 'contact_us', 'value' => '', 'type' => 'string'],
         ['name' => 'terms_conditions', 'value' => '', 'type' => 'string'],

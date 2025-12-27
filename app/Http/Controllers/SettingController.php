@@ -232,6 +232,7 @@ class SettingController extends Controller {
                 'whatsapp_enabled_shein',
                 'whatsapp_enabled_computer',
                 'whatsapp_otp_enabled',
+                'data_saver_mode',
             ] as $booleanKey) {
                 if (array_key_exists($booleanKey, $inputs)) {
                     $inputs[$booleanKey] = filter_var($inputs[$booleanKey], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ? 1 : 0;
