@@ -35,7 +35,8 @@ class AttachCachingHeaders
         $maxAge = $this->determineMaxAge($response);
 
         if ($maxAge !== null) {
-            $response->headers->set('Cache-Control', $this->cacheControlValue($response, $maxAge));
+            $isPrivate = $this->shouldUsePrivateCache($request, $response);
+            $response->headers->set('Cache-Control', $this->cacheControlValue($response, $maxAge, $isPrivate));
             $response->headers->set('Expires', $this->formatHttpDate(Carbon::now('UTC')->addSeconds($maxAge)));
         }
 
@@ -113,13 +114,24 @@ class AttachCachingHeaders
         return null;
     }
 
-    private function cacheControlValue(Response $response, int $maxAge): string
+    private function cacheControlValue(Response $response, int $maxAge, bool $isPrivate): string
     {
         if ($this->isImageResponse($response)) {
             return sprintf('public, max-age=%d, immutable', $maxAge);
         }
 
-        return sprintf('public, max-age=%d, must-revalidate', $maxAge);
+        $visibility = $isPrivate ? 'private' : 'public';
+
+        return sprintf('%s, max-age=%d, must-revalidate', $visibility, $maxAge);
+    }
+
+    private function shouldUsePrivateCache(Request $request, Response $response): bool
+    {
+        if (! $this->isJsonResponse($response)) {
+            return false;
+        }
+
+        return $request->is('api/cart');
     }
 
     private function isJsonResponse(Response $response): bool
