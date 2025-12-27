@@ -298,9 +298,9 @@
                 {{ $showReserve ? 'إخفاء الحالات المحجوزة' : 'عرض الحالات المحجوزة' }}
             </a>
 
-            <a href="{{ route('orders.edit', $order->id) }}" class="btn btn-primary">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#orderUpdateModal">
                 <i class="fa fa-edit"></i> تعديل الطلب
-            </a>
+            </button>
         </div>
     </div>
 
