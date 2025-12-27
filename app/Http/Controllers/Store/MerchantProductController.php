@@ -278,9 +278,12 @@ class MerchantProductController extends Controller
 
     private function storeMissingLocation(Store $store): bool
     {
-        return empty($store->location_address)
-            || $store->location_latitude === null
-            || $store->location_longitude === null;
+        $address = trim((string) ($store->location_address ?? ''));
+        $city = trim((string) ($store->location_city ?? ''));
+        $hasCoordinates = $store->location_latitude !== null
+            && $store->location_longitude !== null;
+
+        return $address === '' && $city === '' && ! $hasCoordinates;
     }
 
     /**
