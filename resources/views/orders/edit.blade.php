@@ -1054,6 +1054,11 @@
     line-height: 1.6;
 }
 
+.order-tracking-group,
+.order-proof-group {
+    display: none;
+}
+
 @media (max-width: 575.98px) {
     .order-summary-label {
         min-width: 0;
