@@ -110,7 +110,7 @@
     {{--    @endif--}}
     {{--    @endif--}}
 
-    @if ($errors->any())
+    @if (isset($errors) && $errors->any())
     @foreach ($errors->all() as $error)
     showErrorToast("{!! $error !!}");
     @endforeach
