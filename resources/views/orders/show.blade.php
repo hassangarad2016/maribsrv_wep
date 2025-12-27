@@ -1,4 +1,4 @@
-@extends('layouts.main')
+﻿@extends('layouts.main')
 
 
 @php
@@ -480,217 +480,7 @@
     @endphp
 
                     <div class="order-summary-grid">
-                        <section class="order-summary-block">
-                            <h6 class="order-summary-heading">البيانات الأساسية</h6>
-                            <ul class="order-summary-list">
-                                <li>
-                                    <span class="order-summary-label">رقم الطلب</span>
-                                    <span class="order-summary-value">{{ $order->order_number }}</span>
-                                </li>
-                                <li>
-                                    <span class="order-summary-label">تاريخ الطلب</span>
-                                    <span class="order-summary-value">{{ $order->created_at->format('Y-m-d H:i') }}</span>
-                                </li>
-                                <li>
-                                    <span class="order-summary-label">حالة الطلب</span>
-                                    <span class="order-summary-value">
-                                        <span class="badge d-inline-flex align-items-center gap-1" style="background-color: {{ $statusColor }}" @if($statusBadgeTitle !== '') title="{{ $statusBadgeTitle }}" @endif>
-                                            @if($statusIconClass)
-                                                <i class="{{ $statusIconClass }}"></i>
-                                            @endif
-                                            <span>{{ $statusLabel }}</span>
-                                            @if($isReserveStatus)
-                                                <span class="ms-1 small fw-semibold">احتياطي</span>
-
-                                            @endif
-                                        </span>
-                                    </span>
-                                </li>
-                                <li>
-                                    <span class="order-summary-label">الفئات</span>
-                                    <span class="order-summary-value">
-                                        @forelse($categoryBadges as $categoryName)
-                                            <span class="badge badge-info me-1 text-white">{{ $categoryName }}</span>
-                                        @empty
-                                            <span class="text-muted">غير متوفر</span>
-                                        @endforelse
-                                    </span>
-                                </li>
-                                <li>
-                                    <span class="order-summary-label">سياسة التسعير</span>
-                                    <span class="order-summary-value">
-                                        @if($policyCode)
-                                            {{ $policyCode }}
-                                            @if($policyId)
-                                                <small class="text-muted">(#{{ $policyId }})</small>
-
-
-                                            @endif
-                                            @if(data_get($policyData, 'version'))
-                                                <span class="badge badge-light">الإصدار {{ data_get($policyData, 'version') }}</span>
-                                            @endif
-                                        @elseif($policyId)
-                                            سياسة #{{ $policyId }}
-                                        @else
-                                            <span class="text-muted">غير متوفر</span>
-                                        @endif
-                                    </span>
-                                </li>
-                                <li>
-                                    <span class="order-summary-label">تاريخ الإكمال</span>
-                                    <span class="order-summary-value">{{ $completedAtDisplay }}</span>
-                                </li>
-                            </ul>
-                        </section>
-
-                        <section class="order-summary-block">
-                            <h6 class="order-summary-heading">معلومات الدفع والتوصيل</h6>
-                            <ul class="order-summary-list">
-                                <li>
-                                    <span class="order-summary-label">حالة الدفع</span>
-                                    <span class="order-summary-value">
-                                        <span class="badge {{ $paymentStatusBadgeClass }}">{{ $paymentStatusLabel }}</span>
-
-
-
-                                    </span>
-                                </li>
-                                <li>
-                                    <span class="order-summary-label">طريقة الدفع</span>
-                                    <span class="order-summary-value">{{ $order->resolved_payment_gateway_label ?? 'غير محدد' }}</span>
-                                </li>
-                                <li>
-                                    <span class="order-summary-label">توقيت دفع التوصيل</span>
-                                    <span class="order-summary-value">{{ $timingLabel }}</span>
-                                </li>
-                                <li>
-                                    <span class="order-summary-label">حالة دفع التوصيل</span>
-                                    <span class="order-summary-value">
-                                        <span class="badge {{ $deliveryStatusValue ? $deliveryStatusClass : 'bg-secondary' }}">{{ $deliveryStatusLabel }}</span>
-                                    </span>
-                                </li>
-                                <li>
-                                    <span class="order-summary-label">المستحق إلكترونياً</span>
-                                    <span class="order-summary-value">
-                                        @if(! is_null($onlinePayable))
-                                            {{ number_format($onlinePayable, 2) }} ريال
-                                        @else
-                                            <span class="text-muted">غير متوفر</span>
-                                        @endif
-                                    </span>
-                                </li>
-                                <li>
-                                    <span class="order-summary-label">المستحق عند التسليم</span>
-                                    <span class="order-summary-value">
-                                        @if(! is_null($codDue))
-                                            {{ number_format($codDue, 2) }} ريال
-                                        @else
-                                            <span class="text-muted">غير متوفر</span>
-                                        @endif
-                                    </span>
-                                </li>
-                                <li>
-                                    <span class="order-summary-label">حجم الطلب</span>
-                                    <span class="order-summary-value">{{ $deliverySizeLabel }}</span>
-                                </li>
-                                <li>
-                                    <span class="order-summary-label">مسافة التوصيل</span>
-                                    <span class="order-summary-value">{{ $deliveryDistanceDisplay }}</span>
-                                </li>
-                                <li>
-                                    <span class="order-summary-label">سعر التوصيل</span>
-                                    <span class="order-summary-value">{{ $deliveryPriceDisplay }}</span>
-                                </li>
-                            </ul>
-                            <div class="order-summary-actions d-flex flex-wrap gap-2 mt-3">
-                                @if($googleMapsUrl)
-                                    <a href="{{ $googleMapsUrl }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
-                                        <i class="bi bi-geo-alt"></i>
-                                        خرائط جوجل
-                                    </a>
-                                @endif
-                                @if($addressCopyText !== '')
-                                    <button type="button" class="btn btn-outline-secondary btn-sm copy-address-btn" data-address-copy="{{ e($addressCopyText) }}">
-                                        <i class="bi bi-clipboard"></i>
-                                        نسخ العنوان
-                                    </button>
-                                @endif
-                            </div>
-                        </section>
-
-                        <section class="order-summary-block">
-                            <h6 class="order-summary-heading">تحديث حالة الطلب</h6>
-                            @php
-                                $orderStatusLocked = isset($pendingManualPaymentRequest) && $pendingManualPaymentRequest;
-                                $paymentStatusLabelForUpdate = $paymentStatusOptions[$order->payment_status] ?? $order->payment_status;
-                                $statusLabelForUpdate = \App\Models\Order::statusLabel($order->order_status);
-                                $canChangeOrderStatus = $order->hasSuccessfulPayment() && ! $orderStatusLocked;
-                                $orderStatusLockMessage = null;
-
-                                if (! $order->hasSuccessfulPayment()) {
-                                    $orderStatusLockMessage = 'لا يمكن تحديث حالة الطلب قبل اكتمال الدفع.';
-                                } elseif ($orderStatusLocked) {
-                                    $orderStatusLockMessage = 'لا يمكن تحديث حالة الطلب أثناء مراجعة الدفع.';
-                                }
-                            @endphp
-                            @if($canChangeOrderStatus)
-                                <form action="{{ route('orders.update', $order->id) }}" method="POST">
-                                    @csrf
-                                    @method('PUT')
-                                    <div class="form-group mb-3">
-                                        <label for="order_status" class="form-label">حالة الطلب</label>
-                                        <select class="form-control" id="order_status" name="order_status" required>
-                                            @foreach($orderStatuses as $status)
-                                                <option value="{{ $status->code }}" {{ $order->order_status == $status->code ? 'selected' : '' }}
-                                                    style="color: {{ $status->color }}">
-                                                    {{ $status->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="form-group mb-3">
-                                        <label class="form-label">حالة الدفع</label>
-                                        <div class="form-control-plaintext border rounded bg-light px-3 py-2">
-                                            {{ $paymentStatusLabelForUpdate ?? '—' }}
-                                        </div>
-                                        <small class="text-muted d-block mt-2">لا يمكن تعديل حالة الدفع من هنا.</small>
-                                    </div>
-                                    <div class="form-group mb-3">
-                                        <label for="comment" class="form-label">ملاحظات التحديث</label>
-                                        <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
-                                    </div>
-                                    <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="notify_customer" name="notify_customer" value="1">
-                                        <label class="form-check-label" for="notify_customer">
-                                            إشعار العميل بالتحديث
-                                        </label>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">تحديث الطلب</button>
-                                </form>
-                            @else
-                                <div class="form-group mb-3">
-                                    <label class="form-label">حالة الطلب</label>
-                                    <div class="form-control-plaintext border rounded bg-light px-3 py-2">
-                                        {{ $statusLabelForUpdate ?? '—' }}
-                                    </div>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">حالة الدفع</label>
-                                    <div class="form-control-plaintext border rounded bg-light px-3 py-2">
-                                        {{ $paymentStatusLabelForUpdate ?? '—' }}
-                                    </div>
-                                    <small class="text-muted d-block mt-2">لا يمكن تعديل حالة الدفع من هنا.</small>
-                                </div>
-                                @if($orderStatusLockMessage)
-                                    <div class="alert alert-info mb-0">
-                                        {{ $orderStatusLockMessage }}
-                                    </div>
-                                @endif
-                            @endif
-                        </section>
-                        
-
-                        @if($orderNotes !== '')
+@if($orderNotes !== '')
                             <section class="order-summary-block order-summary-block--wide">
                                 <h6 class="order-summary-heading">ملاحظات الطلب</h6>
                                 <p class="order-notes-text mb-0">{{ $orderNotes }}</p>
@@ -847,6 +637,100 @@
     </div>
 
 
+
+    <!-- Order update modal -->
+    <div class="modal fade" id="orderUpdateModal" tabindex="-1" aria-labelledby="orderUpdateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderUpdateModalLabel">تحديث حالة الطلب</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @php
+                        $stepDefinitions = [
+                            ['code' => \App\Models\Order::STATUS_CONFIRMED, 'label' => 'تم استلام الطلب', 'icon' => 'bi bi-clipboard-check'],
+                            ['code' => \App\Models\Order::STATUS_PROCESSING, 'label' => 'قيد المعالجة', 'icon' => 'bi bi-gear'],
+                            ['code' => \App\Models\Order::STATUS_PREPARING, 'label' => 'قيد الشحن', 'icon' => 'bi bi-box-seam'],
+                            ['code' => \App\Models\Order::STATUS_OUT_FOR_DELIVERY, 'label' => 'في الطريق', 'icon' => 'bi bi-truck'],
+                            ['code' => \App\Models\Order::STATUS_DELIVERED, 'label' => 'تم التوصيل', 'icon' => 'bi bi-check-circle'],
+                        ];
+                        $stepCodes = array_column($stepDefinitions, 'code');
+                        $currentStepIndex = array_search($order->order_status, $stepCodes, true);
+                        if ($currentStepIndex === false) {
+                            $currentStepIndex = 0;
+                        }
+
+                        $orderStatusLocked = isset($pendingManualPaymentRequest) && $pendingManualPaymentRequest;
+                        $canChangeOrderStatus = $order->hasSuccessfulPayment() && ! $orderStatusLocked;
+                        $orderStatusLockMessage = null;
+                        if (! $order->hasSuccessfulPayment()) {
+                            $orderStatusLockMessage = 'لا يمكن تعديل حالة الطلب قبل اكتمال عملية الدفع.';
+                        } elseif ($orderStatusLocked) {
+                            $orderStatusLockMessage = 'لا يمكن تعديل حالة الطلب حالياً بسبب طلب دفع يدوي.';
+                        }
+
+                        $statusLabelForUpdate = \App\Models\Order::statusLabel($order->order_status);
+                        if ($statusLabelForUpdate === '') {
+                            $statusLabelForUpdate = optional($orderStatuses->firstWhere('code', $order->order_status))->name
+                                ?? \Illuminate\Support\Str::of($order->order_status)->replace('_', ' ')->headline();
+                        }
+                    @endphp
+
+                    <div class="order-status-steps mb-4">
+                        @foreach($stepDefinitions as $index => $step)
+                            @php
+                                $stepClass = $index < $currentStepIndex ? 'is-complete' : ($index === $currentStepIndex ? 'is-active' : '');
+                            @endphp
+                            <div class="order-status-step {{ $stepClass }}">
+                                <span class="order-status-icon"><i class="{{ $step['icon'] }}"></i></span>
+                                <span class="order-status-label">{{ $step['label'] }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    @if($canChangeOrderStatus)
+                        <form action="{{ route('orders.update', $order->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <div class="form-group mb-3">
+                                <label for="modal_order_status" class="form-label">حالة الطلب</label>
+                                <select class="form-control" id="modal_order_status" name="order_status" required>
+                                    @foreach($orderStatuses as $status)
+                                        <option value="{{ $status->code }}" {{ $order->order_status == $status->code ? 'selected' : '' }}>
+                                            {{ $status->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label for="modal_comment" class="form-label">ملاحظة التحديث</label>
+                                <textarea class="form-control" id="modal_comment" name="comment" rows="3"></textarea>
+                            </div>
+                            <div class="d-flex justify-content-end gap-2 mt-3">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                                <button type="submit" class="btn btn-primary">تحديث</button>
+                            </div>
+                        </form>
+                    @else
+                        <div class="form-group mb-3">
+                            <label class="form-label">حالة الطلب</label>
+                            <div class="form-control-plaintext border rounded bg-light px-3 py-2">
+                                {{ $statusLabelForUpdate ?? '—' }}
+                            </div>
+                        </div>
+                        @if($orderStatusLockMessage)
+                            <div class="alert alert-info mb-0">
+                                {{ $orderStatusLockMessage }}
+                            </div>
+                        @endif
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Add order to payment group modal -->
     <div class="modal fade" id="addOrderToGroupModal" tabindex="-1" aria-labelledby="addOrderToGroupModalLabel" aria-hidden="true">
@@ -1387,6 +1271,57 @@
     gap: 0.5rem;
     align-items: center;
 }
+
+.order-status-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f8f9fb;
+    border: 1px solid #e9ecef;
+    border-radius: 0.9rem;
+}
+
+.order-status-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    text-align: center;
+    color: #6c757d;
+}
+
+.order-status-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: #6c757d;
+}
+
+.order-status-step.is-complete .order-status-icon {
+    background: rgba(25, 135, 84, 0.15);
+    color: #198754;
+}
+
+.order-status-step.is-active .order-status-icon {
+    background: rgba(13, 110, 253, 0.18);
+    color: #0d6efd;
+}
+
+.order-status-step.is-complete,
+.order-status-step.is-active {
+    color: #212529;
+    font-weight: 600;
+}
+
+.order-status-label {
+    font-size: 0.85rem;
+}
 .order-metrics {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -1441,3 +1376,4 @@
     }
 }
 </style>
+

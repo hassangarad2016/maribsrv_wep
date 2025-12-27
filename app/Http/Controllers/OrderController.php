@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 use App\Events\OrderNoteUpdated;
@@ -951,63 +951,11 @@ class OrderController extends Controller
      */
     public function edit($id)
     {
-        // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ط§ظ„ط·ظ„ط¨ ظ…ط¹ ط§ظ„ط¹ظ„ط§ظ‚ط§طھ
-        $order = Order::with([
-                'user' => static fn ($query) => $query->withTrashed(),
-                'seller' => static fn ($query) => $query->withTrashed(),
-                'items',
-                'history.user' => static fn ($query) => $query->withTrashed(),
-                'manualPaymentRequests.paymentTransaction',
-                'latestManualPaymentRequest.manualBank',
-                'latestPaymentTransaction.manualPaymentRequest.manualBank',
+        $order = Order::findOrFail($id);
 
-            ])
-            
-            ->findOrFail($id);
-
-        $manualPaymentRequests = $order->manualPaymentRequests;
-
-        $pendingManualPaymentRequest = $manualPaymentRequests
-        ->first(static fn (ManualPaymentRequest $request) => $request->isOpen());
-        $latestManualPaymentRequest = $manualPaymentRequests->first();
-
-
-        // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ظ‚ط§ط¦ظ…ط© ط§ظ„ظ…ط³طھط®ط¯ظ…ظٹظ†
-        $users = User::orderBy('name')->get();
-
-        // ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ط­ط§ظ„ط§طھ ط§ظ„ط·ظ„ط¨ط§طھ
-        $orderStatuses = $this->allowedOrderStatuses($order, true);
-
-        $paymentStatusOptions = Order::paymentStatusLabels();
-        $deliveryPaymentTimingLabels = $this->deliveryPaymentTimingLabels();
-        $deliveryPaymentStatusLabels = $this->deliveryPaymentStatusLabels();
-
-        return view(
-            'orders.edit',
-            compact(
-                'order',
-                'users',
-                'orderStatuses',
-                'paymentStatusOptions',
-                'deliveryPaymentTimingLabels',
-                'deliveryPaymentStatusLabels',
-                'pendingManualPaymentRequest',
-                'latestManualPaymentRequest'
-            )
-        
-        );
-
-
-    
+        return redirect()->route('orders.show', $order->id);
     }
 
-    /**
-     * طھط­ط¯ظٹط« ط§ظ„ط·ظ„ط¨
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         ResponseService::noAnyPermissionThenRedirect(['orders-update']);
@@ -1517,6 +1465,8 @@ class OrderController extends Controller
         return $columns;
     }
 }
+
+
 
 
 
