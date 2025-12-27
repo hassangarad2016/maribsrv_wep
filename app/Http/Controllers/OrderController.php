@@ -1163,8 +1163,16 @@ class OrderController extends Controller
     {
         $includeReserve = $includeReserve ?? request()->boolean('include_reserve_statuses');
 
+        $allowedStatusCodes = [
+            Order::STATUS_CONFIRMED,
+            Order::STATUS_PROCESSING,
+            Order::STATUS_PREPARING,
+            Order::STATUS_OUT_FOR_DELIVERY,
+            Order::STATUS_DELIVERED,
+        ];
+
         $query = OrderStatus::query()
-            ->whereIn('code', Order::statusValues());
+            ->whereIn('code', $allowedStatusCodes);
 
         if ($includeReserve) {
             $query->where(function ($builder) {
@@ -1193,7 +1201,18 @@ class OrderController extends Controller
             }
         }
 
-        return $statuses;
+        $displayMap = Order::statusDisplayMap();
+
+        return $statuses->map(static function (OrderStatus $status) use ($displayMap) {
+            $statusCode = (string) $status->code;
+            $label = $displayMap[$statusCode]['label'] ?? null;
+
+            if (is_string($label) && trim($label) !== '') {
+                $status->name = $label;
+            }
+
+            return $status;
+        });
     }
 
     /**

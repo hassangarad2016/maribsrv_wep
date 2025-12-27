@@ -310,8 +310,7 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
     Route::post('add-service-review-report', [ApiController::class, 'addServiceReviewReport']);
 
 
-    Route::get('cart', [CartController::class, 'index'])
-        ->middleware(\App\Http\Middleware\AttachCachingHeaders::class);
+    Route::get('cart', [CartController::class, 'index']);
     Route::get('checkout-info', [CartController::class, 'checkoutInfo']);
     Route::post('cart/items', [CartController::class, 'store']);
     Route::post('cart/add', [CartController::class, 'store']);
@@ -379,14 +378,12 @@ Route::post('set-item-total-click', [ApiController::class, 'setItemTotalClick'])
 Route::get('get-system-settings', [ApiController::class, 'getSystemSettings']);
 Route::get('get-customfields', [ApiController::class, 'getCustomFields']);
 Route::get('get-item', [ApiController::class, 'getItem']);
-Route::get('get-slider', [ApiController::class, 'getSlider'])
-    ->middleware(\App\Http\Middleware\AttachCachingHeaders::class);
+Route::get('get-slider', [ApiController::class, 'getSlider']);
 Route::post('sliders/{slider}/click', [ApiController::class, 'recordSliderClick'])->whereNumber('slider');
 
 
 Route::get('get-report-reasons', [ApiController::class, 'getReportReasons']);
-Route::get('get-categories', [ApiController::class, 'getSubCategories'])
-    ->middleware(\App\Http\Middleware\AttachCachingHeaders::class);
+Route::get('get-categories', [ApiController::class, 'getSubCategories']);
 Route::get('get-parent-categories', [ApiController::class, 'getParentCategoryTree']);
 Route::get('blogs', [ApiController::class, 'getBlog']);
 Route::get('blog-tags', [ApiController::class, 'getAllBlogTags']);
@@ -416,8 +413,7 @@ Route::middleware('auth:sanctum')->get('user-orders', [ApiController::class, 'ge
 Route::get('delivery-prices', [ApiController::class, 'getDeliveryPrices']);
 Route::post('delivery-prices/calculate', DeliveryPriceCalculatorController::class);
 
-Route::get('get-slider', [ApiController::class, 'getSlider'])
-    ->middleware(\App\Http\Middleware\AttachCachingHeaders::class);
+Route::get('get-slider', [ApiController::class, 'getSlider']);
 Route::get('users-by-account-type', [ApiController::class, 'getUsersByAccountType']);
 
 

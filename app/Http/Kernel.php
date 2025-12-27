@@ -56,6 +56,7 @@ class Kernel extends HttpKernel {
             InitializeApiMetrics::class,
             \App\Http\Middleware\StripNumberFields::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\AttachCachingHeaders::class,
             \App\Http\Middleware\CompressJsonResponse::class,
 
         ],

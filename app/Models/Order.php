@@ -40,7 +40,7 @@ class Order extends Model
 
 
     /**
-     * الحقول القابلة للتعبئة الجماعية
+     * ط§ظ„ط­ظ‚ظˆظ„ ط§ظ„ظ‚ط§ط¨ظ„ط© ظ„ظ„طھط¹ط¨ط¦ط© ط§ظ„ط¬ظ…ط§ط¹ظٹط©
      *
      * @var array
      */
@@ -108,7 +108,7 @@ class Order extends Model
     ];
 
     /**
-     * الحقول التي يجب تحويلها إلى تواريخ
+     * ط§ظ„ط­ظ‚ظˆظ„ ط§ظ„طھظٹ ظٹط¬ط¨ طھط­ظˆظٹظ„ظ‡ط§ ط¥ظ„ظ‰ طھظˆط§ط±ظٹط®
      *
      * @var array
      */
@@ -126,7 +126,7 @@ class Order extends Model
     ];
 
     /**
-     * الحقول التي يجب تحويلها إلى أنواع محددة
+     * ط§ظ„ط­ظ‚ظˆظ„ ط§ظ„طھظٹ ظٹط¬ط¨ طھط­ظˆظٹظ„ظ‡ط§ ط¥ظ„ظ‰ ط£ظ†ظˆط§ط¹ ظ…ط­ط¯ط¯ط©
      *
      * @var array
      */
@@ -208,25 +208,25 @@ class Order extends Model
 
 
     /**
-     * قائمة حالات الدفع المتاحة مع التسميات العربية الخاصة بها.
+     * ظ‚ط§ط¦ظ…ط© ط­ط§ظ„ط§طھ ط§ظ„ط¯ظپط¹ ط§ظ„ظ…طھط§ط­ط© ظ…ط¹ ط§ظ„طھط³ظ…ظٹط§طھ ط§ظ„ط¹ط±ط¨ظٹط© ط§ظ„ط®ط§طµط© ط¨ظ‡ط§.
      *
      * @var array<string, string>
      */
     public const PAYMENT_STATUS_LABELS = [
-        'pending' => 'قيد الانتظار',
-        'payment_pending' => 'قيد الدفع',
-        'paid' => 'مدفوع',
-        'partial' => 'مدفوع جزئياً',
-        'payment_partial' => 'مدفوع جزئياً',
-        'refunded' => 'مسترجع',
-        'failed' => 'فشل الدفع',
-        'cancelled' => 'ملغي',
+        'pending' => 'ظ‚ظٹط¯ ط§ظ„ط§ظ†طھط¸ط§ط±',
+        'payment_pending' => 'ظ‚ظٹط¯ ط§ظ„ط¯ظپط¹',
+        'paid' => 'ظ…ط¯ظپظˆط¹',
+        'partial' => 'ظ…ط¯ظپظˆط¹ ط¬ط²ط¦ظٹط§ظ‹',
+        'payment_partial' => 'ظ…ط¯ظپظˆط¹ ط¬ط²ط¦ظٹط§ظ‹',
+        'refunded' => 'ظ…ط³طھط±ط¬ط¹',
+        'failed' => 'ظپط´ظ„ ط§ظ„ط¯ظپط¹',
+        'cancelled' => 'ظ…ظ„ط؛ظٹ',
     ];
 
 
 
     /**
-     * قائمة حالات الدفع التي تعتبر سداداً ناجحاً للطلب.
+     * ظ‚ط§ط¦ظ…ط© ط­ط§ظ„ط§طھ ط§ظ„ط¯ظپط¹ ط§ظ„طھظٹ طھط¹طھط¨ط± ط³ط¯ط§ط¯ط§ظ‹ ظ†ط§ط¬ط­ط§ظ‹ ظ„ظ„ط·ظ„ط¨.
      *
      * @var array<int, string>
      */
@@ -341,7 +341,7 @@ class Order extends Model
 
 
     /**
-     * علاقة مع المستخدم (العميل)
+     * ط¹ظ„ط§ظ‚ط© ظ…ط¹ ط§ظ„ظ…ط³طھط®ط¯ظ… (ط§ظ„ط¹ظ…ظٹظ„)
      *
      * @return BelongsTo
      */
@@ -351,7 +351,7 @@ class Order extends Model
     }
 
     /**
-     * علاقة مع التاجر
+     * ط¹ظ„ط§ظ‚ط© ظ…ط¹ ط§ظ„طھط§ط¬ط±
      *
      * @return BelongsTo
      */
@@ -380,7 +380,7 @@ class Order extends Model
 
 
     /**
-     * علاقة مع عناصر الطلب
+     * ط¹ظ„ط§ظ‚ط© ظ…ط¹ ط¹ظ†ط§طµط± ط§ظ„ط·ظ„ط¨
      *
      * @return HasMany
      */
@@ -397,7 +397,7 @@ class Order extends Model
 
 
     /**
-     * علاقة مع سجل الطلب
+     * ط¹ظ„ط§ظ‚ط© ظ…ط¹ ط³ط¬ظ„ ط§ظ„ط·ظ„ط¨
      *
      * @return HasMany
      */
@@ -407,7 +407,7 @@ class Order extends Model
     }
 
     /**
-     * علاقة مع معاملات الدفع
+     * ط¹ظ„ط§ظ‚ط© ظ…ط¹ ظ…ط¹ط§ظ…ظ„ط§طھ ط§ظ„ط¯ظپط¹
      *
      * @return HasMany
      */
@@ -623,7 +623,7 @@ class Order extends Model
 
 
     /**
-     * نطاق البحث
+     * ظ†ط·ط§ظ‚ ط§ظ„ط¨ط­ط«
      *
      * @param $query
      * @param $search
@@ -645,7 +645,7 @@ class Order extends Model
     }
 
     /**
-     * نطاق الطلبات حسب الحالة
+     * ظ†ط·ط§ظ‚ ط§ظ„ط·ظ„ط¨ط§طھ ط­ط³ط¨ ط§ظ„ط­ط§ظ„ط©
      *
      * @param $query
      * @param $status
@@ -657,7 +657,7 @@ class Order extends Model
     }
 
     /**
-     * نطاق الطلبات حسب حالة الدفع
+     * ظ†ط·ط§ظ‚ ط§ظ„ط·ظ„ط¨ط§طھ ط­ط³ط¨ ط­ط§ظ„ط© ط§ظ„ط¯ظپط¹
      *
      * @param $query
      * @param $status
@@ -669,7 +669,7 @@ class Order extends Model
     }
 
     /**
-     * نطاق الطلبات المكتملة
+     * ظ†ط·ط§ظ‚ ط§ظ„ط·ظ„ط¨ط§طھ ط§ظ„ظ…ظƒطھظ…ظ„ط©
      *
      * @param $query
      * @return mixed
@@ -680,7 +680,7 @@ class Order extends Model
     }
 
     /**
-     * نطاق الطلبات غير المكتملة
+     * ظ†ط·ط§ظ‚ ط§ظ„ط·ظ„ط¨ط§طھ ط؛ظٹط± ط§ظ„ظ…ظƒطھظ…ظ„ط©
      *
      * @param $query
      * @return mixed
@@ -691,7 +691,7 @@ class Order extends Model
     }
 
     /**
-     * حالات الطلب
+     * ط­ط§ظ„ط§طھ ط§ظ„ط·ظ„ط¨
      */
 
     public const STATUS_PENDING = OrderStatusEnum::PENDING->value;
@@ -713,7 +713,7 @@ class Order extends Model
 
     
     /**
-     * الحصول على مصفوفة حالات الطلب
+     * ط§ظ„ط­طµظˆظ„ ط¹ظ„ظ‰ ظ…طµظپظˆظپط© ط­ط§ظ„ط§طھ ط§ظ„ط·ظ„ط¨
      */
     public static function getStatusList()
 
@@ -726,7 +726,7 @@ class Order extends Model
     }
 
     /**
-     * بيانات العرض لكل حالة طلب.
+     * ط¨ظٹط§ظ†ط§طھ ط§ظ„ط¹ط±ط¶ ظ„ظƒظ„ ط­ط§ظ„ط© ط·ظ„ط¨.
      *
      * @return array<string, array{label: string, icon: ?string, timeline: ?string, reserve: bool}>
      */
@@ -737,33 +737,33 @@ class Order extends Model
 
 
             self::STATUS_PENDING => [
-                'label' => 'قيد الانتظار',
+                'label' => 'ظ‚ظٹط¯ ط§ظ„ط§ظ†طھط¸ط§ط±',
                 'icon' => 'bi bi-hourglass-split',
-                'timeline' => 'تم استلام الطلب وينتظر المراجعة.',
+                'timeline' => 'طھظ… ط§ط³طھظ„ط§ظ… ط§ظ„ط·ظ„ط¨ ظˆظٹظ†طھط¸ط± ط§ظ„ظ…ط±ط§ط¬ط¹ط©.',
                 'reserve' => false,
 
 
 
             ],
             self::STATUS_DEPOSIT_PAID => [
-                'label' => 'تم سداد العربون',
+                'label' => 'طھظ… ط³ط¯ط§ط¯ ط§ظ„ط¹ط±ط¨ظˆظ†',
                 'icon' => 'bi bi-wallet2',
-                'timeline' => 'تم استلام الدفعة المبدئية وجارٍ تجهيز الطلب للمراجعة.',
+                'timeline' => 'طھظ… ط§ط³طھظ„ط§ظ… ط§ظ„ط¯ظپط¹ط© ط§ظ„ظ…ط¨ط¯ط¦ظٹط© ظˆط¬ط§ط±ظچ طھط¬ظ‡ظٹط² ط§ظ„ط·ظ„ط¨ ظ„ظ„ظ…ط±ط§ط¬ط¹ط©.',
                 'reserve' => false,
             ],
             self::STATUS_UNDER_REVIEW => [
-                'label' => 'قيد المراجعة',
+                'label' => 'ظ‚ظٹط¯ ط§ظ„ظ…ط±ط§ط¬ط¹ط©',
                 'icon' => 'bi bi-search',
-                'timeline' => 'يتم التحقق من تفاصيل الطلب ومراجعة المعلومات اللازمة.',
+                'timeline' => 'ظٹطھظ… ط§ظ„طھط­ظ‚ظ‚ ظ…ظ† طھظپط§طµظٹظ„ ط§ظ„ط·ظ„ط¨ ظˆظ…ط±ط§ط¬ط¹ط© ط§ظ„ظ…ط¹ظ„ظˆظ…ط§طھ ط§ظ„ظ„ط§ط²ظ…ط©.',
                 'reserve' => false,
 
 
 
             ],
             self::STATUS_CONFIRMED => [
-                'label' => 'تم التأكيد',
+                'label' => 'تم استلام الطلب',
                 'icon' => 'bi bi-check2-square',
-                'timeline' => 'تم تأكيد الطلب وسيتم البدء في معالجته.',
+                'timeline' => 'تم استلام الطلب بنجاح.',
                 'reserve' => false,
 
 
@@ -772,75 +772,75 @@ class Order extends Model
             self::STATUS_PROCESSING => [
                 'label' => 'قيد المعالجة',
                 'icon' => 'bi bi-gear',
-                'timeline' => 'يتم الآن معالجة تفاصيل الطلب.',
+                'timeline' => 'جارٍ معالجة الطلب.',
                 'reserve' => false,
 
 
             ],
             self::STATUS_PREPARING => [
-                'label' => 'جارٍ التحضير',
+                'label' => 'قيد الشحن',
                 'icon' => 'bi bi-box-seam',
-                'timeline' => 'يتم تجهيز الطلب للشحن.',
+                'timeline' => 'تم تجهيز الطلب للشحن.',
                 'reserve' => false,
 
 
             ],
             self::STATUS_READY_FOR_DELIVERY => [
-                'label' => 'جاهز للتسليم',
+                'label' => 'ط¬ط§ظ‡ط² ظ„ظ„طھط³ظ„ظٹظ…',
                 'icon' => 'bi bi-clipboard-check',
-                'timeline' => 'الطلب جاهز للتسليم إلى شركة الشحن.',
+                'timeline' => 'ط§ظ„ط·ظ„ط¨ ط¬ط§ظ‡ط² ظ„ظ„طھط³ظ„ظٹظ… ط¥ظ„ظ‰ ط´ط±ظƒط© ط§ظ„ط´ط­ظ†.',
                 'reserve' => false,
 
 
             ],
             self::STATUS_OUT_FOR_DELIVERY => [
-                'label' => 'خرج للتسليم',
+                'label' => 'في الطريق',
                 'icon' => 'bi bi-truck',
-                'timeline' => 'الطلب في طريقه إلى العميل.',
+                'timeline' => 'الطلب في الطريق إلى العميل.',
                 'reserve' => false,
 
 
             ],
             self::STATUS_DELIVERED => [
-                'label' => 'تم التسليم',
+                'label' => 'تم التوصيل',
                 'icon' => 'bi bi-check-circle',
-                'timeline' => 'تم تسليم الطلب بنجاح.',
+                'timeline' => 'تم توصيل الطلب بنجاح.',
                 'reserve' => false,
             ],
 
 
             self::STATUS_FINAL_SETTLEMENT => [
-                'label' => 'تسوية نهائية',
+                'label' => 'طھط³ظˆظٹط© ظ†ظ‡ط§ط¦ظٹط©',
                 'icon' => 'bi bi-cash-coin',
-                'timeline' => 'تمت التسوية النهائية للطلب وجميع المبالغ مقفلة.',
+                'timeline' => 'طھظ…طھ ط§ظ„طھط³ظˆظٹط© ط§ظ„ظ†ظ‡ط§ط¦ظٹط© ظ„ظ„ط·ظ„ط¨ ظˆط¬ظ…ظٹط¹ ط§ظ„ظ…ط¨ط§ظ„ط؛ ظ…ظ‚ظپظ„ط©.',
                 'reserve' => false,
             ],
 
 
 
             self::STATUS_RETURNED => [
-                'label' => 'تم الإرجاع',
+                'label' => 'طھظ… ط§ظ„ط¥ط±ط¬ط§ط¹',
                 'icon' => 'bi bi-arrow-counterclockwise',
-                'timeline' => 'تم إعادة الطلب إلى نقطة الاستلام أو المستودع.',
+                'timeline' => 'طھظ… ط¥ط¹ط§ط¯ط© ط§ظ„ط·ظ„ط¨ ط¥ظ„ظ‰ ظ†ظ‚ط·ط© ط§ظ„ط§ط³طھظ„ط§ظ… ط£ظˆ ط§ظ„ظ…ط³طھظˆط¯ط¹.',
                 'reserve' => true,
 
             ],
             self::STATUS_FAILED => [
-                'label' => 'فشل التسليم',
+                'label' => 'ظپط´ظ„ ط§ظ„طھط³ظ„ظٹظ…',
                 'icon' => 'bi bi-exclamation-octagon',
-                'timeline' => 'تعذر إتمام عملية التسليم.',
+                'timeline' => 'طھط¹ط°ط± ط¥طھظ…ط§ظ… ط¹ظ…ظ„ظٹط© ط§ظ„طھط³ظ„ظٹظ….',
                 'reserve' => true,
             ],
             self::STATUS_CANCELED => [
-                'label' => 'ملغي',
+                'label' => 'ظ…ظ„ط؛ظٹ',
                 'icon' => 'bi bi-x-circle',
-                'timeline' => 'تم إلغاء الطلب.',
+                'timeline' => 'طھظ… ط¥ظ„ط؛ط§ط، ط§ظ„ط·ظ„ط¨.',
                 'reserve' => true,
             ],
             self::STATUS_ON_HOLD => [
-                'label' => 'معلّق مؤقتًا',
+                'label' => 'ظ…ط¹ظ„ظ‘ظ‚ ظ…ط¤ظ‚طھظ‹ط§',
                 'icon' => 'bi bi-pause-circle',
-                'timeline' => 'تم تعليق الطلب مؤقتًا لحين معالجة مسألة أو استكمال المعلومات.',
+                'timeline' => 'طھظ… طھط¹ظ„ظٹظ‚ ط§ظ„ط·ظ„ط¨ ظ…ط¤ظ‚طھظ‹ط§ ظ„ط­ظٹظ† ظ…ط¹ط§ظ„ط¬ط© ظ…ط³ط£ظ„ط© ط£ظˆ ط§ط³طھظƒظ…ط§ظ„ ط§ظ„ظ…ط¹ظ„ظˆظ…ط§طھ.',
                 'reserve' => true,
 
             ],
@@ -955,7 +955,7 @@ class Order extends Model
 
 
     /**
-     * خريطة الانتقالات المسموح بها بين حالات الطلب.
+     * ط®ط±ظٹط·ط© ط§ظ„ط§ظ†طھظ‚ط§ظ„ط§طھ ط§ظ„ظ…ط³ظ…ظˆط­ ط¨ظ‡ط§ ط¨ظٹظ† ط­ط§ظ„ط§طھ ط§ظ„ط·ظ„ط¨.
      *
      * @return array<string, array<int, string>>
      */
@@ -1126,7 +1126,7 @@ class Order extends Model
 
         if (self::isFinalStatus($from)) {
             if ($from !== self::STATUS_FINAL_SETTLEMENT && $to === self::STATUS_FINAL_SETTLEMENT) {
-                // السماح بالانتقال إلى التسوية النهائية حتى من الحالات النهائية السابقة.
+                // ط§ظ„ط³ظ…ط§ط­ ط¨ط§ظ„ط§ظ†طھظ‚ط§ظ„ ط¥ظ„ظ‰ ط§ظ„طھط³ظˆظٹط© ط§ظ„ظ†ظ‡ط§ط¦ظٹط© ط­طھظ‰ ظ…ظ† ط§ظ„ط­ط§ظ„ط§طھ ط§ظ„ظ†ظ‡ط§ط¦ظٹط© ط§ظ„ط³ط§ط¨ظ‚ط©.
             } else {
                 return false;
             }
@@ -1150,7 +1150,7 @@ class Order extends Model
 
 
     /**
-     * قائمة بقيم حالات الطلب المتاحة.
+     * ظ‚ط§ط¦ظ…ط© ط¨ظ‚ظٹظ… ط­ط§ظ„ط§طھ ط§ظ„ط·ظ„ط¨ ط§ظ„ظ…طھط§ط­ط©.
      *
      * @return array<int, string>
      */
@@ -1161,7 +1161,7 @@ class Order extends Model
 
 
     /**
-     * إرجاع التسميات العربية لحالات الدفع المدعومة.
+     * ط¥ط±ط¬ط§ط¹ ط§ظ„طھط³ظ…ظٹط§طھ ط§ظ„ط¹ط±ط¨ظٹط© ظ„ط­ط§ظ„ط§طھ ط§ظ„ط¯ظپط¹ ط§ظ„ظ…ط¯ط¹ظˆظ…ط©.
      *
      * @return array<string, string>
      */
@@ -1171,7 +1171,7 @@ class Order extends Model
     }
 
     /**
-     * إرجاع قائمة قيم حالات الدفع المدعومة.
+     * ط¥ط±ط¬ط§ط¹ ظ‚ط§ط¦ظ…ط© ظ‚ظٹظ… ط­ط§ظ„ط§طھ ط§ظ„ط¯ظپط¹ ط§ظ„ظ…ط¯ط¹ظˆظ…ط©.
      *
      * @return array<int, string>
      */
@@ -1367,7 +1367,7 @@ class Order extends Model
     }
 
     /**
-     * التحقق مما إذا كان الطلب في حالة معينة
+     * ط§ظ„طھط­ظ‚ظ‚ ظ…ظ…ط§ ط¥ط°ط§ ظƒط§ظ† ط§ظ„ط·ظ„ط¨ ظپظٹ ط­ط§ظ„ط© ظ…ط¹ظٹظ†ط©
      */
     public function isStatus($status)
     {
@@ -1375,10 +1375,10 @@ class Order extends Model
     }
 
     /**
-     * حساب سعر التوصيل بناءً على المسافة والحجم
+     * ط­ط³ط§ط¨ ط³ط¹ط± ط§ظ„طھظˆطµظٹظ„ ط¨ظ†ط§ط،ظ‹ ط¹ظ„ظ‰ ط§ظ„ظ…ط³ط§ظپط© ظˆط§ظ„ط­ط¬ظ…
      *
-     * @param float $distance المسافة بالكيلومترات
-     * @param string $size حجم الطلب
+     * @param float $distance ط§ظ„ظ…ط³ط§ظپط© ط¨ط§ظ„ظƒظٹظ„ظˆظ…طھط±ط§طھ
+     * @param string $size ط­ط¬ظ… ط§ظ„ط·ظ„ط¨
      * @return float|null
      */
 
@@ -1415,7 +1415,7 @@ class Order extends Model
             return $service->calculate($payload);
 
         } catch (DeliveryPricingException $exception) {
-            Log::warning('فشل حساب تكلفة التوصيل للطلب.', [
+            Log::warning('ظپط´ظ„ ط­ط³ط§ط¨ طھظƒظ„ظپط© ط§ظ„طھظˆطµظٹظ„ ظ„ظ„ط·ظ„ط¨.', [
                 'distance' => $distance,
                 'size' => $size,
                 'department' => $department,
@@ -1440,28 +1440,28 @@ class Order extends Model
             $weight = (float) $value;
         } elseif (is_string($value)) {
             $normalized = strtr($value, [
-                '٠' => '0',
-                '١' => '1',
-                '٢' => '2',
-                '٣' => '3',
-                '٤' => '4',
-                '٥' => '5',
-                '٦' => '6',
-                '٧' => '7',
-                '٨' => '8',
-                '٩' => '9',
-                '۰' => '0',
-                '۱' => '1',
-                '۲' => '2',
-                '۳' => '3',
-                '۴' => '4',
-                '۵' => '5',
-                '۶' => '6',
-                '۷' => '7',
-                '۸' => '8',
-                '۹' => '9',
-                '٫' => '.',
-                '،' => '.',
+                'ظ ' => '0',
+                'ظ،' => '1',
+                'ظ¢' => '2',
+                'ظ£' => '3',
+                'ظ¤' => '4',
+                'ظ¥' => '5',
+                'ظ¦' => '6',
+                'ظ§' => '7',
+                'ظ¨' => '8',
+                'ظ©' => '9',
+                'غ°' => '0',
+                'غ±' => '1',
+                'غ²' => '2',
+                'غ³' => '3',
+                'غ´' => '4',
+                'غµ' => '5',
+                'غ¶' => '6',
+                'غ·' => '7',
+                'غ¸' => '8',
+                'غ¹' => '9',
+                'ظ«' => '.',
+                'طŒ' => '.',
             ]);
 
             $normalized = str_replace(',', '.', trim($normalized));
@@ -1493,10 +1493,10 @@ class Order extends Model
 
 
     /**
-     * تحديث سعر التوصيل للطلب
+     * طھط­ط¯ظٹط« ط³ط¹ط± ط§ظ„طھظˆطµظٹظ„ ظ„ظ„ط·ظ„ط¨
      *
-     * @param float $distance المسافة بالكيلومترات
-     * @param string $size حجم الطلب
+     * @param float $distance ط§ظ„ظ…ط³ط§ظپط© ط¨ط§ظ„ظƒظٹظ„ظˆظ…طھط±ط§طھ
+     * @param string $size ط­ط¬ظ… ط§ظ„ط·ظ„ط¨
      * @return bool
      */
     public function updateDeliveryPrice($distance, $size)
