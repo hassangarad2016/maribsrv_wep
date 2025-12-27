@@ -6,26 +6,25 @@ use App\Models\Setting;
 use Exception;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
 use Intervention\Image\Facades\Image;
 use RuntimeException;
 
 class FileService {
+    private const WEBP_QUALITY = 85;
     /**
      * @param $requestFile
      * @param $folder
      * @return string
      */
     public static function compressAndUpload($requestFile, $folder) {
-        $file_name = uniqid('', true) . time() . '.' . $requestFile->getClientOriginalExtension();
-        if (in_array($requestFile->getClientOriginalExtension(), ['jpg', 'jpeg', 'png'])) {
-            // Check the Extension should be jpg or png and do compression
-            $image = Image::make($requestFile)->encode(null, 60);
-            Storage::disk(config('filesystems.default'))->put($folder . '/' . $file_name, $image);
-        } else {
-            // Else assign file as it is
-            $file = $requestFile;
-            $file->storeAs($folder, $file_name, 'public');
+        if (self::isImageUpload($requestFile)) {
+            return self::storeWebpImage($requestFile, $folder);
         }
+
+        $file_name = uniqid('', true) . time() . '.' . $requestFile->getClientOriginalExtension();
+        $file = $requestFile;
+        $file->storeAs($folder, $file_name, 'public');
         return $folder . '/' . $file_name;
     }
 
@@ -36,6 +35,10 @@ class FileService {
      * @return string
      */
     public static function upload($requestFile, $folder) {
+        if (self::isImageUpload($requestFile)) {
+            return self::storeWebpImage($requestFile, $folder);
+        }
+
         $file_name = uniqid('', true) . time() . '.' . $requestFile->getClientOriginalExtension();
         $requestFile->storeAs($folder, $file_name, 'public');
         return $folder . '/' . $file_name;
@@ -109,41 +112,33 @@ class FileService {
      * @throws Exception
      */
     public static function compressAndUploadWithWatermark($requestFile, $folder) {
-        $file_name = uniqid('', true) . time() . '.' . $requestFile->getClientOriginalExtension();
-
         try {
-            if (in_array($requestFile->getClientOriginalExtension(), ['jpg', 'jpeg', 'png'])) {
+            if (self::isImageUpload($requestFile)) {
                 $watermarkPath = Setting::where('name', 'watermark_image')->value('value');
-
                 $fullWatermarkPath = storage_path('app/public/' . $watermarkPath);
-                $watermark = null;
 
-                $imagePath = $requestFile->getPathname();
-                if (!file_exists($imagePath) || !is_readable($imagePath)) {
-                    throw new RuntimeException("Uploaded image file is not readable at path: " . $imagePath);
-                }
-                $image = Image::make($imagePath)->encode(null, 60);
-                $imageWidth = $image->width();
-                $imageHeight = $image->height();
+                return self::storeWebpImage($requestFile, $folder, static function ($image) use ($watermarkPath, $fullWatermarkPath) {
+                    $watermark = null;
+                    $imageWidth = $image->width();
+                    $imageHeight = $image->height();
 
-                if (!empty($watermarkPath) && file_exists($fullWatermarkPath)) {
-                    $watermark = Image::make($fullWatermarkPath)
-                        ->resize($imageWidth, $imageHeight, function ($constraint) {
-                            $constraint->aspectRatio(); // Preserve aspect ratio
-                        })
-                        ->opacity(10);
-                }
+                    if (!empty($watermarkPath) && file_exists($fullWatermarkPath)) {
+                        $watermark = Image::make($fullWatermarkPath)
+                            ->resize($imageWidth, $imageHeight, function ($constraint) {
+                                $constraint->aspectRatio();
+                            })
+                            ->opacity(10);
+                    }
 
-                if ($watermark) {
-                    $image->insert($watermark, 'center');
-                }
-
-                Storage::disk(config('filesystems.default'))->put($folder . '/' . $file_name, (string)$image->encode());
-            } else {
-                // Else assign file as it is
-                $file = $requestFile;
-                $file->storeAs($folder, $file_name, 'public');
+                    if ($watermark) {
+                        $image->insert($watermark, 'center');
+                    }
+                });
             }
+
+            $file_name = uniqid('', true) . time() . '.' . $requestFile->getClientOriginalExtension();
+            $file = $requestFile;
+            $file->storeAs($folder, $file_name, 'public');
             return $folder . '/' . $file_name;
 
         } catch (Exception $e) {
@@ -159,42 +154,33 @@ class FileService {
         self::delete($deleteRawOriginalImage);
     }
 
-    $file_name = uniqid('', true) . time() . '.' . $requestFile->getClientOriginalExtension();
-
     try {
-        if (in_array($requestFile->getClientOriginalExtension(), ['jpg', 'jpeg', 'png'])) {
+        if (self::isImageUpload($requestFile)) {
             $watermarkPath = Setting::where('name', 'watermark_image')->value('value');
             $fullWatermarkPath = storage_path('app/public/' . $watermarkPath);
-            $watermark = null;
-            $imagePath = $requestFile->getPathname();
-            if (!file_exists($imagePath) || !is_readable($imagePath)) {
-                throw new RuntimeException("Uploaded image file is not readable at path: " . $imagePath);
-            }
-            $image = Image::make($imagePath)->encode(null, 60);
-            $imageWidth = $image->width();
-            $imageHeight = $image->height();
 
+            return self::storeWebpImage($requestFile, $folder, static function ($image) use ($watermarkPath, $fullWatermarkPath) {
+                $watermark = null;
+                $imageWidth = $image->width();
+                $imageHeight = $image->height();
 
-            if (!empty($watermarkPath) && file_exists($fullWatermarkPath)) {
-                $watermark = Image::make($fullWatermarkPath)
-                    ->resize($imageWidth, $imageHeight, function ($constraint) {
-                        $constraint->aspectRatio(); // Preserve aspect ratio
-                    })
-                    ->opacity(10);
-            }
+                if (!empty($watermarkPath) && file_exists($fullWatermarkPath)) {
+                    $watermark = Image::make($fullWatermarkPath)
+                        ->resize($imageWidth, $imageHeight, function ($constraint) {
+                            $constraint->aspectRatio();
+                        })
+                        ->opacity(10);
+                }
 
-            if ($watermark) {
-                $image->insert($watermark, 'center');
-            }
-
-
-            Storage::disk(config('filesystems.default'))->put($folder . '/' . $file_name, (string)$image->encode());
-        } else {
-
-            $file = $requestFile;
-            $file->storeAs($folder, $file_name, 'public');
+                if ($watermark) {
+                    $image->insert($watermark, 'center');
+                }
+            });
         }
 
+        $file_name = uniqid('', true) . time() . '.' . $requestFile->getClientOriginalExtension();
+        $file = $requestFile;
+        $file->storeAs($folder, $file_name, 'public');
         return $folder . '/' . $file_name;
 
     } catch (Exception $e) {
@@ -202,5 +188,62 @@ class FileService {
     }
 }
 
+    private static function isImageUpload($requestFile): bool
+    {
+        if (! $requestFile instanceof UploadedFile) {
+            return false;
+        }
+
+        $mimeType = $requestFile->getMimeType();
+        if (is_string($mimeType)) {
+            $normalized = strtolower($mimeType);
+            if ($normalized === 'image/svg+xml') {
+                return false;
+            }
+            if (str_starts_with($normalized, 'image/')) {
+                return true;
+            }
+        }
+
+        $extension = strtolower($requestFile->getClientOriginalExtension());
+        if ($extension === 'svg') {
+            return false;
+        }
+        return in_array($extension, [
+            'jpg',
+            'jpeg',
+            'png',
+            'webp',
+            'gif',
+            'bmp',
+            'tif',
+            'tiff',
+            'avif',
+            'heic',
+            'heif',
+        ], true);
+    }
+
+    private static function storeWebpImage(UploadedFile $requestFile, string $folder, ?callable $mutator = null): string
+    {
+        $file_name = uniqid('', true) . time() . '.webp';
+        $imagePath = $requestFile->getPathname();
+        if (!file_exists($imagePath) || !is_readable($imagePath)) {
+            throw new RuntimeException("Uploaded image file is not readable at path: " . $imagePath);
+        }
+
+        $image = Image::make($imagePath)->orientate();
+
+        if ($mutator !== null) {
+            $mutator($image);
+        }
+
+        Storage::disk(config('filesystems.default'))->put(
+            $folder . '/' . $file_name,
+            (string) $image->encode('webp', self::WEBP_QUALITY)
+        );
+
+        return $folder . '/' . $file_name;
+    }
 
 }

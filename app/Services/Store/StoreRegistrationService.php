@@ -18,10 +18,12 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Intervention\Image\Facades\Image;
 use RuntimeException;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
+use Throwable;
 
 class StoreRegistrationService
 {
@@ -547,10 +549,19 @@ class StoreRegistrationService
             ]);
         }
 
-        $extension = $this->inferImageExtension($payload, $decoded);
+        try {
+            $image = Image::make($decoded)->orientate();
+        } catch (Throwable $exception) {
+            throw ValidationException::withMessages([
+                $attribute => 'Invalid base64 encoded image provided.',
+            ]);
+        }
 
-        $filename = $directory . '/' . uniqid('store_', true) . '.' . $extension;
-        Storage::disk(config('filesystems.default'))->put($filename, $decoded);
+        $filename = $directory . '/' . uniqid('store_', true) . '.webp';
+        Storage::disk(config('filesystems.default'))->put(
+            $filename,
+            (string) $image->encode('webp', 85)
+        );
 
         if ($existingPath) {
             FileService::delete($existingPath);

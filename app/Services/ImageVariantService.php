@@ -13,17 +13,14 @@ class ImageVariantService
 {
     private const THUMBNAIL_MAX_EDGE = 240;
     private const DETAIL_MAX_EDGE = 720;
-    private const DEFAULT_QUALITY = 80;
+    private const DEFAULT_QUALITY = 85;
 
     /**
      * @return array{original:string, thumbnail:string, detail:string, fallback:string}
      */
     public static function storeWithVariants(UploadedFile $file, string $folder): array
     {
-        $disk = Storage::disk(config('filesystems.default'));
         $uniqueBase = uniqid('', true) . '-' . time();
-        $originalExtension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
-
         $pathsToCleanup = [];
 
         try {
@@ -34,8 +31,8 @@ class ImageVariantService
                 $folder,
                 $uniqueBase . '-thumb',
                 self::THUMBNAIL_MAX_EDGE,
-                ['avif', 'webp'],
-                $originalExtension
+                ['webp'],
+                'webp'
             );
             $pathsToCleanup[] = $thumbnailPath;
 
@@ -44,14 +41,19 @@ class ImageVariantService
                 $folder,
                 $uniqueBase . '-detail',
                 self::DETAIL_MAX_EDGE,
-                ['avif', 'webp'],
-                $originalExtension
+                ['webp'],
+                'webp'
             );
             $pathsToCleanup[] = $detailPath;
 
-            $originalFilename = $uniqueBase . '.' . $originalExtension;
-            $disk->putFileAs($folder, $file, $originalFilename);
-            $originalPath = $folder . '/' . $originalFilename;
+            $originalPath = self::encodeAndStore(
+                clone $image,
+                $folder,
+                $uniqueBase,
+                ['webp'],
+                'webp'
+            );
+            $pathsToCleanup[] = $originalPath;
 
             return [
                 'original'  => $originalPath,
