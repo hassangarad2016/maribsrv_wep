@@ -418,6 +418,9 @@ trait GetItemTrait
                                 $inner->whereNull('interface_type')
                                     ->whereIn('category_id', $interfaceTypeCategoryIds);
                             });
+                        } else {
+                            // Fall back to legacy items when no category mapping is available.
+                            $query->orWhereNull('interface_type');
                         }
                     });
                 })->when($promotedFilter === true, function ($sql) {
