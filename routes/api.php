@@ -310,7 +310,8 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
     Route::post('add-service-review-report', [ApiController::class, 'addServiceReviewReport']);
 
 
-    Route::get('cart', [CartController::class, 'index']);
+    Route::get('cart', [CartController::class, 'index'])
+        ->middleware(\App\Http\Middleware\AttachCachingHeaders::class);
     Route::get('checkout-info', [CartController::class, 'checkoutInfo']);
     Route::post('cart/items', [CartController::class, 'store']);
     Route::post('cart/add', [CartController::class, 'store']);
