@@ -29,6 +29,7 @@ use App\Services\ItemPurchaseOptionsService;
 
 use App\Services\DelegateNotificationService;
 use App\Services\Payments\ManualPaymentRequestService;
+use App\Services\Store\StoreNotificationService;
 use App\Services\Store\StoreStatusService;
 
 use Throwable;
@@ -156,6 +157,7 @@ class OrderCheckoutService
         private readonly DelegateNotificationService $delegateNotificationService,
         private readonly StoreStatusService $storeStatusService,
         private readonly ManualPaymentRequestService $manualPaymentRequestService,
+        private readonly StoreNotificationService $storeNotificationService,
 
     ) {
     }
@@ -452,6 +454,7 @@ class OrderCheckoutService
             
             $order = $order->refreshOrderNumber();
             $this->delegateNotificationService->notifyNewOrder($order);
+            $this->storeNotificationService->notifyOrderCreated($order);
 
             if ($coupon) {
                 $coupon->recordUsage($user->getKey(), $order->getKey());

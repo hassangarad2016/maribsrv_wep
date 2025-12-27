@@ -6,6 +6,7 @@ use App\Enums\StoreStatus;
 use App\Models\Category;
 use App\Models\Store;
 use App\Services\ResponseService;
+use App\Services\Store\StoreNotificationService;
 use App\Services\Store\StoreStatusService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -17,7 +18,10 @@ use Illuminate\Validation\Rule;
 
 class MerchantStoreController extends Controller
 {
-    public function __construct(private readonly StoreStatusService $storeStatusService)
+    public function __construct(
+        private readonly StoreStatusService $storeStatusService,
+        private readonly StoreNotificationService $storeNotificationService
+    )
     {
     }
 
@@ -128,6 +132,7 @@ class MerchantStoreController extends Controller
 
         $newStatus = $data['status'];
         $reason = $data['reason'] ?? null;
+        $previousStatus = (string) $store->status;
 
         if (in_array($newStatus, [StoreStatus::REJECTED->value, StoreStatus::SUSPENDED->value], true)
             && empty($reason)) {
@@ -186,6 +191,8 @@ class MerchantStoreController extends Controller
                 'changed_by' => $authId,
             ]);
         });
+
+        $this->storeNotificationService->notifyStoreStatusChanged($store, $previousStatus, $reason);
 
         return redirect()
             ->route('merchant-stores.show', $store)

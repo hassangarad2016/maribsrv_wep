@@ -9,6 +9,7 @@ use App\Models\PendingSignup;
 use App\Models\User;
 use App\Models\WalletAccount;
 use App\Services\Store\StoreRegistrationService;
+use App\Services\Store\StoreNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +22,8 @@ use Throwable;
 class StoreOnboardingController extends Controller
 {
     public function __construct(
-        private readonly StoreRegistrationService $storeRegistrationService
+        private readonly StoreRegistrationService $storeRegistrationService,
+        private readonly StoreNotificationService $storeNotificationService
     ) {
     }
 
@@ -73,6 +75,16 @@ class StoreOnboardingController extends Controller
 
                 return [$store, $resolvedUser, $issuedToken];
             });
+
+            try {
+                $this->storeNotificationService->notifyStoreSubmitted($store);
+            } catch (Throwable $throwable) {
+                \Log::warning('store_onboarding.notification_failed', [
+                    'store_id' => $store->getKey(),
+                    'user_id' => $resolvedUser?->getKey(),
+                    'message' => $throwable->getMessage(),
+                ]);
+            }
 
             $response = [
                 'message' => __('تم حفظ بيانات المتجر بنجاح.'),
