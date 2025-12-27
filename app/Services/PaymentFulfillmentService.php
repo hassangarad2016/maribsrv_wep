@@ -336,6 +336,23 @@ class PaymentFulfillmentService
             $deliveryPaymentStatus = 'pending';
         }
 
+        $shouldConfirmOrder = $paymentStatus === 'paid'
+            && $previousPaymentStatus !== 'paid'
+            && in_array($order->order_status, [
+                Order::STATUS_PENDING,
+                Order::STATUS_DEPOSIT_PAID,
+                Order::STATUS_UNDER_REVIEW,
+                Order::STATUS_PROCESSING,
+            ], true);
+
+        if ($shouldConfirmOrder) {
+            $order->withStatusContext(
+                $userId,
+                'تم استلام الطلب تلقائيًا بعد نجاح الدفع.'
+            );
+            $order->order_status = Order::STATUS_CONFIRMED;
+        }
+
         $order->delivery_payment_status = $deliveryPaymentStatus;
         $order->delivery_online_payable = $onlineOutstanding;
         $order->delivery_cod_due = $codOutstanding;
