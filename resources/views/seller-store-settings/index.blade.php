@@ -266,10 +266,10 @@
             <div class="tab-pane fade" id="ui-pane" role="tabpanel" aria-labelledby="ui-tab">
                 <div class="row g-4">
                     @php
-    $uiEnabled = (bool) ($uiSetting->enabled ?? false);
-    $uiUpdatedAt = optional($uiSetting->updated_at)->format('Y-m-d H:i');
-@endphp
-<div class="col-xl-4 col-12">
+                        $uiEnabled = (bool) ($uiSetting->enabled ?? false);
+                        $uiUpdatedAt = optional($uiSetting->updated_at)->format('Y-m-d H:i');
+                    @endphp
+                    <div class="col-xl-4 col-12">
     <div class="card section-card shadow-sm storefront-summary">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
@@ -319,17 +319,20 @@
             @if($uiUpdatedAt)
                 <div class="mini-label text-center mt-2">{{ __('آخر تحديث') }}: {{ $uiUpdatedAt }}</div>
             @endif
-        </div>
-    </div>
-</div>
+                    </div>
+                </div>
+            </div>
 
-<div class="col-xl-8 col-12">
+            <div class="col-xl-8 col-12">
                 <div class="card section-card shadow-sm">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                             <div>
-                                <div class="card-title mb-1">{{ __('مصمم واجهة المتجر') }}</div>
-                                <div class="text-muted small">{{ __('رتّب الفئات، البطاقات الترويجية، العروض الجديدة والتخفيضات من مكان واحد.') }}</div>
+                                <div class="card-title mb-1 section-title">
+    <span class="section-icon"><i class="bi bi-palette2"></i></span>
+    <span>{{ __('مصمم واجهة المتجر') }}</span>
+</div>
+                                <div class="text-muted section-hint">{{ __('رتّب الفئات، البطاقات الترويجية، العروض الجديدة والتخفيضات من مكان واحد.') }}</div>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch" id="storefront_ui_enabled" name="enabled" value="1" {{ $uiSetting->enabled ? 'checked' : '' }}>
@@ -350,10 +353,13 @@
                                         <div class="card-body">
                                             <div class="d-flex justify-content-between align-items-center mb-3 section-head">
                                                 <div>
-                                                    <div class="card-title mb-1">{{ __('فئات قسم المتجر (عرض فقط)') }}</div>
-                                                    <div class="text-muted small">{{ __('مرتبة بالأب ثم الاسم، لعرض المتوفر للقسم.') }}</div>
+                                                    <div class="card-title mb-1 section-title">
+    <span class="section-icon"><i class="bi bi-collection"></i></span>
+    <span>{{ __('فئات المتجر المتاحة') }}</span>
+</div>
+                                                    <div class="text-muted section-hint">{{ __('مرتبة بحسب الفئة الأم ثم الاسم، لإظهار المتوفر للقسم.') }}</div>
                                                 </div>
-                                                <span class="badge-dot"><i class="bi bi-eye"></i>{{ __('عرض فقط') }}</span>
+                                                <span class="badge-dot"><i class="bi bi-eye"></i>{{ __('مرئية الآن') }}</span>
                                             </div>
                                             @if(($categories ?? collect())->count() > 0)
                                                 <div class="row g-3">
@@ -398,9 +404,9 @@
     <span class="section-icon"><i class="bi bi-segmented-nav"></i></span>
     <span>{{ __('شريط الفئات المخصص') }}</span>
 </div>
-                                                    <div class="text-muted small">{{ __('اختر الفئات التي ستظهر كشريط تنقل أفقي في الواجهة.') }}</div>
+                                                    <div class="text-muted section-hint">{{ __('اختر الفئات التي ستظهر كشريط تنقل أفقي في الواجهة.') }}</div>
                                                 </div>
-                                                <button type="button" class="btn btn-sm btn-outline-primary" id="addCategoryBtn" onclick="event.preventDefault(); if (window.sfAddCategory) { window.sfAddCategory(); } else { const list=document.getElementById('featuredCategoriesList'); if(list){ const idx=list.children.length+1; const card=document.createElement('div'); card.className='border rounded p-3 bg-light'; card.innerHTML=`<div class=\"fw-semibold mb-2\">{{ __('فئة') }} #${idx}</div><div class=\"text-muted small\">{{ __('تمت الإضافة، عيّن بياناتها بعد إعادة تحميل الصفحة') }}</div>`; list.appendChild(card);} } return false;">
+                                                <button type="button" class="btn btn-sm btn-outline-primary" id="addCategoryBtn" onclick="event.preventDefault(); if (window.sfAddCategory) { window.sfAddCategory(); } else { const list=document.getElementById('featuredCategoriesList'); if(list){ const idx=list.children.length+1; const card=document.createElement('div'); card.className='section-card shadow-sm p-3'; card.innerHTML=`<div class=\"fw-semibold mb-2\">{{ __('فئة') }} #${idx}</div><div class=\"text-muted small\">{{ __('تمت الإضافة، عيّن بياناتها بعد إعادة تحميل الصفحة') }}</div>`; list.appendChild(card);} } return false;">
                                                     <i class="bi bi-plus-lg"></i> {{ __('إضافة فئة') }}
                                                 </button>
                                             </div>
@@ -419,7 +425,7 @@
     <span class="section-icon"><i class="bi bi-megaphone"></i></span>
     <span>{{ __('بطاقات الترويج') }}</span>
 </div>
-                                                    <div class="text-muted small">{{ __('اضبط تكرار ظهور البطاقة وحدد نوعها ومحتواها.') }}</div>
+                                                    <div class="text-muted section-hint">{{ __('اضبط تكرار ظهور البطاقة وحدد نوعها ومحتواها.') }}</div>
                                                 </div>
                                                 <button type="button" class="btn btn-sm btn-outline-primary" id="addPromoBtn">
                                                     <i class="bi bi-megaphone"></i> {{ __('إضافة ترويج') }}
@@ -440,9 +446,9 @@
     <span class="section-icon"><i class="bi bi-stars"></i></span>
     <span>{{ __('العروض الجديدة والتخفيضات') }}</span>
 </div>
-                                                    <div class="text-muted small">{{ __('اختر الإعلانات التي ستظهر كعروض جديدة أو تخفيضات ضمن الواجهة.') }}</div>
+                                                    <div class="text-muted section-hint">{{ __('اختر المنتجات التي ستظهر كعروض جديدة أو تخفيضات ضمن الواجهة.') }}</div>
                                                 </div>
-                                                <div class="d-flex gap-2">
+                                                <div class="section-actions">
                                                     <button type="button" class="btn btn-sm btn-outline-success" data-select-items="offers">
                                                         <i class="bi bi-plus-lg"></i> {{ __('إضافة إلى العروض') }}
                                                     </button>
@@ -829,6 +835,15 @@
         });
     </script>
 @endpush
+
+
+
+
+
+
+
+
+
 
 
 
