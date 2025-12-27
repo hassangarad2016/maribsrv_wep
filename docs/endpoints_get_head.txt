@@ -1,0 +1,446 @@
+  GET|HEAD                / .......................................................................................... 
+  GET|HEAD                _debugbar/assets/javascript .... debugbar.assets.js ??? Barryvdh\Debugbar ??? AssetController@js
+  GET|HEAD                _debugbar/assets/stylesheets . debugbar.assets.css ??? Barryvdh\Debugbar ??? AssetController@css
+  GET|HEAD                _debugbar/clockwork/{id} debugbar.clockwork ??? Barryvdh\Debugbar ??? OpenHandlerController@clo???
+  GET|HEAD                _debugbar/open ..... debugbar.openhandler ??? Barryvdh\Debugbar ??? OpenHandlerController@handle
+  GET|HEAD                _ignition/health-check ignition.healthCheck ??? Spatie\LaravelIgnition ??? HealthCheckController
+  GET|HEAD                _ini ....................................................................................... 
+  GET|HEAD                _tls ....................................................................................... 
+  GET|HEAD                api/action-requests/{actionRequest} ....................... Api\ActionRequestController@show
+  GET|HEAD                api/ad-drafts/{draft} ........................................... Api\AdDraftController@show
+  GET|HEAD                api/addresses .................................... addresses.index ??? AddressController@index
+  GET|HEAD                api/addresses/{address} ............................ addresses.show ??? AddressController@show
+  GET|HEAD                api/admin/me ................................... admin.api.me ??? Admin\AdminAuthController@me
+  GET|HEAD                api/admin/metal-rates .............................. Api\MetalRateManagementController@index
+  GET|HEAD                api/admin/metal-rates/{metalRate} ................... Api\MetalRateManagementController@show
+  GET|HEAD                api/ads/featured/count ................................... ApiController@getFeaturedAdsCount
+  GET|HEAD                api/areas ........................................................... ApiController@getAreas
+  GET|HEAD                api/blocked-users ............................................ ApiController@getBlockedUsers
+  GET|HEAD                api/blog-tags ................................................. ApiController@getAllBlogTags
+  GET|HEAD                api/blogs ............................................................ ApiController@getBlog
+  GET|HEAD                api/cart .............................................................. CartController@index
+  GET|HEAD                api/cart/delivery-payment-timing .................. CartController@showDeliveryPaymentTiming
+  GET|HEAD                api/challenges ................................................. ApiController@getChallenges
+  GET|HEAD                api/chat-list .................................................... ApiController@getChatList
+  GET|HEAD                api/chat-messages ............................................ ApiController@getChatMessages
+  GET|HEAD                api/checkout-info .............................................. CartController@checkoutInfo
+  GET|HEAD                api/cities ......................................................... ApiController@getCities
+  GET|HEAD                api/countries ................................................... ApiController@getCountries
+  GET|HEAD                api/currency-rates .......................................... ApiController@getCurrencyRates
+  GET|HEAD                api/currency-rates/history ................................. CurrencyHistoryController@index
+  GET|HEAD                api/delegates/sections .................................... ApiController@getAllowedSections
+  GET|HEAD                api/delivery-prices ........................................ ApiController@getDeliveryPrices
+  GET|HEAD                api/diag ................................................................................... 
+  GET|HEAD                api/faq .............................................................. ApiController@getFaqs
+  GET|HEAD                api/featured-ads-configs ............................. Api\FeaturedAdsConfigController@index
+  GET|HEAD                api/featured-ads-configs/{featuredAdsConfig} .......... Api\FeaturedAdsConfigController@show
+  GET|HEAD                api/get-categories .......................................... ApiController@getSubCategories
+  GET|HEAD                api/get-customfields ......................................... ApiController@getCustomFields
+  GET|HEAD                api/get-favourite-item ...................................... ApiController@getFavouriteItem
+  GET|HEAD                api/get-featured-section ................................. ApiController@getFeaturedSections
+  GET|HEAD                api/get-item ......................................................... ApiController@getItem
+  GET|HEAD                api/get-languages ............................................... ApiController@getLanguages
+  GET|HEAD                api/get-limits ..................................................... ApiController@getLimits
+  GET|HEAD                api/get-notification-list ................................ ApiController@getNotificationList
+  GET|HEAD                api/get-package ................................................... ApiController@getPackage
+  GET|HEAD                api/get-parent-categories .............................. ApiController@getParentCategoryTree
+  GET|HEAD                api/get-payment-settings .................................. ApiController@getPaymentSettings
+  GET|HEAD                api/get-report-reasons ...................................... ApiController@getReportReasons
+  GET|HEAD                api/get-seller ..................................................... ApiController@getSeller
+  GET|HEAD                api/get-services ................................................. ApiController@getServices
+  GET|HEAD                api/get-slider ..................................................... ApiController@getSlider
+  GET|HEAD                api/get-system-settings .................................... ApiController@getSystemSettings
+  GET|HEAD                api/item-buyer-list ......................................... ApiController@getItemBuyerList
+  GET|HEAD                api/items/search ..................................................... ItemController@search
+  GET|HEAD                api/manual-banks .............................................. ApiController@getManualBanks
+  GET|HEAD                api/manual-payment-requests ......................... ApiController@getManualPaymentRequests
+  GET|HEAD                api/manual-payment-requests/{manualPaymentRequest} .. ApiController@showManualPaymentRequest
+  GET|HEAD                api/manual-payments/banks ..................................... ApiController@getManualBanks
+  GET|HEAD                api/metal-rates .............................................. Api\MetalRateController@index
+  GET|HEAD                api/my-items ......................................................... ApiController@getItem
+  GET|HEAD                api/my-review .................................................... ApiController@getMyReview
+  GET|HEAD                api/my-service-reviews ................................... ApiController@getMyServiceReviews
+  GET|HEAD                api/my-services ............................................. ApiController@getOwnedServices
+  GET|HEAD                api/notification-preferences .................... Api\NotificationPreferenceController@index
+  GET|HEAD                api/notifications .................................... Api\NotificationInboxController@index
+  GET|HEAD                api/notifications/unread-count ................. Api\NotificationInboxController@unreadCount
+  GET|HEAD                api/orders ........................................................ OrderApiController@index
+  GET|HEAD                api/orders/{order} ................................................. OrderApiController@show
+  GET|HEAD                api/orders/{order}/invoice.pdf .................................. OrderApiController@invoice
+  GET|HEAD                api/payment-transactions .............................. ApiController@getPaymentTransactions
+  GET|HEAD                api/ping .............................................................................. ping
+  GET|HEAD                api/products/{item}/purchase-options ................. ProductPurchaseOptionsController@show
+  GET|HEAD                api/seo-settings ................................................. ApiController@seoSettings
+  GET|HEAD                api/service-requests .................................... Api\ServiceRequestController@index
+  GET|HEAD                api/service-requests/{service_request} ................... Api\ServiceRequestController@show
+  GET|HEAD                api/service-requests/{service_request}/purchase-options Api\ServiceRequestController@purcha???
+  GET|HEAD                api/service-reviews ........................................ ApiController@getServiceReviews
+  GET|HEAD                api/services/{service} ..................................... ApiController@getManagedService
+  GET|HEAD                api/states ......................................................... ApiController@getStates
+  GET|HEAD                api/store-gateway-accounts ......................... Api\StoreGatewayAccountController@index
+  GET|HEAD                api/store-gateways ........................................ Api\StoreGatewayController@index
+  GET|HEAD                api/store/dashboard/followers ....................... Api\StoreDashboardController@followers
+  GET|HEAD                api/store/dashboard/summary ........................... Api\StoreDashboardController@summary
+  GET|HEAD                api/store/manual-payments ........................... Api\StoreManualPaymentController@index
+  GET|HEAD                api/store/manual-payments/{manualPaymentRequest} ..... Api\StoreManualPaymentController@show
+  GET|HEAD                api/store/onboarding .................................... Api\StoreOnboardingController@show
+  GET|HEAD                api/store/orders ............................................ Api\StoreOrderController@index
+  GET|HEAD                api/storefront/stores ....................................... Api\StorefrontController@index
+  GET|HEAD                api/storefront/stores/{store} ................................ Api\StorefrontController@show
+  GET|HEAD                api/storefront/stores/{store}/follow-status .......... Api\StorefrontController@followStatus
+  GET|HEAD                api/storefront/stores/{store}/manual-banks ..... Api\StorefrontController@manualBankAccounts
+  GET|HEAD                api/storefront/stores/{store}/products ................... Api\StorefrontController@products
+  GET|HEAD                api/storefront/stores/{store}/reviews ..................... Api\StorefrontController@reviews
+  GET|HEAD                api/storefront/ui-config ........ api.storefront.ui-config ??? Api\StorefrontUiController@show
+  GET|HEAD                api/stores/{seller}/gateways ........................ Api\StoreGatewayPublicController@index
+  GET|HEAD                api/tips ............................................................. ApiController@getTips
+  GET|HEAD                api/topics ........................................... Api\NotificationTopicController@index
+  GET|HEAD                api/user-orders ................................................ ApiController@getUserOrders
+  GET|HEAD                api/user-profile-stats ................................... ApiController@getUserProfileStats
+  GET|HEAD                api/user-referral-points ............................... ApiController@getUserReferralPoints
+  GET|HEAD                api/user/preferences ..................................... Api\UserPreferenceController@show
+  GET|HEAD                api/users-by-account-type .............................. ApiController@getUsersByAccountType
+  GET|HEAD                api/verification-fields ................................ ApiController@getVerificationFields
+  GET|HEAD                api/verification-request .............................. ApiController@getVerificationRequest
+  GET|HEAD                api/verification/metadata ............................ ApiController@getVerificationMetadata
+  GET|HEAD                api/wallet ..................................................... ApiController@walletSummary
+  GET|HEAD                api/wallet/recipients/lookup ........................... ApiController@walletRecipientLookup
+  GET|HEAD                api/wallet/recipients/{recipient} ............................ ApiController@walletRecipient
+  GET|HEAD                api/wallet/transactions ................................... ApiController@walletTransactions
+  GET|HEAD                api/wallet/withdrawals .............................. ApiController@walletWithdrawalRequests
+  GET|HEAD                api/wallet/withdrawals/options ....................... ApiController@walletWithdrawalOptions
+  GET|HEAD                api/wallet/withdrawals/{withdrawalRequest} ....... ApiController@showWalletWithdrawalRequest
+  GET|HEAD                api/web/experience ............................................. Api\WebExperienceController
+  GET|HEAD                api/wifi/admin/networks ............................ Wifi\AdminModerationController@networks
+  GET|HEAD                api/wifi/admin/reports .............................. Wifi\AdminModerationController@reports
+  GET|HEAD                api/wifi/admin/reputation-counters ....... Wifi\AdminModerationController@reputationCounters
+  GET|HEAD                api/wifi/networks .................................. Wifi\PublicDiscoveryController@networks
+  GET|HEAD                api/wifi/orders/{transaction}/code ..................... Wifi\WifiOrderController@revealCode
+  GET|HEAD                api/wifi/owner/batches/{batch} .............................. Wifi\OwnerBatchController@show
+  GET|HEAD                api/wifi/owner/networks .................................. Wifi\OwnerNetworkController@index
+  GET|HEAD                api/wifi/owner/networks/{network} ......................... Wifi\OwnerNetworkController@show
+  GET|HEAD                api/wifi/owner/networks/{network}/codes .................. Wifi\OwnerNetworkController@codes
+  GET|HEAD                api/wifi/owner/networks/{network}/plans ..................... Wifi\OwnerPlanController@index
+  GET|HEAD                api/wifi/owner/networks/{network}/stats .................. Wifi\OwnerNetworkController@stats
+  GET|HEAD                api/wifi/owner/plans/{plan} .................................. Wifi\OwnerPlanController@show
+  GET|HEAD                api/wifi/owner/plans/{plan}/batches ........................ Wifi\OwnerBatchController@index
+  GET|HEAD                api/wifi/plans ........................................ Wifi\PublicDiscoveryController@plans
+  GET|HEAD                area ............................................... area.index ??? PlaceController@createArea
+  GET|HEAD                area/show/{id} ........................................ area.show ??? PlaceController@areaShow
+  GET|HEAD                auto-translate/{id}/{type}/{locale} ......................................... auto-translate
+  GET|HEAD                blog ..................................................... blog.index ??? BlogController@index
+  GET|HEAD                blog/create ............................................ blog.create ??? BlogController@create
+  GET|HEAD                blog/{blog} ................................................ blog.show ??? BlogController@show
+  GET|HEAD                blog/{blog}/edit ........................................... blog.edit ??? BlogController@edit
+  GET|HEAD                category ......................................... category.index ??? CategoryController@index
+  GET|HEAD                category/categories/order ............ category.order ??? CategoryController@categoriesReOrder
+  GET|HEAD                category/create ................................ category.create ??? CategoryController@create
+  GET|HEAD                category/{category} ................................ category.show ??? CategoryController@show
+  GET|HEAD                category/{category}/clone-targets . category.clone-targets ??? CategoryController@cloneTargets
+  GET|HEAD                category/{category}/edit ........................... category.edit ??? CategoryController@edit
+  GET|HEAD                category/{category}/managers ....... category.managers.edit ??? CategoryManagerController@edit
+  GET|HEAD                category/{id}/custom-fields ....... category.custom-fields ??? CategoryController@customFields
+  GET|HEAD                category/{id}/custom-fields/show category.custom-fields.show ??? CategoryController@getCatego???
+  GET|HEAD                category/{id}/sub-category/change-order sub.category.order.change ??? CategoryController@subC???
+  GET|HEAD                category/{id}/subcategories ... category.subcategories ??? CategoryController@getSubCategories
+  GET|HEAD                challenges .................................... challenges.index ??? ChallengeController@index
+  GET|HEAD                challenges/list ................................. challenges.list ??? ChallengeController@list
+  GET|HEAD                challenges/{challenge}/edit ..................... challenges.edit ??? ChallengeController@edit
+  GET|HEAD                change-password ................. change-password.index ??? HomeController@changePasswordIndex
+  GET|HEAD                change-profile .................... change-profile.index ??? HomeController@changeProfileIndex
+  GET|HEAD                chat-monitor .............................. chat-monitor.index ??? ChatMonitorController@index
+  GET|HEAD                chat-monitor/conversations chat-monitor.conversations ??? ChatMonitorController@conversations
+  GET|HEAD                chat-monitor/delete-conversation/{id} chat-monitor.delete-conversation ??? ChatMonitorControl???
+  GET|HEAD                chat-monitor/search ..................... chat-monitor.search ??? ChatMonitorController@search
+  GET|HEAD                chat-monitor/statistics ......... chat-monitor.statistics ??? ChatMonitorController@statistics
+  GET|HEAD                chat-monitor/test-conversation/{id} ......................... chat-monitor.test-conversation
+  GET|HEAD                chat-monitor/view-conversation/{id} chat-monitor.view-conversation ??? ChatMonitorController@???
+  GET|HEAD                cities ............................................ cities.index ??? PlaceController@cityIndex
+  GET|HEAD                cities/search ................................... cities.search ??? PlaceController@citySearch
+  GET|HEAD                cities/show ......................................... cities.show ??? PlaceController@cityShow
+  GET|HEAD                clear ...................................................................................... 
+  GET|HEAD                common/js/lang .......................... common.language.read ??? Controller@readLanguageFile
+  GET|HEAD                computer ........................................... item.computer ??? ItemController@computer
+  GET|HEAD                computer/create ....................... item.computer.create ??? ItemController@computerCreate
+  GET|HEAD                computer/custom-orders ... item.computer.custom-orders.index ??? RequestDeviceController@index
+  GET|HEAD                computer/custom-orders/{id} item.computer.custom-orders.show ??? RequestDeviceController@show
+  GET|HEAD                computer/delegates .............. item.computer.delegates ??? DelegateController@computerIndex
+  GET|HEAD                computer/orders ....................... item.computer.orders ??? OrderController@indexComputer
+  GET|HEAD                computer/products ................. item.computer.products ??? ItemController@computerProducts
+  GET|HEAD                computer/products/data ... item.computer.products.data ??? ItemController@computerProductsData
+  GET|HEAD                computer/publish .................... item.computer.publish ??? ItemController@computerPublish
+  GET|HEAD                computer/reports ..................... item.computer.reports ??? OrderReportController@section
+  GET|HEAD                computer/settings ....... item.computer.settings ??? DepartmentSettingsController@editComputer
+  GET|HEAD                computer/support ....................... item.computer.support ??? ChatMonitorController@index
+  GET|HEAD                contact-us ................................. contact-us.index ??? FaqController@contactUsIndex
+  GET|HEAD                contact-us/show .............................. contact-us.show ??? FaqController@contactUsShow
+  GET|HEAD                countries ................................... countries.index ??? PlaceController@countryIndex
+  GET|HEAD                countries/show ................................ countries.show ??? PlaceController@countryShow
+  GET|HEAD                coupons ............................................. coupons.index ??? CouponController@index
+  GET|HEAD                coupons/create .................................... coupons.create ??? CouponController@create
+  GET|HEAD                coupons/{coupon}/edit ................................. coupons.edit ??? CouponController@edit
+  GET|HEAD                currency ......................................... currency.index ??? CurrencyController@index
+  GET|HEAD                currency/create ................................ currency.create ??? CurrencyController@create
+  GET|HEAD                currency/logs ................................ currency.logs ??? CurrencyController@changeLogs
+  GET|HEAD                currency/show ...................................... currency.show ??? CurrencyController@show
+  GET|HEAD                currency/{id}/edit ................................. currency.edit ??? CurrencyController@edit
+  GET|HEAD                custom-fields ............................ custom-fields.index ??? CustomFieldController@index
+  GET|HEAD                custom-fields/create ................... custom-fields.create ??? CustomFieldController@create
+  GET|HEAD                custom-fields/{categoryId}/order custom-fields.order ??? CustomFieldController@customFieldsRe???
+  GET|HEAD                custom-fields/{custom_field} ............... custom-fields.show ??? CustomFieldController@show
+  GET|HEAD                custom-fields/{custom_field}/edit .......... custom-fields.edit ??? CustomFieldController@edit
+  GET|HEAD                custom-fields/{id}/value/show custom-fields.value.show ??? CustomFieldController@getCustomFie???
+  GET|HEAD                customer ........................................ customer.index ??? CustomersController@index
+  GET|HEAD                customer/create ............................... customer.create ??? CustomersController@create
+  GET|HEAD                customer/list ..................................... customer.list ??? CustomersController@list
+  GET|HEAD                customer/show/{id} ......................... customer.show ??? CustomersController@showDetails
+  GET|HEAD                customer/{customer}/edit .......................... customer.edit ??? CustomersController@edit
+  GET|HEAD                delivery-prices ...................... delivery-prices.index ??? DeliveryPriceController@index
+  GET|HEAD                delivery-prices/create ............. delivery-prices.create ??? DeliveryPriceController@create
+  GET|HEAD                delivery-prices/{deliveryPrice}/edit ... delivery-prices.edit ??? DeliveryPriceController@edit
+  GET|HEAD                delivery/agents ...................... delivery.agents.index ??? DeliveryAgentController@index
+  GET|HEAD                delivery/requests ................ delivery.requests.index ??? DeliveryRequestController@index
+  GET|HEAD                delivery/requests/{deliveryRequest} delivery.requests.show ??? DeliveryRequestController@show
+  GET|HEAD                faq ........................................................ faq.index ??? FaqController@index
+  GET|HEAD                faq/create ............................................... faq.create ??? FaqController@create
+  GET|HEAD                faq/{faq} .................................................... faq.show ??? FaqController@show
+  GET|HEAD                faq/{faq}/edit ............................................... faq.edit ??? FaqController@edit
+  GET|HEAD                featured-ads-configs .. featured-ads-configs.index ??? Admin\FeaturedAdsConfigController@index
+  GET|HEAD                featured-ads-configs/create featured-ads-configs.create ??? Admin\FeaturedAdsConfigController???
+  GET|HEAD                featured-ads-configs/{featured_ads_config}/edit featured-ads-configs.edit ??? Admin\FeaturedA???
+  GET|HEAD                governorates .............................. governorates.index ??? GovernorateController@index
+  GET|HEAD                governorates/create ..................... governorates.create ??? GovernorateController@create
+  GET|HEAD                governorates/{governorate}/edit ............. governorates.edit ??? GovernorateController@edit
+  GET|HEAD                home ........................................................... home ??? HomeController@index
+  GET|HEAD                home/metrics ......................................... home.metrics ??? HomeController@metrics
+  GET|HEAD                install ............. install.index ??? dacoto\LaravelWizardInstaller ??? InstallIndexController
+  GET|HEAD                install/database install.database ??? dacoto\LaravelWizardInstaller ??? InstallDatabaseControll???
+  GET|HEAD                install/finish .... install.finish ??? dacoto\LaravelWizardInstaller ??? InstallFinishController
+  GET|HEAD                install/folders .. install.folders ??? dacoto\LaravelWizardInstaller ??? InstallFolderController
+  GET|HEAD                install/keys .......... install.keys ??? dacoto\LaravelWizardInstaller ??? InstallKeysController
+  GET|HEAD                install/migrations install.migrations ??? dacoto\LaravelWizardInstaller ??? InstallMigrationsCo???
+  GET|HEAD                install/php-function ..... install.php-function.index ??? InstallerController@phpFunctionIndex
+  GET|HEAD                install/purchase-code .. install.purchase-code.index ??? InstallerController@purchaseCodeIndex
+  GET|HEAD                install/server .... install.server ??? dacoto\LaravelWizardInstaller ??? InstallServerController
+  GET|HEAD                item ..................................................... item.index ??? ItemController@index
+  GET|HEAD                item/create ............................................ item.create ??? ItemController@create
+  GET|HEAD                item/list .............................................. item.list ??? ItemController@listData
+  GET|HEAD                item/shein ......................................... item.shein.index ??? ItemController@shein
+  GET|HEAD                item/shein/batches .............. item.shein.batches.index ??? SheinOrderBatchController@index
+  GET|HEAD                item/shein/batches/create ..... item.shein.batches.create ??? SheinOrderBatchController@create
+  GET|HEAD                item/shein/batches/report ..... item.shein.batches.report ??? SheinOrderBatchController@report
+  GET|HEAD                item/shein/batches/{batch} ........ item.shein.batches.show ??? SheinOrderBatchController@show
+  GET|HEAD                item/shein/create ........................... item.shein.create ??? ItemController@createShein
+  GET|HEAD                item/shein/custom-orders ..... item.shein.custom-orders.index ??? SheinRequestController@index
+  GET|HEAD                item/shein/custom-orders/{id} .. item.shein.custom-orders.show ??? SheinRequestController@show
+  GET|HEAD                item/shein/delegates .................. item.shein.delegates ??? DelegateController@sheinIndex
+  GET|HEAD                item/shein/edit/{id} ............................ item.shein.edit ??? ItemController@editShein
+  GET|HEAD                item/shein/orders ........................... item.shein.orders ??? OrderController@indexShein
+  GET|HEAD                item/shein/products ..................... item.shein.products ??? ItemController@sheinProducts
+  GET|HEAD                item/shein/products/create ......... item.shein.products.create ??? ItemController@createShein
+  GET|HEAD                item/shein/products/data ....... item.shein.products.data ??? ItemController@sheinProductsData
+  GET|HEAD                item/shein/products/{id}/edit .......... item.shein.products.edit ??? ItemController@editShein
+  GET|HEAD                item/shein/reports ...................... item.shein.reports ??? OrderReportController@section
+  GET|HEAD                item/shein/settings ........... item.shein.settings ??? DepartmentSettingsController@editShein
+  GET|HEAD                item/shein/support ........................ item.shein.support ??? ChatMonitorController@index
+  GET|HEAD                item/{item} ................................................ item.show ??? ItemController@show
+  GET|HEAD                item/{item}/details .................................. item.details ??? ItemController@details
+  GET|HEAD                item/{item}/edit ........................................... item.edit ??? ItemController@edit
+  GET|HEAD                language ......................................... language.index ??? LanguageController@index
+  GET|HEAD                language/create ................................ language.create ??? LanguageController@create
+  GET|HEAD                language/download/app ...... language.download.app.json ??? LanguageController@downloadAppFile
+  GET|HEAD                language/download/panel language.download.panel.json ??? LanguageController@downloadPanelFile
+  GET|HEAD                language/download/web ...... language.download.web.json ??? LanguageController@downloadWebFile
+  GET|HEAD                language/languageedit/{id}/{type} ........... languageedit ??? LanguageController@editLanguage
+  GET|HEAD                language/set-language/{lang} ......... language.set-current ??? LanguageController@setLanguage
+  GET|HEAD                language/{language} ................................ language.show ??? LanguageController@show
+  GET|HEAD                language/{language}/edit ........................... language.edit ??? LanguageController@edit
+  GET|HEAD                login ........................................... login ??? Auth\LoginController@showLoginForm
+  GET|HEAD                merchant-stores ...................... merchant-stores.index ??? MerchantStoreController@index
+  GET|HEAD                merchant-stores/{store} ................ merchant-stores.show ??? MerchantStoreController@show
+  GET|HEAD                merchant/coupons ................ merchant.coupons.index ??? Store\StoreCouponController@index
+  GET|HEAD                merchant/coupons/create ....... merchant.coupons.create ??? Store\StoreCouponController@create
+  GET|HEAD                merchant/coupons/{coupon}/edit .... merchant.coupons.edit ??? Store\StoreCouponController@edit
+  GET|HEAD                merchant/dashboard ..................... merchant.dashboard ??? StoreDashboardController@index
+  GET|HEAD                merchant/manual-payments merchant.manual-payments.index ??? Store\StoreManualPaymentControlle???
+  GET|HEAD                merchant/manual-payments/{manualPaymentRequest} merchant.manual-payments.show ??? Store\Store???
+  GET|HEAD                merchant/orders ................... merchant.orders.index ??? Store\StoreOrderController@index
+  GET|HEAD                merchant/orders/{order} ............. merchant.orders.show ??? Store\StoreOrderController@show
+  GET|HEAD                merchant/products .......... merchant.products.index ??? Store\MerchantProductController@index
+  GET|HEAD                merchant/reports/customers merchant.reports.customers ??? Store\StoreInsightsController@custo???
+  GET|HEAD                merchant/reports/orders merchant.reports.orders ??? Store\StoreInsightsController@orderReports
+  GET|HEAD                merchant/reports/sales . merchant.reports.sales ??? Store\StoreInsightsController@salesReports
+  GET|HEAD                merchant/settings .................. merchant.settings ??? Store\StoreSettingsController@index
+  GET|HEAD                merchant/wallet ............... merchant.wallet.index ??? Store\MerchantWalletController@index
+  GET|HEAD                metal-rates .................................. metal-rates.index ??? MetalRateController@index
+  GET|HEAD                metal-rates/create ......................... metal-rates.create ??? MetalRateController@create
+  GET|HEAD                metal-rates/show ............................... metal-rates.show ??? MetalRateController@show
+  GET|HEAD                metal-rates/{metalRate}/edit ................... metal-rates.edit ??? MetalRateController@edit
+  GET|HEAD                migrate .................................................................................... 
+  GET|HEAD                migrate-rollback ........................................................................... 
+  GET|HEAD                notification ............................. notification.index ??? NotificationController@index
+  GET|HEAD                notification/create .................... notification.create ??? NotificationController@create
+  GET|HEAD                notification/{notification} ................ notification.show ??? NotificationController@show
+  GET|HEAD                notification/{notification}/edit ........... notification.edit ??? NotificationController@edit
+  GET|HEAD                orders ................................................ orders.index ??? OrderController@index
+  GET|HEAD                orders/create ....................................... orders.create ??? OrderController@create
+  GET|HEAD                orders/payment-groups/{group} orders.payment-groups.show ??? OrderPaymentGroupController@show
+  GET|HEAD                orders/{order} .......................................... orders.show ??? OrderController@show
+  GET|HEAD                orders/{order}/deposit-receipts orders.deposit-receipts ??? OrderDocumentController@depositRe???
+  GET|HEAD                orders/{order}/edit ..................................... orders.edit ??? OrderController@edit
+  GET|HEAD                orders/{order}/invoice.pdf ............ orders.invoice.pdf ??? OrderDocumentController@invoice
+  GET|HEAD                orders/{order}/invoice/preview .... orders.invoice.preview ??? OrderDocumentController@preview
+  GET|HEAD                package ............................................ package.index ??? PackageController@index
+  GET|HEAD                package/advertisement ... package.advertisement.index ??? PackageController@advertisementIndex
+  GET|HEAD                package/advertisement/show package.advertisement.show ??? PackageController@advertisementShow
+  GET|HEAD                package/create ................................... package.create ??? PackageController@create
+  GET|HEAD                package/payment-transactions package.payment-transactions.index ??? PackageController@payment???
+  GET|HEAD                package/payment-transactions/show package.payment-transactions.show ??? PackageController@pay???
+  GET|HEAD                package/users .................... package.users.index ??? PackageController@userPackagesIndex
+  GET|HEAD                package/users/show ................. package.users.show ??? PackageController@userPackagesShow
+  GET|HEAD                package/{package} .................................... package.show ??? PackageController@show
+  GET|HEAD                package/{package}/edit ............................... package.edit ??? PackageController@edit
+  GET|HEAD                page/contact-us .......................................................... public.contact-us
+  GET|HEAD                page/privacy-policy .................................................. public.privacy-policy
+  GET|HEAD                page/terms-conditions .............................................. public.terms-conditions
+  GET|HEAD                page/usage-guide ........................................................ public.usage-guide
+  GET|HEAD                password/confirm ......... password.confirm ??? Auth\ConfirmPasswordController@showConfirmForm
+  GET|HEAD                password/reset ........ password.request ??? Auth\ForgotPasswordController@showLinkRequestForm
+  GET|HEAD                password/reset/{token} ......... password.reset ??? Auth\ResetPasswordController@showResetForm
+  GET|HEAD                payment-requests ............. payment-requests.index ??? ManualPaymentRequestController@index
+  GET|HEAD                payment-requests/list .......... payment-requests.list ??? ManualPaymentRequestController@list
+  GET|HEAD                payment-requests/open/{paymentTransaction} payment-requests.deep-link ??? ManualPaymentReques???
+  GET|HEAD                payment-requests/review-transaction/{paymentTransaction} payment-requests.review-transactio???
+  GET|HEAD                payment-requests/table ....... payment-requests.table ??? ManualPaymentRequestController@table
+  GET|HEAD                payment-requests/{manualPaymentRequest} payment-requests.show ??? ManualPaymentRequestControl???
+  GET|HEAD                payment-requests/{manualPaymentRequest}/review payment-requests.review ??? ManualPaymentReque???
+  GET|HEAD                payment-requests/{manualPaymentRequest}/timeline payment-requests.timeline ??? ManualPaymentR???
+  GET|HEAD                product-details/{slug} ............................ deep-link ??? SettingController@webPageURL
+  GET|HEAD                referrals ....................................... referrals.index ??? ReferralController@index
+  GET|HEAD                referrals/attempts ........................ referrals.attempts ??? ReferralController@attempts
+  GET|HEAD                referrals/list .................................... referrals.list ??? ReferralController@list
+  GET|HEAD                referrals/top-users ...................... referrals.top-users ??? ReferralController@topUsers
+  GET|HEAD                register ........................... register ??? Auth\RegisterController@showRegistrationForm
+  GET|HEAD                report-reasons ......................... report-reasons.index ??? ReportReasonController@index
+  GET|HEAD                report-reasons/create ................ report-reasons.create ??? ReportReasonController@create
+  GET|HEAD                report-reasons/user-report report-reasons.user-reports.index ??? ReportReasonController@users???
+  GET|HEAD                report-reasons/user-report/show report-reasons.user-reports.show ??? ReportReasonController@u???
+  GET|HEAD                report-reasons/{report_reason} ........... report-reasons.show ??? ReportReasonController@show
+  GET|HEAD                report-reasons/{report_reason}/edit ...... report-reasons.edit ??? ReportReasonController@edit
+  GET|HEAD                reports ........................................ reports.index ??? OrderReportController@index
+  GET|HEAD                reports/customers ...................... reports.customers ??? OrderReportController@customers
+  GET|HEAD                reports/payment-requests ... reports.payment-requests ??? OrderReportController@manualPayments
+  GET|HEAD                reports/payment-requests/list reports.payment-requests.list ??? OrderReportController@manualP???
+  GET|HEAD                reports/payment-requests/{manualPaymentRequest} reports.payment-requests.show ??? OrderReport???
+  GET|HEAD                reports/sales .................................. reports.sales ??? OrderReportController@sales
+  GET|HEAD                reports/statuses ......................... reports.statuses ??? OrderReportController@statuses
+  GET|HEAD                response/paystack/success ..... paystack.success ??? WebhookController@paystackSuccessCallback
+  GET|HEAD                response/paystack/success/web paystack.success.web ??? SettingController@paystackPaymentSuces???
+  GET|HEAD                response/phonepe/success ........ phonepe.success ??? WebhookController@phonePeSuccessCallback
+  GET|HEAD                response/phonepe/success/web . phonepe.success.web ??? SettingController@phonepePaymentSucesss
+  GET|HEAD                review-report .......................... seller-review.report ??? SellerController@showReports
+  GET|HEAD                roles ................................................... roles.index ??? RoleController@index
+  GET|HEAD                roles-list ................................................ roles.list ??? RoleController@list
+  GET|HEAD                roles/create .......................................... roles.create ??? RoleController@create
+  GET|HEAD                roles/{role} .............................................. roles.show ??? RoleController@show
+  GET|HEAD                roles/{role}/edit ......................................... roles.edit ??? RoleController@edit
+  GET|HEAD                sanctum/csrf-cookie ...... sanctum.csrf-cookie ??? Laravel\Sanctum ??? CsrfCookieController@show
+  GET|HEAD                seeder ..................................................................................... 
+  GET|HEAD                seller-review ................................. seller-review.index ??? SellerController@index
+  GET|HEAD                seller-review/create ........................ seller-review.create ??? SellerController@create
+  GET|HEAD                seller-review/{seller_review} ................... seller-review.show ??? SellerController@show
+  GET|HEAD                seller-review/{seller_review}/edit .............. seller-review.edit ??? SellerController@edit
+  GET|HEAD                seller-store-settings .......... seller-store-settings.index ??? StoreSettingsController@index
+  GET|HEAD                seller-store-settings/gateways seller-store-settings.gateways.index ??? StoreSettingsControll???
+  GET|HEAD                seller-store-settings/gateways/create seller-store-settings.gateways.create ??? StoreSettings???
+  GET|HEAD                seller-store-settings/gateways/{storeGateway}/edit seller-store-settings.gateways.edit ??? St???
+  GET|HEAD                seller-store-settings/items seller-store-settings.items ??? StoreSettingsController@searchSto???
+  GET|HEAD                seller-verification ........... seller-verification.index ??? UserVerificationController@index
+  GET|HEAD                seller-verification/create .. seller-verification.create ??? UserVerificationController@create
+  GET|HEAD                seller-verification/dashboard seller-verification.dashboard ??? UserVerificationController@da???
+  GET|HEAD                seller-verification/requests/{id} seller-verification.request.details ??? UserVerificationCon???
+  GET|HEAD                seller-verification/verification-details/{id} UserVerificationController@getVerificationDet???
+  GET|HEAD                seller-verification/verification-field verification-field.show ??? UserVerificationController???
+  GET|HEAD                seller-verification/verification-field/index seller-verification.verification-field ??? UserV???
+  GET|HEAD                seller-verification/verification-payments verification_payments.show ??? UserVerificationCont???
+  GET|HEAD                seller-verification/verification-requests verification_requests.show ??? UserVerificationCont???
+  GET|HEAD                seller-verification/verified-accounts verification_verified_accounts.show ??? UserVerificatio???
+  GET|HEAD                seller-verification/{id}/edit seller-verification.verification-field.edit ??? UserVerificatio???
+  GET|HEAD                seller-verification/{id}/value/show seller-verification.value.show ??? UserVerificationContro???
+  GET|HEAD                seller-verification/{seller_verification} seller-verification.show ??? UserVerificationContro???
+  GET|HEAD                seller-verification/{seller_verification}/edit seller-verification.edit ??? UserVerificationC???
+  GET|HEAD                seo-setting ................................. seo-setting.index ??? SeoSettingController@index
+  GET|HEAD                seo-setting/create ........................ seo-setting.create ??? SeoSettingController@create
+  GET|HEAD                seo-setting/{seo_setting} ..................... seo-setting.show ??? SeoSettingController@show
+  GET|HEAD                seo-setting/{seo_setting}/edit ................ seo-setting.edit ??? SeoSettingController@edit
+  GET|HEAD                service-requests ................... service.requests.index ??? ServiceRequestController@index
+  GET|HEAD                service-requests/datatable . service.requests.datatable ??? ServiceRequestController@datatable
+  GET|HEAD                service-requests/{serviceRequest} .... service.requests.show ??? ServiceRequestController@show
+  GET|HEAD                service-requests/{serviceRequest}/review service.requests.review ??? ServiceRequestController???
+  GET|HEAD                services .......................................... services.index ??? ServiceController@index
+  GET|HEAD                services/category/{category} ................ services.category ??? ServiceController@category
+  GET|HEAD                services/category/{category}/reviews services.category.reviews ??? ServiceController@category???
+  GET|HEAD                services/create ................................. services.create ??? ServiceController@create
+  GET|HEAD                services/list ....................................... services.list ??? ServiceController@list
+  GET|HEAD                services/{service} .................................. services.show ??? ServiceController@show
+  GET|HEAD                services/{service}/edit ............................. services.edit ??? ServiceController@edit
+  GET|HEAD                services/{service}/reviews .......... services.reviews.index ??? ServiceReviewController@index
+  GET|HEAD                settings .......................................... settings.index ??? SettingController@index
+  GET|HEAD                settings/about-us ......................... settings.about-us.index ??? SettingController@page
+  GET|HEAD                settings/admob ............................... settings.admob.index ??? SettingController@page
+  GET|HEAD                settings/app-interface ....... settings.app-interface.index ??? SettingController@appInterface
+  GET|HEAD                settings/contact-us ..................... settings.contact-us.index ??? SettingController@page
+  GET|HEAD                settings/error-logs settings.error-logs.index ??? Rap2hpoutre\LaravelLogViewer ??? LogViewerCon???
+  GET|HEAD                settings/file-manager ................. settings.file-manager.index ??? SettingController@page
+  GET|HEAD                settings/firebase ......................... settings.firebase.index ??? SettingController@page
+  GET|HEAD                settings/invoice ........................... settings.invoice.index ??? SettingController@page
+  GET|HEAD                settings/language ......................... settings.language.index ??? SettingController@page
+  GET|HEAD                settings/legal-numbering settings.legal-numbering.index ??? LegalNumberingSettingController@i???
+  GET|HEAD                settings/payment-gateway settings.payment-gateway.index ??? SettingController@paymentSettings???
+  GET|HEAD                settings/privacy-policy ............. settings.privacy-policy.index ??? SettingController@page
+  GET|HEAD                settings/seo-setting .................. settings.seo-settings.index ??? SettingController@page
+  GET|HEAD                settings/system ................................... settings.system ??? SettingController@page
+  GET|HEAD                settings/system-status ....... settings.system-status.index ??? SettingController@systemStatus
+  GET|HEAD                settings/terms-conditions ......... settings.terms-conditions.index ??? SettingController@page
+  GET|HEAD                settings/toggle-storage-link ..... toggle.storage.link ??? SettingController@toggleStorageLink
+  GET|HEAD                settings/usage-guide ................... settings.usage-guide.index ??? SettingController@page
+  GET|HEAD                settings/whatsapp ......................... settings.whatsapp.index ??? SettingController@page
+  GET|HEAD                slider ............................................... slider.index ??? SliderController@index
+  GET|HEAD                slider/create ...................................... slider.create ??? SliderController@create
+  GET|HEAD                slider/defaults/create ............. slider.defaults.create ??? SliderController@createDefault
+  GET|HEAD                slider/metrics/summary ............ slider.metrics.summary ??? SliderController@metricsSummary
+  GET|HEAD                slider/{slider} ........................................ slider.show ??? SliderController@show
+  GET|HEAD                slider/{slider}/edit ................................... slider.edit ??? SliderController@edit
+  GET|HEAD                staff .................................................. staff.index ??? StaffController@index
+  GET|HEAD                staff/create ......................................... staff.create ??? StaffController@create
+  GET|HEAD                staff/{staff} ............................................ staff.show ??? StaffController@show
+  GET|HEAD                staff/{staff}/edit ....................................... staff.edit ??? StaffController@edit
+  GET|HEAD                states ........................................... states.index ??? PlaceController@stateIndex
+  GET|HEAD                states/search .................................. states.search ??? PlaceController@stateSearch
+  GET|HEAD                states/show ........................................ states.show ??? PlaceController@stateShow
+  GET|HEAD                storage-link ............................................................................... 
+  GET|HEAD                system-update ........................... system-update.index ??? SystemUpdateController@index
+  GET|HEAD                tips ...................................................... tips.index ??? TipController@index
+  GET|HEAD                tips/create ............................................. tips.create ??? TipController@create
+  GET|HEAD                tips/{tip} .................................................. tips.show ??? TipController@show
+  GET|HEAD                tips/{tip}/edit ............................................. tips.edit ??? TipController@edit
+  GET|HEAD                wallet .......................................... wallet.index ??? WalletAdminController@index
+  GET|HEAD                wallet/withdrawals . wallet.withdrawals.index ??? WalletWithdrawalRequestAdminController@index
+  GET|HEAD                wallet/withdrawals/datatable wallet.withdrawals.datatable ??? WalletWithdrawalRequestAdminCon???
+  GET|HEAD                wallet/{user} ..................................... wallet.show ??? WalletAdminController@show
+  GET|HEAD                wallet/{user}/transactions/datatable wallet.transactions.datatable ??? WalletAdminController@???
+  GET|HEAD                wifi-cabin .......................................... wifi.index ??? WifiCabinController@index
+  GET|HEAD                wifi-cabin/api/admin/networks ...................... Wifi\AdminModerationController@networks
+  GET|HEAD                wifi-cabin/api/networks ................ wifi.api. ??? Wifi\AdminModerationController@networks
+  GET|HEAD                wifi-cabin/api/owner/networks/{network} ....... wifi.api. ??? Wifi\OwnerNetworkController@show
+  GET|HEAD                wifi-cabin/api/owner/networks/{network}/plans ... wifi.api. ??? Wifi\OwnerPlanController@index
+  GET|HEAD                wifi-cabin/api/owner/networks/{network}/stats wifi.api. ??? Wifi\OwnerNetworkController@stats
+  GET|HEAD                wifi-cabin/api/owner/plans/{plan} ................ wifi.api. ??? Wifi\OwnerPlanController@show
+  GET|HEAD                wifi-cabin/api/reports .................. wifi.api. ??? Wifi\AdminModerationController@reports
+  GET|HEAD                wifi-cabin/create ................................. wifi.create ??? WifiCabinController@create
+  GET|HEAD                wifi-cabin/networks/{network} ......................... wifi.show ??? WifiCabinController@show
+  GET|HEAD                wifi-cabin/networks/{network}/codes ................. wifi.codes ??? WifiCabinController@codes
+  GET|HEAD                wifi-cabin/networks/{network}/financials/export wifi.financials.export ??? WifiCabinControlle???
+  GET|HEAD                wifi-cabin/{network}/edit ............................. wifi.edit ??? WifiCabinController@edit
+  GET|HEAD                wifi/networks ...................... wifi.networks.index ??? Wifi\OwnerNetworkController@index
+  GET|HEAD                wifi/networks/{network}/plans ............ wifi.plans.index ??? Wifi\OwnerPlanController@index

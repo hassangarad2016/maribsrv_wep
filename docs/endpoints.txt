@@ -1,0 +1,818 @@
+
+  GET|HEAD                / .......................................................................................... 
+  GET|HEAD                _debugbar/assets/javascript .... debugbar.assets.js ??? Barryvdh\Debugbar ??? AssetController@js
+  GET|HEAD                _debugbar/assets/stylesheets . debugbar.assets.css ??? Barryvdh\Debugbar ??? AssetController@css
+  DELETE                  _debugbar/cache/{key}/{tags?} debugbar.cache.delete ??? Barryvdh\Debugbar ??? CacheController@d???
+  GET|HEAD                _debugbar/clockwork/{id} debugbar.clockwork ??? Barryvdh\Debugbar ??? OpenHandlerController@clo???
+  GET|HEAD                _debugbar/open ..... debugbar.openhandler ??? Barryvdh\Debugbar ??? OpenHandlerController@handle
+  POST                    _ignition/execute-solution ignition.executeSolution ??? Spatie\LaravelIgnition ??? ExecuteSolut???
+  GET|HEAD                _ignition/health-check ignition.healthCheck ??? Spatie\LaravelIgnition ??? HealthCheckController
+  POST                    _ignition/update-config ignition.updateConfig ??? Spatie\LaravelIgnition ??? UpdateConfigContro???
+  GET|HEAD                _ini ....................................................................................... 
+  GET|HEAD                _tls ....................................................................................... 
+  GET|HEAD                api/action-requests/{actionRequest} ....................... Api\ActionRequestController@show
+  POST                    api/action-requests/{actionRequest}/perform ............ Api\ActionRequestController@perform
+  POST                    api/ad-drafts .................................................. Api\AdDraftController@store
+  POST                    api/ad-drafts/publish ........................................ Api\AdDraftController@publish
+  PUT                     api/ad-drafts/{draft} ......................................... Api\AdDraftController@update
+  GET|HEAD                api/ad-drafts/{draft} ........................................... Api\AdDraftController@show
+  POST                    api/add-item ......................................................... ApiController@addItem
+  POST                    api/add-item-review ............................................ ApiController@addItemReview
+  POST                    api/add-reports ................................................... ApiController@addReports
+  POST                    api/add-review-report ........................................ ApiController@addReviewReport
+  POST                    api/add-service-review ...................................... ApiController@addServiceReview
+  POST                    api/add-service-review-report ......................... ApiController@addServiceReviewReport
+  POST                    api/add-to-cart ....................................................... CartController@store
+  GET|HEAD                api/addresses .................................... addresses.index ??? AddressController@index
+  POST                    api/addresses .................................... addresses.store ??? AddressController@store
+  GET|HEAD                api/addresses/{address} ............................ addresses.show ??? AddressController@show
+  PUT|PATCH               api/addresses/{address} ........................ addresses.update ??? AddressController@update
+  DELETE                  api/addresses/{address} ...................... addresses.destroy ??? AddressController@destroy
+  PATCH                   api/addresses/{address}/default ............................... AddressController@setDefault
+  POST                    api/admin/items/{item}/stock/bulk-set ........ ItemPurchaseManagementController@bulkSetStock
+  POST                    api/admin/login .......................... admin.api.login ??? Admin\AdminAuthController@login
+  POST                    api/admin/logout ....................... admin.api.logout ??? Admin\AdminAuthController@logout
+  GET|HEAD                api/admin/me ................................... admin.api.me ??? Admin\AdminAuthController@me
+  GET|HEAD                api/admin/metal-rates .............................. Api\MetalRateManagementController@index
+  POST                    api/admin/metal-rates .............................. Api\MetalRateManagementController@store
+  DELETE                  api/admin/metal-rates/schedules/{metalRateUpdate} Api\MetalRateManagementController@cancelS???
+  GET|HEAD                api/admin/metal-rates/{metalRate} ................... Api\MetalRateManagementController@show
+  PUT                     api/admin/metal-rates/{metalRate} ................. Api\MetalRateManagementController@update
+  DELETE                  api/admin/metal-rates/{metalRate} ................ Api\MetalRateManagementController@destroy
+  POST                    api/admin/metal-rates/{metalRate}/schedule ...... Api\MetalRateManagementController@schedule
+  GET|HEAD                api/ads/featured/count ................................... ApiController@getFeaturedAdsCount
+  POST                    api/ads/{item}/unfeature ......................................... ApiController@unfeatureAd
+  GET|HEAD                api/areas ........................................................... ApiController@getAreas
+  POST                    api/assign-free-package .................................... ApiController@assignFreePackage
+  POST                    api/block-user ..................................................... ApiController@blockUser
+  GET|HEAD                api/blocked-users ............................................ ApiController@getBlockedUsers
+  GET|HEAD                api/blog-tags ................................................. ApiController@getAllBlogTags
+  GET|HEAD                api/blogs ............................................................ ApiController@getBlog
+  GET|HEAD                api/cart .............................................................. CartController@index
+  POST                    api/cart/add .......................................................... CartController@store
+  POST                    api/cart/apply-coupon ........................................... CartController@applyCoupon
+  DELETE                  api/cart/clear ........................................................ CartController@clear
+  POST                    api/cart/clear ........................................................ CartController@clear
+  DELETE                  api/cart/coupon ................................................ CartController@removeCoupon
+  GET|HEAD                api/cart/delivery-payment-timing .................. CartController@showDeliveryPaymentTiming
+  POST                    api/cart/delivery-payment-timing ................ CartController@updateDeliveryPaymentTiming
+  POST                    api/cart/items ........................................................ CartController@store
+  PATCH                   api/cart/items/{cartItem} .................................... CartController@updateQuantity
+  DELETE                  api/cart/items/{cartItem} ........................................... CartController@destroy
+  PATCH                   api/cart/items/{cartItem}/quantity ........................... CartController@updateQuantity
+  DELETE                  api/cart/items/{cartItem}/remove .................................... CartController@destroy
+  POST                    api/cart/items/{cartItem}/update ............................. CartController@updateQuantity
+  POST                    api/cart/quote-shipping ........................................ CartShippingQuoteController
+  GET|HEAD                api/challenges ................................................. ApiController@getChallenges
+  GET|HEAD                api/chat-list .................................................... ApiController@getChatList
+  GET|HEAD                api/chat-messages ............................................ ApiController@getChatMessages
+  POST                    api/chat/conversations/{conversation}/presence .......... ApiController@updatePresenceStatus
+  POST                    api/chat/conversations/{conversation}/typing .............. ApiController@updateTypingStatus
+  GET|HEAD                api/checkout-info .............................................. CartController@checkoutInfo
+  GET|HEAD                api/cities ......................................................... ApiController@getCities
+  POST                    api/complete-registration ............................... ApiController@completeRegistration
+  POST                    api/contact-us ................................................ ApiController@storeContactUs
+  GET|HEAD                api/countries ................................................... ApiController@getCountries
+  GET|HEAD                api/currency-rates .......................................... ApiController@getCurrencyRates
+  GET|HEAD                api/currency-rates/history ................................. CurrencyHistoryController@index
+  GET|HEAD                api/delegates/sections .................................... ApiController@getAllowedSections
+  POST                    api/delete-item ................................................... ApiController@deleteItem
+  DELETE                  api/delete-user ................................................... ApiController@deleteUser
+  GET|HEAD                api/delivery-prices ........................................ ApiController@getDeliveryPrices
+  POST                    api/delivery-prices/calculate ........................ Api\DeliveryPriceCalculatorController
+  GET|HEAD                api/diag ................................................................................... 
+  GET|HEAD                api/faq .............................................................. ApiController@getFaqs
+  GET|HEAD                api/featured-ads-configs ............................. Api\FeaturedAdsConfigController@index
+  POST                    api/featured-ads-configs ............................. Api\FeaturedAdsConfigController@store
+  GET|HEAD                api/featured-ads-configs/{featuredAdsConfig} .......... Api\FeaturedAdsConfigController@show
+  PUT                     api/featured-ads-configs/{featuredAdsConfig} ........ Api\FeaturedAdsConfigController@update
+  DELETE                  api/featured-ads-configs/{featuredAdsConfig} ....... Api\FeaturedAdsConfigController@destroy
+  GET|HEAD                api/get-categories .......................................... ApiController@getSubCategories
+  GET|HEAD                api/get-customfields ......................................... ApiController@getCustomFields
+  GET|HEAD                api/get-favourite-item ...................................... ApiController@getFavouriteItem
+  GET|HEAD                api/get-featured-section ................................. ApiController@getFeaturedSections
+  GET|HEAD                api/get-item ......................................................... ApiController@getItem
+  GET|HEAD                api/get-languages ............................................... ApiController@getLanguages
+  GET|HEAD                api/get-limits ..................................................... ApiController@getLimits
+  GET|HEAD                api/get-notification-list ................................ ApiController@getNotificationList
+  GET|HEAD                api/get-package ................................................... ApiController@getPackage
+  GET|HEAD                api/get-parent-categories .............................. ApiController@getParentCategoryTree
+  GET|HEAD                api/get-payment-settings .................................. ApiController@getPaymentSettings
+  GET|HEAD                api/get-report-reasons ...................................... ApiController@getReportReasons
+  GET|HEAD                api/get-seller ..................................................... ApiController@getSeller
+  GET|HEAD                api/get-services ................................................. ApiController@getServices
+  GET|HEAD                api/get-slider ..................................................... ApiController@getSlider
+  GET|HEAD                api/get-system-settings .................................... ApiController@getSystemSettings
+  POST                    api/in-app-purchase ............................................ ApiController@inAppPurchase
+  GET|HEAD                api/item-buyer-list ......................................... ApiController@getItemBuyerList
+  POST                    api/item-offer ............................................... ApiController@createItemOffer
+  GET|HEAD                api/items/search ..................................................... ItemController@search
+  POST                    api/items/{item}/attributes .............. ItemPurchaseManagementController@updateAttributes
+  PATCH                   api/items/{item}/discount .................. ItemPurchaseManagementController@updateDiscount
+  POST                    api/make-item-featured ...................................... ApiController@makeFeaturedItem
+  POST                    api/manage-favourite ......................................... ApiController@manageFavourite
+  GET|HEAD                api/manual-banks .............................................. ApiController@getManualBanks
+  POST                    api/manual-payment-requests ........................ ApiController@storeManualPaymentRequest
+  GET|HEAD                api/manual-payment-requests ......................... ApiController@getManualPaymentRequests
+  GET|HEAD                api/manual-payment-requests/{manualPaymentRequest} .. ApiController@showManualPaymentRequest
+  GET|HEAD                api/manual-payments/banks ..................................... ApiController@getManualBanks
+  POST                    api/mark-message-delivered .............................. ApiController@markMessageDelivered
+  POST                    api/mark-message-read ........................................ ApiController@markMessageRead
+  GET|HEAD                api/metal-rates .............................................. Api\MetalRateController@index
+  GET|HEAD                api/my-items ......................................................... ApiController@getItem
+  GET|HEAD                api/my-review .................................................... ApiController@getMyReview
+  GET|HEAD                api/my-service-reviews ................................... ApiController@getMyServiceReviews
+  GET|HEAD                api/my-services ............................................. ApiController@getOwnedServices
+  PATCH                   api/my-services/{service} ................................. ApiController@updateOwnedService
+  DELETE                  api/my-services/{service} ................................. ApiController@deleteOwnedService
+  GET|HEAD                api/notification-preferences .................... Api\NotificationPreferenceController@index
+  POST                    api/notification-preferences .................... Api\NotificationPreferenceController@store
+  GET|HEAD                api/notifications .................................... Api\NotificationInboxController@index
+  POST                    api/notifications/mark-all-read ................ Api\NotificationInboxController@markAllRead
+  POST                    api/notifications/mark-read ....................... Api\NotificationInboxController@markRead
+  GET|HEAD                api/notifications/unread-count ................. Api\NotificationInboxController@unreadCount
+  POST                    api/notifications/{delivery}/payment-request ...... Api\NotificationPaymentController@update
+  GET|HEAD                api/orders ........................................................ OrderApiController@index
+  POST                    api/orders ........................................................ OrderApiController@store
+  GET|HEAD                api/orders/{order} ................................................. OrderApiController@show
+  POST                    api/orders/{order}/cancel ........................................ OrderApiController@cancel
+  POST                    api/orders/{order}/collect-delivery ..................... OrderApiController@collectDelivery
+  GET|HEAD                api/orders/{order}/invoice.pdf .................................. OrderApiController@invoice
+  POST                    api/payment-intent .......................................... ApiController@getPaymentIntent
+  GET|HEAD                api/payment-transactions .............................. ApiController@getPaymentTransactions
+  POST                    api/payments/confirm ......................................... Api\PaymentController@confirm
+  POST                    api/payments/initiate ....................................... Api\PaymentController@initiate
+  POST                    api/payments/manual ............................................... PaymentController@manual
+  POST                    api/payments/webhook/bank-alsharq payments.webhook.bank-alsharq ??? Payments\PaymentWebhookCo???
+  POST                    api/payments/webhook/wallet payments.webhook.wallet ??? Payments\PaymentWebhookController@wal???
+  GET|HEAD                api/ping .............................................................................. ping
+  GET|HEAD                api/products/{item}/purchase-options ................. ProductPurchaseOptionsController@show
+  POST                    api/renew-item ..................................................... ApiController@renewItem
+  POST                    api/request-device ........................................ ApiController@storeRequestDevice
+  POST                    api/send-message ................................................. ApiController@sendMessage
+  POST                    api/send-otp ......................................................... ApiController@sendOtp
+  POST                    api/send-verification-request ........................ ApiController@sendVerificationRequest
+  GET|HEAD                api/seo-settings ................................................. ApiController@seoSettings
+  GET|HEAD                api/service-requests .................................... Api\ServiceRequestController@index
+  POST                    api/service-requests .................................... Api\ServiceRequestController@store
+  GET|HEAD                api/service-requests/{service_request} ................... Api\ServiceRequestController@show
+  GET|HEAD                api/service-requests/{service_request}/purchase-options Api\ServiceRequestController@purcha???
+  GET|HEAD                api/service-reviews ........................................ ApiController@getServiceReviews
+  POST                    api/services/requests ................................... Api\ServiceRequestController@store
+  GET|HEAD                api/services/{service} ..................................... ApiController@getManagedService
+  POST                    api/set-item-total-click ................................... ApiController@setItemTotalClick
+  POST                    api/sliders/{slider}/click ................................. ApiController@recordSliderClick
+  GET|HEAD                api/states ......................................................... ApiController@getStates
+  GET|HEAD                api/store-gateway-accounts ......................... Api\StoreGatewayAccountController@index
+  POST                    api/store-gateway-accounts ......................... Api\StoreGatewayAccountController@store
+  PUT|PATCH               api/store-gateway-accounts/{storeGatewayAccount} .. Api\StoreGatewayAccountController@update
+  DELETE                  api/store-gateway-accounts/{storeGatewayAccount} . Api\StoreGatewayAccountController@destroy
+  GET|HEAD                api/store-gateways ........................................ Api\StoreGatewayController@index
+  GET|HEAD                api/store/dashboard/followers ....................... Api\StoreDashboardController@followers
+  GET|HEAD                api/store/dashboard/summary ........................... Api\StoreDashboardController@summary
+  GET|HEAD                api/store/manual-payments ........................... Api\StoreManualPaymentController@index
+  GET|HEAD                api/store/manual-payments/{manualPaymentRequest} ..... Api\StoreManualPaymentController@show
+  POST                    api/store/manual-payments/{manualPaymentRequest}/decision Api\StoreManualPaymentController@???
+  GET|HEAD                api/store/onboarding .................................... Api\StoreOnboardingController@show
+  POST                    api/store/onboarding ................................... Api\StoreOnboardingController@store
+  GET|HEAD                api/store/orders ............................................ Api\StoreOrderController@index
+  POST                    api/store/orders/{order}/status ...................... Api\StoreOrderController@updateStatus
+  GET|HEAD                api/storefront/stores ....................................... Api\StorefrontController@index
+  GET|HEAD                api/storefront/stores/{store} ................................ Api\StorefrontController@show
+  POST                    api/storefront/stores/{store}/follow ....................... Api\StorefrontController@follow
+  GET|HEAD                api/storefront/stores/{store}/follow-status .......... Api\StorefrontController@followStatus
+  GET|HEAD                api/storefront/stores/{store}/manual-banks ..... Api\StorefrontController@manualBankAccounts
+  GET|HEAD                api/storefront/stores/{store}/products ................... Api\StorefrontController@products
+  GET|HEAD                api/storefront/stores/{store}/reviews ..................... Api\StorefrontController@reviews
+  POST                    api/storefront/stores/{store}/reviews ................... Api\StorefrontController@addReview
+  PUT                     api/storefront/stores/{store}/reviews ................ Api\StorefrontController@updateReview
+  DELETE                  api/storefront/stores/{store}/reviews ................ Api\StorefrontController@deleteReview
+  POST                    api/storefront/stores/{store}/unfollow ................... Api\StorefrontController@unfollow
+  GET|HEAD                api/storefront/ui-config ........ api.storefront.ui-config ??? Api\StorefrontUiController@show
+  GET|HEAD                api/stores/{seller}/gateways ........................ Api\StoreGatewayPublicController@index
+  GET|HEAD                api/tips ............................................................. ApiController@getTips
+  GET|HEAD                api/topics ........................................... Api\NotificationTopicController@index
+  POST                    api/topics/subscribe ............................. Api\NotificationTopicController@subscribe
+  POST                    api/topics/unsubscribe ......................... Api\NotificationTopicController@unsubscribe
+  POST                    api/unblock-user ................................................. ApiController@unblockUser
+  POST                    api/update-item ................................................... ApiController@updateItem
+  POST                    api/update-item-status ...................................... ApiController@updateItemStatus
+  POST                    api/update-password ........................................... ApiController@updatePassword
+  POST                    api/update-profile ............................................. ApiController@updateProfile
+  POST                    api/user-login ..................................................... ApiController@userLogin
+  GET|HEAD                api/user-orders ................................................ ApiController@getUserOrders
+  GET|HEAD                api/user-profile-stats ................................... ApiController@getUserProfileStats
+  GET|HEAD                api/user-referral-points ............................... ApiController@getUserReferralPoints
+  POST                    api/user-signup ................................................... ApiController@userSignup
+  GET|HEAD                api/user/preferences ..................................... Api\UserPreferenceController@show
+  PUT                     api/user/preferences ................................... Api\UserPreferenceController@update
+  GET|HEAD                api/users-by-account-type .............................. ApiController@getUsersByAccountType
+  GET|HEAD                api/verification-fields ................................ ApiController@getVerificationFields
+  GET|HEAD                api/verification-request .............................. ApiController@getVerificationRequest
+  GET|HEAD                api/verification/metadata ............................ ApiController@getVerificationMetadata
+  POST                    api/verify-otp ..................................................... ApiController@verifyOtp
+  GET|HEAD                api/wallet ..................................................... ApiController@walletSummary
+  GET|HEAD                api/wallet/recipients/lookup ........................... ApiController@walletRecipientLookup
+  GET|HEAD                api/wallet/recipients/{recipient} ............................ ApiController@walletRecipient
+  GET|HEAD                api/wallet/transactions ................................... ApiController@walletTransactions
+  POST                    api/wallet/transfers ......................................... ApiController@transferRequest
+  POST                    api/wallet/withdrawals .......................... ApiController@storeWalletWithdrawalRequest
+  GET|HEAD                api/wallet/withdrawals .............................. ApiController@walletWithdrawalRequests
+  GET|HEAD                api/wallet/withdrawals/options ....................... ApiController@walletWithdrawalOptions
+  GET|HEAD                api/wallet/withdrawals/{withdrawalRequest} ....... ApiController@showWalletWithdrawalRequest
+  GET|HEAD                api/web/experience ............................................. Api\WebExperienceController
+  GET|HEAD                api/wifi/admin/networks ............................ Wifi\AdminModerationController@networks
+  POST                    api/wifi/admin/networks/{network}/reputation-counters Wifi\AdminModerationController@storeR???
+  PATCH                   api/wifi/admin/networks/{network}/status Wifi\AdminModerationController@updateNetworkStatus
+  GET|HEAD                api/wifi/admin/reports .............................. Wifi\AdminModerationController@reports
+  PATCH                   api/wifi/admin/reports/{report} ................ Wifi\AdminModerationController@updateReport
+  GET|HEAD                api/wifi/admin/reputation-counters ....... Wifi\AdminModerationController@reputationCounters
+  PATCH                   api/wifi/admin/reputation-counters/{counter} Wifi\AdminModerationController@updateReputatio???
+  GET|HEAD                api/wifi/networks .................................. Wifi\PublicDiscoveryController@networks
+  GET|HEAD                api/wifi/orders/{transaction}/code ..................... Wifi\WifiOrderController@revealCode
+  GET|HEAD                api/wifi/owner/batches/{batch} .............................. Wifi\OwnerBatchController@show
+  DELETE                  api/wifi/owner/batches/{batch} ........................... Wifi\OwnerBatchController@destroy
+  PATCH                   api/wifi/owner/batches/{batch}/status ............... Wifi\OwnerBatchController@updateStatus
+  GET|HEAD                api/wifi/owner/networks .................................. Wifi\OwnerNetworkController@index
+  POST                    api/wifi/owner/networks .................................. Wifi\OwnerNetworkController@store
+  GET|HEAD                api/wifi/owner/networks/{network} ......................... Wifi\OwnerNetworkController@show
+  PUT|PATCH               api/wifi/owner/networks/{network} ....................... Wifi\OwnerNetworkController@update
+  DELETE                  api/wifi/owner/networks/{network} ...................... Wifi\OwnerNetworkController@destroy
+  PATCH                   api/wifi/owner/networks/{network}/availability Wifi\OwnerNetworkController@toggleAvailabili???
+  GET|HEAD                api/wifi/owner/networks/{network}/codes .................. Wifi\OwnerNetworkController@codes
+  PATCH                   api/wifi/owner/networks/{network}/commission ..... Wifi\OwnerNetworkController@setCommission
+  GET|HEAD                api/wifi/owner/networks/{network}/plans ..................... Wifi\OwnerPlanController@index
+  POST                    api/wifi/owner/networks/{network}/plans ..................... Wifi\OwnerPlanController@store
+  GET|HEAD                api/wifi/owner/networks/{network}/stats .................. Wifi\OwnerNetworkController@stats
+  GET|HEAD                api/wifi/owner/plans/{plan} .................................. Wifi\OwnerPlanController@show
+  PUT|PATCH               api/wifi/owner/plans/{plan} ................................ Wifi\OwnerPlanController@update
+  DELETE                  api/wifi/owner/plans/{plan} ............................... Wifi\OwnerPlanController@destroy
+  GET|HEAD                api/wifi/owner/plans/{plan}/batches ........................ Wifi\OwnerBatchController@index
+  POST                    api/wifi/owner/plans/{plan}/batches ........................ Wifi\OwnerBatchController@store
+  GET|HEAD                api/wifi/plans ........................................ Wifi\PublicDiscoveryController@plans
+  GET|HEAD                area ............................................... area.index ??? PlaceController@createArea
+  POST                    area/create .......................................... area.create ??? PlaceController@addArea
+  POST                    area/create-city ..................................... city.create ??? PlaceController@addCity
+  GET|HEAD                area/show/{id} ........................................ area.show ??? PlaceController@areaShow
+  DELETE                  area/{id}/delete ................................ city.destroy ??? PlaceController@destroyCity
+  DELETE                  area/{id}/delete-area ........................... area.destroy ??? PlaceController@destroyArea
+  PUT                     area/{id}/update .................................. city.update ??? PlaceController@updateCity
+  PUT                     area/{id}/update-area ............................. area.update ??? PlaceController@updateArea
+  GET|HEAD                auto-translate/{id}/{type}/{locale} ......................................... auto-translate
+  GET|HEAD                blog ..................................................... blog.index ??? BlogController@index
+  POST                    blog ..................................................... blog.store ??? BlogController@store
+  GET|HEAD                blog/create ............................................ blog.create ??? BlogController@create
+  GET|HEAD                blog/{blog} ................................................ blog.show ??? BlogController@show
+  PUT|PATCH               blog/{blog} ............................................ blog.update ??? BlogController@update
+  DELETE                  blog/{blog} .......................................... blog.destroy ??? BlogController@destroy
+  GET|HEAD                blog/{blog}/edit ........................................... blog.edit ??? BlogController@edit
+  GET|POST|HEAD           broadcasting/auth ............... Illuminate\Broadcasting ??? BroadcastController@authenticate
+  GET|HEAD                category ......................................... category.index ??? CategoryController@index
+  POST                    category ......................................... category.store ??? CategoryController@store
+  POST                    category/categories/change-order .... category.order.change ??? CategoryController@updateOrder
+  GET|HEAD                category/categories/order ............ category.order ??? CategoryController@categoriesReOrder
+  GET|HEAD                category/create ................................ category.create ??? CategoryController@create
+  GET|HEAD                category/{category} ................................ category.show ??? CategoryController@show
+  PUT|PATCH               category/{category} ............................ category.update ??? CategoryController@update
+  DELETE                  category/{category} .......................... category.destroy ??? CategoryController@destroy
+  POST                    category/{category}/clone ................ category.clone ??? CategoryController@cloneCategory
+  GET|HEAD                category/{category}/clone-targets . category.clone-targets ??? CategoryController@cloneTargets
+  GET|HEAD                category/{category}/edit ........................... category.edit ??? CategoryController@edit
+  GET|HEAD                category/{category}/managers ....... category.managers.edit ??? CategoryManagerController@edit
+  POST                    category/{category}/managers ... category.managers.update ??? CategoryManagerController@update
+  GET|HEAD                category/{id}/custom-fields ....... category.custom-fields ??? CategoryController@customFields
+  GET|HEAD                category/{id}/custom-fields/show category.custom-fields.show ??? CategoryController@getCatego???
+  DELETE                  category/{id}/custom-fields/{customFieldID}/delete category.custom-fields.destroy ??? Categor???
+  GET|HEAD                category/{id}/sub-category/change-order sub.category.order.change ??? CategoryController@subC???
+  GET|HEAD                category/{id}/subcategories ... category.subcategories ??? CategoryController@getSubCategories
+  GET|HEAD                challenges .................................... challenges.index ??? ChallengeController@index
+  GET|HEAD                challenges/list ................................. challenges.list ??? ChallengeController@list
+  GET|POST|HEAD           challenges/store .............................. challenges.store ??? ChallengeController@store
+  PUT|POST|GET|HEAD       challenges/{challenge} ...................... challenges.update ??? ChallengeController@update
+  DELETE                  challenges/{challenge} ..................... challenges.delete ??? ChallengeController@destroy
+  GET|HEAD                challenges/{challenge}/edit ..................... challenges.edit ??? ChallengeController@edit
+  GET|HEAD                change-password ................. change-password.index ??? HomeController@changePasswordIndex
+  POST                    change-password ............... change-password.update ??? HomeController@changePasswordUpdate
+  GET|HEAD                change-profile .................... change-profile.index ??? HomeController@changeProfileIndex
+  POST                    change-profile .................. change-profile.update ??? HomeController@changeProfileUpdate
+  GET|HEAD                chat-monitor .............................. chat-monitor.index ??? ChatMonitorController@index
+  GET|HEAD                chat-monitor/conversations chat-monitor.conversations ??? ChatMonitorController@conversations
+  GET|HEAD                chat-monitor/delete-conversation/{id} chat-monitor.delete-conversation ??? ChatMonitorControl???
+  GET|HEAD                chat-monitor/search ..................... chat-monitor.search ??? ChatMonitorController@search
+  GET|HEAD                chat-monitor/statistics ......... chat-monitor.statistics ??? ChatMonitorController@statistics
+  GET|HEAD                chat-monitor/test-conversation/{id} ......................... chat-monitor.test-conversation
+  POST                    chat-monitor/tickets ........ chat-monitor.tickets.store ??? ChatMonitorController@storeTicket
+  POST                    chat-monitor/tickets/{ticket}/status chat-monitor.tickets.update-status ??? ChatMonitorContro???
+  GET|HEAD                chat-monitor/view-conversation/{id} chat-monitor.view-conversation ??? ChatMonitorController@???
+  POST                    chat-monitor/{conversation}/assign ...... chat-monitor.assign ??? ChatMonitorController@assign
+  GET|HEAD                cities ............................................ cities.index ??? PlaceController@cityIndex
+  GET|HEAD                cities/search ................................... cities.search ??? PlaceController@citySearch
+  GET|HEAD                cities/show ......................................... cities.show ??? PlaceController@cityShow
+  GET|HEAD                clear ...................................................................................... 
+  PUT                     common/change-row-order ................ common.row-order.change ??? Controller@changeRowOrder
+  PUT                     common/change-status ........................ common.status.change ??? Controller@changeStatus
+  GET|HEAD                common/js/lang .......................... common.language.read ??? Controller@readLanguageFile
+  GET|HEAD                computer ........................................... item.computer ??? ItemController@computer
+  POST                    computer/advertiser item.computer.advertiser.update ??? DepartmentAdvertiserController@update???
+  GET|HEAD                computer/create ....................... item.computer.create ??? ItemController@computerCreate
+  GET|HEAD                computer/custom-orders ... item.computer.custom-orders.index ??? RequestDeviceController@index
+  GET|HEAD                computer/custom-orders/{id} item.computer.custom-orders.show ??? RequestDeviceController@show
+  DELETE                  computer/custom-orders/{id} item.computer.custom-orders.destroy ??? RequestDeviceController@d???
+  GET|HEAD                computer/delegates .............. item.computer.delegates ??? DelegateController@computerIndex
+  POST                    computer/delegates ...... item.computer.delegates.update ??? DelegateController@computerUpdate
+  GET|HEAD                computer/orders ....................... item.computer.orders ??? OrderController@indexComputer
+  POST                    computer/products .............. item.computer.products.store ??? ItemController@storeComputer
+  GET|HEAD                computer/products ................. item.computer.products ??? ItemController@computerProducts
+  GET|HEAD                computer/products/data ... item.computer.products.data ??? ItemController@computerProductsData
+  GET|HEAD                computer/publish .................... item.computer.publish ??? ItemController@computerPublish
+  GET|HEAD                computer/reports ..................... item.computer.reports ??? OrderReportController@section
+  GET|HEAD                computer/settings ....... item.computer.settings ??? DepartmentSettingsController@editComputer
+  POST                    computer/settings item.computer.settings.update ??? DepartmentSettingsController@updateComput???
+  GET|HEAD                computer/support ....................... item.computer.support ??? ChatMonitorController@index
+  GET|HEAD                contact-us ................................. contact-us.index ??? FaqController@contactUsIndex
+  GET|HEAD                contact-us/show .............................. contact-us.show ??? FaqController@contactUsShow
+  DELETE                  contact-us/{id} .......................... contact-us.delete ??? FaqController@contactUsDelete
+  GET|HEAD                countries ................................... countries.index ??? PlaceController@countryIndex
+  POST                    countries/import .......................... countries.import ??? PlaceController@importCountry
+  GET|HEAD                countries/show ................................ countries.show ??? PlaceController@countryShow
+  DELETE                  countries/{id}/delete ................... countries.destroy ??? PlaceController@destroyCountry
+  GET|HEAD                coupons ............................................. coupons.index ??? CouponController@index
+  POST                    coupons ............................................. coupons.store ??? CouponController@store
+  GET|HEAD                coupons/create .................................... coupons.create ??? CouponController@create
+  PUT|PATCH               coupons/{coupon} .................................. coupons.update ??? CouponController@update
+  GET|HEAD                coupons/{coupon}/edit ................................. coupons.edit ??? CouponController@edit
+  GET|HEAD                currency ......................................... currency.index ??? CurrencyController@index
+  POST                    currency ......................................... currency.store ??? CurrencyController@store
+  GET|HEAD                currency/create ................................ currency.create ??? CurrencyController@create
+  POST                    currency/import ................................ currency.import ??? CurrencyController@import
+  GET|HEAD                currency/logs ................................ currency.logs ??? CurrencyController@changeLogs
+  GET|HEAD                currency/show ...................................... currency.show ??? CurrencyController@show
+  PUT                     currency/{id} .................................. currency.update ??? CurrencyController@update
+  DELETE                  currency/{id} ................................ currency.destroy ??? CurrencyController@destroy
+  GET|HEAD                currency/{id}/edit ................................. currency.edit ??? CurrencyController@edit
+  DELETE                  currency/{id}/icon .................. currency.icon.destroy ??? CurrencyController@destroyIcon
+  GET|HEAD                custom-fields ............................ custom-fields.index ??? CustomFieldController@index
+  POST                    custom-fields ............................ custom-fields.store ??? CustomFieldController@store
+  GET|HEAD                custom-fields/create ................... custom-fields.create ??? CustomFieldController@create
+  POST                    custom-fields/order/update custom-fields.order.update ??? CustomFieldController@updateCustomF???
+  GET|HEAD                custom-fields/{categoryId}/order custom-fields.order ??? CustomFieldController@customFieldsRe???
+  POST                    custom-fields/{category}/clone ... custom-fields.clone ??? CustomFieldController@cloneCategory
+  GET|HEAD                custom-fields/{custom_field} ............... custom-fields.show ??? CustomFieldController@show
+  PUT|PATCH               custom-fields/{custom_field} ........... custom-fields.update ??? CustomFieldController@update
+  DELETE                  custom-fields/{custom_field} ......... custom-fields.destroy ??? CustomFieldController@destroy
+  GET|HEAD                custom-fields/{custom_field}/edit .......... custom-fields.edit ??? CustomFieldController@edit
+  POST                    custom-fields/{id}/value/add custom-fields.value.add ??? CustomFieldController@addCustomField???
+  PUT                     custom-fields/{id}/value/edit custom-fields.value.update ??? CustomFieldController@updateCust???
+  GET|HEAD                custom-fields/{id}/value/show custom-fields.value.show ??? CustomFieldController@getCustomFie???
+  DELETE                  custom-fields/{id}/value/{value}/delete custom-fields.value.delete ??? CustomFieldController@???
+  GET|HEAD                customer ........................................ customer.index ??? CustomersController@index
+  PUT                     customer ...................................... customer.update ??? CustomersController@update
+  POST                    customer ........................................ customer.store ??? CustomersController@store
+  POST                    customer/additional-info customer.update.additional.info ??? CustomersController@updateAdditi???
+  POST                    customer/assign-package ........ customer.assign.package ??? CustomersController@assignPackage
+  GET|HEAD                customer/create ............................... customer.create ??? CustomersController@create
+  GET|HEAD                customer/list ..................................... customer.list ??? CustomersController@list
+  GET|HEAD                customer/show/{id} ......................... customer.show ??? CustomersController@showDetails
+  DELETE                  customer/{customer} ......................... customer.destroy ??? CustomersController@destroy
+  GET|HEAD                customer/{customer}/edit .......................... customer.edit ??? CustomersController@edit
+  GET|HEAD                delivery-prices ...................... delivery-prices.index ??? DeliveryPriceController@index
+  POST                    delivery-prices ...................... delivery-prices.store ??? DeliveryPriceController@store
+  GET|HEAD                delivery-prices/create ............. delivery-prices.create ??? DeliveryPriceController@create
+  PUT                     delivery-prices/policies/{policy} delivery-prices.policies.update ??? DeliveryPriceController???
+  POST                    delivery-prices/policies/{policy}/weight-tiers delivery-prices.weight-tiers.store ??? Deliver???
+  PUT                     delivery-prices/weight-tiers/{weightTier} delivery-prices.weight-tiers.update ??? DeliveryPri???
+  DELETE                  delivery-prices/weight-tiers/{weightTier} delivery-prices.weight-tiers.destroy ??? DeliveryPr???
+  PUT                     delivery-prices/{deliveryPrice} .... delivery-prices.update ??? DeliveryPriceController@update
+  DELETE                  delivery-prices/{deliveryPrice} .. delivery-prices.destroy ??? DeliveryPriceController@destroy
+  GET|HEAD                delivery-prices/{deliveryPrice}/edit ... delivery-prices.edit ??? DeliveryPriceController@edit
+  PUT                     delivery-prices/{deliveryPrice}/toggle-status delivery-prices.toggle-status ??? DeliveryPrice???
+  GET|HEAD                delivery/agents ...................... delivery.agents.index ??? DeliveryAgentController@index
+  POST                    delivery/agents ...................... delivery.agents.store ??? DeliveryAgentController@store
+  DELETE                  delivery/agents/{deliveryAgent} .. delivery.agents.destroy ??? DeliveryAgentController@destroy
+  POST                    delivery/agents/{deliveryAgent}/toggle delivery.agents.toggle ??? DeliveryAgentController@tog???
+  GET|HEAD                delivery/requests ................ delivery.requests.index ??? DeliveryRequestController@index
+  GET|HEAD                delivery/requests/{deliveryRequest} delivery.requests.show ??? DeliveryRequestController@show
+  PATCH                   delivery/requests/{deliveryRequest} delivery.requests.update ??? DeliveryRequestController@up???
+  POST                    delivery/requests/{deliveryRequest}/notify delivery.requests.notify ??? DeliveryRequestContro???
+  GET|HEAD                faq ........................................................ faq.index ??? FaqController@index
+  POST                    faq ........................................................ faq.store ??? FaqController@store
+  GET|HEAD                faq/create ............................................... faq.create ??? FaqController@create
+  GET|HEAD                faq/{faq} .................................................... faq.show ??? FaqController@show
+  PUT|PATCH               faq/{faq} ................................................ faq.update ??? FaqController@update
+  DELETE                  faq/{faq} .............................................. faq.destroy ??? FaqController@destroy
+  GET|HEAD                faq/{faq}/edit ............................................... faq.edit ??? FaqController@edit
+  GET|HEAD                featured-ads-configs .. featured-ads-configs.index ??? Admin\FeaturedAdsConfigController@index
+  POST                    featured-ads-configs .. featured-ads-configs.store ??? Admin\FeaturedAdsConfigController@store
+  GET|HEAD                featured-ads-configs/create featured-ads-configs.create ??? Admin\FeaturedAdsConfigController???
+  PUT|PATCH               featured-ads-configs/{featured_ads_config} featured-ads-configs.update ??? Admin\FeaturedAdsC???
+  DELETE                  featured-ads-configs/{featured_ads_config} featured-ads-configs.destroy ??? Admin\FeaturedAds???
+  GET|HEAD                featured-ads-configs/{featured_ads_config}/edit featured-ads-configs.edit ??? Admin\FeaturedA???
+  GET|HEAD                governorates .............................. governorates.index ??? GovernorateController@index
+  POST                    governorates .............................. governorates.store ??? GovernorateController@store
+  GET|HEAD                governorates/create ..................... governorates.create ??? GovernorateController@create
+  PUT                     governorates/{governorate} .............. governorates.update ??? GovernorateController@update
+  DELETE                  governorates/{governorate} ............ governorates.destroy ??? GovernorateController@destroy
+  GET|HEAD                governorates/{governorate}/edit ............. governorates.edit ??? GovernorateController@edit
+  GET|HEAD                home ........................................................... home ??? HomeController@index
+  GET|HEAD                home/metrics ......................................... home.metrics ??? HomeController@metrics
+  GET|HEAD                install ............. install.index ??? dacoto\LaravelWizardInstaller ??? InstallIndexController
+  GET|HEAD                install/database install.database ??? dacoto\LaravelWizardInstaller ??? InstallDatabaseControll???
+  POST                    install/database .............. dacoto\LaravelWizardInstaller ??? InstallSetDatabaseController
+  GET|HEAD                install/finish .... install.finish ??? dacoto\LaravelWizardInstaller ??? InstallFinishController
+  GET|HEAD                install/folders .. install.folders ??? dacoto\LaravelWizardInstaller ??? InstallFolderController
+  GET|HEAD                install/keys .......... install.keys ??? dacoto\LaravelWizardInstaller ??? InstallKeysController
+  POST                    install/keys ...................... dacoto\LaravelWizardInstaller ??? InstallSetKeysController
+  GET|HEAD                install/migrations install.migrations ??? dacoto\LaravelWizardInstaller ??? InstallMigrationsCo???
+  POST                    install/migrations .......... dacoto\LaravelWizardInstaller ??? InstallSetMigrationsController
+  GET|HEAD                install/php-function ..... install.php-function.index ??? InstallerController@phpFunctionIndex
+  GET|HEAD                install/purchase-code .. install.purchase-code.index ??? InstallerController@purchaseCodeIndex
+  POST                    install/purchase-code ... install.purchase-code.post ??? InstallerController@checkPurchaseCode
+  GET|HEAD                install/server .... install.server ??? dacoto\LaravelWizardInstaller ??? InstallServerController
+  GET|HEAD                item ..................................................... item.index ??? ItemController@index
+  POST                    item ..................................................... item.store ??? ItemController@store
+  GET|HEAD                item/create ............................................ item.create ??? ItemController@create
+  GET|HEAD                item/list .............................................. item.list ??? ItemController@listData
+  GET|HEAD                item/shein ......................................... item.shein.index ??? ItemController@shein
+  POST                    item/shein/advertiser item.shein.advertiser.update ??? DepartmentAdvertiserController@updateS???
+  GET|HEAD                item/shein/batches .............. item.shein.batches.index ??? SheinOrderBatchController@index
+  POST                    item/shein/batches .............. item.shein.batches.store ??? SheinOrderBatchController@store
+  GET|HEAD                item/shein/batches/create ..... item.shein.batches.create ??? SheinOrderBatchController@create
+  GET|HEAD                item/shein/batches/report ..... item.shein.batches.report ??? SheinOrderBatchController@report
+  GET|HEAD                item/shein/batches/{batch} ........ item.shein.batches.show ??? SheinOrderBatchController@show
+  PUT                     item/shein/batches/{batch} .... item.shein.batches.update ??? SheinOrderBatchController@update
+  POST                    item/shein/batches/{batch}/assign-orders item.shein.batches.assign-orders ??? SheinOrderBatch???
+  POST                    item/shein/batches/{batch}/bulk-update item.shein.batches.bulk-update ??? SheinOrderBatchCont???
+  GET|HEAD                item/shein/create ........................... item.shein.create ??? ItemController@createShein
+  GET|HEAD                item/shein/custom-orders ..... item.shein.custom-orders.index ??? SheinRequestController@index
+  GET|HEAD                item/shein/custom-orders/{id} .. item.shein.custom-orders.show ??? SheinRequestController@show
+  DELETE                  item/shein/custom-orders/{id} item.shein.custom-orders.destroy ??? SheinRequestController@des???
+  GET|HEAD                item/shein/delegates .................. item.shein.delegates ??? DelegateController@sheinIndex
+  POST                    item/shein/delegates .......... item.shein.delegates.update ??? DelegateController@sheinUpdate
+  GET|HEAD                item/shein/edit/{id} ............................ item.shein.edit ??? ItemController@editShein
+  GET|HEAD                item/shein/orders ........................... item.shein.orders ??? OrderController@indexShein
+  GET|HEAD                item/shein/products ..................... item.shein.products ??? ItemController@sheinProducts
+  POST                    item/shein/products .................. item.shein.products.store ??? ItemController@storeShein
+  GET|HEAD                item/shein/products/create ......... item.shein.products.create ??? ItemController@createShein
+  GET|HEAD                item/shein/products/data ....... item.shein.products.data ??? ItemController@sheinProductsData
+  POST                    item/shein/products/import .. item.shein.products.import ??? ItemController@importSheinProduct
+  POST                    item/shein/products/{id} ........... item.shein.products.update ??? ItemController@updateShein
+  GET|HEAD                item/shein/products/{id}/edit .......... item.shein.products.edit ??? ItemController@editShein
+  GET|HEAD                item/shein/reports ...................... item.shein.reports ??? OrderReportController@section
+  GET|HEAD                item/shein/settings ........... item.shein.settings ??? DepartmentSettingsController@editShein
+  POST                    item/shein/settings .. item.shein.settings.update ??? DepartmentSettingsController@updateShein
+  POST                    item/shein/store .............................. item.shein.store ??? ItemController@storeShein
+  GET|HEAD                item/shein/support ........................ item.shein.support ??? ChatMonitorController@index
+  POST                    item/shein/update/{id} ...................... item.shein.update ??? ItemController@updateShein
+  PUT                     item/{id}/approval ....................... item.approval ??? ItemController@updateItemApproval
+  GET|HEAD                item/{item} ................................................ item.show ??? ItemController@show
+  PUT|PATCH               item/{item} ............................................ item.update ??? ItemController@update
+  DELETE                  item/{item} .......................................... item.destroy ??? ItemController@destroy
+  GET|HEAD                item/{item}/details .................................. item.details ??? ItemController@details
+  GET|HEAD                item/{item}/edit ........................................... item.edit ??? ItemController@edit
+  POST                    item/{item}/feature .................................. item.feature ??? ItemController@feature
+  GET|HEAD                language ......................................... language.index ??? LanguageController@index
+  POST                    language ......................................... language.store ??? LanguageController@store
+  GET|HEAD                language/create ................................ language.create ??? LanguageController@create
+  GET|HEAD                language/download/app ...... language.download.app.json ??? LanguageController@downloadAppFile
+  GET|HEAD                language/download/panel language.download.panel.json ??? LanguageController@downloadPanelFile
+  GET|HEAD                language/download/web ...... language.download.web.json ??? LanguageController@downloadWebFile
+  PUT                     language/language/update/{id}/{type} .... updatelanguage ??? LanguageController@updatelanguage
+  GET|HEAD                language/languageedit/{id}/{type} ........... languageedit ??? LanguageController@editLanguage
+  GET|HEAD                language/set-language/{lang} ......... language.set-current ??? LanguageController@setLanguage
+  GET|HEAD                language/{language} ................................ language.show ??? LanguageController@show
+  PUT|PATCH               language/{language} ............................ language.update ??? LanguageController@update
+  DELETE                  language/{language} .......................... language.destroy ??? LanguageController@destroy
+  GET|HEAD                language/{language}/edit ........................... language.edit ??? LanguageController@edit
+  GET|HEAD                login ........................................... login ??? Auth\LoginController@showLoginForm
+  POST                    login ........................................................... Auth\LoginController@login
+  POST                    logout ................................................ logout ??? Auth\LoginController@logout
+  GET|HEAD                merchant-stores ...................... merchant-stores.index ??? MerchantStoreController@index
+  GET|HEAD                merchant-stores/{store} ................ merchant-stores.show ??? MerchantStoreController@show
+  POST                    merchant-stores/{store}/status merchant-stores.status ??? MerchantStoreController@updateStatus
+  GET|HEAD                merchant/coupons ................ merchant.coupons.index ??? Store\StoreCouponController@index
+  POST                    merchant/coupons ................ merchant.coupons.store ??? Store\StoreCouponController@store
+  GET|HEAD                merchant/coupons/create ....... merchant.coupons.create ??? Store\StoreCouponController@create
+  PUT|PATCH               merchant/coupons/{coupon} ..... merchant.coupons.update ??? Store\StoreCouponController@update
+  DELETE                  merchant/coupons/{coupon} ... merchant.coupons.destroy ??? Store\StoreCouponController@destroy
+  GET|HEAD                merchant/coupons/{coupon}/edit .... merchant.coupons.edit ??? Store\StoreCouponController@edit
+  PATCH                   merchant/coupons/{coupon}/toggle merchant.coupons.toggle ??? Store\StoreCouponController@togg???
+  GET|HEAD                merchant/dashboard ..................... merchant.dashboard ??? StoreDashboardController@index
+  GET|HEAD                merchant/manual-payments merchant.manual-payments.index ??? Store\StoreManualPaymentControlle???
+  GET|HEAD                merchant/manual-payments/{manualPaymentRequest} merchant.manual-payments.show ??? Store\Store???
+  POST                    merchant/manual-payments/{manualPaymentRequest}/decide merchant.manual-payments.decide ??? St???
+  GET|HEAD                merchant/orders ................... merchant.orders.index ??? Store\StoreOrderController@index
+  GET|HEAD                merchant/orders/{order} ............. merchant.orders.show ??? Store\StoreOrderController@show
+  POST                    merchant/orders/{order}/status merchant.orders.status ??? Store\StoreOrderController@updateSt???
+  GET|HEAD                merchant/products .......... merchant.products.index ??? Store\MerchantProductController@index
+  POST                    merchant/products .......... merchant.products.store ??? Store\MerchantProductController@store
+  DELETE                  merchant/products/{item} merchant.products.destroy ??? Store\MerchantProductController@destroy
+  PATCH                   merchant/products/{item}/status merchant.products.status ??? Store\MerchantProductController@???
+  PATCH                   merchant/products/{item}/stock merchant.products.stock ??? Store\MerchantProductController@up???
+  GET|HEAD                merchant/reports/customers merchant.reports.customers ??? Store\StoreInsightsController@custo???
+  GET|HEAD                merchant/reports/orders merchant.reports.orders ??? Store\StoreInsightsController@orderReports
+  GET|HEAD                merchant/reports/sales . merchant.reports.sales ??? Store\StoreInsightsController@salesReports
+  GET|HEAD                merchant/settings .................. merchant.settings ??? Store\StoreSettingsController@index
+  POST                    merchant/settings/gateway-accounts merchant.settings.gateway-accounts.store ??? Store\StoreSe???
+  PUT|PATCH               merchant/settings/gateway-accounts/{storeGatewayAccount} merchant.settings.gateway-accounts???
+  DELETE                  merchant/settings/gateway-accounts/{storeGatewayAccount} merchant.settings.gateway-accounts???
+  POST                    merchant/settings/general merchant.settings.general ??? Store\StoreSettingsController@updateG???
+  POST                    merchant/settings/hours merchant.settings.hours ??? Store\StoreSettingsController@updateHours
+  POST                    merchant/settings/policies merchant.settings.policies ??? Store\StoreSettingsController@updat???
+  POST                    merchant/settings/staff merchant.settings.staff ??? Store\StoreSettingsController@updateStaff
+  POST                    merchant/settings/wallet/withdraw merchant.settings.wallet.withdraw ??? Store\StoreSettingsCo???
+  GET|HEAD                merchant/wallet ............... merchant.wallet.index ??? Store\MerchantWalletController@index
+  POST                    merchant/wallet/withdraw merchant.wallet.withdraw ??? Store\MerchantWalletController@submitWi???
+  GET|HEAD                metal-rates .................................. metal-rates.index ??? MetalRateController@index
+  POST                    metal-rates .................................. metal-rates.store ??? MetalRateController@store
+  GET|HEAD                metal-rates/create ......................... metal-rates.create ??? MetalRateController@create
+  DELETE                  metal-rates/schedules/{metalRateUpdate} metal-rates.schedule.cancel ??? MetalRateController@c???
+  GET|HEAD                metal-rates/show ............................... metal-rates.show ??? MetalRateController@show
+  PUT                     metal-rates/{metalRate} .................... metal-rates.update ??? MetalRateController@update
+  DELETE                  metal-rates/{metalRate} .................. metal-rates.destroy ??? MetalRateController@destroy
+  GET|HEAD                metal-rates/{metalRate}/edit ................... metal-rates.edit ??? MetalRateController@edit
+  POST                    metal-rates/{metalRate}/schedule ....... metal-rates.schedule ??? MetalRateController@schedule
+  GET|HEAD                migrate .................................................................................... 
+  GET|HEAD                migrate-rollback ........................................................................... 
+  GET|HEAD                notification ............................. notification.index ??? NotificationController@index
+  POST                    notification ............................. notification.store ??? NotificationController@store
+  POST                    notification/automation/trigger notification.automation.trigger ??? MarketingCampaignControll???
+  DELETE                  notification/batch-delete ... notification.batch.delete ??? NotificationController@batchDelete
+  POST                    notification/campaigns .... notification.campaigns.store ??? MarketingCampaignController@store
+  PUT                     notification/campaigns/{campaign} notification.campaigns.update ??? MarketingCampaignControll???
+  POST                    notification/campaigns/{campaign}/schedule notification.campaigns.schedule ??? MarketingCampa???
+  POST                    notification/campaigns/{campaign}/send notification.campaigns.send ??? MarketingCampaignContr???
+  GET|HEAD                notification/create .................... notification.create ??? NotificationController@create
+  GET|HEAD                notification/{notification} ................ notification.show ??? NotificationController@show
+  PUT|PATCH               notification/{notification} ............ notification.update ??? NotificationController@update
+  DELETE                  notification/{notification} .......... notification.destroy ??? NotificationController@destroy
+  GET|HEAD                notification/{notification}/edit ........... notification.edit ??? NotificationController@edit
+  GET|HEAD                orders ................................................ orders.index ??? OrderController@index
+  POST                    orders ................................................ orders.store ??? OrderController@store
+  GET|HEAD                orders/create ....................................... orders.create ??? OrderController@create
+  GET|HEAD                orders/payment-groups/{group} orders.payment-groups.show ??? OrderPaymentGroupController@show
+  POST                    orders/payment-groups/{group}/bulk-update orders.payment-groups.bulk-update ??? OrderPaymentG???
+  POST                    orders/payment-groups/{group}/orders orders.payment-groups.orders.store ??? OrderPaymentGroup???
+  GET|HEAD                orders/{order} .......................................... orders.show ??? OrderController@show
+  PUT|PATCH               orders/{order} ...................................... orders.update ??? OrderController@update
+  DELETE                  orders/{order} .................................... orders.destroy ??? OrderController@destroy
+  GET|HEAD                orders/{order}/deposit-receipts orders.deposit-receipts ??? OrderDocumentController@depositRe???
+  GET|HEAD                orders/{order}/edit ..................................... orders.edit ??? OrderController@edit
+  GET|HEAD                orders/{order}/invoice.pdf ............ orders.invoice.pdf ??? OrderDocumentController@invoice
+  GET|HEAD                orders/{order}/invoice/preview .... orders.invoice.preview ??? OrderDocumentController@preview
+  POST                    orders/{order}/manual-payments orders.manual-payments.store ??? OrderPaymentActionController@???
+  POST                    orders/{order}/notifications orders.notifications.send ??? OrderPaymentActionController@sendI???
+  POST                    orders/{order}/payment-groups orders.payment-groups.store ??? OrderPaymentGroupController@sto???
+  GET|HEAD                package ............................................ package.index ??? PackageController@index
+  POST                    package ............................................ package.store ??? PackageController@store
+  GET|HEAD                package/advertisement ... package.advertisement.index ??? PackageController@advertisementIndex
+  GET|HEAD                package/advertisement/show package.advertisement.show ??? PackageController@advertisementShow
+  POST                    package/advertisement/store package.advertisement.store ??? PackageController@advertisementSt???
+  PUT                     package/advertisement/{id}/update package.advertisement.update ??? PackageController@advertis???
+  GET|HEAD                package/create ................................... package.create ??? PackageController@create
+  GET|HEAD                package/payment-transactions package.payment-transactions.index ??? PackageController@payment???
+  GET|HEAD                package/payment-transactions/show package.payment-transactions.show ??? PackageController@pay???
+  GET|HEAD                package/users .................... package.users.index ??? PackageController@userPackagesIndex
+  GET|HEAD                package/users/show ................. package.users.show ??? PackageController@userPackagesShow
+  GET|HEAD                package/{package} .................................... package.show ??? PackageController@show
+  PUT|PATCH               package/{package} ................................ package.update ??? PackageController@update
+  DELETE                  package/{package} .............................. package.destroy ??? PackageController@destroy
+  GET|HEAD                package/{package}/edit ............................... package.edit ??? PackageController@edit
+  GET|HEAD                page/contact-us .......................................................... public.contact-us
+  GET|HEAD                page/privacy-policy .................................................. public.privacy-policy
+  GET|HEAD                page/terms-conditions .............................................. public.terms-conditions
+  GET|HEAD                page/usage-guide ........................................................ public.usage-guide
+  GET|HEAD                password/confirm ......... password.confirm ??? Auth\ConfirmPasswordController@showConfirmForm
+  POST                    password/confirm .................................... Auth\ConfirmPasswordController@confirm
+  POST                    password/email ........... password.email ??? Auth\ForgotPasswordController@sendResetLinkEmail
+  GET|HEAD                password/reset ........ password.request ??? Auth\ForgotPasswordController@showLinkRequestForm
+  POST                    password/reset ........................ password.update ??? Auth\ResetPasswordController@reset
+  GET|HEAD                password/reset/{token} ......... password.reset ??? Auth\ResetPasswordController@showResetForm
+  GET|HEAD                payment-requests ............. payment-requests.index ??? ManualPaymentRequestController@index
+  GET|HEAD                payment-requests/list .......... payment-requests.list ??? ManualPaymentRequestController@list
+  GET|HEAD                payment-requests/open/{paymentTransaction} payment-requests.deep-link ??? ManualPaymentReques???
+  GET|HEAD                payment-requests/review-transaction/{paymentTransaction} payment-requests.review-transactio???
+  GET|HEAD                payment-requests/table ....... payment-requests.table ??? ManualPaymentRequestController@table
+  GET|HEAD                payment-requests/{manualPaymentRequest} payment-requests.show ??? ManualPaymentRequestControl???
+  POST                    payment-requests/{manualPaymentRequest}/approve payment-requests.approve ??? ManualPaymentReq???
+  POST                    payment-requests/{manualPaymentRequest}/decision payment-requests.decision ??? ManualPaymentR???
+  POST                    payment-requests/{manualPaymentRequest}/east-yemen/check payment-requests.east-yemen.check ???
+  POST                    payment-requests/{manualPaymentRequest}/east-yemen/confirm payment-requests.east-yemen.conf???
+  POST                    payment-requests/{manualPaymentRequest}/east-yemen/request payment-requests.east-yemen.requ???
+  POST                    payment-requests/{manualPaymentRequest}/notify payment-requests.notify ??? ManualPaymentReque???
+  POST                    payment-requests/{manualPaymentRequest}/reject payment-requests.reject ??? ManualPaymentReque???
+  GET|HEAD                payment-requests/{manualPaymentRequest}/review payment-requests.review ??? ManualPaymentReque???
+  GET|HEAD                payment-requests/{manualPaymentRequest}/timeline payment-requests.timeline ??? ManualPaymentR???
+  GET|HEAD                product-details/{slug} ............................ deep-link ??? SettingController@webPageURL
+  GET|HEAD                referrals ....................................... referrals.index ??? ReferralController@index
+  GET|HEAD                referrals/attempts ........................ referrals.attempts ??? ReferralController@attempts
+  GET|HEAD                referrals/list .................................... referrals.list ??? ReferralController@list
+  GET|HEAD                referrals/top-users ...................... referrals.top-users ??? ReferralController@topUsers
+  GET|HEAD                register ........................... register ??? Auth\RegisterController@showRegistrationForm
+  POST                    register .................................................. Auth\RegisterController@register
+  GET|HEAD                report-reasons ......................... report-reasons.index ??? ReportReasonController@index
+  POST                    report-reasons ......................... report-reasons.store ??? ReportReasonController@store
+  GET|HEAD                report-reasons/create ................ report-reasons.create ??? ReportReasonController@create
+  GET|HEAD                report-reasons/user-report report-reasons.user-reports.index ??? ReportReasonController@users???
+  GET|HEAD                report-reasons/user-report/show report-reasons.user-reports.show ??? ReportReasonController@u???
+  GET|HEAD                report-reasons/{report_reason} ........... report-reasons.show ??? ReportReasonController@show
+  PUT|PATCH               report-reasons/{report_reason} ....... report-reasons.update ??? ReportReasonController@update
+  DELETE                  report-reasons/{report_reason} ..... report-reasons.destroy ??? ReportReasonController@destroy
+  GET|HEAD                report-reasons/{report_reason}/edit ...... report-reasons.edit ??? ReportReasonController@edit
+  GET|HEAD                reports ........................................ reports.index ??? OrderReportController@index
+  GET|HEAD                reports/customers ...................... reports.customers ??? OrderReportController@customers
+  GET|HEAD                reports/payment-requests ... reports.payment-requests ??? OrderReportController@manualPayments
+  GET|HEAD                reports/payment-requests/list reports.payment-requests.list ??? OrderReportController@manualP???
+  GET|HEAD                reports/payment-requests/{manualPaymentRequest} reports.payment-requests.show ??? OrderReport???
+  GET|HEAD                reports/sales .................................. reports.sales ??? OrderReportController@sales
+  GET|HEAD                reports/statuses ......................... reports.statuses ??? OrderReportController@statuses
+  GET|HEAD                response/paystack/success ..... paystack.success ??? WebhookController@paystackSuccessCallback
+  GET|HEAD                response/paystack/success/web paystack.success.web ??? SettingController@paystackPaymentSuces???
+  GET|HEAD                response/phonepe/success ........ phonepe.success ??? WebhookController@phonePeSuccessCallback
+  GET|HEAD                response/phonepe/success/web . phonepe.success.web ??? SettingController@phonepePaymentSucesss
+  GET|HEAD                review-report .......................... seller-review.report ??? SellerController@showReports
+  GET|HEAD                roles ................................................... roles.index ??? RoleController@index
+  POST                    roles ................................................... roles.store ??? RoleController@store
+  GET|HEAD                roles-list ................................................ roles.list ??? RoleController@list
+  GET|HEAD                roles/create .......................................... roles.create ??? RoleController@create
+  GET|HEAD                roles/{role} .............................................. roles.show ??? RoleController@show
+  PUT|PATCH               roles/{role} .......................................... roles.update ??? RoleController@update
+  DELETE                  roles/{role} ........................................ roles.destroy ??? RoleController@destroy
+  GET|HEAD                roles/{role}/edit ......................................... roles.edit ??? RoleController@edit
+  GET|HEAD                sanctum/csrf-cookie ...... sanctum.csrf-cookie ??? Laravel\Sanctum ??? CsrfCookieController@show
+  POST                    sections/{section}/categories/clone sections.clone-categories ??? SectionCategoryCloneControl???
+  GET|HEAD                seeder ..................................................................................... 
+  GET|HEAD                seller-review ................................. seller-review.index ??? SellerController@index
+  POST                    seller-review ................................. seller-review.store ??? SellerController@store
+  GET|HEAD                seller-review/create ........................ seller-review.create ??? SellerController@create
+  GET|HEAD                seller-review/{seller_review} ................... seller-review.show ??? SellerController@show
+  PUT|PATCH               seller-review/{seller_review} ............... seller-review.update ??? SellerController@update
+  DELETE                  seller-review/{seller_review} ............. seller-review.destroy ??? SellerController@destroy
+  GET|HEAD                seller-review/{seller_review}/edit .............. seller-review.edit ??? SellerController@edit
+  GET|HEAD                seller-store-settings .......... seller-store-settings.index ??? StoreSettingsController@index
+  PATCH                   seller-store-settings/gateway-accounts/{storeGatewayAccount}/toggle seller-store-settings.g???
+  GET|HEAD                seller-store-settings/gateways seller-store-settings.gateways.index ??? StoreSettingsControll???
+  POST                    seller-store-settings/gateways seller-store-settings.gateways.store ??? StoreSettingsControll???
+  GET|HEAD                seller-store-settings/gateways/create seller-store-settings.gateways.create ??? StoreSettings???
+  PUT                     seller-store-settings/gateways/{storeGateway} seller-store-settings.gateways.update ??? Store???
+  DELETE                  seller-store-settings/gateways/{storeGateway} seller-store-settings.gateways.destroy ??? Stor???
+  GET|HEAD                seller-store-settings/gateways/{storeGateway}/edit seller-store-settings.gateways.edit ??? St???
+  PATCH                   seller-store-settings/gateways/{storeGateway}/toggle seller-store-settings.gateways.toggle ???
+  GET|HEAD                seller-store-settings/items seller-store-settings.items ??? StoreSettingsController@searchSto???
+  POST                    seller-store-settings/terms seller-store-settings.terms.store ??? StoreSettingsController@sto???
+  POST                    seller-store-settings/ui seller-store-settings.ui.store ??? StoreSettingsController@storeUiSe???
+  GET|HEAD                seller-verification ........... seller-verification.index ??? UserVerificationController@index
+  POST                    seller-verification ........... seller-verification.store ??? UserVerificationController@store
+  GET|HEAD                seller-verification/create .. seller-verification.create ??? UserVerificationController@create
+  GET|HEAD                seller-verification/dashboard seller-verification.dashboard ??? UserVerificationController@da???
+  POST                    seller-verification/plans seller-verification.plan.store ??? UserVerificationController@store???
+  PUT                     seller-verification/plans/{plan} seller-verification.plan.update ??? UserVerificationControll???
+  DELETE                  seller-verification/plans/{plan} seller-verification.plan.delete ??? UserVerificationControll???
+  GET|HEAD                seller-verification/requests/{id} seller-verification.request.details ??? UserVerificationCon???
+  PUT                     seller-verification/seller-verification/status-change seller-verification.update_status ??? U???
+  GET|HEAD                seller-verification/verification-details/{id} UserVerificationController@getVerificationDet???
+  GET|HEAD                seller-verification/verification-field verification-field.show ??? UserVerificationController???
+  GET|HEAD                seller-verification/verification-field/index seller-verification.verification-field ??? UserV???
+  GET|HEAD                seller-verification/verification-payments verification_payments.show ??? UserVerificationCont???
+  GET|HEAD                seller-verification/verification-requests verification_requests.show ??? UserVerificationCont???
+  GET|HEAD                seller-verification/verified-accounts verification_verified_accounts.show ??? UserVerificatio???
+  PUT                     seller-verification/{id} seller-verification.verification-field.update ??? UserVerificationCo???
+  PUT                     seller-verification/{id}/approval seller_verification.approval ??? UserVerificationController???
+  DELETE                  seller-verification/{id}/delete seller-verification.verification-field.delete ??? UserVerific???
+  GET|HEAD                seller-verification/{id}/edit seller-verification.verification-field.edit ??? UserVerificatio???
+  POST                    seller-verification/{id}/value/add seller-verification.value.add ??? UserVerificationControll???
+  PUT                     seller-verification/{id}/value/edit seller-verification.value.update ??? UserVerificationCont???
+  GET|HEAD                seller-verification/{id}/value/show seller-verification.value.show ??? UserVerificationContro???
+  DELETE                  seller-verification/{id}/value/{value}/delete seller-verification.value.delete ??? UserVerifi???
+  GET|HEAD                seller-verification/{seller_verification} seller-verification.show ??? UserVerificationContro???
+  PUT|PATCH               seller-verification/{seller_verification} seller-verification.update ??? UserVerificationCont???
+  DELETE                  seller-verification/{seller_verification} seller-verification.destroy ??? UserVerificationCon???
+  GET|HEAD                seller-verification/{seller_verification}/edit seller-verification.edit ??? UserVerificationC???
+  GET|HEAD                seo-setting ................................. seo-setting.index ??? SeoSettingController@index
+  POST                    seo-setting ................................. seo-setting.store ??? SeoSettingController@store
+  GET|HEAD                seo-setting/create ........................ seo-setting.create ??? SeoSettingController@create
+  GET|HEAD                seo-setting/{seo_setting} ..................... seo-setting.show ??? SeoSettingController@show
+  PUT|PATCH               seo-setting/{seo_setting} ................. seo-setting.update ??? SeoSettingController@update
+  DELETE                  seo-setting/{seo_setting} ............... seo-setting.destroy ??? SeoSettingController@destroy
+  GET|HEAD                seo-setting/{seo_setting}/edit ................ seo-setting.edit ??? SeoSettingController@edit
+  GET|HEAD                service-requests ................... service.requests.index ??? ServiceRequestController@index
+  POST                    service-requests/approval/{id} service.requests.approval ??? ServiceRequestController@updateA???
+  GET|HEAD                service-requests/datatable . service.requests.datatable ??? ServiceRequestController@datatable
+  DELETE                  service-requests/{id} .......... service.requests.destroy ??? ServiceRequestController@destroy
+  GET|HEAD                service-requests/{serviceRequest} .... service.requests.show ??? ServiceRequestController@show
+  GET|HEAD                service-requests/{serviceRequest}/review service.requests.review ??? ServiceRequestController???
+  GET|HEAD                services .......................................... services.index ??? ServiceController@index
+  POST                    services .......................................... services.store ??? ServiceController@store
+  GET|HEAD                services/category/{category} ................ services.category ??? ServiceController@category
+  GET|HEAD                services/category/{category}/reviews services.category.reviews ??? ServiceController@category???
+  GET|HEAD                services/create ................................. services.create ??? ServiceController@create
+  GET|HEAD                services/list ....................................... services.list ??? ServiceController@list
+  GET|HEAD                services/{service} .................................. services.show ??? ServiceController@show
+  PUT                     services/{service} .............................. services.update ??? ServiceController@update
+  DELETE                  services/{service} ............................ services.destroy ??? ServiceController@destroy
+  GET|HEAD                services/{service}/edit ............................. services.edit ??? ServiceController@edit
+  GET|HEAD                services/{service}/reviews .......... services.reviews.index ??? ServiceReviewController@index
+  PATCH                   services/{service}/reviews/{serviceReview} services.reviews.update ??? ServiceReviewControlle???
+  GET|HEAD                settings .......................................... settings.index ??? SettingController@index
+  GET|HEAD                settings/about-us ......................... settings.about-us.index ??? SettingController@page
+  GET|HEAD                settings/admob ............................... settings.admob.index ??? SettingController@page
+  GET|HEAD                settings/app-interface ....... settings.app-interface.index ??? SettingController@appInterface
+  GET|HEAD                settings/contact-us ..................... settings.contact-us.index ??? SettingController@page
+  GET|HEAD                settings/error-logs settings.error-logs.index ??? Rap2hpoutre\LaravelLogViewer ??? LogViewerCon???
+  GET|HEAD                settings/file-manager ................. settings.file-manager.index ??? SettingController@page
+  POST                    settings/file-manager-store settings.file-manager.store ??? SettingController@fileManagerSett???
+  GET|HEAD                settings/firebase ......................... settings.firebase.index ??? SettingController@page
+  POST                    settings/firebase/update settings.firebase.update ??? SettingController@updateFirebaseSettings
+  GET|HEAD                settings/invoice ........................... settings.invoice.index ??? SettingController@page
+  GET|HEAD                settings/language ......................... settings.language.index ??? SettingController@page
+  GET|HEAD                settings/legal-numbering settings.legal-numbering.index ??? LegalNumberingSettingController@i???
+  POST                    settings/legal-numbering settings.legal-numbering.update ??? LegalNumberingSettingController@???
+  GET|HEAD                settings/payment-gateway settings.payment-gateway.index ??? SettingController@paymentSettings???
+  POST                    settings/payment-gateway settings.payment-gateway.store ??? SettingController@paymentSettings???
+  POST                    settings/payment-gateway/east-yemen-bank settings.payment-gateway.east-yemen-bank ??? Setting???
+  PUT                     settings/payment-gateway/manual-banks/{manualBank} settings.manual-banks.update ??? SettingCo???
+  DELETE                  settings/payment-gateway/manual-banks/{manualBank} settings.manual-banks.destroy ??? SettingC???
+  GET|HEAD                settings/privacy-policy ............. settings.privacy-policy.index ??? SettingController@page
+  GET|HEAD                settings/seo-setting .................. settings.seo-settings.index ??? SettingController@page
+  POST                    settings/store .................................... settings.store ??? SettingController@store
+  GET|HEAD                settings/system ................................... settings.system ??? SettingController@page
+  GET|HEAD                settings/system-status ....... settings.system-status.index ??? SettingController@systemStatus
+  GET|HEAD                settings/terms-conditions ......... settings.terms-conditions.index ??? SettingController@page
+  GET|HEAD                settings/toggle-storage-link ..... toggle.storage.link ??? SettingController@toggleStorageLink
+  GET|HEAD                settings/usage-guide ................... settings.usage-guide.index ??? SettingController@page
+  GET|HEAD                settings/whatsapp ......................... settings.whatsapp.index ??? SettingController@page
+  GET|HEAD                slider ............................................... slider.index ??? SliderController@index
+  POST                    slider ............................................... slider.store ??? SliderController@store
+  GET|HEAD                slider/create ...................................... slider.create ??? SliderController@create
+  POST                    slider/defaults ...................... slider.defaults.store ??? SliderController@storeDefault
+  GET|HEAD                slider/defaults/create ............. slider.defaults.create ??? SliderController@createDefault
+  DELETE                  slider/defaults/{sliderDefault} .. slider.defaults.destroy ??? SliderController@destroyDefault
+  GET|HEAD                slider/metrics/summary ............ slider.metrics.summary ??? SliderController@metricsSummary
+  GET|HEAD                slider/{slider} ........................................ slider.show ??? SliderController@show
+  PUT|PATCH               slider/{slider} .................................... slider.update ??? SliderController@update
+  DELETE                  slider/{slider} .................................. slider.destroy ??? SliderController@destroy
+  GET|HEAD                slider/{slider}/edit ................................... slider.edit ??? SliderController@edit
+  GET|HEAD                staff .................................................. staff.index ??? StaffController@index
+  POST                    staff .................................................. staff.store ??? StaffController@store
+  GET|HEAD                staff/create ......................................... staff.create ??? StaffController@create
+  PUT                     staff/{id}/change-password .......... staff.change-password ??? StaffController@changePassword
+  GET|HEAD                staff/{staff} ............................................ staff.show ??? StaffController@show
+  PUT|PATCH               staff/{staff} ........................................ staff.update ??? StaffController@update
+  DELETE                  staff/{staff} ...................................... staff.destroy ??? StaffController@destroy
+  GET|HEAD                staff/{staff}/edit ....................................... staff.edit ??? StaffController@edit
+  GET|HEAD                states ........................................... states.index ??? PlaceController@stateIndex
+  GET|HEAD                states/search .................................. states.search ??? PlaceController@stateSearch
+  GET|HEAD                states/show ........................................ states.show ??? PlaceController@stateShow
+  GET|HEAD                storage-link ............................................................................... 
+  GET|HEAD                system-update ........................... system-update.index ??? SystemUpdateController@index
+  POST                    system-update ......................... system-update.update ??? SystemUpdateController@update
+  GET|HEAD                tips ...................................................... tips.index ??? TipController@index
+  POST                    tips ...................................................... tips.store ??? TipController@store
+  GET|HEAD                tips/create ............................................. tips.create ??? TipController@create
+  GET|HEAD                tips/{tip} .................................................. tips.show ??? TipController@show
+  PUT|PATCH               tips/{tip} .............................................. tips.update ??? TipController@update
+  DELETE                  tips/{tip} ............................................ tips.destroy ??? TipController@destroy
+  GET|HEAD                tips/{tip}/edit ............................................. tips.edit ??? TipController@edit
+  GET|HEAD                wallet .......................................... wallet.index ??? WalletAdminController@index
+  GET|HEAD                wallet/withdrawals . wallet.withdrawals.index ??? WalletWithdrawalRequestAdminController@index
+  GET|HEAD                wallet/withdrawals/datatable wallet.withdrawals.datatable ??? WalletWithdrawalRequestAdminCon???
+  POST                    wallet/withdrawals/{withdrawalRequest}/approve wallet.withdrawals.approve ??? WalletWithdrawa???
+  POST                    wallet/withdrawals/{withdrawalRequest}/reject wallet.withdrawals.reject ??? WalletWithdrawalR???
+  GET|HEAD                wallet/{user} ..................................... wallet.show ??? WalletAdminController@show
+  POST                    wallet/{user}/credit .......................... wallet.credit ??? WalletAdminController@credit
+  GET|HEAD                wallet/{user}/transactions/datatable wallet.transactions.datatable ??? WalletAdminController@???
+  POST                    webhook/paystack ................................................ WebhookController@paystack
+  POST                    webhook/phonePe .................................................. WebhookController@phonePe
+  POST                    webhook/razorpay ................................................ WebhookController@razorpay
+  POST                    webhook/stripe .................................................... WebhookController@stripe
+  GET|HEAD                wifi-cabin .......................................... wifi.index ??? WifiCabinController@index
+  GET|HEAD                wifi-cabin/api/admin/networks ...................... Wifi\AdminModerationController@networks
+  PATCH                   wifi-cabin/api/admin/networks/{network}/commission Wifi\OwnerNetworkController@setCommission
+  PATCH                   wifi-cabin/api/admin/networks/{network}/status Wifi\AdminModerationController@updateNetwork???
+  GET|HEAD                wifi-cabin/api/networks ................ wifi.api. ??? Wifi\AdminModerationController@networks
+  PATCH                   wifi-cabin/api/networks/{network}/status wifi.api. ??? Wifi\AdminModerationController@updateN???
+  PATCH                   wifi-cabin/api/owner/batches/{batch}/status wifi.api. ??? Wifi\OwnerBatchController@updateSta???
+  GET|HEAD                wifi-cabin/api/owner/networks/{network} ....... wifi.api. ??? Wifi\OwnerNetworkController@show
+  PATCH                   wifi-cabin/api/owner/networks/{network}/commission wifi.api. ??? Wifi\OwnerNetworkController@???
+  GET|HEAD                wifi-cabin/api/owner/networks/{network}/plans ... wifi.api. ??? Wifi\OwnerPlanController@index
+  GET|HEAD                wifi-cabin/api/owner/networks/{network}/stats wifi.api. ??? Wifi\OwnerNetworkController@stats
+  GET|HEAD                wifi-cabin/api/owner/plans/{plan} ................ wifi.api. ??? Wifi\OwnerPlanController@show
+  GET|HEAD                wifi-cabin/api/reports .................. wifi.api. ??? Wifi\AdminModerationController@reports
+  PATCH                   wifi-cabin/api/reports/{report} .... wifi.api. ??? Wifi\AdminModerationController@updateReport
+  POST                    wifi-cabin/batches .................. wifi.voucher-batches.store ??? WifiCabinController@store
+  GET|HEAD                wifi-cabin/create ................................. wifi.create ??? WifiCabinController@create
+  GET|HEAD                wifi-cabin/networks/{network} ......................... wifi.show ??? WifiCabinController@show
+  GET|HEAD                wifi-cabin/networks/{network}/codes ................. wifi.codes ??? WifiCabinController@codes
+  GET|HEAD                wifi-cabin/networks/{network}/financials/export wifi.financials.export ??? WifiCabinControlle???
+  POST                    wifi-cabin/owner-requests/{batch}/approve wifi.owner-requests.approve ??? WifiCabinController???
+  POST                    wifi-cabin/owner-requests/{batch}/reject wifi.owner-requests.reject ??? WifiCabinController@r???
+  GET|HEAD                wifi-cabin/{network}/edit ............................. wifi.edit ??? WifiCabinController@edit
+  GET|HEAD                wifi/networks ...................... wifi.networks.index ??? Wifi\OwnerNetworkController@index
+  POST                    wifi/networks ...................... wifi.networks.store ??? Wifi\OwnerNetworkController@store
+  PUT                     wifi/networks/{network} .......... wifi.networks.update ??? Wifi\OwnerNetworkController@update
+  GET|HEAD                wifi/networks/{network}/plans ............ wifi.plans.index ??? Wifi\OwnerPlanController@index
+  POST                    wifi/networks/{network}/plans ............ wifi.plans.store ??? Wifi\OwnerPlanController@store
+  PUT                     wifi/plans/{plan} ...................... wifi.plans.update ??? Wifi\OwnerPlanController@update
+  POST                    wifi/plans/{plan}/batches ....... wifi.plans.batches.store ??? Wifi\OwnerBatchController@store
+
+                                                                                                  Showing [814] routes
+
