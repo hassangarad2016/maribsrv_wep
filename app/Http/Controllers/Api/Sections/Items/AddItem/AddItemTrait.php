@@ -127,6 +127,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Log;
 
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -149,7 +150,7 @@ use JsonException;
 
 trait AddItemTrait
 {
-     public function addItem(Request $request) {
+    public function addItem(Request $request) {
         try {
 
 
@@ -235,7 +236,9 @@ trait AddItemTrait
                 'video_link'           => 'nullable|url',
                 'gallery_images'       => 'nullable|array|min:1',
                 'gallery_images.*'     => 'nullable|mimes:jpeg,png,jpg,webp|max:4096',
-                'image'                => 'required|mimes:jpeg,png,jpg,webp|max:4096',
+                'imported_images'      => 'nullable|array',
+                'imported_images.*'    => 'nullable|url|max:2048',
+                'image'                => 'required_without:imported_images|mimes:jpeg,png,jpg,webp|max:4096',
                 'country'              => 'required',
                 'state'                => 'nullable',
                 'city'                 => 'required',
@@ -366,51 +369,85 @@ trait AddItemTrait
 
             
         
-            if ($request->hasFile('image')) {
-                try {
-                    $variants = ImageVariantService::storeWithVariants($request->file('image'), $this->uploadFolder);
-                } catch (Throwable $exception) {
-                    ResponseService::validationErrors([
-                        'image' => [__('Unable to process the uploaded image. Please try again with a different file.')],
-                    ]);
-                }
-            
-            
-            
+            [$importedFiles, $importedTempPaths] = $this->downloadImportedImageFiles($request);
 
-                $data['image'] = $variants['original'];
-                $data['thumbnail_url'] = $variants['thumbnail'];
-                $data['detail_image_url'] = $variants['detail'];
+            $mainImageFile = $request->file('image');
+            $importedGallery = [];
 
+            if ($mainImageFile) {
+                $importedGallery = $importedFiles;
+            } elseif ($importedFiles !== []) {
+                $mainImageFile = array_shift($importedFiles);
+                $importedGallery = $importedFiles;
             }
-            $item = Item::create($data);
 
-            if ($request->hasFile('gallery_images')) {
+            if (! $mainImageFile) {
+                $this->cleanupTemporaryFiles($importedTempPaths);
+                ResponseService::validationErrors([
+                    'image' => [__('Unable to process the imported images. Please add a main image manually.')],
+                ]);
+            }
+
+            try {
+                $variants = ImageVariantService::storeWithVariants($mainImageFile, $this->uploadFolder);
+            } catch (Throwable $exception) {
+                $this->cleanupTemporaryFiles($importedTempPaths);
+
+                ResponseService::validationErrors([
+                    'image' => [__('Unable to process the uploaded image. Please try again with a different file.')],
+                ]);
+            }
+
+            $data['image'] = $variants['original'];
+            $data['thumbnail_url'] = $variants['thumbnail'];
+            $data['detail_image_url'] = $variants['detail'];
+
+            $item = null;
+
+            try {
+                $item = Item::create($data);
+
                 $galleryImages = [];
                 $timestamp = now();
-                foreach ($request->file('gallery_images') as $file) {
+                $files = [];
 
-                    try {
-                        $galleryVariants = ImageVariantService::storeWithVariants($file, $this->uploadFolder);
-                    } catch (Throwable $exception) {
-                        ResponseService::validationErrors([
-                            'gallery_images' => [__('Unable to process one of the gallery images. Please verify the files and retry.')],
-                        ]);
+                if ($request->hasFile('gallery_images')) {
+                    $files = $request->file('gallery_images');
+                    if (! is_array($files)) {
+                        $files = [$files];
                     }
+                }
 
-                    $galleryImages[] = [
-                        'image'      => $galleryVariants['original'],
-                        'thumbnail_url' => $galleryVariants['thumbnail'],
-                        'detail_image_url' => $galleryVariants['detail'],
-                        'item_id'    => $item->id,
-                        'created_at' => $timestamp,
-                        'updated_at' => $timestamp->copy(),
-                    ];
+                if (! empty($importedGallery)) {
+                    $files = array_merge($files, $importedGallery);
+                }
+
+                if ($files !== []) {
+                    foreach ($files as $file) {
+                        try {
+                            $galleryVariants = ImageVariantService::storeWithVariants($file, $this->uploadFolder);
+                        } catch (Throwable $exception) {
+                            ResponseService::validationErrors([
+                                'gallery_images' => [__('Unable to process one of the gallery images. Please verify the files and retry.')],
+                            ]);
+                        }
+
+                        $galleryImages[] = [
+                            'image'      => $galleryVariants['original'],
+                            'thumbnail_url' => $galleryVariants['thumbnail'],
+                            'detail_image_url' => $galleryVariants['detail'],
+                            'item_id'    => $item->id,
+                            'created_at' => $timestamp,
+                            'updated_at' => $timestamp->copy(),
+                        ];
+                    }
                 }
 
                 if (count($galleryImages) > 0) {
                     ItemImages::insert($galleryImages);
                 }
+            } finally {
+                $this->cleanupTemporaryFiles($importedTempPaths);
             }
 
             if ($request->custom_fields) {
@@ -546,6 +583,102 @@ trait AddItemTrait
             DB::rollBack();
             ResponseService::logErrorResponse($th, "API Controller -> addItem");
             ResponseService::errorResponse();
+        }
+    }
+
+    private function downloadImportedImageFiles(Request $request): array
+    {
+        $urls = $request->input('imported_images', []);
+        if (! is_array($urls)) {
+            return [[], []];
+        }
+
+        $urls = collect($urls)
+            ->filter(static fn ($value) => is_string($value))
+            ->map(static fn ($value) => trim($value))
+            ->filter(static fn ($value) => $value !== '')
+            ->unique()
+            ->take(20)
+            ->values()
+            ->all();
+
+        if ($urls === []) {
+            return [[], []];
+        }
+
+        $downloaded = [];
+        $tempPaths = [];
+
+        foreach ($urls as $url) {
+            if (! preg_match('~^https?://~i', $url)) {
+                continue;
+            }
+
+            $tempPath = tempnam(sys_get_temp_dir(), 'shein_');
+            if ($tempPath === false) {
+                continue;
+            }
+
+            try {
+                $response = Http::timeout(25)
+                    ->retry(1, 200)
+                    ->withOptions(['sink' => $tempPath])
+                    ->get($url);
+            } catch (Throwable $exception) {
+                @unlink($tempPath);
+                continue;
+            }
+
+            if (! $response->successful()) {
+                @unlink($tempPath);
+                continue;
+            }
+
+            $contentType = $response->header('Content-Type');
+            $extension = $this->guessImageExtension($url, $contentType);
+            $filename = 'imported.' . $extension;
+
+            $downloaded[] = new UploadedFile($tempPath, $filename, $contentType ?: null, null, true);
+            $tempPaths[] = $tempPath;
+        }
+
+        return [$downloaded, $tempPaths];
+    }
+
+    private function guessImageExtension(string $url, ?string $contentType): string
+    {
+        $map = [
+            'image/jpeg' => 'jpg',
+            'image/jpg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            'image/avif' => 'avif',
+        ];
+
+        if ($contentType) {
+            $normalized = strtolower(trim(explode(';', $contentType)[0] ?? $contentType));
+            if (isset($map[$normalized])) {
+                return $map[$normalized];
+            }
+        }
+
+        $path = parse_url($url, PHP_URL_PATH);
+        $extension = strtolower((string) pathinfo((string) $path, PATHINFO_EXTENSION));
+
+        if (in_array($extension, ['jpeg', 'jpg', 'png', 'gif', 'webp', 'avif'], true)) {
+            return $extension === 'jpeg' ? 'jpg' : $extension;
+        }
+
+        return 'jpg';
+    }
+
+    private function cleanupTemporaryFiles(array $paths): void
+    {
+        foreach ($paths as $path) {
+            if (is_string($path) && $path !== '') {
+                @unlink($path);
+            }
         }
     }
 }
