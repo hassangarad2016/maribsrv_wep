@@ -151,6 +151,20 @@ class MerchantProductController extends Controller
                 ?? $store->contact_email
                 ?? $user?->email
                 ?? '';
+            $address = trim((string) ($store->location_address ?? ''));
+            if ($address === '') {
+                $address = trim((string) ($store->location_city ?? $store->location_state ?? $store->location_country ?? ''));
+            }
+            if ($address === '') {
+                $address = '-';
+            }
+
+            $latitude = $store->location_latitude ?? 0.0;
+            $longitude = $store->location_longitude ?? 0.0;
+
+            $city = (string) ($store->location_city ?? $store->location_state ?? $store->location_country ?? '-');
+            $state = (string) ($store->location_state ?? $store->location_city ?? $store->location_country ?? '-');
+            $country = (string) ($store->location_country ?? $store->location_state ?? $store->location_city ?? '-');
 
             $slugSource = $request->input('slug')
                 ?: ($validated['name'] ?? '')
@@ -168,17 +182,17 @@ class MerchantProductController extends Controller
                 'image' => $imagePath,
                 'thumbnail_url' => $imagePath,
                 'detail_image_url' => $imagePath,
-                'latitude' => $store->location_latitude,
-                'longitude' => $store->location_longitude,
-                'address' => $store->location_address,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'address' => $address,
                 'contact' => $contactChannel,
                 'show_only_to_premium' => false,
                 'status' => 'approved',
                 'video_link' => $validated['video_link'] ?? null,
                 'slug' => $uniqueSlug,
-                'city' => $store->location_city ?? '—',
-                'state' => $store->location_state ?? '—',
-                'country' => $store->location_country ?? '—',
+                'city' => $city,
+                'state' => $state,
+                'country' => $country,
                 'user_id' => $user?->id,
                 'store_id' => $store->id,
                 'category_id' => $validated['category_id'],
@@ -533,3 +547,4 @@ class MerchantProductController extends Controller
         ];
     }
 }
+
