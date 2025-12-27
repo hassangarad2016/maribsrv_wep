@@ -60,6 +60,62 @@
         .storefront-tabs .nav-link.active:hover {
             color: #ffffff;
         }
+        .storefront-summary {
+            background: linear-gradient(135deg, #ffffff 0%, #f3f7ff 100%);
+        }
+        .summary-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: #e8f1ff;
+            color: #0d6efd;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .summary-tile {
+            border: 1px solid var(--sf-border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            background: #ffffff;
+        }
+        .summary-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2a44;
+        }
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title .section-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: #f0f4ff;
+            color: #0d6efd;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .section-hint {
+            font-size: 12px;
+            color: var(--sf-muted);
+        }
+        .section-actions {
+            display: inline-flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
     </style>
 @endsection
 
