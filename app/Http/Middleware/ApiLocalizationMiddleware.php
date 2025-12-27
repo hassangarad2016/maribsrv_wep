@@ -18,6 +18,11 @@ class ApiLocalizationMiddleware {
 //        $request->headers->set('Accept', 'application/json');
 //        $request->headers->set('Content-Type', 'application/json');
         $localization = $request->header('Content-Language');
+        $localization = is_string($localization) ? trim($localization) : '';
+        if ($localization === '') {
+            $localization = config('app.locale', 'ar');
+        }
+
         app()->setLocale($localization);
 
         return $next($request);

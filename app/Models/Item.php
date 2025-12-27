@@ -361,8 +361,30 @@ class Item extends Model {
             return;
         }
 
-        $title = __('item.notifications.store_new_item.title', ['store' => $store->name]);
-        $body = $this->name;
+        $storeName = trim((string) $store->name);
+        if ($storeName === '') {
+            $storeName = __('item.notifications.store_new_item.store_fallback');
+        }
+
+        $itemName = trim((string) $this->name);
+        if ($itemName === '') {
+            $itemName = __('item.notifications.fallback_item_name');
+        }
+
+        $priceValue = is_numeric($this->price) ? (float) $this->price : 0.0;
+        $currency = strtoupper((string) ($this->currency ?: config('app.currency', 'SAR')));
+        $priceText = $priceValue > 0 ? number_format($priceValue, 2, '.', '') . ' ' . $currency : '';
+
+        $title = __('item.notifications.store_new_item.title', ['store' => $storeName]);
+        $bodyKey = $priceValue > 0
+            ? 'item.notifications.store_new_item.body_with_price'
+            : 'item.notifications.store_new_item.body';
+        $body = __($bodyKey, [
+            'store' => $storeName,
+            'item' => $itemName,
+            'price' => $priceText,
+            'currency' => $currency,
+        ]);
 
         NotificationService::sendFcmNotification(
             $tokens,
@@ -372,8 +394,10 @@ class Item extends Model {
             [
                 'store_id' => $store->getKey(),
                 'item_id' => $this->getKey(),
-                'store_name' => $store->name,
-                'item_name' => $this->name,
+                'store_name' => $storeName,
+                'item_name' => $itemName,
+                'price' => $priceValue > 0 ? $priceValue : null,
+                'currency' => $priceValue > 0 ? $currency : null,
             ]
         );
     }

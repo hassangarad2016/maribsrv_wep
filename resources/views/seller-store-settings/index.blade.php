@@ -1,4 +1,4 @@
-@extends('layouts.main')
+﻿@extends('layouts.main')
 
 @section('title')
     {{ __('إعدادات المتجر الإلكتروني') }}
@@ -116,6 +116,22 @@
             gap: 8px;
             flex-wrap: wrap;
         }
+        #featuredCategoriesList:empty::before,
+        #promotionCardsList:empty::before {
+            display: block;
+            padding: 14px 16px;
+            border: 1px dashed var(--sf-border);
+            border-radius: 12px;
+            background: #fbfcff;
+            color: var(--sf-muted);
+            font-size: 13px;
+        }
+        #featuredCategoriesList:empty::before {
+            content: "لا توجد فئات مخصصة بعد. اضغط \"إضافة فئة\" للبدء.";
+        }
+        #promotionCardsList:empty::before {
+            content: "لا توجد بطاقات ترويج بعد. اضغط \"إضافة بطاقة\" لإنشاء أول بطاقة.";
+        }
     </style>
 @endsection
 
@@ -139,7 +155,7 @@
                 </div>
                 <div class="flex-grow-1">
                     <div class="fw-semibold fs-5 mb-1">{{ __('تصميم واجهة متجر متكاملة') }}</div>
-                    <div class="text-muted small">{{ __('تحكم كامل في الشريط المميز، بطاقات الترويج، العروض والتخفيضات دون تبويبات معقدة.') }}</div>
+                    <div class="text-muted small">{{ __('تحكم كامل في الشريط المميز، بطاقات الترويج، العروض الجديدة والتخفيضات دون تبويبات معقدة.') }}</div>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
                     <span class="pill"><i class="bi bi-sliders"></i>{{ __('إعداد سريع') }}</span>
@@ -172,7 +188,7 @@
                     <div class="col-12">
                 <div class="card section-card shadow-sm mb-4">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3 section-head">
                             <div>
                                 <div class="card-title mb-1">{{ __('الشروط والأحكام') }}</div>
                                 <div class="text-muted small">{{ __('نص عادي فقط كما سيظهر للمتاجر الإلكترونية.') }}</div>
@@ -189,7 +205,7 @@
 
                 <div class="card section-card shadow-sm mb-4">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3 section-head">
                             <div>
                                 <div class="card-title mb-1">{{ __('بوابات الدفع') }}</div>
                                 <div class="text-muted small">{{ __('عرض وإدارة بوابات الدفع الخاصة بالمتاجر الإلكترونية.') }}</div>
@@ -249,35 +265,75 @@
             </div>
             <div class="tab-pane fade" id="ui-pane" role="tabpanel" aria-labelledby="ui-tab">
                 <div class="row g-4">
-                    <div class="col-xl-4 col-12">
-                <div class="card section-card shadow-sm">
-                    <div class="card-body">
-                        <div class="card-title mb-2">{{ __('ملخص سريع') }}</div>
-                        <div class="vstack gap-2 mini-label">
-                            <div class="d-flex justify-content-between"><span>{{ __('فئات مميزة') }}</span><span id="summaryCats" class="fw-semibold">0</span></div>
-                            <div class="d-flex justify-content-between"><span>{{ __('بطاقات ترويج') }}</span><span id="summaryPromos" class="fw-semibold">0</span></div>
-                            <div class="d-flex justify-content-between"><span>{{ __('عروض جديدة') }}</span><span id="summaryOffers" class="fw-semibold">0</span></div>
-                            <div class="d-flex justify-content-between"><span>{{ __('تخفيضات') }}</span><span id="summaryDiscounts" class="fw-semibold">0</span></div>
-                        </div>
-                        <hr>
-                        <div class="mini-label">{{ __('الحفظ يطبق فوراً على تطبيق المتاجر.') }}</div>
-                        <button form="storefrontUiForm" type="submit" class="btn btn-primary w-100 mt-3">{{ __('حفظ واجهة المتجر') }}</button>
+                    @php
+    $uiEnabled = (bool) ($uiSetting->enabled ?? false);
+    $uiUpdatedAt = optional($uiSetting->updated_at)->format('Y-m-d H:i');
+@endphp
+<div class="col-xl-4 col-12">
+    <div class="card section-card shadow-sm storefront-summary">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="summary-icon"><i class="bi bi-grid-3x3-gap"></i></div>
+                    <div>
+                        <div class="card-title mb-0">{{ __('ملخص الواجهة') }}</div>
+                        <div class="mini-label">{{ __('تتبع عناصر الواجهة النشطة') }}</div>
                     </div>
                 </div>
+                <span class="badge {{ $uiEnabled ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }}">
+                    {{ $uiEnabled ? __('مفعلة') : __('غير مفعلة') }}
+                </span>
+            </div>
+
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="summary-tile">
+                        <div class="mini-label">{{ __('فئات مميزة') }}</div>
+                        <div id="summaryCats" class="summary-value">0</div>
                     </div>
+                </div>
+                <div class="col-6">
+                    <div class="summary-tile">
+                        <div class="mini-label">{{ __('بطاقات ترويج') }}</div>
+                        <div id="summaryPromos" class="summary-value">0</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="summary-tile">
+                        <div class="mini-label">{{ __('عروض جديدة') }}</div>
+                        <div id="summaryOffers" class="summary-value">0</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="summary-tile">
+                        <div class="mini-label">{{ __('تخفيضات') }}</div>
+                        <div id="summaryDiscounts" class="summary-value">0</div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="alert alert-light border mt-3 mb-0 small">
+                {{ __('كل تغيير هنا ينعكس مباشرة على واجهة المتجر في التطبيق.') }}
+            </div>
+            <button form="storefrontUiForm" type="submit" class="btn btn-primary w-100 mt-3">{{ __('حفظ واجهة المتجر') }}</button>
+            @if($uiUpdatedAt)
+                <div class="mini-label text-center mt-2">{{ __('آخر تحديث') }}: {{ $uiUpdatedAt }}</div>
+            @endif
+        </div>
+    </div>
+</div>
 
-            <div class="col-xl-8 col-12">
+<div class="col-xl-8 col-12">
                 <div class="card section-card shadow-sm">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                             <div>
-                                <div class="card-title mb-1">{{ __('مصمم الواجهة (شريط + عروض)') }}</div>
-                                <div class="text-muted small">{{ __('كل عناصر الواجهة في لوحة واحدة بدون تبويب منفصل.') }}</div>
+                                <div class="card-title mb-1">{{ __('مصمم واجهة المتجر') }}</div>
+                                <div class="text-muted small">{{ __('رتّب الفئات، البطاقات الترويجية، العروض الجديدة والتخفيضات من مكان واحد.') }}</div>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch" id="storefront_ui_enabled" name="enabled" value="1" {{ $uiSetting->enabled ? 'checked' : '' }}>
-                                <label class="form-check-label" for="storefront_ui_enabled">{{ __('تشغيل الواجهة المخصصة') }}</label>
+                                <label class="form-check-label" for="storefront_ui_enabled">{{ __('تفعيل الواجهة المخصصة') }}</label>
                             </div>
                         </div>
 
@@ -292,7 +348,7 @@
                                 <div class="col-12">
                                     <div class="card section-card shadow-sm mb-4">
                                         <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-3 section-head">
                                                 <div>
                                                     <div class="card-title mb-1">{{ __('فئات قسم المتجر (عرض فقط)') }}</div>
                                                     <div class="text-muted small">{{ __('مرتبة بالأب ثم الاسم، لعرض المتوفر للقسم.') }}</div>
@@ -336,10 +392,13 @@
                                 <div class="col-12">
                                     <div class="card section-card shadow-sm mb-4">
                                         <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-3 section-head">
                                                 <div>
-                                                    <div class="card-title mb-1">{{ __('الشريط المميز (فئات مختصرة)') }}</div>
-                                                    <div class="text-muted small">{{ __('اختر الفئات التي ستظهر كشرائح أفقية في التطبيق.') }}</div>
+                                                    <div class="card-title mb-1 section-title">
+    <span class="section-icon"><i class="bi bi-segmented-nav"></i></span>
+    <span>{{ __('شريط الفئات المخصص') }}</span>
+</div>
+                                                    <div class="text-muted small">{{ __('اختر الفئات التي ستظهر كشريط تنقل أفقي في الواجهة.') }}</div>
                                                 </div>
                                                 <button type="button" class="btn btn-sm btn-outline-primary" id="addCategoryBtn" onclick="event.preventDefault(); if (window.sfAddCategory) { window.sfAddCategory(); } else { const list=document.getElementById('featuredCategoriesList'); if(list){ const idx=list.children.length+1; const card=document.createElement('div'); card.className='border rounded p-3 bg-light'; card.innerHTML=`<div class=\"fw-semibold mb-2\">{{ __('فئة') }} #${idx}</div><div class=\"text-muted small\">{{ __('تمت الإضافة، عيّن بياناتها بعد إعادة تحميل الصفحة') }}</div>`; list.appendChild(card);} } return false;">
                                                     <i class="bi bi-plus-lg"></i> {{ __('إضافة فئة') }}
@@ -354,10 +413,13 @@
                                 <div class="col-12">
                                     <div class="card section-card shadow-sm mb-4">
                                         <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-3 section-head">
                                                 <div>
-                                                    <div class="card-title mb-1">{{ __('بطاقات الترويج بين المتاجر') }}</div>
-                                                    <div class="text-muted small">{{ __('تظهر بطاقة ترويج بعد عدد معيّن من بطاقات المتاجر.') }}</div>
+                                                    <div class="card-title mb-1 section-title">
+    <span class="section-icon"><i class="bi bi-megaphone"></i></span>
+    <span>{{ __('بطاقات الترويج') }}</span>
+</div>
+                                                    <div class="text-muted small">{{ __('اضبط تكرار ظهور البطاقة وحدد نوعها ومحتواها.') }}</div>
                                                 </div>
                                                 <button type="button" class="btn btn-sm btn-outline-primary" id="addPromoBtn">
                                                     <i class="bi bi-megaphone"></i> {{ __('إضافة ترويج') }}
@@ -372,9 +434,12 @@
                                 <div class="col-12">
                                     <div class="card section-card shadow-sm">
                                         <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-3 section-head">
                                                 <div>
-                                                    <div class="card-title mb-1">{{ __('العروض والتخفيضات') }}</div>
+                                                    <div class="card-title mb-1 section-title">
+    <span class="section-icon"><i class="bi bi-stars"></i></span>
+    <span>{{ __('العروض الجديدة والتخفيضات') }}</span>
+</div>
                                                     <div class="text-muted small">{{ __('اختر الإعلانات التي ستظهر كعروض جديدة أو تخفيضات ضمن الواجهة.') }}</div>
                                                 </div>
                                                 <div class="d-flex gap-2">
@@ -408,12 +473,12 @@
             </div>
         </div>
     </section>
-    {{-- Modal اختيار الإعلانات --}}
+    {{-- Modal اختيار المنتجات --}}
     <div class="modal fade" id="itemsPickerModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">{{ __('اختر إعلانات') }}</h5>
+                    <h5 class="modal-title">{{ __('اختر المنتجات') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -438,7 +503,7 @@
                 if (!list) return false;
                 const idx = list.children.length + 1;
                 const card = document.createElement('div');
-                card.className = 'border rounded p-3 bg-light';
+                card.className = 'section-card shadow-sm p-3';
                 card.dataset.catCard = '1';
                 card.innerHTML = `
                     <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
@@ -514,7 +579,7 @@
                 if (!catList) return;
                 const idx = catList.children.length + 1;
                 const card = document.createElement('div');
-                card.className = 'border rounded p-3 bg-light';
+                card.className = 'section-card shadow-sm p-3';
                 card.dataset.catCard = '1';
                 card.innerHTML = `
                     <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
@@ -553,7 +618,7 @@
                 const item = Array.isArray(slot.items) && slot.items.length ? slot.items[0] : {};
                 const idx = promoList.children.length + 1;
                 const card = document.createElement('div');
-                card.className = 'border rounded p-3';
+                card.className = 'section-card shadow-sm p-3';
                 card.dataset.promoCard = '1';
                 card.innerHTML = `
                     <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
@@ -764,4 +829,14 @@
         });
     </script>
 @endpush
+
+
+
+
+
+
+
+
+
+
 

@@ -892,6 +892,25 @@
     "Wallet Top-up #:id": "شحن المحفظة رقم :id",
     "Search by Transaction Number": "البحث برقم المعاملة",
     "Enter transaction number": "أدخل رقم المعاملة",
-    "Transaction Identifier": "معرّف المعاملة"
+    "Transaction Identifier": "معرّف المعاملة",
+    "item.notifications.review.title": "تم استلام إعلانك",
+    "item.notifications.review.body": "إعلانك \":item\" قيد المراجعة. سنبلغك عند اعتماده.",
+    "item.notifications.approved.title": "تم اعتماد إعلانك",
+    "item.notifications.approved.body": "إعلانك \":item\" أصبح متاحًا للعملاء الآن.",
+    "item.notifications.rejected.title": "تم رفض إعلانك",
+    "item.notifications.rejected.body": "تم رفض إعلانك \":item\". السبب: :reason",
+    "item.notifications.rejected.body_fallback": "تم رفض إعلانك \":item\". يمكنك تعديل البيانات وإعادة الإرسال.",
+    "item.notifications.review_received.title": "تقييم جديد على إعلانك",
+    "item.notifications.review_received.body": ":buyer قيّم إعلانك \":item\" بـ :rating نجوم.",
+    "item.notifications.review_received.buyer_fallback": "عميل",
+    "item.notifications.store_new_item.title": "إعلان جديد من :store",
+    "item.notifications.store_new_item.body": "أضاف متجر :store إعلانًا جديدًا بعنوان \":item\".",
+    "item.notifications.store_new_item.body_with_price": "أضاف متجر :store إعلانًا جديدًا بعنوان \":item\" بسعر :price.",
+    "item.notifications.store_new_item.store_fallback": "المتجر",
+    "item.notifications.active.title": "تم تفعيل إعلانك",
+    "item.notifications.active.body": "إعلانك \":item\" أصبح ظاهرًا للعملاء.",
+    "item.notifications.blocked.title": "تم إيقاف إعلانك",
+    "item.notifications.blocked.body": "تم إيقاف إعلانك \":item\". يرجى التواصل مع الدعم لمزيد من التفاصيل.",
+    "item.notifications.fallback_item_name": "هذا الإعلان"
 }
 
